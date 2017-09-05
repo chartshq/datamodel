@@ -13,9 +13,6 @@ module.exports = {
   devtool: 'source-map',
   module: {
     loaders: [{
-      test: /\.css$/,
-      loader: 'style!css',
-    }, {
       test: /\.js$/,
       loader: 'babel-loader',
       query: {
