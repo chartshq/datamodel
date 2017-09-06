@@ -46,8 +46,8 @@
     "webpack-dev-server": "2.4.2"
   },
   "scripts": {
-    "test": "karma start karma.conf.js ",
-    "build": "npm run lint && npm run flow && npm run test && webpack",
+    "test": "npm run lint && npm run flow && karma start karma.conf.js ",
+    "build": "npm run test && webpack",
     "start": "webpack-dev-server",
     "lint": "eslint ./src",
     "docs": "jsdoc -c ./jsdoc.conf.json",
