@@ -1,0 +1,56 @@
+{
+  "env": {
+    "es6": true
+  },
+  "extends": "airbnb",
+  "parser": "babel-eslint",
+  "rules": {
+    "func-names": ["error", "never"],
+    "require-jsdoc": [
+      "warn",
+      {
+        "require": {
+          "FunctionDeclaration": true,
+          "MethodDefinition": true,
+          "ClassDeclaration": true,
+          "ArrowFunctionExpression": true
+        }
+      }
+    ],
+    "valid-jsdoc": [
+      "warn",
+      {
+        "prefer": {
+          "arg": "param",
+          "argument": "param",
+          "returns": "return",
+          "constructor": "class",
+          "augments": "extends",
+          "const": "constant",
+          "defaultvalue": "default",
+          "desc": "description",
+          "host": "external",
+          "fileoverview": "file",
+          "overview": "file",
+          "emits": "fires",
+          "var": "member",
+          "prop": "property",
+          "exception": "throws"
+        },
+        "preferType": {
+          "Boolean": "boolean",
+          "Null": "null",
+          "Undefined": "undefined",
+          "Number": "number",
+          "String": "string",
+          "Symbol": "symbol",
+          "object": "Object",
+          "array": "Array",
+          "function": "Function"
+        },
+        "requireReturn": false,
+        "matchDescription": ".+"
+      }
+    ]
+  }
+}
