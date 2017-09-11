@@ -25,13 +25,7 @@
 
 ## Repository Structure
 
-Directory       | Summary
-----------------|---------------------------------------------
-`js`            | Latest library release with minified files
-`develop`       | Library source modules, tests and doc source
-
-### [js/](js/)
-If you intend to use the latest release of FusionBoard, the files are located in this folder.
+~~ to be documented further ~~
 
 ### [develop/](develop/)
 If you are looking to contribute to FusionBoard development, this directory has everything.  Make sure you read [CONTRIBUTING.md](CONTRIBUTING.md) (this file) if you are contributing for the first time.
@@ -40,12 +34,10 @@ If you are looking to contribute to FusionBoard development, this directory has 
 
 Directory       | Summary
 ----------------|---------------------------------------------
-`ci`            | All automated testing and deployment scripts
-`docs`          | API and tutorial documentation source files
+`coverage`      | Code Coverage of the application
+`dist`          | Script Build Artifacts
 `src`           | Source code (.js files) as modules
-`tests`         | The test specification files reside here
-`tmp`           | For your convenience only!
-`vendors`       | Third-party submodules are stored here
+`example`       | Templates to run code iterations
 
 ~~ to be documented further ~~
 
@@ -71,7 +63,7 @@ Developers      | `feature/*`, `support/*`, `hotfix/*`
 ## Preferred IDE
 The preferred IDE for `fusionboard` project is Microsoft Visual Studio Code. You can download it from [http://www.sublimetext.com](http://www.sublimetext.com).
 
-The repository has a sublime project file included in `develop/` directory. This project is configured with the best practices recommended for `fusionboard`. Things like using 120 character ruler, addition of end-of-file newline, cleaning up of trailing whitespace has been configured in this project.
+The repository has a project file included in `develop/` directory. This project is configured with the best practices recommended for `fusionboard`. Things like using 120 character ruler, addition of end-of-file newline, cleaning up of trailing whitespace has been configured in this project.
 
 Visual Studio Code provides IntelliSense, debugging, and powerful editor features for JavaScript. VS Code uses the JavaScript language service to make authoring JavaScript easy. In addition to syntactical features like format, format on type and outlining, you also get language service features such as Peek, Go to Definition, Find all References, and Rename Symbol.
 
@@ -83,10 +75,10 @@ VS Code provides two different scopes for settings:
     - User :  These settings apply globally to any instance of VS Code you open
     - Workspace : These settings are stored inside your workspace in a .vscode folder and only apply when the workspace is opened. Settings defined on this scope override the user scope. 
     
-In case you are using any other IDE, (not recommended,) setting the following defaults of the IDE should help:
+In case you are using any other IDE, (not recommended) setting the following defaults of the IDE should help:
 
 1. Set to true to ensure the last line of the file ends in a newline character when saving.
-2. Use 120the columns to display vertical ruler.
+2. Use 120 the columns to display vertical ruler.
 3. The number of spaces a tab is considered equal should be 4.
 4. Insert spaces when tab is pressed.
 5. Remove trailing white space on save.
@@ -188,7 +180,7 @@ We use [JSDoc](http://usejsdoc.org) as our documentation platform. All API docum
 
 The CI system is built as a bunch of bash scripts to execute a set of tasks. These scripts are meant to execute tasks that can run on every local machine. In general, knowledge about these scripts are not necessary for development.
 
-**The scripts are to be only accessed using `npm run-script script name`.** This ensures that the execution point of the scripts (`pwd`) is always the repository root.
+**The scripts are to be only accessed using `npm run script`.** This ensures that the execution point of the scripts (`pwd`) is always the repository root.
 
 ### Ensuring your commits will not fail build
 
@@ -198,24 +190,12 @@ The script associated with `npm test` will run all tests that ensures that your 
 
 ### Executing individual build tasks
 
-#### npm run-script build
-~~ to be documented further ~~
-
-#### npm run-script build-source
-
-#### npm run-script release
-~~ to be documented further ~~
-
-#### npm run-script drone
-
-~~ to be documented further ~~
-
-### Accessing build log on drone
+#### npm run build
 ~~ to be documented further ~~
 
 ### Accessing your build artefacts
 
-All scripts output build artefacts to `./out`
+All scripts output build artefacts to `./dist`
 The artefacts are located at ~~ to be documented further ~~
 
 Use Google Apps Auth to authenticate and access the same.
