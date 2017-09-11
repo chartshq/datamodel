@@ -16,11 +16,7 @@
 - [The CI Platform](#markdown-header-the-ci-platform)
 	- [Ensuring your commits will not fail build](#markdown-header-ensuring-your-commits-will-not-fail-build)
 	- [Executing individual build tasks](#markdown-header-executing-individual-build-tasks)
-		- [npm run-script build](#markdown-header-npm-run-script-build)
-		- [npm run-script build-source](#markdown-header-npm-run-script-build-source)
-		- [npm run-script release](#markdown-header-npm-run-script-release)
-		- [npm run-script drone](#markdown-header-npm-run-script-drone)
-	- [Accessing build log on drone](#markdown-header-accessing-build-log-on-drone)
+		- [npm run build](#markdown-header-npm-run-build)
 	- [Accessing your build artefacts](#markdown-header-accessing-your-build-artefacts)
 
 ## Repository Structure
@@ -61,7 +57,7 @@ Developers      | `feature/*`, `support/*`, `hotfix/*`
 > Rebasing on `master` is blocked.
 
 ## Preferred IDE
-The preferred IDE for `fusionboard` project is Microsoft Visual Studio Code. You can download it from [http://www.sublimetext.com](http://www.sublimetext.com).
+The preferred IDE for `fusionboard` project is Microsoft Visual Studio Code. You can download it from [https://code.visualstudio.com/download].
 
 The repository has a project file included in `develop/` directory. This project is configured with the best practices recommended for `fusionboard`. Things like using 120 character ruler, addition of end-of-file newline, cleaning up of trailing whitespace has been configured in this project.
 
@@ -173,7 +169,6 @@ We use [JSDoc](http://usejsdoc.org) as our documentation platform. All API docum
 
 ### Things to remember
 
-
 ~~ to be documented further ~~
 
 ## The CI Platform
@@ -187,6 +182,22 @@ The CI system is built as a bunch of bash scripts to execute a set of tasks. The
 > `npm test`
 
 The script associated with `npm test` will run all tests that ensures that your commit does not break anything in the repository. As such run `npm test` before you push.
+
+> `npm start`
+
+The script associated with `npm start` uses webpack middleware to serve a webpack bundle which is also connected to the server via sock.js. 
+
+> `npm lint`
+
+The script associated with `npm lint` will run linting tests that ensures that their are no bugs inconsistent with ECMAScript/JavaScript code. The linter uses the Airbnb style guide with some overridden rules for the smae. As such run `npm lint` before you push.
+
+> `npm docs`
+
+The script associated with `npm docs` will generate the documentation for the code.
+
+> `npm flow`
+
+The script associated with `npm flow` will run a static type check on the code.
 
 ### Executing individual build tasks
 
