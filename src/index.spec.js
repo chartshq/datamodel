@@ -4,7 +4,7 @@
 import { expect } from 'chai';
 
 describe('sample test case', () => {
-  it('sample ', () => {
-    expect(true).to.be.true;
-  });
+    it('sample ', () => {
+        expect(true).to.be.true;
+    });
 });
