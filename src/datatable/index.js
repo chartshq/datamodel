@@ -1,3 +1,1 @@
-import { DataTable } from './main';
-
-export { DataTable as default };
+export { DataTable as default } from './main';
