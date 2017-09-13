@@ -1,3 +1,4 @@
+import formatCell from './cell-formatter';
 /**
  * This helps to convert csv data to dataTable consumable json format
  * @param  {string} data The csv data in string format
@@ -7,7 +8,7 @@
 function parseCSV(data, schema) {
     const retJson = {
         schema,
-        data: [],
+        data: new Array(schema.length),
     };
     const seperator = ',';
     const retJsonData = retJson.data;
@@ -15,15 +16,12 @@ function parseCSV(data, schema) {
     const dataRows = data.split(/\n|\r/);
 
     // iterating through the data row
-    dataRows.forEach((row, i) => {
+    dataRows.forEach((row) => {
         const rowArr = row.split(seperator);
-        // Push an empty array which will be filled up by column
-        retJsonData.push([]);
         // Iterating through the data column
         schema.forEach((col, ii) => {
             // If measure convert it to Number
-            retJsonData[i].push(col.type === 'measure' ? +rowArr[ii] :
-                (`${rowArr[ii] === undefined ? '' : rowArr[ii]}`).replace(/^\s+|\s+$/g, ''));
+            (retJsonData[ii] || (retJsonData[ii] = [])).push(formatCell(rowArr[ii], col));
         });
     });
     return retJson;
