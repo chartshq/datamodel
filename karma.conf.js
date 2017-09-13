@@ -8,16 +8,36 @@ module.exports = function (config) {
     ],
     webpack: {
       module: {
-        loaders: [{
-          exclude: /node_modules/,
-          loader: 'babel-loader',
-          query: {
-            presets: ['es2015'],
+        rules: [
+          // instrument only testing sources with Istanbul
+          {
+            test: /\.js$/,
+            use: {
+              loader: 'babel-loader',
+              query: {
+                presets: ['es2015'],
+              },
+            },
+            exclude: /node_modules/,
           },
-        }],
+          {
+            test: /\.js$|\.jsx$/,
+            use: {
+              loader: 'istanbul-instrumenter-loader',
+              options: { esModules: true }
+            },
+            enforce: 'post',
+            exclude: /node_modules|\.spec\.js$/,
+          }
+        ],
+        // loaders: [{
+        //   loader: 'babel-loader',
+        //   query: {
+        //     presets: ['es2015'],
+        //   },
+        // }],
       },
     },
-
     preprocessors: {
       // add webpack as preprocessor
       // 'dist/fusiontime.js': ['webpack'],
@@ -27,15 +47,19 @@ module.exports = function (config) {
       '**/*.swp',
     ],
 
-    coverageReporter: {
+    coverageIstanbulReporter: {
       dir: 'coverage/',
+
+      reports: [ 'text-summary' ],
+      fixWebpackSourcePaths: true,
       reporters: [
-          { type: 'text' },
-          { type: 'html', subdir: 'report-html', file: 'report.html' },
-          { type: 'lcov', subdir: 'report-lcov', file: 'report.txt' },
+        { type: 'text' },
+        { type: 'html', subdir: 'report-html', file: 'report.html' },
+        { type: 'lcov', subdir: 'report-lcov', file: 'report.txt' },
       ],
     },
-    reporters: ['spec', 'coverage'],
+
+    reporters: ['progress', 'coverage-istanbul'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
