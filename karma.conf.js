@@ -49,8 +49,27 @@ module.exports = function (config) {
 
     coverageIstanbulReporter: {
       dir: 'coverage/',
-
-      reports: [ 'text-summary' ],
+      thresholds: {
+        emitWarning: false, // set to `true` to not fail the test command when thresholds are not met 
+        global: { // thresholds for all files 
+          statements: 80,
+          lines: 80,
+          branches: 80,
+          functions: 80
+        },
+        each: { // thresholds per file 
+          statements: 80,
+          lines: 80,
+          branches: 80,
+          functions: 80,
+          overrides: {
+            'baz/component/**/*.js': {
+              statements: 80
+            }
+          }
+        }
+      },
+      reports: ['text-summary'],
       fixWebpackSourcePaths: true,
       reporters: [
         { type: 'text' },
