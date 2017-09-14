@@ -10,17 +10,18 @@ class Relation {
      * a field store with these fields in global space which can be used
      * by other functions for calculations and other operations on data
      * @param  {string|json} data The tabuler data csv or json format
+     * @param  {json} schema The details of the schema
      */
-    constructor(data) {
+    constructor(data, schema) {
         if (data) {
             // This will create a generealise data structure consumable from
             // different type of data (different type of json or CSV)
-            const normalizeData = normalize(data);
+            const normalizeData = normalize(data, schema);
             // This will create array of fields possible from the data
-            const fieldArr = createFields(normalizeData);
+            const fieldArr = createFields(normalizeData, schema);
             // This will create a new fieldStore with the fields
             const nameSpace = fieldStore.createNameSpace(fieldArr);
-            this.derivatives = nameSpace;
+            this.columnNameSpace = nameSpace;
         }
     }
 }
