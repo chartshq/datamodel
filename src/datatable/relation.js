@@ -22,6 +22,9 @@ class Relation {
             // This will create a new fieldStore with the fields
             const nameSpace = fieldStore.createNameSpace(fieldArr);
             this.columnNameSpace = nameSpace;
+            // If data is provided create the default colIdentifier and rowDiffset
+            this.rowDiffset = `0-${fieldArr[0] ? fieldArr[0].length : 0}`;
+            this.colIdentifier = (schema.map(_ => _.name)).join();
         }
     }
 }

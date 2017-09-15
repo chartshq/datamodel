@@ -13,13 +13,13 @@ function createFields(data, schema) {
         let field;
         switch (_.type) {
         case 'measure':
-            field = new Measure(_.name, data[i], schema);
+            field = new Measure(_.name, data[i], _);
             break;
         case 'dimension':
-            field = new Dimension(_.name, data[i], schema);
+            field = new Dimension(_.name, data[i], _);
             break;
         case 'datetime':
-            field = new DateTime(_.name, data[i], schema);
+            field = new DateTime(_.name, data[i], _);
             break;
         default:
         }
