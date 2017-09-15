@@ -6,12 +6,8 @@ import formatCell from './cell-formatter';
  * @return {json}      The json format required by DataTable
  */
 function parseCSV(data, schema) {
-    const retJson = {
-        schema,
-        data: new Array(schema.length),
-    };
+    const retData = new Array(schema.length);
     const seperator = ',';
-    const retJsonData = retJson.data;
 
     const dataRows = data.split(/\n|\r/);
 
@@ -21,10 +17,10 @@ function parseCSV(data, schema) {
         // Iterating through the data column
         schema.forEach((col, ii) => {
             // If measure convert it to Number
-            (retJsonData[ii] || (retJsonData[ii] = [])).push(formatCell(rowArr[ii], col));
+            (retData[ii] || (retData[ii] = [])).push(formatCell(rowArr[ii], col));
         });
     });
-    return retJson;
+    return retData;
 }
 
 export { parseCSV as default };

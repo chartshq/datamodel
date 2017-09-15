@@ -1,6 +1,6 @@
 import { isString } from '../../utils/index';
-import { parseCSV } from './parse-csv';
-import { parseJSON } from './parse-json';
+import parseCSV from './parse-csv';
+import parseJSON from './parse-json';
 
 /**
  * It convert the user given data to the consumable format

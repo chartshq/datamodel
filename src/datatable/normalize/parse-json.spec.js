@@ -15,14 +15,11 @@ describe('Checking parseJSON', () => {
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
         ];
-        const retArr = {
-            schema,
-            data: [
-                [10, 15],
-                [20, 25],
-                ['d', 'demo'],
-            ],
-        };
+        const retArr = [
+            [10, 15],
+            [20, 25],
+            ['d', 'demo'],
+        ];
         expect(parseJSON(jsonData, schema)).to.deep.equal(retArr);
     });
     it('valid Data with date', () => {
@@ -35,14 +32,11 @@ describe('Checking parseJSON', () => {
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
         ];
-        const retArr = {
-            schema,
-            data: [
-                [new Date(2012, 0), new Date(2012, 1)],
-                [20, 25],
-                ['d', 'demo'],
-            ],
-        };
+        const retArr = [
+            [new Date(2012, 0), new Date(2012, 1)],
+            [20, 25],
+            ['d', 'demo'],
+        ];
         expect(parseJSON(jsonData, schema)).to.deep.equal(retArr);
     });
     it('valid extra schema Data ', () => {
@@ -56,15 +50,12 @@ describe('Checking parseJSON', () => {
             { name: 'aaaa', type: 'dimension' },
             { name: 'aaaaa', type: 'dimension' },
         ];
-        const retArr = {
-            schema,
-            data: [
-                [10, 15],
-                [20, 25],
-                ['d', 'demo'],
-                ['', ''],
-            ],
-        };
+        const retArr = [
+            [10, 15],
+            [20, 25],
+            ['d', 'demo'],
+            ['', ''],
+        ];
         expect(parseJSON(jsonData, schema)).to.deep.equal(retArr);
     });
     it('valid extra Data row', () => {
@@ -76,22 +67,16 @@ describe('Checking parseJSON', () => {
             { name: 'a', type: 'measure' },
             { name: 'aaa', type: 'measure' },
         ];
-        const retArr = {
-            schema,
-            data: [
-                [10, 15],
-                [20, 25],
-            ],
-        };
+        const retArr = [
+            [10, 15],
+            [20, 25],
+        ];
         expect(parseJSON(jsonData, schema)).to.deep.equal(retArr);
     });
     it('blank Data ', () => {
         const jsonData = [];
         const schema = [];
-        const retArr = {
-            schema,
-            data: [],
-        };
+        const retArr = [];
         expect(parseJSON(jsonData, schema)).to.deep.equal(retArr);
     });
 });

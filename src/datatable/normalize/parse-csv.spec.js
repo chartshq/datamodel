@@ -12,14 +12,11 @@ describe('Checking parseCSV', () => {
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
         ];
-        const retArr = {
-            schema,
-            data: [
-                [10, 15],
-                [20, 25],
-                ['d', 'demo'],
-            ],
-        };
+        const retArr = [
+            [10, 15],
+            [20, 25],
+            ['d', 'demo'],
+        ];
         expect(parseCSV(svgStr, schema)).to.deep.equal(retArr);
     });
     it('valid Data with date', () => {
@@ -29,14 +26,11 @@ describe('Checking parseCSV', () => {
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
         ];
-        const retArr = {
-            schema,
-            data: [
-                [new Date(2012, 0), new Date(2012, 1)],
-                [20, 25],
-                ['d', 'demo'],
-            ],
-        };
+        const retArr = [
+            [new Date(2012, 0), new Date(2012, 1)],
+            [20, 25],
+            ['d', 'demo'],
+        ];
         expect(parseCSV(svgStr, schema)).to.deep.equal(retArr);
     });
     it('valid extra schema Data ', () => {
@@ -47,15 +41,12 @@ describe('Checking parseCSV', () => {
             { name: 'aaaa', type: 'dimension' },
             { name: 'aaaaa', type: 'dimension' },
         ];
-        const retArr = {
-            schema,
-            data: [
-                [10, 15],
-                [20, 25],
-                ['d', 'demo'],
-                ['', ''],
-            ],
-        };
+        const retArr = [
+            [10, 15],
+            [20, 25],
+            ['d', 'demo'],
+            ['', ''],
+        ];
         expect(parseCSV(svgStr, schema)).to.deep.equal(retArr);
     });
     it('valid extra Data row', () => {
@@ -64,22 +55,16 @@ describe('Checking parseCSV', () => {
             { name: 'a', type: 'measure' },
             { name: 'aaa', type: 'measure' },
         ];
-        const retArr = {
-            schema,
-            data: [
-                [10, 15],
-                [20, 25],
-            ],
-        };
+        const retArr = [
+            [10, 15],
+            [20, 25],
+        ];
         expect(parseCSV(svgStr, schema)).to.deep.equal(retArr);
     });
     it('blank Data ', () => {
         const svgStr = '';
         const schema = [];
-        const retArr = {
-            schema,
-            data: [],
-        };
+        const retArr = [];
         expect(parseCSV(svgStr, schema)).to.deep.equal(retArr);
     });
 });

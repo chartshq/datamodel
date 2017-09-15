@@ -6,21 +6,17 @@ import formatCell from './cell-formatter';
  * @return {json}      The json format required by DataTable
  */
 function parseJSON(data, schema) {
-    const retJson = {
-        schema,
-        data: new Array(schema.length),
-    };
-    const retJsonData = retJson.data;
+    const retData = new Array(schema.length);
 
     // iterating through the data row
     data.forEach((row) => {
         // Iterating through the data column
         schema.forEach((col, ii) => {
             // If measure convert it to Number
-            (retJsonData[ii] || (retJsonData[ii] = [])).push(formatCell(row[col.name], col));
+            (retData[ii] || (retData[ii] = [])).push(formatCell(row[col.name], col));
         });
     });
-    return retJson;
+    return retData;
 }
 
 export { parseJSON as default };

@@ -1,6 +1,6 @@
-import { normalize } from './normalize';
-import { createFields } from './create-fields';
-import { fieldStore } from './field-store';
+import normalize from './normalize';
+import createFields from './create-fields';
+import fieldStore from './field-store';
 /**
  * Contains all the relational algebra part
  */
