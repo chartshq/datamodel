@@ -23,9 +23,22 @@ class Relation {
             const nameSpace = fieldStore.createNameSpace(fieldArr);
             this.columnNameSpace = nameSpace;
             // If data is provided create the default colIdentifier and rowDiffset
-            this.rowDiffset = `0-${fieldArr[0] ? fieldArr[0].length : 0}`;
+            this.rowDiffset = `0-${normalizeData[0] ? (normalizeData[0].length - 1) : 0}`;
             this.colIdentifier = (schema.map(_ => _.name)).join();
         }
+    }
+
+    /**
+     * Set the projection to the DataTable only the projection string
+     * @param  {string} projString The projection to be applied
+     * @return {instance}            Instance of the class (this).
+     */
+    projectHelper(projString) {
+        /**
+         * @todo need to have validation
+         */
+        this.colIdentifier = projString;
+        return this;
     }
 }
 
