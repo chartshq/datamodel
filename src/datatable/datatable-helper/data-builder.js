@@ -1,12 +1,18 @@
+import rowDiffsetIterator from './row-diffset-iterator';
+
 /**
  * This function actually create the data array that will be exported
  * @param  {Object} fieldStore    The FieldStore where field Array
  * @param  {string} rowDiffset    details of which row to be include eg. '0-2,4,6'
  * @param  {string} colIdentifier details of which column to be include eg 'date,sales,profit'
- * @return {Array}               The final multidimensional array
+ * @return {Object}               The Object containing multidimensional array and the
+ * relative schema
  */
 function dataBuilder(fieldStore, rowDiffset, colIdentifier) {
-    const retArr = [];
+    const retObj = {
+        schema: [],
+        data: [],
+    };
     // this will store the fields according to the colIdentifier provided
     const tmpDataArr = [];
 
@@ -22,33 +28,22 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier) {
         }
     });
     // =============== column filter takes place here end ================= //
-    // initialize the multidimensional array
-    retArr[0] = [];
-    // insert the first schema row
+    // insert the schema to the schema object
     tmpDataArr.forEach((field) => {
         /**
          * @todo need to implement extend2 otherwise user can overwrite
          */
-        retArr[0].push(field.schema);
+        retObj.schema.push(field.schema);
     });
     // =============== row filter takes place here ================= //
-    const rowDiffArr = rowDiffset.split(',');
-    rowDiffArr.forEach((diffStr) => {
-        const diffStsArr = diffStr.split('-');
-        const start = +(diffStsArr[0]);
-        const end = +(diffStsArr[1] || diffStsArr[0]);
-        // insert the data
-        if (end >= start) {
-            for (let i = start; i <= end; i += 1) {
-                retArr.push(new Array(tmpDataArr.length));
-                tmpDataArr.forEach((field, ii) => {
-                    retArr[retArr.length - 1][ii] = field.data[i];
-                });
-            }
-        }
+    rowDiffsetIterator(rowDiffset, (i) => {
+        retObj.data.push(new Array(tmpDataArr.length));
+        tmpDataArr.forEach((field, ii) => {
+            retObj.data[retObj.data.length - 1][ii] = field.data[i];
+        });
     });
     // =============== row filter takes place here end ================= //
-    return retArr;
+    return retObj;
 }
 
 export { dataBuilder as default };

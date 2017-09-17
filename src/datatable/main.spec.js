@@ -36,13 +36,45 @@ describe('DataTable functionality', () => {
         ];
         const dataTable = new DataTable(data, schema);
         const projectedDataTable = dataTable.project('aaaa,a');
+        const expData = {
+            schema: [
+                { name: 'aaaa', type: 'dimension' },
+                { name: 'a', type: 'measure' },
+            ],
+            data: [
+                ['d', 10],
+                ['demo', 15],
+            ],
+        };
+        // check project is not applied on the same DataTable
+        expect(dataTable === projectedDataTable).to.be.false;
+        // Check The return data
+        expect(projectedDataTable.getData()).to.deep.equal(expData);
+    });
+    it.skip('Selection functionality', () => {
+        const data = [
+            { a: 10, aaa: 20, aaaa: 'd' },
+            { a: 15, aaa: 25, aaaa: 'demo' },
+            { a: 9, aaa: 35, aaaa: 'demo' },
+            { a: 7, aaa: 15, aaaa: 'demo' },
+            { a: 35, aaa: 5, aaaa: 'demo' },
+            { a: 10, aaa: 10, aaaa: 'demoo' },
+        ];
+        const schema = [
+            { name: 'a', type: 'measure' },
+            { name: 'aaa', type: 'measure' },
+            { name: 'aaaa', type: 'dimension' },
+        ];
+        const dataTable = new DataTable(data, schema);
+        const projectedDataTable = (dataTable.project('aaaa,a')).select((fields, i) =>
+        fields[0].data[i] <= 10 && fields[2].data[i] === 'demo');
         const expData = [
             [
                 { name: 'aaaa', type: 'dimension' },
                 { name: 'a', type: 'measure' },
             ],
-            ['d', 10],
-            ['demo', 15],
+            ['demo', 9],
+            ['demo', 7],
         ];
         // check project is not applied on the same DataTable
         expect(dataTable === projectedDataTable).to.be.false;

@@ -79,6 +79,18 @@ class DataTable extends Relation {
         cloneDataTable.projectHelper(projString);
         return cloneDataTable;
     }
+
+    /**
+     * Set the selection of the cloned DataTable
+     * @param  {functiona} selectFn The function which will be looped through all the data
+     * if it return true the row will be there in the DataTable
+     * @return {DataTable}          The cloned DataTable with the required selection;
+     */
+    select(selectFn) {
+        const cloneDataTable = this.cloneAsChild();
+        cloneDataTable.selectHelper(selectFn);
+        return cloneDataTable;
+    }
     // ============================== Accessable functionality ends ======================= //
 }
 

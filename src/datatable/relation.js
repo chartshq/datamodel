@@ -40,6 +40,10 @@ class Relation {
         this.colIdentifier = projString;
         return this;
     }
+
+    // selectHelper() {
+    //     return this;
+    // }
 }
 
 export { Relation as default };
