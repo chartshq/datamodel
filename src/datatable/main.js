@@ -88,7 +88,7 @@ class DataTable extends Relation {
      */
     select(selectFn) {
         const cloneDataTable = this.cloneAsChild();
-        cloneDataTable.selectHelper(selectFn);
+        cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn);
         return cloneDataTable;
     }
     // ============================== Accessable functionality ends ======================= //

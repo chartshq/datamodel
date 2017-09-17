@@ -1,6 +1,7 @@
 import normalize from './normalize';
 import createFields from './create-fields';
 import fieldStore from './field-store';
+import rowDiffsetIterator from './datatable-helper/row-diffset-iterator';
 /**
  * Contains all the relational algebra part
  */
@@ -41,9 +42,32 @@ class Relation {
         return this;
     }
 
-    // selectHelper() {
-    //     return this;
-    // }
+    /**
+     * Set the selection to the DataTable
+     * @param  {Array} fields   FieldStore fields array
+     * @param  {Function} selectFn The filter function
+     * @return {Instance}          Instance of the class (this)
+     */
+    selectHelper(fields, selectFn) {
+        const newRowDiffSet = [];
+        let lastInsertedValue = -1;
+        // newRowDiffSet last index
+        let li;
+        rowDiffsetIterator(this.rowDiffset, (i) => {
+            if (selectFn(fields, i)) {
+                // Check for if this value to be attached to the last diffset ie. 1-5 format
+                if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
+                    li = newRowDiffSet.length - 1;
+                    newRowDiffSet[li] = `${newRowDiffSet[li].split('-')[0]}-${i}`;
+                } else {
+                    newRowDiffSet.push(`${i}`);
+                }
+                lastInsertedValue = i;
+            }
+        });
+        this.rowDiffset = newRowDiffSet.join(',');
+        return this;
+    }
 }
 
 export { Relation as default };
