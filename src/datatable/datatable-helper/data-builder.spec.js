@@ -110,9 +110,7 @@ describe('Checking dataBuilder', () => {
                 { name: 'sales', type: 'measure' },
                 { name: 'city', type: 'dimension' },
             ],
-            data: [
-                [10, 20, 'a'],
-            ],
+            data: [],
         };
         expect(expObj).to.deep.equal(oriObj);
     });
