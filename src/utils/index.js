@@ -1,4 +1,5 @@
 import DateTimeFormatter from './date-time-formatter';
+import extend2 from './extend2';
 /**
  * To check if the data is of type Array
  * @param  {*}  _ data for which the type is to be checked
@@ -33,4 +34,5 @@ export {
     isObject,
     isString,
     DateTimeFormatter,
+    extend2,
 };

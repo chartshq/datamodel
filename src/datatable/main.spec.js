@@ -145,4 +145,37 @@ describe('DataTable functionality', () => {
         // Check The return data
         expect(projectedDataTable1.getData()).to.deep.equal(expData);
     });
+    it('Rename functionality', () => {
+        const data = [
+            { a: 10, aaa: 20, aaaa: 'd' },
+            { a: 15, aaa: 25, aaaa: 'demo' },
+            { a: 9, aaa: 35, aaaa: 'demo' },
+            { a: 7, aaa: 15, aaaa: 'demo' },
+            { a: 35, aaa: 5, aaaa: 'demo' },
+            { a: 10, aaa: 10, aaaa: 'demoo' },
+        ];
+        const schema = [
+            { name: 'a', type: 'measure' },
+            { name: 'aaa', type: 'measure' },
+            { name: 'aaaa', type: 'dimension' },
+        ];
+        const dataTable = new DataTable(data, schema);
+        const renameDataTable = dataTable.rename({ aaa: 'aaaRename' });
+        const expData = {
+            schema: [
+                { name: 'a', type: 'measure' },
+                { name: 'aaaRename', type: 'measure' },
+                { name: 'aaaa', type: 'dimension' },
+            ],
+            data: [
+                [10, 20, 'd'],
+                [15, 25, 'demo'],
+                [9, 35, 'demo'],
+                [7, 15, 'demo'],
+                [35, 5, 'demo'],
+                [10, 10, 'demoo'],
+            ],
+        };
+        expect(renameDataTable.getData()).to.deep.equal(expData);
+    });
 });

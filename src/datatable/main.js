@@ -46,8 +46,9 @@ class DataTable extends Relation {
      * @return {Object} Field store
      */
     getNameSpace() {
-        let nameSpace;
         let child = this;
+        if (this.columnNameSpace) { return this.columnNameSpace; }
+        let nameSpace;
         while (child.parent) {
             if (child.parent.columnNameSpace) {
                 nameSpace = child.parent.columnNameSpace;
@@ -65,7 +66,37 @@ class DataTable extends Relation {
      * @return {Array} multidimensional array of the data
      */
     getData() {
-        return dataBuilder(this.getNameSpace().fields, this.rowDiffset, this.colIdentifier);
+        return dataBuilder.call(this, this.getNameSpace().fields, this.rowDiffset,
+            this.colIdentifier);
+    }
+
+    /**
+     * This helps to rename the column name of the DataTable this helps in joining two dataTable.
+     * Also union and difference as these operations required to have same column name.
+     * @param  {Object} schemaObj object having the name of the field to rename as key and the new
+     * name as the value
+     * @return {DataTable}           The cloned DataTable with the rename columns
+     */
+    rename(schemaObj) {
+        const cloneDataTable = this.cloneAsChild();
+        const schemaArr = cloneDataTable.colIdentifier.split(',');
+        const fieldStore = this.getNameSpace().fields;
+        Object.entries(schemaObj).forEach(([key, value]) => {
+            if (schemaArr.indexOf(key) !== -1 && typeof value === 'string') {
+                for (let i = 0; i <= fieldStore.length; i += 1) {
+                    if (fieldStore[i].name === key) {
+                        const renameField = fieldStore[i].clone(fieldStore[i].data);
+                        renameField.name = value;
+                        renameField.schema.name = value;
+                        schemaArr[schemaArr.indexOf(key)] = value;
+                        fieldStore.push(renameField);
+                        break;
+                    }
+                }
+            }
+        });
+        cloneDataTable.colIdentifier = schemaArr.join();
+        return cloneDataTable;
     }
 
     /**
