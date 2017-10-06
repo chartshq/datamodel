@@ -1,5 +1,6 @@
 import Relation from './relation';
 import dataBuilder from './datatable-helper/data-builder';
+import crossProduct from './datatable-helper/cross-product';
 
 /**
  * The main class
@@ -97,6 +98,23 @@ class DataTable extends Relation {
         });
         cloneDataTable.colIdentifier = schemaArr.join();
         return cloneDataTable;
+    }
+
+    /**
+     * this reflect the cross-product of the relational algebra.
+     * It take another DataTable instance and create new DataTable with the cross-product data and
+     * filter the data according to the filter function provided.
+     * Say there are two dataTablw tableA with 4 column 5 rows and tableB with 3 column 6 row
+     * so the new DataTable tableA X tableB will have 7(4 + 3) rows and 30(5 * 6) columns (if no
+     * filter function is provided).
+     *
+     * @param  {DataTable} joinWith The DataTable to be joined with this DataTable
+     * @param  {Function} filterFn Function that will filter the result of the crossProduct
+     * DataTable
+     * @return {DataTable}          the new DataTable created by joining
+     */
+    join(joinWith, filterFn) {
+        return crossProduct(this, joinWith, filterFn);
     }
 
     /**

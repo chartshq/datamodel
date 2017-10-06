@@ -20,7 +20,7 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier) {
     // Store the fields according to the colIdentifier
     const colIArr = colIdentifier.split(',');
     colIArr.forEach((colName) => {
-        for (let i = 0; i <= fieldStore.length; i += 1) {
+        for (let i = 0; i < fieldStore.length; i += 1) {
             if (fieldStore[i].name === colName) {
                 tmpDataArr.push(fieldStore[i]);
                 break;

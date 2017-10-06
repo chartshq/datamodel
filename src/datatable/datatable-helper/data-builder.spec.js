@@ -34,6 +34,40 @@ describe('Checking dataBuilder', () => {
         };
         expect(expObj).to.deep.equal(oriObj);
     });
+    it('Checking for special case with blank data', () => {
+        const data = [];
+        const schema = [
+            { name: 'profit', type: 'measure' },
+            { name: 'sales', type: 'measure' },
+            { name: 'city', type: 'dimension' },
+        ];
+        const fieldsArr = createFields(data, schema);
+        const expObj = dataBuilder(fieldsArr, '', 'profit,sales,city');
+        const oriObj = {
+            schema: [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'city', type: 'dimension' },
+            ],
+            data: [],
+        };
+        expect(expObj).to.deep.equal(oriObj);
+    });
+    it('Checking for special case with blank data and blank schema', () => {
+        const data = [
+            [10, 15, 7, 9, 20, 35],
+            [20, 25, 8, 40, 77, 9],
+            ['a', 'b', 'c', 'd', 'e', 'f'],
+        ];
+        const schema = [];
+        const fieldsArr = createFields(data, schema);
+        const expObj = dataBuilder(fieldsArr, '', '');
+        const oriObj = {
+            schema: [],
+            data: [],
+        };
+        expect(expObj).to.deep.equal(oriObj);
+    });
     it('Checking for normal case with column filteration', () => {
         const data = [
             [10, 15, 7, 9, 20, 35],

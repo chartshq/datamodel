@@ -4,10 +4,11 @@ const fieldStore = {
      * This add a new data to the fieldStore data and return the data
      * @todo function need to be written freshly
      * @param  {Array} fieldArr the list of field that will be present in this data
+     * @param  {string} name name of the field store
      * @return {Object}          the data as a object which is added
      */
-    createNameSpace(fieldArr) {
-        const dataId = `rand-${(new Date()).getTime()}`;
+    createNameSpace(fieldArr, name) {
+        const dataId = name || `rand-${(new Date()).getTime()}`;
         this.data[dataId] = {
             name: dataId,
             fields: fieldArr,

@@ -12,8 +12,9 @@ class Relation {
      * by other functions for calculations and other operations on data
      * @param  {string|json} data The tabuler data csv or json format
      * @param  {json} schema The details of the schema
+     * @param  {string} name name of the DataTable if not provided will assign a random name
      */
-    constructor(data, schema) {
+    constructor(data, schema, name) {
         if (data) {
             // This will create a generealise data structure consumable from
             // different type of data (different type of json or CSV)
@@ -21,7 +22,7 @@ class Relation {
             // This will create array of fields possible from the data
             const fieldArr = createFields(normalizeData, schema);
             // This will create a new fieldStore with the fields
-            const nameSpace = fieldStore.createNameSpace(fieldArr);
+            const nameSpace = fieldStore.createNameSpace(fieldArr, name);
             this.columnNameSpace = nameSpace;
             // If data is provided create the default colIdentifier and rowDiffset
             this.rowDiffset = `0-${normalizeData[0] ? (normalizeData[0].length - 1) : 0}`;
