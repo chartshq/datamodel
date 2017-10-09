@@ -1,6 +1,7 @@
 import Relation from './relation';
 import dataBuilder from './datatable-helper/data-builder';
 import crossProduct from './datatable-helper/cross-product';
+import naturalJoinFilter from './datatable-helper/natural-join-filter-function';
 
 /**
  * The main class
@@ -101,7 +102,7 @@ class DataTable extends Relation {
     }
 
     /**
-     * this reflect the cross-product of the relational algebra.
+     * this reflect the cross-product of the relational algebra or can be called as theta join.
      * It take another DataTable instance and create new DataTable with the cross-product data and
      * filter the data according to the filter function provided.
      * Say there are two dataTablw tableA with 4 column 5 rows and tableB with 3 column 6 row
@@ -115,6 +116,18 @@ class DataTable extends Relation {
      */
     join(joinWith, filterFn) {
         return crossProduct(this, joinWith, filterFn);
+    }
+
+    /**
+     * This can join two DataTable to form a new DataTable which meet the requirement of
+     * natural join.
+     * it's not possible to pass a filter function as the filter function is decided according to
+     * the definition of natural join
+     * @param  {DataTable} joinWith the DataTable with whome this DataTable will be joined
+     * @return {DataTable}          The new joind DataTable
+     */
+    naturalJoin(joinWith) {
+        return crossProduct(this, joinWith, naturalJoinFilter(this, joinWith), true);
     }
 
     /**
