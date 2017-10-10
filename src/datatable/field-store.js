@@ -12,6 +12,13 @@ const fieldStore = {
         this.data[dataId] = {
             name: dataId,
             fields: fieldArr,
+            fieldsObj() {
+                const retObj = {};
+                this.fields.forEach((field) => {
+                    retObj[field.name] = field;
+                });
+                return retObj;
+            },
         };
         return this.data[dataId];
     },

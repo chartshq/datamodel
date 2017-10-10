@@ -2,6 +2,7 @@ import Relation from './relation';
 import dataBuilder from './datatable-helper/data-builder';
 import crossProduct from './datatable-helper/cross-product';
 import naturalJoinFilter from './datatable-helper/natural-join-filter-function';
+import { union as unionHelper } from './datatable-helper/union';
 
 /**
  * The main class
@@ -128,6 +129,17 @@ class DataTable extends Relation {
      */
     naturalJoin(joinWith) {
         return crossProduct(this, joinWith, naturalJoinFilter(this, joinWith), true);
+    }
+
+    /**
+     * This function handles the union operation of the relational algebra.
+     * It can be termed as vertical joining of all the unique tuples from both the dataTable.
+     * The requirement is both the DataTable should have same column name and order
+     * @param  {DataTable} unionWith The DataTable with which this table will be united
+     * @return {DataTable}           The new DataTable with the vertical joining
+     */
+    union(unionWith) {
+        return unionHelper(this, unionWith);
     }
 
     /**

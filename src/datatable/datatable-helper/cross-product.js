@@ -1,6 +1,7 @@
 import DataTable from '../index';
 import { extend2 } from '../../utils';
 import getCommonSchema from './get-common-schema';
+import rowDiffsetIterator from './row-diffset-iterator';
 
 /**
  * Default filter function for crossProduct. If the user doesnot provide any filter function
@@ -56,8 +57,8 @@ function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = fa
         }
     });
     // Prepare Data
-    dataTable1FieldStore.fields[0].data.forEach((val, i) => {
-        dataTable2FieldStore.fields[0].data.forEach((vall, ii) => {
+    rowDiffsetIterator(dataTable1.rowDiffset, (i) => {
+        rowDiffsetIterator(dataTable2.rowDiffset, (ii) => {
             const tuple = [];
             const userArg = {};
             userArg[dataTable1FieldStoreName] = {};
