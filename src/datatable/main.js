@@ -2,7 +2,8 @@ import Relation from './relation';
 import dataBuilder from './datatable-helper/data-builder';
 import crossProduct from './datatable-helper/cross-product';
 import naturalJoinFilter from './datatable-helper/natural-join-filter-function';
-import { union as unionHelper } from './datatable-helper/union';
+import union from './datatable-helper/union';
+import difference from './datatable-helper/difference';
 
 /**
  * The main class
@@ -139,7 +140,18 @@ class DataTable extends Relation {
      * @return {DataTable}           The new DataTable with the vertical joining
      */
     union(unionWith) {
-        return unionHelper(this, unionWith);
+        return union(this, unionWith);
+    }
+
+    /**
+     * This function handles the difference operation of the relational algebra.
+     * It can be termed as vertical joining of all the tuples those are not in the second DataTable.
+     * The requirement is both the DataTable should have same column name and order
+     * @param  {DataTable} differenceWith The DataTable with which this table will be united
+     * @return {DataTable}           The new DataTable with the vertical joining
+     */
+    difference(differenceWith) {
+        return difference(this, differenceWith);
     }
 
     /**
