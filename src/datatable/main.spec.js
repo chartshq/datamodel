@@ -178,6 +178,43 @@ describe('DataTable functionality', () => {
         };
         expect(renameDataTable.getData()).to.deep.equal(expData);
     });
+    it('sort configuration and functionality', () => {
+        const data = [
+            { a: 10, aaa: 20 },
+            { a: 15, aaa: 25 },
+            { a: 9, aaa: 35 },
+            { a: 7, aaa: 20 },
+            { a: 35, aaa: 5 },
+            { a: 10, aaa: 10 },
+        ];
+        const schema = [
+            { name: 'a', type: 'measure' },
+            { name: 'aaa', type: 'measure' },
+        ];
+        const dataTable = new DataTable(data, schema);
+        dataTable.sort('aaa');
+        dataTable.sort('a');
+        dataTable.sort('aaa', 'desc');
+        expect(dataTable.sortingDetails).to.deep.equal({
+            column: ['a', 'aaa'],
+            type: ['asc', 'desc'],
+        });
+        const expData = {
+            schema: [
+                { name: 'a', type: 'measure' },
+                { name: 'aaa', type: 'measure' },
+            ],
+            data: [
+                [9, 35],
+                [15, 25],
+                [7, 20],
+                [10, 20],
+                [10, 10],
+                [35, 5],
+            ],
+        };
+        expect(dataTable.getData()).to.deep.equal(expData);
+    });
     it('join functionality', () => {
         const data1 = [
             { profit: 10, sales: 20, city: 'a' },

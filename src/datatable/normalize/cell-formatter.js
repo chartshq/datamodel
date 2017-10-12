@@ -15,7 +15,7 @@ function getDate(value, schema) {
         dateFormater = new DateTimeFormatter((schema.format || ''));
         preSchema = schema;
     }
-    return dateFormater.getNativeDate(value);
+    return dateFormater.getNativeDate(value).getTime();
 }
 
 /**

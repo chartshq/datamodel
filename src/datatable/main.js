@@ -18,6 +18,10 @@ class DataTable extends Relation {
         super(...args);
         // This will hold all the children DataTable
         this.child = [];
+        this.sortingDetails = {
+            column: [],
+            type: [],
+        };
     }
     /**
      * This function will create a new DataTable with the required field to have
@@ -71,7 +75,7 @@ class DataTable extends Relation {
      */
     getData() {
         return dataBuilder.call(this, this.getNameSpace().fields, this.rowDiffset,
-            this.colIdentifier);
+            this.colIdentifier, this.sortingDetails);
     }
 
     /**
@@ -176,6 +180,39 @@ class DataTable extends Relation {
         const cloneDataTable = this.cloneAsChild();
         cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn);
         return cloneDataTable;
+    }
+
+    /**
+     * It helps to define the sorting mechanism of the returned data.
+     * This can be called multiple time to sort according to the various column, but only the
+     * last two call will be taken into consideration. The sort will be stable so previous sorting
+     * will also be reflected on the data.
+     *
+     * Please note no new DataTable will be created from this call, as this function may be called
+     * numerious time
+     * @param  {string} columnName name of the column need to be sorted
+     * @param  {string} sortType   type of sorting (asc for ascending and desc for descending)
+     * @return {DataTable}            it's own instance
+     */
+    sort(columnName, sortType) {
+        const sortingDetails = this.sortingDetails;
+        const sortingDetailsColumn = sortingDetails.column;
+        const sortingDetailsType = sortingDetails.type;
+        const sortTypeSan = sortType === 'desc' ? 'desc' : 'asc';
+        // Delete the column name and its type if it already exist
+        if (sortingDetailsColumn.indexOf(columnName) !== -1) {
+            const ind = sortingDetailsColumn.indexOf(columnName);
+            sortingDetailsColumn.splice(ind, 1);
+            sortingDetailsType.splice(ind, 1);
+        }
+        sortingDetailsColumn.push(columnName);
+        sortingDetailsType.push(sortTypeSan);
+        // only two level of sorting is taken into consideration
+        if (sortingDetailsColumn.length > 2) {
+            sortingDetailsColumn.splice(0, sortingDetailsColumn.length - 2);
+            sortingDetailsType.splice(0, sortingDetailsType.length - 2);
+        }
+        return this;
     }
     // ============================== Accessable functionality ends ======================= //
 }

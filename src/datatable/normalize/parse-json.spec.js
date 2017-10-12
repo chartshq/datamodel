@@ -33,7 +33,7 @@ describe('Checking parseJSON', () => {
             { name: 'aaaa', type: 'dimension' },
         ];
         const retArr = [
-            [new Date(2012, 0), new Date(2012, 1)],
+            [(new Date(2012, 0)).getTime(), (new Date(2012, 1)).getTime()],
             [20, 25],
             ['d', 'demo'],
         ];
