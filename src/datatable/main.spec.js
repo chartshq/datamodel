@@ -192,13 +192,14 @@ describe('DataTable functionality', () => {
             { name: 'aaa', type: 'measure' },
         ];
         const dataTable = new DataTable(data, schema);
-        dataTable.sort('aaa');
-        dataTable.sort('a');
-        dataTable.sort('aaa', 'desc');
-        expect(dataTable.sortingDetails).to.deep.equal({
-            column: ['a', 'aaa'],
-            type: ['asc', 'desc'],
-        });
+        dataTable.sort([
+            ['aaa', 'desc'],
+            ['a'],
+        ]);
+        expect(dataTable.sortingDetails).to.deep.equal([
+            ['aaa', 'desc'],
+            ['a', 'asc'],
+        ]);
         const expData = {
             schema: [
                 { name: 'a', type: 'measure' },
@@ -211,6 +212,78 @@ describe('DataTable functionality', () => {
                 [10, 20],
                 [10, 10],
                 [35, 5],
+            ],
+        };
+        expect(dataTable.getData()).to.deep.equal(expData);
+    });
+    it('sort for multi rows functionality', () => {
+        const data = [
+            { a: 2, aa: 1, aaa: 1 },
+            { a: 2, aa: 6, aaa: 12 },
+            { a: 1, aa: 15, aaa: 9 },
+            { a: 1, aa: 15, aaa: 12 },
+            { a: 1, aa: 6, aaa: 15 },
+            { a: 2, aa: 1, aaa: 56 },
+            { a: 2, aa: 1, aaa: 3 },
+            { a: 1, aa: 15, aaa: 10 },
+            { a: 2, aa: 6, aaa: 9 },
+            { a: 1, aa: 6, aaa: 4 },
+        ];
+        const schema = [
+            { name: 'a', type: 'measure' },
+            { name: 'aa', type: 'measure' },
+            { name: 'aaa', type: 'measure' },
+        ];
+        const dataTable = new DataTable(data, schema);
+        dataTable.sort([
+            ['a'],
+            ['aa', 'desc'],
+            ['aaa'],
+        ]);
+        const expData = {
+            schema: [
+                { name: 'a', type: 'measure' },
+                { name: 'aa', type: 'measure' },
+                { name: 'aaa', type: 'measure' },
+            ],
+            data: [
+                [1, 15, 9],
+                [1, 15, 10],
+                [1, 15, 12],
+                [1, 6, 4],
+                [1, 6, 15],
+                [2, 6, 9],
+                [2, 6, 12],
+                [2, 1, 1],
+                [2, 1, 3],
+                [2, 1, 56],
+            ],
+        };
+        expect(dataTable.getData()).to.deep.equal(expData);
+    });
+    it('sort for string data', () => {
+        const data = [
+            { a: 'bad' },
+            { a: 'mat' },
+            { a: 'cat' },
+            { a: 'rat' },
+        ];
+        const schema = [
+            { name: 'a', type: 'dimension' },
+        ];
+        const dataTable = new DataTable(data, schema);
+        dataTable.sort([
+            ['a'],
+        ]);
+        const expData = {
+            schema: [
+                { name: 'a', type: 'dimension' },
+            ],
+            data: [
+                ['bad'],
+                ['cat'],
+                ['mat'],
+                ['rat'],
             ],
         };
         expect(dataTable.getData()).to.deep.equal(expData);

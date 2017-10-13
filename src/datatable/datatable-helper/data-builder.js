@@ -80,14 +80,14 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails) {
         });
     });
     // handles the sort functionality
-    if (sortingDetails && sortingDetails.column.length > 0) {
-        sortingDetails.column.forEach((column, i) => {
+    if (sortingDetails && sortingDetails.length > 0) {
+        for (let i = sortingDetails.length - 1; i >= 0; i -= 1) {
             retObj.schema.forEach((schema, ii) => {
-                if (column === schema.name) {
-                    mergeSort(retObj.data, getSortFn(schema.type, sortingDetails.type[i], ii));
+                if (sortingDetails[i][0] === schema.name) {
+                    mergeSort(retObj.data, getSortFn(schema.type, sortingDetails[i][1], ii));
                 }
             });
-        });
+        }
     }
     // =============== row filter takes place here end ================= //
     return retObj;

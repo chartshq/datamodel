@@ -183,35 +183,22 @@ class DataTable extends Relation {
     }
 
     /**
-     * It helps to define the sorting mechanism of the returned data.
-     * This can be called multiple time to sort according to the various column, but only the
-     * last two call will be taken into consideration. The sort will be stable so previous sorting
-     * will also be reflected on the data.
+     * It helps to define the sorting order of the returned data.
+     * This is similar to the orderBy functionality of the database
+     * you have to pass the array of array [['columnName', 'sortType(asc|desc)']] and the
+     * function getData will give the data accordingly
      *
-     * Please note no new DataTable will be created from this call, as this function may be called
-     * numerious time
-     * @param  {string} columnName name of the column need to be sorted
-     * @param  {string} sortType   type of sorting (asc for ascending and desc for descending)
+     * Please note no new DataTable will be created from this call, as this function overwrite the
+     * previous sorting config
+     * @param  {Array} sortList The array of all the column that need to be sorted
      * @return {DataTable}            it's own instance
      */
-    sort(columnName, sortType) {
-        const sortingDetails = this.sortingDetails;
-        const sortingDetailsColumn = sortingDetails.column;
-        const sortingDetailsType = sortingDetails.type;
-        const sortTypeSan = sortType === 'desc' ? 'desc' : 'asc';
-        // Delete the column name and its type if it already exist
-        if (sortingDetailsColumn.indexOf(columnName) !== -1) {
-            const ind = sortingDetailsColumn.indexOf(columnName);
-            sortingDetailsColumn.splice(ind, 1);
-            sortingDetailsType.splice(ind, 1);
-        }
-        sortingDetailsColumn.push(columnName);
-        sortingDetailsType.push(sortTypeSan);
-        // only two level of sorting is taken into consideration
-        if (sortingDetailsColumn.length > 2) {
-            sortingDetailsColumn.splice(0, sortingDetailsColumn.length - 2);
-            sortingDetailsType.splice(0, sortingDetailsType.length - 2);
-        }
+    sort(sortList) {
+        sortList.forEach((row) => {
+            const currRow = row;
+            currRow[1] = row[1] === 'desc' ? 'desc' : 'asc';
+        });
+        this.sortingDetails = sortList;
         return this;
     }
     // ============================== Accessable functionality ends ======================= //
