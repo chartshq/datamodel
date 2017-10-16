@@ -22,8 +22,8 @@ function getSortFn(dataType, sortType, index) {
         break;
     default:
         retFunc = (a, b) => {
-            const a1 = `${a}`;
-            const b1 = `${b}`;
+            const a1 = `${a[index]}`;
+            const b1 = `${b[index]}`;
             if (a1 < b1) {
                 return sortType === 'desc' ? 1 : -1;
             }

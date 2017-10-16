@@ -263,27 +263,39 @@ describe('DataTable functionality', () => {
     });
     it('sort for string data', () => {
         const data = [
-            { a: 'bad' },
-            { a: 'mat' },
-            { a: 'cat' },
-            { a: 'rat' },
+            { Name: 'Shubham', Age: '22', Gender: 'Male', Location: 'Kolkata' },
+            { Name: 'Teen', Age: '14', Gender: 'Female', Location: 'Kolkata' },
+            { Name: 'Manoj', Age: '52', Gender: 'Male', Location: 'Kolkata' },
+            { Name: 'Usha', Age: '49', Gender: 'Female', Location: 'Kolkata' },
+            { Name: 'Akash', Age: '28', Gender: 'Male', Location: 'Kolkata' },
+            { Name: 'Shyam', Age: '74', Gender: 'Male', Location: 'Kolkata' },
+            { Name: 'Baby', Age: '3', Gender: 'Male', Location: 'Kolkata' },
         ];
         const schema = [
-            { name: 'a', type: 'dimension' },
+            { name: 'Name', type: 'dimension' },
+            { name: 'Age', type: 'measure' },
+            { name: 'Gender', type: 'dimension' },
+            { name: 'Location', type: 'dimension' },
         ];
         const dataTable = new DataTable(data, schema);
         dataTable.sort([
-            ['a'],
+            ['Gender', 'desc'],
         ]);
         const expData = {
             schema: [
-                { name: 'a', type: 'dimension' },
+                { name: 'Name', type: 'dimension' },
+                { name: 'Age', type: 'measure' },
+                { name: 'Gender', type: 'dimension' },
+                { name: 'Location', type: 'dimension' },
             ],
             data: [
-                ['bad'],
-                ['cat'],
-                ['mat'],
-                ['rat'],
+                ['Shubham', 22, 'Male', 'Kolkata'],
+                ['Manoj', 52, 'Male', 'Kolkata'],
+                ['Akash', 28, 'Male', 'Kolkata'],
+                ['Shyam', 74, 'Male', 'Kolkata'],
+                ['Baby', 3, 'Male', 'Kolkata'],
+                ['Teen', 14, 'Female', 'Kolkata'],
+                ['Usha', 49, 'Female', 'Kolkata'],
             ],
         };
         expect(dataTable.getData()).to.deep.equal(expData);
