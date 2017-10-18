@@ -19,6 +19,24 @@ const fieldStore = {
                 });
                 return retObj;
             },
+            getMeasure() {
+                const retObj = {};
+                this.fields.forEach((field) => {
+                    if (field.schema.type === 'measure') {
+                        retObj[field.name] = field;
+                    }
+                });
+                return retObj;
+            },
+            getDimension() {
+                const retObj = {};
+                this.fields.forEach((field) => {
+                    if (field.schema.type === 'dimension' || field.schema.type === 'datetime') {
+                        retObj[field.name] = field;
+                    }
+                });
+                return retObj;
+            },
         };
         return this.data[dataId];
     },
