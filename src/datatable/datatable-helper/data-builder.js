@@ -50,6 +50,7 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails) {
         schema: [],
         data: [],
     };
+    const reqSorting = sortingDetails && sortingDetails.length > 0;
     // this will store the fields according to the colIdentifier provided
     const tmpDataArr = [];
 
@@ -74,13 +75,18 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails) {
     });
     // =============== row filter takes place here ================= //
     rowDiffsetIterator(rowDiffset, (i) => {
-        retObj.data.push(new Array(tmpDataArr.length));
+        retObj.data.push([]);
+        const insertInd = retObj.data.length - 1;
         tmpDataArr.forEach((field, ii) => {
-            retObj.data[retObj.data.length - 1][ii] = field.data[i];
+            retObj.data[insertInd][ii] = field.data[i];
         });
+        // if sorting needed then there is the need to expose the index mapping from the old index
+        // to its new index
+        if (reqSorting) { retObj.data[insertInd].push(i); }
     });
     // handles the sort functionality
-    if (sortingDetails && sortingDetails.length > 0) {
+    if (reqSorting) {
+        retObj.indexMap = {};
         for (let i = sortingDetails.length - 1; i >= 0; i -= 1) {
             retObj.schema.forEach((schema, ii) => {
                 if (sortingDetails[i][0] === schema.name) {
@@ -88,6 +94,10 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails) {
                 }
             });
         }
+        // generating the mapping of the old index to its new index
+        retObj.data.forEach((value, key) => {
+            retObj.indexMap[value.pop()] = key;
+        });
     }
     // =============== row filter takes place here end ================= //
     return retObj;

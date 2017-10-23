@@ -213,6 +213,14 @@ describe('DataTable functionality', () => {
                 [10, 10],
                 [35, 5],
             ],
+            indexMap: {
+                0: 3,
+                1: 1,
+                2: 0,
+                3: 2,
+                4: 5,
+                5: 4,
+            },
         };
         expect(dataTable.getData()).to.deep.equal(expData);
     });
@@ -258,6 +266,18 @@ describe('DataTable functionality', () => {
                 [2, 1, 3],
                 [2, 1, 56],
             ],
+            indexMap: {
+                0: 7,
+                1: 6,
+                2: 0,
+                3: 2,
+                4: 4,
+                5: 9,
+                6: 8,
+                7: 1,
+                8: 5,
+                9: 3,
+            },
         };
         expect(dataTable.getData()).to.deep.equal(expData);
     });
@@ -297,6 +317,15 @@ describe('DataTable functionality', () => {
                 ['Teen', 14, 'Female', 'Kolkata'],
                 ['Usha', 49, 'Female', 'Kolkata'],
             ],
+            indexMap: {
+                0: 0,
+                1: 5,
+                2: 1,
+                3: 6,
+                4: 2,
+                5: 3,
+                6: 4,
+            },
         };
         expect(dataTable.getData()).to.deep.equal(expData);
     });
