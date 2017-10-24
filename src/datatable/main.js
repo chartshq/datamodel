@@ -4,6 +4,7 @@ import crossProduct from './datatable-helper/cross-product';
 import naturalJoinFilter from './datatable-helper/natural-join-filter-function';
 import union from './datatable-helper/union';
 import difference from './datatable-helper/difference';
+import groupBy from './datatable-helper/group-by';
 
 /**
  * The main class
@@ -180,6 +181,21 @@ class DataTable extends Relation {
         const cloneDataTable = this.cloneAsChild();
         cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn);
         return cloneDataTable;
+    }
+
+    /**
+     * This function will perform group-by on the data table according to the fields
+     * and reducers provided.
+     *
+     * fields can be skipped in that case all field will be taken into consideration.
+     * reducres single function defination can be given or object for each field, If nothing
+     * is provided sum will be the default reducer.
+     * @param  {Array} fieldsArr array containing the name of the columns
+     * @param  {Object|Function|string} reducers  reducer function
+     * @return {DataTable}           new DataTable with the required operations
+     */
+    groupBy(fieldsArr, reducers) {
+        return groupBy(this, fieldsArr, reducers);
     }
 
     /**
