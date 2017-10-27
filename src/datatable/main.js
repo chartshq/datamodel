@@ -4,7 +4,7 @@ import crossProduct from './datatable-helper/cross-product';
 import naturalJoinFilter from './datatable-helper/natural-join-filter-function';
 import union from './datatable-helper/union';
 import difference from './datatable-helper/difference';
-import groupBy from './datatable-helper/group-by';
+import { groupBy } from './datatable-helper/group-by';
 
 /**
  * The main class
