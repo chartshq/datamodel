@@ -72,11 +72,12 @@ class DataTable extends Relation {
     /**
      * This Function will give the data after the operation in the format of
      * multidimensional array with first row as schema
+     * @param {Boolean} rowWise this define how the data need to be returned row wise or column wise
      * @return {Array} multidimensional array of the data
      */
-    getData() {
+    getData(rowWise = false) {
         return dataBuilder.call(this, this.getNameSpace().fields, this.rowDiffset,
-            this.colIdentifier, this.sortingDetails);
+            this.colIdentifier, this.sortingDetails, { rowWise });
     }
 
     /**

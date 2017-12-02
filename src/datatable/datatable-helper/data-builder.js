@@ -42,10 +42,11 @@ function getSortFn(dataType, sortType, index) {
  * @param  {string} rowDiffset    details of which row to be include eg. '0-2,4,6'
  * @param  {string} colIdentifier details of which column to be include eg 'date,sales,profit'
  * @param  {Object} sortingDetails object containin sorting details of the dataTable
+ * @param  {Object} options other option required to create the type of data required
  * @return {Object}               The Object containing multidimensional array and the
  * relative schema
  */
-function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails) {
+function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, options = {}) {
     const retObj = {
         schema: [],
         data: [],
@@ -100,6 +101,19 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails) {
         });
     }
     // =============== row filter takes place here end ================= //
+
+    // normally the data is created column wise but there is some situation where data is
+    // required row wise of the accomodate the feature this is needed
+    if (options.rowWise) {
+        const tmpData = Array(...Array(retObj.schema.length)).map(() => []);
+        retObj.data.forEach((tuple) => {
+            tuple.forEach((data, i) => {
+                tmpData[i].push(data);
+            });
+        });
+        retObj.data = tmpData;
+    }
+
     return retObj;
 }
 

@@ -34,6 +34,34 @@ describe('Checking dataBuilder', () => {
         };
         expect(expObj).to.deep.equal(oriObj);
     });
+    it('Checking for normal case with row filteration and rowWise data', () => {
+        const data = [
+            [10, 15, 7, 9, 20, 35],
+            [20, 25, 8, 40, 77, 9],
+            ['a', 'b', 'c', 'd', 'e', 'f'],
+        ];
+        const schema = [
+            { name: 'profit', type: 'measure' },
+            { name: 'sales', type: 'measure' },
+            { name: 'city', type: 'dimension' },
+        ];
+        const fieldsArr = createFields(data, schema);
+        const expObj = dataBuilder(fieldsArr, '0-2,4', 'profit,sales,city',
+        undefined, { rowWise: true });
+        const oriObj = {
+            schema: [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'city', type: 'dimension' },
+            ],
+            data: [
+                [10, 15, 7, 20],
+                [20, 25, 8, 77],
+                ['a', 'b', 'c', 'e'],
+            ],
+        };
+        expect(expObj).to.deep.equal(oriObj);
+    });
     it('Checking for special case with blank data', () => {
         const data = [];
         const schema = [
