@@ -1,5 +1,5 @@
-const FusionBoard = {
+const DataTable = {
     version: '0.0.1',
 };
 
-export { FusionBoard as default };
+export { DataTable as default };

@@ -1,17 +1,17 @@
 {
-  "name": "fusionboard",
+  "name": "datatable",
   "description": "JavaScript Data Visualisation Library",
   "homepage": "http://www.fusioncharts.com/",
   "version": "1.0.0-beta.1",
   "license": "MIT",
   "author": "FusionCharts Technologies <support@fusioncharts.com>",
   "keywords": [
-    "fusionboard"
+    "datatable"
   ],
   "preferGlobal": false,
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/fusioncharts/fusionboard.git"
+    "url": "https://bitbucket.org/fusioncharts/datatable.git"
   },
   "dependencies": {},
   "devDependencies": {
@@ -23,31 +23,31 @@
     "babel-preset-flow": "6.23.0",
     "babel-preset-latest": "6.24.0",
     "chai": "3.5.0",
+    "cross-env": "^5.0.5",
     "eslint": "3.19.0",
     "eslint-config-airbnb": "15.1.0",
     "eslint-plugin-import": "2.7.0",
     "eslint-plugin-jsx-a11y": "5.1.1",
     "eslint-plugin-react": "7.3.0",
     "flow-bin": "0.54.0",
-    "istanbul": "0.4.5",
-    "istanbul-instrumenter-loader": "2.0.0",
+    "istanbul-instrumenter-loader": "^3.0.0",
     "jsdoc": "3.4.3",
     "karma": "1.7.1",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "2.1.1",
-    "karma-coverage": "1.1.1",
+    "karma-coverage-istanbul-reporter": "^1.3.0",
     "karma-mocha": "1.3.0",
-    "karma-phantomjs-launcher": "1.0.4",
     "karma-spec-reporter": "0.0.31",
     "karma-webpack": "2.0.3",
     "mocha": "3.4.2",
     "mocha-webpack": "0.7.0",
+    "transform-runtime": "0.0.0",
     "webpack": "2.3.2",
     "webpack-dev-server": "2.4.2"
   },
   "scripts": {
-    "test": "npm run lint && npm run flow && karma start karma.conf.js ",
-    "build": "npm run test && webpack",
+    "test": "npm run lint && npm run flow && karma start --single-run --browsers ChromeHeadlessNoSandbox karma.conf.js ",
+    "build": "webpack",
     "start": "webpack-dev-server",
     "lint": "eslint ./src",
     "docs": "jsdoc -c ./jsdoc.conf.json",
