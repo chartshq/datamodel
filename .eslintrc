@@ -6,9 +6,28 @@
   "parser": "babel-eslint",
   "rules": {
     "func-names": ["error", "never"],
-    "indent": ["error", 4],
+    "import/extensions": "off",
+    "indent": ["error", 4, { "MemberExpression": 4 }],
+    "space-before-function-paren": "off",
+    "no-multi-assign": "off",
+    "max-len": ["error", 120],
+    "one-var": ["error", "always"],
+    "no-plusplus": "off",
+    "no-unused-expressions": "off",
+    "class-methods-use-this": "off",
+    "import/prefer-default-export": "off",
+    "comma-dangle": "off",
     "no-underscore-dangle": 0,
     "no-mixed-operators" : 0,
+    "brace-style": "off",
+    "no-param-reassign": "off",
+    "no-iterator" : "off",
+    "no-restricted-syntax": [
+       "error",
+       "LabeledStatement",
+       "WithStatement"
+    ],
+    "prefer-const": 0,
     "require-jsdoc": [
       "warn",
       {
