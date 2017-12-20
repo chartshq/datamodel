@@ -1,4 +1,4 @@
-# FusionCharts FusionBoard
+# FusionCharts DataTable
 
 **Table of Contents**
 
@@ -23,7 +23,7 @@
 ## Repository Structure
 
 
-If you are looking to contribute to FusionBoard development, this directory has everything.  Make sure you read [CONTRIBUTING.md](CONTRIBUTING.md) (this file) if you are contributing for the first time.
+If you are looking to contribute to DataTable development, this directory has everything.  Make sure you read [CONTRIBUTING.md](CONTRIBUTING.md) (this file) if you are contributing for the first time.
 
 ## Repository Structure of Development Directory
 
@@ -56,9 +56,9 @@ Developers      | `feature/*`, `support/*`, `hotfix/*`
 > Rebasing on `master` is blocked.
 
 ## Preferred IDE
-The preferred IDE for `fusionboard` project is Microsoft Visual Studio Code. You can download it from [https://code.visualstudio.com/download].
+The preferred IDE for `datatable` project is Microsoft Visual Studio Code. You can download it from [https://code.visualstudio.com/download].
 
-The repository has a project file configured with the best practices recommended for `fusionboard`. Things like using 120 character ruler, addition of end-of-file newline, cleaning up of trailing whitespace has been configured in this project.
+The repository has a project file configured with the best practices recommended for `datatable`. Things like using 120 character ruler, addition of end-of-file newline, cleaning up of trailing whitespace has been configured in this project.
 
 Visual Studio Code provides IntelliSense, debugging, and powerful editor features for JavaScript. VS Code uses the JavaScript language service to make authoring JavaScript easy. In addition to syntactical features like format, format on type and outlining, you also get language service features such as Peek, Go to Definition, Find all References, and Rename Symbol.
 

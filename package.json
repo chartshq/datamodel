@@ -1,17 +1,17 @@
 {
-  "name": "fusionboard",
+  "name": "datatable",
   "description": "JavaScript Data Visualisation Library",
   "homepage": "http://www.fusioncharts.com/",
   "version": "1.0.0-beta.1",
   "license": "MIT",
   "author": "FusionCharts Technologies <support@fusioncharts.com>",
   "keywords": [
-    "fusionboard"
+    "datatable"
   ],
   "preferGlobal": false,
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/fusioncharts/fusionboard.git"
+    "url": "https://bitbucket.org/fusioncharts/datatable.git"
   },
   "dependencies": {},
   "devDependencies": {

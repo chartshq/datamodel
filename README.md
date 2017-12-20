@@ -1,20 +1,20 @@
-# FUSION BOARD 
+# DATATABLE 
 
-Fusion Board is a front-end, JavaScript-based, comprehensive Recommendation Engine and Dashboarding Tool for Data Visualization. This includes simple and complex charts (like the column and bar chart, pie and doughnut chart, the treemap, heatmap, and logarithmic chart), gauges (like the angular gauge, bulb gauge, and the thermometer gauge) and maps (all continents, major countries, and all US states), with the added capability to visualize data using analytical techniques like time series, etc.
+DataTable is a front-end, JavaScript-based, comprehensive Recommendation Engine and Dashboarding Tool for Data Visualization. This includes simple and complex charts (like the column and bar chart, pie and doughnut chart, the treemap, heatmap, and logarithmic chart), gauges (like the angular gauge, bulb gauge, and the thermometer gauge) and maps (all continents, major countries, and all US states), with the added capability to visualize data using analytical techniques like time series, etc.
 
 ## Version ##
 Currently the build system is on the FSB-10 version.
 
 ## How do I get set up? ##
 
-The Fusion Board Application has its developer version in the remote repository of FusionCharts in BitBucket. Only members with access can clone the application.
+The Data Table Application has its developer version in the remote repository of FusionCharts in BitBucket. Only members with access can clone the application.
 The `package.json` file contains all the dependencies and the configurations for the build.
 
-### Setting up the FusionBoard Developer Application
+### Setting up the DataTable Developer Application
 
-1. Clone the fusionboard Repo
+1. Clone the datatable Repo
 
-   `git clone git@bitbucket.org:fusioncharts/fusionboard.git`
+   `git clone git@bitbucket.org:fusioncharts/datatable.git`
    
 2. Install all Dependencies
 
