@@ -1,5 +1,3 @@
-const DataTable = {
-    version: '0.0.1',
-};
+import DataTable from './datatable/index';
 
 export { DataTable as default };
