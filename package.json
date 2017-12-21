@@ -4,6 +4,7 @@
   "homepage": "http://www.fusioncharts.com/",
   "version": "1.0.0-beta.1",
   "license": "MIT",
+  "main": "src/index.js",
   "author": "FusionCharts Technologies <support@fusioncharts.com>",
   "keywords": [
     "datatable"
