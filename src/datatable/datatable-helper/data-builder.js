@@ -22,8 +22,8 @@ function getSortFn(dataType, sortType, index) {
         break;
     default:
         retFunc = (a, b) => {
-            const a1 = `${a[index]}`;
-            const b1 = `${b[index]}`;
+            const a1 = `${a[index]}`,
+                b1 = `${b[index]}`;
             if (a1 < b1) {
                 return sortType === 'desc' ? 1 : -1;
             }
@@ -48,16 +48,15 @@ function getSortFn(dataType, sortType, index) {
  */
 function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, options = {}) {
     const retObj = {
-        schema: [],
-        data: [],
-    };
-    const reqSorting = sortingDetails && sortingDetails.length > 0;
+            schema: [],
+            data: [],
+        },
+        reqSorting = sortingDetails && sortingDetails.length > 0,
     // this will store the fields according to the colIdentifier provided
-    const tmpDataArr = [];
-
+        tmpDataArr = [],
     // =============== column filter takes place here ================= //
     // Store the fields according to the colIdentifier
-    const colIArr = colIdentifier.split(',');
+        colIArr = colIdentifier.split(',');
     colIArr.forEach((colName) => {
         for (let i = 0; i < fieldStore.length; i += 1) {
             if (fieldStore[i].name === colName) {

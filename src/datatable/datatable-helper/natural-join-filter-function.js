@@ -9,11 +9,11 @@ import getCommonSchema from './get-common-schema';
  * @return {Function}            function that can be passed to the crossProduct function
  */
 function naturalJoinFilter(dataTable1, dataTable2) {
-    const dataTable1FieldStore = dataTable1.getNameSpace();
-    const dataTable2FieldStore = dataTable2.getNameSpace();
-    const dataTable1FieldStoreName = dataTable1FieldStore.name;
-    const dataTable2FieldStoreName = dataTable2FieldStore.name;
-    const commonSchemaArr = getCommonSchema(dataTable1FieldStore, dataTable2FieldStore);
+    const dataTable1FieldStore = dataTable1.getNameSpace(),
+        dataTable2FieldStore = dataTable2.getNameSpace(),
+        dataTable1FieldStoreName = dataTable1FieldStore.name,
+        dataTable2FieldStoreName = dataTable2FieldStore.name,
+        commonSchemaArr = getCommonSchema(dataTable1FieldStore, dataTable2FieldStore);
 
     return (obj) => {
         let retainTupple = false;

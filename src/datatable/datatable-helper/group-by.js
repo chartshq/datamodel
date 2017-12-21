@@ -11,9 +11,9 @@ import DataTable from '../index';
  * @return {Array}           arrays of field name
  */
 function getFieldArr(dataTable, fieldArr) {
-    const retArr = [];
-    const fieldStore = dataTable.getNameSpace();
-    const dimensions = fieldStore.getDimension();
+    const retArr = [],
+        fieldStore = dataTable.getNameSpace(),
+        dimensions = fieldStore.getDimension();
     Object.entries(dimensions).forEach(([key]) => {
         if (fieldArr && fieldArr.length) {
             if (fieldArr.indexOf(key) !== -1) {
@@ -34,10 +34,10 @@ function getFieldArr(dataTable, fieldArr) {
  * @return {Object}               object containing reducer function for every measure
  */
 function getReducerObj(dataTable, reducers = {}) {
-    const retObj = {};
-    const pReducers = reducers;
-    const fieldStore = dataTable.getNameSpace();
-    const measures = fieldStore.getMeasure();
+    const retObj = {},
+        pReducers = reducers,
+        fieldStore = dataTable.getNameSpace(),
+        measures = fieldStore.getMeasure();
     let reducer = defReducer;
     if (typeof reducers === 'function') {
         reducer = reducers;
@@ -63,16 +63,16 @@ function getReducerObj(dataTable, reducers = {}) {
  * @return {DataTable}           new dataTable with the group by
  */
 function groupBy(dataTable, fieldArr, reducers) {
-    const sFieldArr = getFieldArr(dataTable, fieldArr);
-    const reducerObj = getReducerObj(dataTable, reducers);
-    const fieldStore = dataTable.getNameSpace();
-    const fieldStoreObj = fieldStore.fieldsObj();
-    const dbName = fieldStore.name;
-    const dimensionArr = [];
-    const measureArr = [];
-    const schema = [];
-    const hashMap = {};
-    const data = [];
+    const sFieldArr = getFieldArr(dataTable, fieldArr),
+        reducerObj = getReducerObj(dataTable, reducers),
+        fieldStore = dataTable.getNameSpace(),
+        fieldStoreObj = fieldStore.fieldsObj(),
+        dbName = fieldStore.name,
+        dimensionArr = [],
+        measureArr = [],
+        schema = [],
+        hashMap = {},
+        data = [];
     // Prepare the schema
     Object.entries(fieldStoreObj).forEach(([key, value]) => {
         if (sFieldArr.indexOf(key) !== -1 || reducerObj[key]) {

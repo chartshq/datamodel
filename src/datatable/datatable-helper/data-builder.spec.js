@@ -11,27 +11,27 @@ describe('Checking dataBuilder', () => {
             [10, 15, 7, 9, 20, 35],
             [20, 25, 8, 40, 77, 9],
             ['a', 'b', 'c', 'd', 'e', 'f'],
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'profit', type: 'measure' },
             { name: 'sales', type: 'measure' },
             { name: 'city', type: 'dimension' },
-        ];
-        const fieldsArr = createFields(data, schema);
-        const expObj = dataBuilder(fieldsArr, '0-2,4', 'profit,sales,city');
-        const oriObj = {
-            schema: [
+            ],
+            fieldsArr = createFields(data, schema),
+            expObj = dataBuilder(fieldsArr, '0-2,4', 'profit,sales,city'),
+            oriObj = {
+                schema: [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
                 { name: 'city', type: 'dimension' },
-            ],
-            data: [
+                ],
+                data: [
                 [10, 20, 'a'],
                 [15, 25, 'b'],
                 [7, 8, 'c'],
                 [20, 77, 'e'],
-            ],
-        };
+                ],
+            };
         expect(expObj).to.deep.equal(oriObj);
     });
     it('Checking for normal case with row filteration and rowWise data', () => {
@@ -39,46 +39,46 @@ describe('Checking dataBuilder', () => {
             [10, 15, 7, 9, 20, 35],
             [20, 25, 8, 40, 77, 9],
             ['a', 'b', 'c', 'd', 'e', 'f'],
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'profit', type: 'measure' },
             { name: 'sales', type: 'measure' },
             { name: 'city', type: 'dimension' },
-        ];
-        const fieldsArr = createFields(data, schema);
-        const expObj = dataBuilder(fieldsArr, '0-2,4', 'profit,sales,city',
-        undefined, { rowWise: true });
-        const oriObj = {
-            schema: [
+            ],
+            fieldsArr = createFields(data, schema),
+            expObj = dataBuilder(fieldsArr, '0-2,4', 'profit,sales,city',
+            undefined, { rowWise: true }),
+            oriObj = {
+                schema: [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
                 { name: 'city', type: 'dimension' },
-            ],
-            data: [
+                ],
+                data: [
                 [10, 15, 7, 20],
                 [20, 25, 8, 77],
                 ['a', 'b', 'c', 'e'],
-            ],
-        };
+                ],
+            };
         expect(expObj).to.deep.equal(oriObj);
     });
     it('Checking for special case with blank data', () => {
-        const data = [];
-        const schema = [
+        const data = [],
+            schema = [
             { name: 'profit', type: 'measure' },
             { name: 'sales', type: 'measure' },
             { name: 'city', type: 'dimension' },
-        ];
-        const fieldsArr = createFields(data, schema);
-        const expObj = dataBuilder(fieldsArr, '', 'profit,sales,city');
-        const oriObj = {
-            schema: [
+            ],
+            fieldsArr = createFields(data, schema),
+            expObj = dataBuilder(fieldsArr, '', 'profit,sales,city'),
+            oriObj = {
+                schema: [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
                 { name: 'city', type: 'dimension' },
-            ],
-            data: [],
-        };
+                ],
+                data: [],
+            };
         expect(expObj).to.deep.equal(oriObj);
     });
     it('Checking for special case with blank data and blank schema', () => {
@@ -86,14 +86,14 @@ describe('Checking dataBuilder', () => {
             [10, 15, 7, 9, 20, 35],
             [20, 25, 8, 40, 77, 9],
             ['a', 'b', 'c', 'd', 'e', 'f'],
-        ];
-        const schema = [];
-        const fieldsArr = createFields(data, schema);
-        const expObj = dataBuilder(fieldsArr, '', '');
-        const oriObj = {
-            schema: [],
-            data: [],
-        };
+            ],
+            schema = [],
+            fieldsArr = createFields(data, schema),
+            expObj = dataBuilder(fieldsArr, '', ''),
+            oriObj = {
+                schema: [],
+                data: [],
+            };
         expect(expObj).to.deep.equal(oriObj);
     });
     it('Checking for normal case with column filteration', () => {
@@ -101,26 +101,26 @@ describe('Checking dataBuilder', () => {
             [10, 15, 7, 9, 20, 35],
             [20, 25, 8, 40, 77, 9],
             ['a', 'b', 'c', 'd', 'e', 'f'],
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'profit', type: 'measure' },
             { name: 'sales', type: 'measure' },
             { name: 'city', type: 'dimension' },
-        ];
-        const fieldsArr = createFields(data, schema);
-        const expObj = dataBuilder(fieldsArr, '0-2,4', 'sales,city');
-        const oriObj = {
-            schema: [
+            ],
+            fieldsArr = createFields(data, schema),
+            expObj = dataBuilder(fieldsArr, '0-2,4', 'sales,city'),
+            oriObj = {
+                schema: [
                 { name: 'sales', type: 'measure' },
                 { name: 'city', type: 'dimension' },
-            ],
-            data: [
+                ],
+                data: [
                 [20, 'a'],
                 [25, 'b'],
                 [8, 'c'],
                 [77, 'e'],
-            ],
-        };
+                ],
+            };
         expect(expObj).to.deep.equal(oriObj);
     });
     it('Checking for all data', () => {
@@ -128,29 +128,29 @@ describe('Checking dataBuilder', () => {
             [10, 15, 7, 9, 20, 35],
             [20, 25, 8, 40, 77, 9],
             ['a', 'b', 'c', 'd', 'e', 'f'],
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'profit', type: 'measure' },
             { name: 'sales', type: 'measure' },
             { name: 'city', type: 'dimension' },
-        ];
-        const fieldsArr = createFields(data, schema);
-        const expObj = dataBuilder(fieldsArr, '0-5', 'profit,sales,city');
-        const oriObj = {
-            schema: [
+            ],
+            fieldsArr = createFields(data, schema),
+            expObj = dataBuilder(fieldsArr, '0-5', 'profit,sales,city'),
+            oriObj = {
+                schema: [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
                 { name: 'city', type: 'dimension' },
-            ],
-            data: [
+                ],
+                data: [
                 [10, 20, 'a'],
                 [15, 25, 'b'],
                 [7, 8, 'c'],
                 [9, 40, 'd'],
                 [20, 77, 'e'],
                 [35, 9, 'f'],
-            ],
-        };
+                ],
+            };
         expect(expObj).to.deep.equal(oriObj);
     });
     it('Checking for no data', () => {
@@ -158,22 +158,22 @@ describe('Checking dataBuilder', () => {
             [10, 15, 7, 9, 20, 35],
             [20, 25, 8, 40, 77, 9],
             ['a', 'b', 'c', 'd', 'e', 'f'],
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'profit', type: 'measure' },
             { name: 'sales', type: 'measure' },
             { name: 'city', type: 'dimension' },
-        ];
-        const fieldsArr = createFields(data, schema);
-        const expObj = dataBuilder(fieldsArr, '', 'profit,sales,city');
-        const oriObj = {
-            schema: [
+            ],
+            fieldsArr = createFields(data, schema),
+            expObj = dataBuilder(fieldsArr, '', 'profit,sales,city'),
+            oriObj = {
+                schema: [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
                 { name: 'city', type: 'dimension' },
-            ],
-            data: [],
-        };
+                ],
+                data: [],
+            };
         expect(expObj).to.deep.equal(oriObj);
     });
     it('Checking for schama order changed', () => {
@@ -181,29 +181,29 @@ describe('Checking dataBuilder', () => {
             [10, 15, 7, 9, 20, 35],
             [20, 25, 8, 40, 77, 9],
             ['a', 'b', 'c', 'd', 'e', 'f'],
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'profit', type: 'measure' },
             { name: 'sales', type: 'measure' },
             { name: 'city', type: 'dimension' },
-        ];
-        const fieldsArr = createFields(data, schema);
-        const expObj = dataBuilder(fieldsArr, '0-5', 'city,profit,sales');
-        const oriObj = {
-            schema: [
+            ],
+            fieldsArr = createFields(data, schema),
+            expObj = dataBuilder(fieldsArr, '0-5', 'city,profit,sales'),
+            oriObj = {
+                schema: [
                 { name: 'city', type: 'dimension' },
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
-            ],
-            data: [
+                ],
+                data: [
                 ['a', 10, 20],
                 ['b', 15, 25],
                 ['c', 7, 8],
                 ['d', 9, 40],
                 ['e', 20, 77],
                 ['f', 35, 9],
-            ],
-        };
+                ],
+            };
         expect(expObj).to.deep.equal(oriObj);
     });
     it('Checking if order of rowDiffset is not right', () => {
@@ -211,22 +211,22 @@ describe('Checking dataBuilder', () => {
             [10, 15, 7, 9, 20, 35],
             [20, 25, 8, 40, 77, 9],
             ['a', 'b', 'c', 'd', 'e', 'f'],
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'profit', type: 'measure' },
             { name: 'sales', type: 'measure' },
             { name: 'city', type: 'dimension' },
-        ];
-        const fieldsArr = createFields(data, schema);
-        const expObj = dataBuilder(fieldsArr, '5-0', 'profit,sales,city');
-        const oriObj = {
-            schema: [
+            ],
+            fieldsArr = createFields(data, schema),
+            expObj = dataBuilder(fieldsArr, '5-0', 'profit,sales,city'),
+            oriObj = {
+                schema: [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
                 { name: 'city', type: 'dimension' },
-            ],
-            data: [],
-        };
+                ],
+                data: [],
+            };
         expect(expObj).to.deep.equal(oriObj);
     });
 });

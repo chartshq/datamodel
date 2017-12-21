@@ -1,4 +1,4 @@
-# FusionCharts FusionBoard
+# FusionCharts DataTable
 
 **Table of Contents**
 
@@ -12,23 +12,18 @@
 		- [Clean commit message](#markdown-header-clean-commit-message)
 - [Preferred IDE](#markdown-header-preferred-ide)
 	- [Generic IDE settings](#markdown-header-generic-ide-settings)
+- [Guidelines for writing Test Cases](#guidelines-for-writing-test-cases)
 - [Guidelines for sending a Pull Request](#markdown-header-guidelines-for-sending-a-pull-request)
 - [The CI Platform](#markdown-header-the-ci-platform)
 	- [Ensuring your commits will not fail build](#markdown-header-ensuring-your-commits-will-not-fail-build)
 	- [Executing individual build tasks](#markdown-header-executing-individual-build-tasks)
-		- [npm run-script build](#markdown-header-npm-run-script-build)
-		- [npm run-script build-source](#markdown-header-npm-run-script-build-source)
-		- [npm run-script release](#markdown-header-npm-run-script-release)
-		- [npm run-script drone](#markdown-header-npm-run-script-drone)
-	- [Accessing build log on drone](#markdown-header-accessing-build-log-on-drone)
+		- [npm run build](#markdown-header-npm-run-build)
 	- [Accessing your build artefacts](#markdown-header-accessing-your-build-artefacts)
 
 ## Repository Structure
 
-~~ to be documented further ~~
 
-### [develop/](develop/)
-If you are looking to contribute to FusionBoard development, this directory has everything.  Make sure you read [CONTRIBUTING.md](CONTRIBUTING.md) (this file) if you are contributing for the first time.
+If you are looking to contribute to DataTable development, this directory has everything.  Make sure you read [CONTRIBUTING.md](CONTRIBUTING.md) (this file) if you are contributing for the first time.
 
 ## Repository Structure of Development Directory
 
@@ -61,9 +56,9 @@ Developers      | `feature/*`, `support/*`, `hotfix/*`
 > Rebasing on `master` is blocked.
 
 ## Preferred IDE
-The preferred IDE for `fusionboard` project is Microsoft Visual Studio Code. You can download it from [http://www.sublimetext.com](http://www.sublimetext.com).
+The preferred IDE for `datatable` project is Microsoft Visual Studio Code. You can download it from [https://code.visualstudio.com/download].
 
-The repository has a project file included in `develop/` directory. This project is configured with the best practices recommended for `fusionboard`. Things like using 120 character ruler, addition of end-of-file newline, cleaning up of trailing whitespace has been configured in this project.
+The repository has a project file configured with the best practices recommended for `datatable`. Things like using 120 character ruler, addition of end-of-file newline, cleaning up of trailing whitespace has been configured in this project.
 
 Visual Studio Code provides IntelliSense, debugging, and powerful editor features for JavaScript. VS Code uses the JavaScript language service to make authoring JavaScript easy. In addition to syntactical features like format, format on type and outlining, you also get language service features such as Peek, Go to Definition, Find all References, and Rename Symbol.
 
@@ -97,6 +92,7 @@ Checking for errors should be done for each commit whether it is being pushed to
 First, you don't want to submit any whitespace errors. Git provides an easy way to check for this — before you commit, run `git diff --check`, which identifies possible whitespace errors and lists them for you. If you run that command before committing, you can tell if you're about to commit whitespace issues that may annoy other developers.
 
 Secondly, you should ensure that your commit does not break builds. Run `npm test` on the repository to execute all sanity and smoke tests. If any test fail, do not change the test to pass your commit. The tests were there with a purpose. Discuss within your team to ensure that the changes that you do to test specs are valid. If you are adding a new feature, accompanying them with new tests are a good practice.
+The `npm test` command uses karma with mocha and chai, along with ESLint based on the AirBnb Style Guide to check for errors in the code. It also does a static type checking of the code using Flow.
 
 ### Atomic commits
 
@@ -164,6 +160,26 @@ Commit to master branch and develop branch is locked. As such, `git-flow` for fe
 9. If you have deadlines to ensure feature completion, send Pull Request ahead of time. Better still, ensure your feature development timeline accounts for PR acceptance.
 10. If you have mentioned JIRA issues in Pull Request commits or commit messages, the severity and priority of those issues will be taken into account. Otherwise, no Pull Request will take priority over others already in queue - it is first-pull first-merge!
 
+## Guidelines for writing Test Cases
+
+Test Cases to be added can be added with the following format :
+
+	Test case id 		– (Unique Identifier)
+	Test case Title 	– (Short description of test case & should be effective to convey the test case)
+	Test case Summary 	– (Detailed description of test case & additional information needed for the test case to execute)
+	Pre-condition/Test data – (Any pre-requisite required to execute the test case)
+	Test Steps 			– (Actual step to be followed or executed)
+	Excepted Result 	– (Result which is expected as a normal behavior)
+	Actual result		– (Result which we actually get after we execute the test step)
+	Test Case Status	- (Pass/Fail)
+	Comments 			– (Additional Comments or any note required to while executing test case or special note to tester which need to be consider)
+
+-	Test cases should be simple and easy to understand
+-	Concentrate on real life scenarios first which end user going to use day to day life 
+-	Do not assume any requirements by your own
+-	Test Cases should not be repeated
+-	Assign priority to each test case added
+
 ## Documentation guidelines
 
 We use [JSDoc](http://usejsdoc.org) as our documentation platform. All API documentation and end-user documentation is produced using JSDoc.
@@ -172,7 +188,6 @@ We use [JSDoc](http://usejsdoc.org) as our documentation platform. All API docum
  - End-user documentation are written as [JSDoc tutorials](http://usejsdoc.org/about-tutorials.html) in Markdown syntax. These tutorials are kept in `develop/docs` directory.
 
 ### Things to remember
-
 
 ~~ to be documented further ~~
 
@@ -188,18 +203,33 @@ The CI system is built as a bunch of bash scripts to execute a set of tasks. The
 
 The script associated with `npm test` will run all tests that ensures that your commit does not break anything in the repository. As such run `npm test` before you push.
 
+
 ### Executing individual build tasks
 
+> `npm start`
+
+The script associated with `npm start` uses webpack middleware to serve a webpack bundle which is also connected to the server via sock.js. 
+
+> `npm lint`
+
+The script associated with `npm lint` will run linting tests that ensures that their are no bugs inconsistent with ECMAScript/JavaScript code. The linter uses the Airbnb style guide with some overridden rules for the same. As such run `npm lint` before you push.
+
+> `npm docs`
+
+The script associated with `npm docs` will generate the documentation for the code.
+
+> `npm flow`
+
+The script associated with `npm flow` will run a static type check on the code.
+
 #### npm run build
-~~ to be documented further ~~
+
+This builds the application, after running the tests and other processes attached to it. Once the build is complete, the build artifacts can be retrieved.
 
 ### Accessing your build artefacts
 
 All scripts output build artefacts to `./dist`
 The artefacts are located at ~~ to be documented further ~~
-
-Use Google Apps Auth to authenticate and access the same.
-
 
 ---
 *Sections of this document uses excerpts from various books and the Internet. [http://git-scm.com/book/](http://git-scm.com/book/) is one of the dominating influencers.*

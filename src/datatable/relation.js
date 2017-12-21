@@ -18,11 +18,11 @@ class Relation {
         if (data) {
             // This will create a generealise data structure consumable from
             // different type of data (different type of json or CSV)
-            const normalizeData = normalize(data, schema);
-            // This will create array of fields possible from the data
-            const fieldArr = createFields(normalizeData, schema);
-            // This will create a new fieldStore with the fields
-            const nameSpace = fieldStore.createNameSpace(fieldArr, name);
+            const normalizeData = normalize(data, schema),
+                // This will create array of fields possible from the data
+                fieldArr = createFields(normalizeData, schema),
+                // This will create a new fieldStore with the fields
+                nameSpace = fieldStore.createNameSpace(fieldArr, name);
             this.columnNameSpace = nameSpace;
             // If data is provided create the default colIdentifier and rowDiffset
             this.rowDiffset = `0-${normalizeData[0] ? (normalizeData[0].length - 1) : 0}`;
@@ -51,9 +51,9 @@ class Relation {
      */
     selectHelper(fields, selectFn) {
         const newRowDiffSet = [];
-        let lastInsertedValue = -1;
-        // newRowDiffSet last index
-        let li;
+        let lastInsertedValue = -1,
+            // newRowDiffSet last index
+            li;
         rowDiffsetIterator(this.rowDiffset, (i) => {
             if (selectFn(fields, i)) {
                 // Check for if this value to be attached to the last diffset ie. 1-5 format

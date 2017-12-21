@@ -55,9 +55,9 @@ class DataTable extends Relation {
      * @return {Object} Field store
      */
     getNameSpace() {
-        let child = this;
+        let child = this,
+            nameSpace;
         if (this.columnNameSpace) { return this.columnNameSpace; }
-        let nameSpace;
         while (child.parent) {
             if (child.parent.columnNameSpace) {
                 nameSpace = child.parent.columnNameSpace;
@@ -72,7 +72,7 @@ class DataTable extends Relation {
     /**
      * This Function will give the data after the operation in the format of
      * multidimensional array with first row as schema
-     * @param {Boolean} rowWise this define how the data need to be returned row wise or column wise
+     * @param {boolean} rowWise this define how the data need to be returned row wise or column wise
      * @return {Array} multidimensional array of the data
      */
     getData(rowWise = false) {
@@ -88,9 +88,9 @@ class DataTable extends Relation {
      * @return {DataTable}           The cloned DataTable with the rename columns
      */
     rename(schemaObj) {
-        const cloneDataTable = this.cloneAsChild();
-        const schemaArr = cloneDataTable.colIdentifier.split(',');
-        const fieldStore = this.getNameSpace().fields;
+        const cloneDataTable = this.cloneAsChild(),
+            schemaArr = cloneDataTable.colIdentifier.split(','),
+            fieldStore = this.getNameSpace().fields;
         Object.entries(schemaObj).forEach(([key, value]) => {
             if (schemaArr.indexOf(key) !== -1 && typeof value === 'string') {
                 for (let i = 0; i <= fieldStore.length; i += 1) {

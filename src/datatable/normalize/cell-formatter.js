@@ -1,8 +1,8 @@
 import { DateTimeFormatter } from '../../utils';
 
 // For using dateFormatter if the schema is same little optimization
-let preSchema;
-let dateFormater;
+let preSchema,
+    dateFormater;
 
 /**
  * converts date string to Date object according to the format provided in the schema

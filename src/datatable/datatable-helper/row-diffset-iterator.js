@@ -9,9 +9,9 @@ function rowDiffsetIterator(rowDiffset, callback) {
     if (rowDiffset.length > 0) {
         const rowDiffArr = rowDiffset.split(',');
         rowDiffArr.forEach((diffStr) => {
-            const diffStsArr = diffStr.split('-');
-            const start = +(diffStsArr[0]);
-            const end = +(diffStsArr[1] || diffStsArr[0]);
+            const diffStsArr = diffStr.split('-'),
+                start = +(diffStsArr[0]),
+                end = +(diffStsArr[1] || diffStsArr[0]);
             if (end >= start) {
                 for (let i = start; i <= end; i += 1) {
                     callback(i);

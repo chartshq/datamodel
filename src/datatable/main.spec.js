@@ -9,16 +9,18 @@ describe('DataTable functionality', () => {
         const data = [
             { a: 10, aaa: 20, aaaa: 'd' },
             { a: 15, aaa: 25, aaaa: 'demo' },
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'a', type: 'measure' },
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
-        ];
-        const dataTable = new DataTable(data, schema);
+            ],
+            dataTable = new DataTable(data, schema);
+        let cloneRelation;
+
         dataTable.colIdentifier = '1-20';
         dataTable.rowDiffset = 'a, aaa, aaaa';
-        const cloneRelation = dataTable.clone();
+        cloneRelation = dataTable.clone();
         expect(cloneRelation instanceof DataTable).to.be.true;
         // Check clone dataTable have all the required attribute
         expect(cloneRelation.colIdentifier).to.equal('1-20');
@@ -28,24 +30,24 @@ describe('DataTable functionality', () => {
         const data = [
             { a: 10, aaa: 20, aaaa: 'd' },
             { a: 15, aaa: 25, aaaa: 'demo' },
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'a', type: 'measure' },
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
-        ];
-        const dataTable = new DataTable(data, schema);
-        const projectedDataTable = dataTable.project('aaaa,a');
-        const expData = {
-            schema: [
+            ],
+            dataTable = new DataTable(data, schema),
+            projectedDataTable = dataTable.project('aaaa,a'),
+            expData = {
+                schema: [
                 { name: 'aaaa', type: 'dimension' },
                 { name: 'a', type: 'measure' },
-            ],
-            data: [
+                ],
+                data: [
                 ['d', 10],
                 ['demo', 15],
-            ],
-        };
+                ],
+            };
         // check project is not applied on the same DataTable
         expect(dataTable === projectedDataTable).to.be.false;
         // Check The return data
@@ -59,25 +61,25 @@ describe('DataTable functionality', () => {
             { a: 7, aaa: 15, aaaa: 'demo' },
             { a: 35, aaa: 5, aaaa: 'demo' },
             { a: 10, aaa: 10, aaaa: 'demoo' },
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'a', type: 'measure' },
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
-        ];
-        const dataTable = new DataTable(data, schema);
-        const projectedDataTable = (dataTable.project('aaaa,a')).select((fields, i) =>
-        fields[0].data[i] <= 10 && fields[2].data[i] === 'demo');
-        const expData = {
-            schema: [
+            ],
+            dataTable = new DataTable(data, schema),
+            projectedDataTable = (dataTable.project('aaaa,a')).select((fields, i) =>
+        fields[0].data[i] <= 10 && fields[2].data[i] === 'demo'),
+            expData = {
+                schema: [
                 { name: 'aaaa', type: 'dimension' },
                 { name: 'a', type: 'measure' },
-            ],
-            data: [
+                ],
+                data: [
                 ['demo', 9],
                 ['demo', 7],
-            ],
-        };
+                ],
+            };
         // check project is not applied on the same DataTable
         expect(dataTable === projectedDataTable).to.be.false;
         expect(projectedDataTable.rowDiffset).to.equal('2-3');
@@ -96,15 +98,18 @@ describe('DataTable functionality', () => {
             { a: 10, aaa: 10, aaaa: 'demo' },
             { a: 10, aaa: 10, aaaa: 'demoo' },
             { a: 10, aaa: 10, aaaa: 'demo' },
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'a', type: 'measure' },
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
-        ];
-        const dataTable = new DataTable(data, schema);
-        const projectedDataTable = (dataTable.project('aaaa,a')).select((fields, i) =>
-        fields[2].data[i] === 'demo');
+            ],
+            dataTable = new DataTable(data, schema),
+            projectedDataTable = (dataTable.project('aaaa,a')).select((fields, i) =>
+                fields[2].data[i] === 'demo'),
+            // Check if repetation select works
+            projectedDataTable1 = projectedDataTable.select((fields, i) =>
+                fields[0].data[i] === 10);
         let expData = {
             schema: [
                 { name: 'aaaa', type: 'dimension' },
@@ -126,9 +131,6 @@ describe('DataTable functionality', () => {
         // Check The return data
         expect(projectedDataTable.getData()).to.deep.equal(expData);
 
-        // Check if repetation select works
-        const projectedDataTable1 = projectedDataTable.select((fields, i) =>
-        fields[0].data[i] === 10);
         expData = {
             schema: [
                 { name: 'aaaa', type: 'dimension' },
@@ -153,29 +155,29 @@ describe('DataTable functionality', () => {
             { a: 7, aaa: 15, aaaa: 'demo' },
             { a: 35, aaa: 5, aaaa: 'demo' },
             { a: 10, aaa: 10, aaaa: 'demoo' },
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'a', type: 'measure' },
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
-        ];
-        const dataTable = new DataTable(data, schema);
-        const renameDataTable = dataTable.rename({ aaa: 'aaaRename' });
-        const expData = {
-            schema: [
+            ],
+            dataTable = new DataTable(data, schema),
+            renameDataTable = dataTable.rename({ aaa: 'aaaRename' }),
+            expData = {
+                schema: [
                 { name: 'a', type: 'measure' },
                 { name: 'aaaRename', type: 'measure' },
                 { name: 'aaaa', type: 'dimension' },
-            ],
-            data: [
+                ],
+                data: [
                 [10, 20, 'd'],
                 [15, 25, 'demo'],
                 [9, 35, 'demo'],
                 [7, 15, 'demo'],
                 [35, 5, 'demo'],
                 [10, 10, 'demoo'],
-            ],
-        };
+                ],
+            };
         expect(renameDataTable.getData()).to.deep.equal(expData);
     });
     it('sort configuration and functionality', () => {
@@ -186,12 +188,34 @@ describe('DataTable functionality', () => {
             { a: 7, aaa: 20 },
             { a: 35, aaa: 5 },
             { a: 10, aaa: 10 },
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'a', type: 'measure' },
             { name: 'aaa', type: 'measure' },
-        ];
-        const dataTable = new DataTable(data, schema);
+            ],
+            dataTable = new DataTable(data, schema),
+            expData = {
+                schema: [
+                { name: 'a', type: 'measure' },
+                { name: 'aaa', type: 'measure' },
+                ],
+                data: [
+                [9, 35],
+                [15, 25],
+                [7, 20],
+                [10, 20],
+                [10, 10],
+                [35, 5],
+                ],
+                indexMap: {
+                    0: 3,
+                    1: 1,
+                    2: 0,
+                    3: 2,
+                    4: 5,
+                    5: 4,
+                },
+            };
         dataTable.sort([
             ['aaa', 'desc'],
             ['a'],
@@ -200,28 +224,6 @@ describe('DataTable functionality', () => {
             ['aaa', 'desc'],
             ['a', 'asc'],
         ]);
-        const expData = {
-            schema: [
-                { name: 'a', type: 'measure' },
-                { name: 'aaa', type: 'measure' },
-            ],
-            data: [
-                [9, 35],
-                [15, 25],
-                [7, 20],
-                [10, 20],
-                [10, 10],
-                [35, 5],
-            ],
-            indexMap: {
-                0: 3,
-                1: 1,
-                2: 0,
-                3: 2,
-                4: 5,
-                5: 4,
-            },
-        };
         expect(dataTable.getData()).to.deep.equal(expData);
     });
     it('sort for multi rows functionality', () => {
@@ -236,25 +238,20 @@ describe('DataTable functionality', () => {
             { a: 1, aa: 15, aaa: 10 },
             { a: 2, aa: 6, aaa: 9 },
             { a: 1, aa: 6, aaa: 4 },
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'a', type: 'measure' },
             { name: 'aa', type: 'measure' },
             { name: 'aaa', type: 'measure' },
-        ];
-        const dataTable = new DataTable(data, schema);
-        dataTable.sort([
-            ['a'],
-            ['aa', 'desc'],
-            ['aaa'],
-        ]);
-        const expData = {
-            schema: [
+            ],
+            dataTable = new DataTable(data, schema),
+            expData = {
+                schema: [
                 { name: 'a', type: 'measure' },
                 { name: 'aa', type: 'measure' },
                 { name: 'aaa', type: 'measure' },
-            ],
-            data: [
+                ],
+                data: [
                 [1, 15, 9],
                 [1, 15, 10],
                 [1, 15, 12],
@@ -265,20 +262,25 @@ describe('DataTable functionality', () => {
                 [2, 1, 1],
                 [2, 1, 3],
                 [2, 1, 56],
-            ],
-            indexMap: {
-                0: 7,
-                1: 6,
-                2: 0,
-                3: 2,
-                4: 4,
-                5: 9,
-                6: 8,
-                7: 1,
-                8: 5,
-                9: 3,
-            },
-        };
+                ],
+                indexMap: {
+                    0: 7,
+                    1: 6,
+                    2: 0,
+                    3: 2,
+                    4: 4,
+                    5: 9,
+                    6: 8,
+                    7: 1,
+                    8: 5,
+                    9: 3,
+                },
+            };
+        dataTable.sort([
+                ['a'],
+                ['aa', 'desc'],
+                ['aaa'],
+        ]);
         expect(dataTable.getData()).to.deep.equal(expData);
     });
     it('sort for string data', () => {
@@ -290,25 +292,22 @@ describe('DataTable functionality', () => {
             { Name: 'Akash', Age: '28', Gender: 'Male', Location: 'Kolkata' },
             { Name: 'Shyam', Age: '74', Gender: 'Male', Location: 'Kolkata' },
             { Name: 'Baby', Age: '3', Gender: 'Male', Location: 'Kolkata' },
-        ];
-        const schema = [
+            ],
+            schema = [
             { name: 'Name', type: 'dimension' },
             { name: 'Age', type: 'measure' },
             { name: 'Gender', type: 'dimension' },
             { name: 'Location', type: 'dimension' },
-        ];
-        const dataTable = new DataTable(data, schema);
-        dataTable.sort([
-            ['Gender', 'desc'],
-        ]);
-        const expData = {
-            schema: [
+            ],
+            dataTable = new DataTable(data, schema),
+            expData = {
+                schema: [
                 { name: 'Name', type: 'dimension' },
                 { name: 'Age', type: 'measure' },
                 { name: 'Gender', type: 'dimension' },
                 { name: 'Location', type: 'dimension' },
-            ],
-            data: [
+                ],
+                data: [
                 ['Shubham', 22, 'Male', 'Kolkata'],
                 ['Manoj', 52, 'Male', 'Kolkata'],
                 ['Akash', 28, 'Male', 'Kolkata'],
@@ -316,40 +315,42 @@ describe('DataTable functionality', () => {
                 ['Baby', 3, 'Male', 'Kolkata'],
                 ['Teen', 14, 'Female', 'Kolkata'],
                 ['Usha', 49, 'Female', 'Kolkata'],
-            ],
-            indexMap: {
-                0: 0,
-                1: 5,
-                2: 1,
-                3: 6,
-                4: 2,
-                5: 3,
-                6: 4,
-            },
-        };
+                ],
+                indexMap: {
+                    0: 0,
+                    1: 5,
+                    2: 1,
+                    3: 6,
+                    4: 2,
+                    5: 3,
+                    6: 4,
+                },
+            };
+        dataTable.sort([
+            ['Gender', 'desc'],
+        ]);
         expect(dataTable.getData()).to.deep.equal(expData);
     });
     it('join functionality', () => {
         const data1 = [
             { profit: 10, sales: 20, city: 'a' },
             { profit: 15, sales: 25, city: 'b' },
-        ];
-        const schema1 = [
+            ],
+            schema1 = [
             { name: 'profit', type: 'measure' },
             { name: 'sales', type: 'measure' },
             { name: 'city', type: 'dimension' },
-        ];
-
-        const data2 = [
+            ],
+            data2 = [
             { population: 200, city: 'a' },
             { population: 250, city: 'b' },
-        ];
-        const schema2 = [
+            ],
+            schema2 = [
             { name: 'population', type: 'measure' },
             { name: 'city', type: 'dimension' },
-        ];
-        const dataTable1 = new DataTable(data1, schema1, 'TableA');
-        const dataTable2 = new DataTable(data2, schema2, 'TableB');
+            ],
+            dataTable1 = new DataTable(data1, schema1, 'TableA'),
+            dataTable2 = new DataTable(data2, schema2, 'TableB');
         expect((dataTable1.join(dataTable2)).getData()).to.deep.equal({
             schema: [
                 { name: 'profit', type: 'measure' },
@@ -366,19 +367,19 @@ describe('DataTable functionality', () => {
             ],
         });
         expect((dataTable1.join(dataTable2, obj => obj.TableA.city === obj.TableB.city))
-        .getData()).to.deep.equal({
-            schema: [
+                        .getData()).to.deep.equal({
+                            schema: [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
                 { name: 'TableA.city', type: 'dimension' },
                 { name: 'population', type: 'measure' },
                 { name: 'TableB.city', type: 'dimension' },
-            ],
-            data: [
+                            ],
+                            data: [
                 [10, 20, 'a', 200, 'a'],
                 [15, 25, 'b', 250, 'b'],
-            ],
-        });
+                            ],
+                        });
         expect((dataTable1.naturalJoin(dataTable2)).getData()).to.deep.equal({
             schema: [
                 { name: 'profit', type: 'measure' },
@@ -398,28 +399,27 @@ describe('DataTable functionality', () => {
             { profit: 15, sales: 25, city: 'b', state: 'bb' },
             { profit: 10, sales: 20, city: 'a', state: 'ab' },
             { profit: 15, sales: 25, city: 'b', state: 'ba' },
-        ];
-        const schema1 = [
+            ],
+            schema1 = [
             { name: 'profit', type: 'measure' },
             { name: 'sales', type: 'measure' },
             { name: 'city', type: 'dimension' },
             { name: 'state', type: 'dimension' },
-        ];
-
-        const data2 = [
+            ],
+            data2 = [
             { profit: 10, sales: 20, city: 'a', state: 'ab' },
             { profit: 15, sales: 25, city: 'b', state: 'ba' },
             { profit: 10, sales: 20, city: 'a', state: 'aba' },
             { profit: 15, sales: 25, city: 'b', state: 'baa' },
-        ];
-        const schema2 = [
+            ],
+            schema2 = [
             { name: 'profit', type: 'measure' },
             { name: 'sales', type: 'measure' },
             { name: 'city', type: 'dimension' },
             { name: 'state', type: 'dimension' },
-        ];
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA')).project('city,state');
-        const dataTable2 = (new DataTable(data2, schema2, 'TableB')).project('city,state');
+            ],
+            dataTable1 = (new DataTable(data1, schema1, 'TableA')).project('city,state'),
+            dataTable2 = (new DataTable(data2, schema2, 'TableB')).project('city,state');
         expect(dataTable1.difference(dataTable2).getData()).to.deep.equal({
             schema: [
                 { name: 'city', type: 'dimension' },

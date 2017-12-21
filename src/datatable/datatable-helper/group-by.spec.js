@@ -11,13 +11,13 @@ const data1 = [
     { profit: 15, sales: 25, city: 'b', state: 'bb' },
     { profit: 10, sales: 20, city: 'a', state: 'ab' },
     { profit: 15, sales: 25, city: 'b', state: 'ba' },
-];
-const schema1 = [
+    ],
+    schema1 = [
     { name: 'city', type: 'dimension' },
     { name: 'state', type: 'dimension' },
     { name: 'profit', type: 'measure' },
     { name: 'sales', type: 'measure' },
-];
+    ];
 
 describe('groupBy tests', () => {
     it('getFieldArr basic', () => {
@@ -31,7 +31,7 @@ describe('groupBy tests', () => {
     it('getFieldArr if wrong fields provided', () => {
         const dataTable1 = (new DataTable(data1, schema1, 'TableA'));
         expect(getFieldArr(dataTable1, ['city', 'state', 'abc', 'profit'])).to
-            .deep.equal(['city', 'state']);
+                        .deep.equal(['city', 'state']);
     });
     it('getReducerObj basic', () => {
         const dataTable1 = (new DataTable(data1, schema1, 'TableA'));
@@ -63,19 +63,19 @@ describe('groupBy tests', () => {
         });
     });
     it('groupby functionality', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA'));
-        const reqData = {
-            schema: [
+        const dataTable1 = (new DataTable(data1, schema1, 'TableA')),
+            reqData = {
+                schema: [
                 { name: 'city', type: 'dimension' },
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
-            ],
-            data: [
+                ],
+                data: [
                 ['a', 20, 40],
                 ['b', 30, 50],
-            ],
-        };
-        const compData = groupBy(dataTable1, ['city']).getData();
+                ],
+            },
+            compData = groupBy(dataTable1, ['city']).getData();
         expect(compData).to.deep.equal(reqData);
     });
 });

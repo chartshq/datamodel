@@ -1,6 +1,10 @@
 {
-  plugins: ["transform-runtime"],
-  presets: [
+  "presets": [
     ["es2015", { "modules": false }], "flow"
-  ]
+  ],
+  "env": {
+    "test": {
+      "plugins": [ "istanbul" ]
+    }
+  }
 }

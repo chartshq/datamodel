@@ -6,10 +6,9 @@ import formatCell from './cell-formatter';
  * @return {json}      The json format required by DataTable
  */
 function parseCSV(data, schema) {
-    const retData = new Array(schema.length);
-    const seperator = ',';
-
-    const dataRows = data.split(/\n|\r/);
+    const retData = new Array(schema.length),
+        seperator = ',',
+        dataRows = data.split(/\n|\r/);
 
     // iterating through the data row
     dataRows.forEach((row) => {

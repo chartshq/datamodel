@@ -21,9 +21,9 @@ function sum(arr) {
  * @return {number}     mean of the array
  */
 function mean(arr) {
-    const isNestedArray = arr[0] instanceof Array;
-    const len = arr.length || 1;
-    const arrSum = sum(arr);
+    const isNestedArray = arr[0] instanceof Array,
+        len = arr.length || 1,
+        arrSum = sum(arr);
     if (isNestedArray) {
         return arrSum.map(x => x / len);
     }
@@ -82,8 +82,8 @@ function lastValue(arr) {
  * @return {number}     count of the array
  */
 function count(arr) {
-    const isNestedArray = arr[0] instanceof Array;
-    const len = arr.length;
+    const isNestedArray = arr[0] instanceof Array,
+        len = arr.length;
     if (isNestedArray) {
         return Array(...Array(arr[0].length)).map(() => len);
     }
