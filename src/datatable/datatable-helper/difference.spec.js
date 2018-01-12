@@ -44,6 +44,7 @@ describe('Checking difference', () => {
                 ['a', 'aa'],
                 ['b', 'bb'],
             ],
+            uids: [0, 1]
         });
     });
 });

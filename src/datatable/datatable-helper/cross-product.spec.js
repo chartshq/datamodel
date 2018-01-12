@@ -42,6 +42,7 @@ describe('Checking crossProduct', () => {
                 [15, 25, 'b', 200, 'a'],
                 [15, 25, 'b', 250, 'b'],
             ],
+            uids: [0, 1, 2, 3]
         });
     });
     it('crossProduct with filterFn', () => {
@@ -49,6 +50,7 @@ describe('Checking crossProduct', () => {
             dataTable2 = new DataTable(data2, schema2, 'TableB'),
             crossDataTable = crossProduct(dataTable1, dataTable2, obj => obj.TableA.city ===
             obj.TableB.city, true);
+
         expect(crossDataTable.getData()).to.deep.equal({
             schema: [
                 { name: 'profit', type: 'measure' },
@@ -60,6 +62,7 @@ describe('Checking crossProduct', () => {
                 [10, 20, 'a', 200],
                 [15, 25, 'b', 250],
             ],
+            uids: [0, 1]
         });
     });
 });

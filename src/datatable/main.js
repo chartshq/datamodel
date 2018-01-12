@@ -81,6 +81,15 @@ class DataTable extends Relation {
     }
 
     /**
+     * This returns the data with the uids
+     */
+    getDataWithUids () {
+        return dataBuilder.call(this, this.getNameSpace().fields, this.rowDiffset,
+            this.colIdentifier, this.sortingDetails, {
+                addUid: true
+            });
+    }
+    /**
      * This helps to rename the column name of the DataTable this helps in joining two dataTable.
      * Also union and difference as these operations required to have same column name.
      * @param  {Object} schemaObj object having the name of the field to rename as key and the new

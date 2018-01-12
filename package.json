@@ -48,7 +48,7 @@
     "webpack-dev-server": "2.4.2"
   },
   "scripts": {
-    "test": "npm run lint && npm run flow && karma start --single-run --browsers ChromeHeadlessNoSandbox karma.conf.js ",
+    "test": "npm run lint && npm run flow && karma start karma.conf.js",
     "testinbrowser": "karma start --single-run false --browsers Chrome karma.conf.js ",
     "build": "webpack",
     "start": "webpack-dev-server",

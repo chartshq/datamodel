@@ -74,6 +74,7 @@ describe('groupBy tests', () => {
                 ['a', 20, 40],
                 ['b', 30, 50],
                 ],
+                uids: [0, 1]
             },
             compData = groupBy(dataTable1, ['city']).getData();
         expect(compData).to.deep.equal(reqData);

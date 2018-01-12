@@ -47,6 +47,7 @@ describe('DataTable functionality', () => {
                 ['d', 10],
                 ['demo', 15],
                 ],
+                uids: [0, 1]
             };
         // check project is not applied on the same DataTable
         expect(dataTable === projectedDataTable).to.be.false;
@@ -79,6 +80,7 @@ describe('DataTable functionality', () => {
                 ['demo', 9],
                 ['demo', 7],
                 ],
+                uids: [2, 3]
             };
         // check project is not applied on the same DataTable
         expect(dataTable === projectedDataTable).to.be.false;
@@ -124,6 +126,7 @@ describe('DataTable functionality', () => {
                 ['demo', 10],
                 ['demo', 10],
             ],
+            uids: [1, 2, 4, 5, 6, 7, 9]
         };
         // check project is not applied on the same DataTable
         expect(dataTable === projectedDataTable).to.be.false;
@@ -142,6 +145,7 @@ describe('DataTable functionality', () => {
                 ['demo', 10],
                 ['demo', 10],
             ],
+            uids: [5, 6, 7, 9]
         };
         expect(projectedDataTable1.rowDiffset).to.equal('5-7,9');
         // Check The return data
@@ -177,6 +181,7 @@ describe('DataTable functionality', () => {
                 [35, 5, 'demo'],
                 [10, 10, 'demoo'],
                 ],
+                uids: [0, 1, 2, 3, 4, 5]
             };
         expect(renameDataTable.getData()).to.deep.equal(expData);
     });
@@ -207,14 +212,7 @@ describe('DataTable functionality', () => {
                 [10, 10],
                 [35, 5],
                 ],
-                indexMap: {
-                    0: 3,
-                    1: 1,
-                    2: 0,
-                    3: 2,
-                    4: 5,
-                    5: 4,
-                },
+                uids: [2, 1, 3, 0, 5, 4]
             };
         dataTable.sort([
             ['aaa', 'desc'],
@@ -263,18 +261,7 @@ describe('DataTable functionality', () => {
                 [2, 1, 3],
                 [2, 1, 56],
                 ],
-                indexMap: {
-                    0: 7,
-                    1: 6,
-                    2: 0,
-                    3: 2,
-                    4: 4,
-                    5: 9,
-                    6: 8,
-                    7: 1,
-                    8: 5,
-                    9: 3,
-                },
+                uids: [2, 7, 3, 9, 4, 8, 1, 0, 6, 5]
             };
         dataTable.sort([
                 ['a'],
@@ -316,15 +303,7 @@ describe('DataTable functionality', () => {
                 ['Teen', 14, 'Female', 'Kolkata'],
                 ['Usha', 49, 'Female', 'Kolkata'],
                 ],
-                indexMap: {
-                    0: 0,
-                    1: 5,
-                    2: 1,
-                    3: 6,
-                    4: 2,
-                    5: 3,
-                    6: 4,
-                },
+                uids: [0, 2, 4, 5, 6, 1, 3]
             };
         dataTable.sort([
             ['Gender', 'desc'],
@@ -365,6 +344,7 @@ describe('DataTable functionality', () => {
                 [15, 25, 'b', 200, 'a'],
                 [15, 25, 'b', 250, 'b'],
             ],
+            uids: [0, 1, 2, 3]
         });
         expect((dataTable1.join(dataTable2, obj => obj.TableA.city === obj.TableB.city))
                         .getData()).to.deep.equal({
@@ -379,6 +359,7 @@ describe('DataTable functionality', () => {
                 [10, 20, 'a', 200, 'a'],
                 [15, 25, 'b', 250, 'b'],
                             ],
+                            uids: [0, 1]
                         });
         expect((dataTable1.naturalJoin(dataTable2)).getData()).to.deep.equal({
             schema: [
@@ -391,6 +372,7 @@ describe('DataTable functionality', () => {
                 [10, 20, 'a', 200],
                 [15, 25, 'b', 250],
             ],
+            uids: [0, 1]
         });
     });
     it('difference and union functionality', () => {
@@ -429,6 +411,7 @@ describe('DataTable functionality', () => {
                 ['a', 'aa'],
                 ['b', 'bb'],
             ],
+            uids: [0, 1]
         });
         expect(dataTable1.union(dataTable2).getData()).to.deep.equal({
             schema: [
@@ -443,6 +426,7 @@ describe('DataTable functionality', () => {
                 ['a', 'aba'],
                 ['b', 'baa'],
             ],
+            uids: [0, 1, 2, 3, 4, 5]
         });
     });
 });

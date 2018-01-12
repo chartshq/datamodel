@@ -50,7 +50,9 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, opti
     const retObj = {
             schema: [],
             data: [],
+            uids: []
         },
+        addUid = options.addUid,
         reqSorting = sortingDetails && sortingDetails.length > 0,
     // this will store the fields according to the colIdentifier provided
         tmpDataArr = [],
@@ -65,8 +67,15 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, opti
             }
         }
     });
+
+    if (addUid) {
+        retObj.schema[0] = {
+            name: 'uid',
+            type: 'identifier'
+        };
+    }
     // =============== column filter takes place here end ================= //
-    // insert the schema to the schema object
+    // // insert the schema to the schema object
     tmpDataArr.forEach((field) => {
         /**
          * @todo need to implement extend2 otherwise user can overwrite
@@ -77,16 +86,28 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, opti
     rowDiffsetIterator(rowDiffset, (i) => {
         retObj.data.push([]);
         const insertInd = retObj.data.length - 1;
+        let start;
+        if (addUid) {
+            retObj.data[insertInd][0] = i;
+            start = 1;
+        }
+        else {
+            start = 0;
+        }
         tmpDataArr.forEach((field, ii) => {
-            retObj.data[insertInd][ii] = field.data[i];
+            retObj.data[insertInd][ii + start] = field.data[i];
         });
+
+        // Create an array of unique identifiers for each row
+        retObj.uids.push(i);
         // if sorting needed then there is the need to expose the index mapping from the old index
         // to its new index
         if (reqSorting) { retObj.data[insertInd].push(i); }
     });
     // handles the sort functionality
     if (reqSorting) {
-        retObj.indexMap = {};
+        // When data will be sorted uids will get changed.
+        retObj.uids = [];
         for (let i = sortingDetails.length - 1; i >= 0; i -= 1) {
             retObj.schema.forEach((schema, ii) => {
                 if (sortingDetails[i][0] === schema.name) {
@@ -95,8 +116,8 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, opti
             });
         }
         // generating the mapping of the old index to its new index
-        retObj.data.forEach((value, key) => {
-            retObj.indexMap[value.pop()] = key;
+        retObj.data.forEach((value) => {
+            retObj.uids.push(value.pop());
         });
     }
     // =============== row filter takes place here end ================= //

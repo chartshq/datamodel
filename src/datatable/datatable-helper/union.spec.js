@@ -42,6 +42,7 @@ describe('Checking union', () => {
                 ['a', 'ab'],
                 ['b', 'ba'],
             ],
+            uids: [0, 1, 2, 3]
         });
     });
     it('union if fields are not same', () => {

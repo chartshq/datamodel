@@ -31,6 +31,7 @@ describe('Checking dataBuilder', () => {
                 [7, 8, 'c'],
                 [20, 77, 'e'],
                 ],
+                uids: [0, 1, 2, 4]
             };
         expect(expObj).to.deep.equal(oriObj);
     });
@@ -59,6 +60,7 @@ describe('Checking dataBuilder', () => {
                 [20, 25, 8, 77],
                 ['a', 'b', 'c', 'e'],
                 ],
+                uids: [0, 1, 2, 4]
             };
         expect(expObj).to.deep.equal(oriObj);
     });
@@ -78,6 +80,7 @@ describe('Checking dataBuilder', () => {
                 { name: 'city', type: 'dimension' },
                 ],
                 data: [],
+                uids: []
             };
         expect(expObj).to.deep.equal(oriObj);
     });
@@ -93,6 +96,7 @@ describe('Checking dataBuilder', () => {
             oriObj = {
                 schema: [],
                 data: [],
+                uids: []
             };
         expect(expObj).to.deep.equal(oriObj);
     });
@@ -120,6 +124,7 @@ describe('Checking dataBuilder', () => {
                 [8, 'c'],
                 [77, 'e'],
                 ],
+                uids: [0, 1, 2, 4]
             };
         expect(expObj).to.deep.equal(oriObj);
     });
@@ -150,6 +155,7 @@ describe('Checking dataBuilder', () => {
                 [20, 77, 'e'],
                 [35, 9, 'f'],
                 ],
+                uids: [0, 1, 2, 3, 4, 5]
             };
         expect(expObj).to.deep.equal(oriObj);
     });
@@ -173,6 +179,7 @@ describe('Checking dataBuilder', () => {
                 { name: 'city', type: 'dimension' },
                 ],
                 data: [],
+                uids: []
             };
         expect(expObj).to.deep.equal(oriObj);
     });
@@ -203,6 +210,7 @@ describe('Checking dataBuilder', () => {
                 ['e', 20, 77],
                 ['f', 35, 9],
                 ],
+                uids: [0, 1, 2, 3, 4, 5]
             };
         expect(expObj).to.deep.equal(oriObj);
     });
@@ -226,6 +234,7 @@ describe('Checking dataBuilder', () => {
                 { name: 'city', type: 'dimension' },
                 ],
                 data: [],
+                uids: []
             };
         expect(expObj).to.deep.equal(oriObj);
     });
