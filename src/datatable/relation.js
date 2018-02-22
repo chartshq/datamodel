@@ -24,6 +24,13 @@ class Relation {
                 // This will create a new fieldStore with the fields
                 nameSpace = fieldStore.createNameSpace(fieldArr, name);
             this.columnNameSpace = nameSpace;
+            this.fieldMap = schema.reduce((acc, fieldDef, i) => {
+                acc[fieldDef.name] = {
+                    index: i,
+                    def: fieldDef
+                };
+                return acc;
+            }, {});
             // If data is provided create the default colIdentifier and rowDiffset
             this.rowDiffset = `0-${normalizeData[0] ? (normalizeData[0].length - 1) : 0}`;
             this.colIdentifier = (schema.map(_ => _.name)).join();

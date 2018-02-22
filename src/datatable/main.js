@@ -209,6 +209,14 @@ class DataTable extends Relation {
     }
 
     /**
+     * Returns index and field details in an object where key is the field name.
+     * @return {Object} field definitions
+     */
+    getFieldMap () {
+        return this.fieldMap;
+    }
+
+    /**
      * It helps to define the sorting order of the returned data.
      * This is similar to the orderBy functionality of the database
      * you have to pass the array of array [['columnName', 'sortType(asc|desc)']] and the
