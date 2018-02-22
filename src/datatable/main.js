@@ -34,7 +34,7 @@ class DataTable extends Relation {
         // Copy the required property
         retDataTable.colIdentifier = this.colIdentifier;
         retDataTable.rowDiffset = this.rowDiffset;
-
+        retDataTable.fieldMap = this.fieldMap;
         return retDataTable;
     }
 
