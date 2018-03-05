@@ -1,3 +1,5 @@
+import * as DATA_TYPES from '../enums/data-types';
+
 const fieldStore = {
     data: {},
     /**
@@ -22,7 +24,7 @@ const fieldStore = {
             getMeasure() {
                 const retObj = {};
                 this.fields.forEach((field) => {
-                    if (field.schema.type === 'measure') {
+                    if (field.schema.type === DATA_TYPES.MEASURE) {
                         retObj[field.name] = field;
                     }
                 });
@@ -31,7 +33,8 @@ const fieldStore = {
             getDimension() {
                 const retObj = {};
                 this.fields.forEach((field) => {
-                    if (field.schema.type === 'dimension' || field.schema.type === 'datetime') {
+                    if (field.schema.type === DATA_TYPES.DIMENSION ||
+                        field.schema.type === DATA_TYPES.DATETIME) {
                         retObj[field.name] = field;
                     }
                 });
