@@ -1,4 +1,4 @@
-import { isString } from '../../utils/index';
+import { isString } from '../utils/index';
 import parseCSV from './parse-csv';
 import parseJSON from './parse-json';
 

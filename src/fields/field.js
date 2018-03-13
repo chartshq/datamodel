@@ -1,4 +1,4 @@
-import { extend2 } from '../../utils';
+import { extend2 } from '../utils';
 /**
  * This is the base class of all the field type all the common functionality
  * and data will be in this class

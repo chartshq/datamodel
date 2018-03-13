@@ -1,4 +1,4 @@
-import { DateTimeFormatter } from '../../utils';
+import { DateTimeFormatter } from '../utils';
 
 // For using dateFormatter if the schema is same little optimization
 let preSchema,

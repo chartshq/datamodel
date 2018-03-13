@@ -1,5 +1,5 @@
 import DataTable from '../index';
-import { extend2 } from '../../utils';
+import { extend2 } from '../utils';
 import getCommonSchema from './get-common-schema';
 import rowDiffsetIterator from './row-diffset-iterator';
 

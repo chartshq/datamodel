@@ -1,4 +1,4 @@
-import * as DATA_TYPES from '../enums/data-types';
+import * as DATA_TYPES from './enums/data-types';
 
 const fieldStore = {
     data: {},

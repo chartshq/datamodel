@@ -1,5 +1,5 @@
 import DataTable from '../index';
-import { extend2 } from '../../utils';
+import { extend2 } from '../utils';
 import rowDiffsetIterator from './row-diffset-iterator';
 
 /**
@@ -8,7 +8,7 @@ import rowDiffsetIterator from './row-diffset-iterator';
  * @param  {DataTable} dataTable2 Second DataTable
  * @return {DataTable}            the DataTable after union operation
  */
-function union(dataTable1, dataTable2) {
+function difference(dataTable1, dataTable2) {
     const hashTable = {},
         schema = [],
         schemaNameArr = [],
@@ -18,10 +18,9 @@ function union(dataTable1, dataTable2) {
         dataTable1FieldStoreFieldObj = dataTable1FieldStore.fieldsObj(),
         dataTable2FieldStoreFieldObj = dataTable2FieldStore.fieldsObj(),
         name = `${dataTable1FieldStore.name} union ${dataTable2FieldStore.name}`;
-
     // For union the columns should match otherwise return the first dataTable;
     if (dataTable1.colIdentifier !== dataTable2.colIdentifier) {
-        return dataTable1.cloneAsChild();
+        return dataTable1.clone();
     }
 
     // Prepare the schema
@@ -35,8 +34,9 @@ function union(dataTable1, dataTable2) {
      * create the data from the two dataTable
      * @param  {DataTable} dataTable DataTable for which data is inserted
      * @param  {Object} fieldsObj fieldStore object format
+     * @param  {boolean} addData if true only tuple will be added to the data
      */
-    function prepareDataHelper(dataTable, fieldsObj) {
+    function prepareDataHelper(dataTable, fieldsObj, addData) {
         rowDiffsetIterator(dataTable.rowDiffset, (i) => {
             const tuple = {};
             let hashData = '';
@@ -46,15 +46,15 @@ function union(dataTable1, dataTable2) {
                 tuple[schemaName] = value;
             });
             if (!hashTable[hashData]) {
-                data.push(tuple);
+                if (addData) { data.push(tuple); }
                 hashTable[hashData] = true;
             }
         });
     }
-    prepareDataHelper(dataTable1, dataTable1FieldStoreFieldObj);
-    prepareDataHelper(dataTable2, dataTable2FieldStoreFieldObj);
+    prepareDataHelper(dataTable2, dataTable2FieldStoreFieldObj, false);
+    prepareDataHelper(dataTable1, dataTable1FieldStoreFieldObj, true);
 
     return new DataTable(data, schema, name);
 }
 
-export { union as default };
+export { difference as default };
