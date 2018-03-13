@@ -49,6 +49,7 @@
   },
   "scripts": {
     "test": "npm run lint && npm run flow && karma start karma.conf.js",
+    "ut": "karma start karma.conf.js",
     "testinbrowser": "karma start --single-run false --browsers Chrome karma.conf.js ",
     "build": "webpack",
     "start": "webpack-dev-server",

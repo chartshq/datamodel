@@ -73,13 +73,21 @@ module.exports = function (config) {
             reports: ['html', 'lcov', 'text-summary'],
             fixWebpackSourcePaths: true,
             reporters: [
-      { type: 'text' },
-      { type: 'html', subdir: 'report-html', file: 'report.html' },
-      { type: 'lcov', subdir: 'report-lcov', file: 'report.txt' },
+                { type: 'text' },
+                { type: 'html', subdir: 'report-html', file: 'report.html' },
+                { type: 'lcov', subdir: 'report-lcov', file: 'report.txt' },
             ],
         },
 
-        reporters: ['progress', 'coverage-istanbul'],
+        reporters: ['spec', 'coverage-istanbul'],
+        specReporter: {
+            maxLogLines: 5, // limit number of lines logged per test
+            suppressErrorSummary: true, // do not print error summary
+            suppressFailed: false, // do not print information about failed tests
+            suppressPassed: false, // do not print information about passed tests
+            suppressSkipped: true, // do not print information about skipped tests
+            showSpecTiming: false, // print the time elapsed for each spec
+        },
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
