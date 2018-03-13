@@ -34,6 +34,8 @@ class Relation {
             // If data is provided create the default colIdentifier and rowDiffset
             this.rowDiffset = `0-${normalizeData[0] ? (normalizeData[0].length - 1) : 0}`;
             this.colIdentifier = (schema.map(_ => _.name)).join();
+        } else {
+            throw new Error('No data found.');
         }
     }
 
