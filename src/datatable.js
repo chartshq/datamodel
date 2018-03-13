@@ -1,10 +1,10 @@
 import Relation from './relation';
-import dataBuilder from './datatable-helper/data-builder';
-import crossProduct from './datatable-helper/cross-product';
-import naturalJoinFilter from './datatable-helper/natural-join-filter-function';
-import union from './datatable-helper/union';
-import difference from './datatable-helper/difference';
-import { groupBy } from './datatable-helper/group-by';
+import dataBuilder from './operator/data-builder';
+import crossProduct from './operator/cross-product';
+import naturalJoinFilter from './operator/natural-join-filter-function';
+import union from './operator/union';
+import difference from './operator/difference';
+import { groupBy } from './operator/group-by';
 
 /**
  * The main class

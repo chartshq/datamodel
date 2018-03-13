@@ -2,9 +2,9 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import normalize from './main';
+import normalize from '.';
 
-describe('Checking parseCSV', () => {
+describe('Normalize', () => {
     it('valid Data ', () => {
         const svgStr = '10, 20, d \n 15, 25, demo',
             schema = [

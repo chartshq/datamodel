@@ -1,7 +1,7 @@
-import normalize from './normalize';
+import normalize from './normalizer';
 import createFields from './create-fields';
 import fieldStore from './field-store';
-import rowDiffsetIterator from './datatable-helper/row-diffset-iterator';
+import rowDiffsetIterator from './operator/row-diffset-iterator';
 /**
  * Contains all the relational algebra part
  */
