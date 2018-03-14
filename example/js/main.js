@@ -1,4 +1,4 @@
-/* global datatable, d3 */
+/* eslint-disable */
 
 const DataTable = datatable.default;
 let dt;
