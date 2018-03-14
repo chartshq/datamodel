@@ -1,5 +1,5 @@
 import DataTable from './datatable';
-import * as DATA_TYPES from './enums/data-types';
+import * as TYPES from './enums';
 
 export { DataTable as default };
-export { DATA_TYPES };
+export { TYPES };

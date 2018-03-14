@@ -678,6 +678,12 @@ DateTimeFormatter.prototype.extractTokenValue = function (dateTimeStamp) {
  * @return {Date} : Native JS Date
  */
 DateTimeFormatter.prototype.getNativeDate = function (dateTimeStamp) {
+    if (dateTimeStamp instanceof Date) {
+        return dateTimeStamp;
+    } else if (isFinite(dateTimeStamp) && !!this.format) {
+        return new Date(dateTimeStamp);
+    }
+
     var dtParams = this.dtParams = this.parse(dateTimeStamp);
 
     dtParams.unshift(null);

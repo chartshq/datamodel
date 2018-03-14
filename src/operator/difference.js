@@ -9,15 +9,15 @@ import rowDiffsetIterator from './row-diffset-iterator';
  * @return {DataTable}            the DataTable after union operation
  */
 function difference(dataTable1, dataTable2) {
-    const hashTable = {},
-        schema = [],
-        schemaNameArr = [],
-        data = [],
-        dataTable1FieldStore = dataTable1.getNameSpace(),
-        dataTable2FieldStore = dataTable2.getNameSpace(),
-        dataTable1FieldStoreFieldObj = dataTable1FieldStore.fieldsObj(),
-        dataTable2FieldStoreFieldObj = dataTable2FieldStore.fieldsObj(),
-        name = `${dataTable1FieldStore.name} union ${dataTable2FieldStore.name}`;
+    const hashTable = {};
+    const schema = [];
+    const schemaNameArr = [];
+    const data = [];
+    const dataTable1FieldStore = dataTable1.getNameSpace();
+    const dataTable2FieldStore = dataTable2.getNameSpace();
+    const dataTable1FieldStoreFieldObj = dataTable1FieldStore.fieldsObj();
+    const dataTable2FieldStoreFieldObj = dataTable2FieldStore.fieldsObj();
+    const name = `${dataTable1FieldStore.name} union ${dataTable2FieldStore.name}`;
     // For union the columns should match otherwise return the first dataTable;
     if (dataTable1.colIdentifier !== dataTable2.colIdentifier) {
         return dataTable1.clone();

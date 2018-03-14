@@ -26,15 +26,15 @@ function defFilterFn() { return true; }
  * crossProduct operations
  */
 function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = false) {
-    const schema = [],
-        data = [],
-        applicableFilterFn = filterFn || defFilterFn,
-        dataTable1FieldStore = dataTable1.getNameSpace(),
-        dataTable2FieldStore = dataTable2.getNameSpace(),
-        dataTable1FieldStoreName = dataTable1FieldStore.name,
-        dataTable2FieldStoreName = dataTable2FieldStore.name,
-        name = `${dataTable1FieldStore.name}.${dataTable2FieldStore.name}`,
-        commonSchemaList = getCommonSchema(dataTable1FieldStore, dataTable2FieldStore);
+    const schema = [];
+    const data = [];
+    const applicableFilterFn = filterFn || defFilterFn;
+    const dataTable1FieldStore = dataTable1.getNameSpace();
+    const dataTable2FieldStore = dataTable2.getNameSpace();
+    const dataTable1FieldStoreName = dataTable1FieldStore.name;
+    const dataTable2FieldStoreName = dataTable2FieldStore.name;
+    const name = `${dataTable1FieldStore.name}.${dataTable2FieldStore.name}`;
+    const commonSchemaList = getCommonSchema(dataTable1FieldStore, dataTable2FieldStore);
 
     // Prepare the schema
     dataTable1FieldStore.fields.forEach((field) => {
@@ -58,8 +58,8 @@ function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = fa
     // Prepare Data
     rowDiffsetIterator(dataTable1.rowDiffset, (i) => {
         rowDiffsetIterator(dataTable2.rowDiffset, (ii) => {
-            const tuple = [],
-                userArg = {};
+            const tuple = [];
+            const userArg = {};
             userArg[dataTable1FieldStoreName] = {};
             userArg[dataTable2FieldStoreName] = {};
             dataTable1FieldStore.fields.forEach((field) => {

@@ -1,3 +1,5 @@
+// @todo move this file in picasso-util repo
+
 import DateTimeFormatter from './date-time-formatter';
 import extend2 from './extend2';
 /**
@@ -29,9 +31,25 @@ function isString(_) {
     return typeof _ === 'string';
 }
 
+const columnMajor = (store) => {
+    let i = 0;
+    return (...fields) => {
+        fields.forEach((val, fieldIndex) => {
+            let arr;
+            if (!(store[fieldIndex] instanceof Array)) {
+                store[fieldIndex] = Array.from({ length: i });
+            }
+            arr = store[fieldIndex];
+            arr.push(val);
+        });
+        i++;
+    };
+};
+
 export {
     isArray,
     isObject,
+    columnMajor,
     isString,
     DateTimeFormatter,
     extend2,

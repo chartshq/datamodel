@@ -5,8 +5,8 @@
  * @return {Array}     array containing the common name
  */
 function getCommonSchema(fs1, fs2) {
-    const retArr = [],
-        fs1Arr = [];
+    const retArr = [];
+    const fs1Arr = [];
     fs1.fields.forEach((field) => {
         fs1Arr.push(field.schema.name);
     });

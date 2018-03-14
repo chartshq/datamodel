@@ -11,13 +11,13 @@ const data1 = [
     { profit: 15, sales: 25, city: 'b', state: 'bb' },
     { profit: 10, sales: 20, city: 'a', state: 'ab' },
     { profit: 15, sales: 25, city: 'b', state: 'ba' },
-    ],
-    schema1 = [
+];
+const schema1 = [
     { name: 'city', type: 'dimension' },
     { name: 'state', type: 'dimension' },
     { name: 'profit', type: 'measure' },
     { name: 'sales', type: 'measure' },
-    ];
+];
 
 describe('groupBy tests', () => {
     it('getFieldArr basic', () => {
@@ -63,20 +63,20 @@ describe('groupBy tests', () => {
         });
     });
     it('groupby functionality', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA')),
-            reqData = {
-                schema: [
+        const dataTable1 = (new DataTable(data1, schema1, 'TableA'));
+        const reqData = {
+            schema: [
                 { name: 'city', type: 'dimension' },
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
-                ],
-                data: [
+            ],
+            data: [
                 ['a', 20, 40],
                 ['b', 30, 50],
-                ],
-                uids: [0, 1]
-            },
-            compData = groupBy(dataTable1, ['city']).getData();
+            ],
+            uids: [0, 1]
+        };
+        const compData = groupBy(dataTable1, ['city']).getData();
         expect(compData).to.deep.equal(reqData);
     });
 });

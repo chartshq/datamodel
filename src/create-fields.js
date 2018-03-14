@@ -1,31 +1,50 @@
-import { Measure, Dimension, DateTime } from './fields';
+import { Measure, Categorical, DateTime } from './fields';
+import { FIELD_TYPE, DIM_SUBTYPE } from './enums';
 
-/**
- * A list of field (DateTime|Measure|Dimension) will be created from the data
- * @todo The function need to be written correctly
- * @param {Array} data The data from which the field array will be created
- * @param {json} schema Information about field type
- * @return {Array} The list of field
- */
-function createFields(data, schema) {
-    const retArr = [];
-    schema.forEach((_, i) => {
-        let field;
-        switch (_.type) {
-        case 'measure':
-            field = new Measure(_.name, data[i], _);
+function createUnitField (data, schema) {
+    let field;
+    switch (schema.type) {
+    case FIELD_TYPE.MEASURE:
+        field = new Measure(schema.name, data, schema);
+        break;
+
+    case FIELD_TYPE.DIMENSION:
+    default:
+        switch (schema.subtype) {
+        case DIM_SUBTYPE.CATEGORICAL:
+            field = new Categorical(schema.name, data, schema);
             break;
-        case 'dimension':
-            field = new Dimension(_.name, data[i], _);
+
+        case DIM_SUBTYPE.TEMPORAL:
+            field = new DateTime(schema.name, data, schema);
             break;
-        case 'datetime':
-            field = new DateTime(_.name, data[i], _);
+
+        case DIM_SUBTYPE.GEO:
+            // @todo no geo support as of now. Will do after v1.
+            field = new Categorical(schema.name, data, schema);
             break;
+
         default:
+            field = new Categorical(schema.name, data, schema);
         }
-        retArr.push(field);
+        break;
+    }
+
+    return field;
+}
+
+function createFields(dataColumn, schema, headers) {
+    const headersObj = {};
+
+    if (!(headers && headers.length)) {
+        headers = schema.map(item => item.name);
+    }
+
+    headers.forEach((header, i) => {
+        headersObj[header] = i;
     });
-    return retArr;
+
+    return schema.map(item => createUnitField(dataColumn[headersObj[item.name]], item));
 }
 
 export { createFields as default };

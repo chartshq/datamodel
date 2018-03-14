@@ -30,7 +30,7 @@ class DataTable extends Relation {
      * @return {DataTable} The cloned DataTable.
      */
     clone() {
-        const retDataTable = new DataTable();
+        const retDataTable = new DataTable(this);
         // Copy the required property
         retDataTable.colIdentifier = this.colIdentifier;
         retDataTable.rowDiffset = this.rowDiffset;
@@ -55,8 +55,8 @@ class DataTable extends Relation {
      * @return {Object} Field store
      */
     getNameSpace() {
-        let child = this,
-            nameSpace;
+        let child = this;
+        let nameSpace;
         if (this.columnNameSpace) { return this.columnNameSpace; }
         while (child.parent) {
             if (child.parent.columnNameSpace) {
@@ -97,9 +97,9 @@ class DataTable extends Relation {
      * @return {DataTable}           The cloned DataTable with the rename columns
      */
     rename(schemaObj) {
-        const cloneDataTable = this.cloneAsChild(),
-            schemaArr = cloneDataTable.colIdentifier.split(','),
-            fieldStore = this.getNameSpace().fields;
+        const cloneDataTable = this.cloneAsChild();
+        const schemaArr = cloneDataTable.colIdentifier.split(',');
+        const fieldStore = this.getNameSpace().fields;
         Object.entries(schemaObj).forEach(([key, value]) => {
             if (schemaArr.indexOf(key) !== -1 && typeof value === 'string') {
                 for (let i = 0; i <= fieldStore.length; i += 1) {

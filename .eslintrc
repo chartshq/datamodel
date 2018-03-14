@@ -11,7 +11,6 @@
     "space-before-function-paren": "off",
     "no-multi-assign": "off",
     "max-len": ["error", 120],
-    "one-var": ["error", "always"],
     "no-plusplus": "off",
     "no-unused-expressions": "off",
     "class-methods-use-this": "off",

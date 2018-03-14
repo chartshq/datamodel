@@ -5,8 +5,8 @@
  * @return {number}   -1|1|0 according to the condition
  */
 function defSortFn(a, b) {
-    const a1 = `${a}`,
-        b1 = `${b}`;
+    const a1 = `${a}`;
+    const b1 = `${b}`;
     if (a1 < b1) {
         return -1;
     }
@@ -25,13 +25,13 @@ function defSortFn(a, b) {
  * @param  {Function} sortFn The function according to which the array will be changed
  */
 function merge(arr, lo, mid, hi, sortFn) {
-    const mainArr = arr,
-        auxArr = [];
+    const mainArr = arr;
+    const auxArr = [];
     for (let i = lo; i <= hi; i += 1) {
         auxArr[i] = mainArr[i];
     }
-    let a = lo,
-        b = mid + 1;
+    let a = lo;
+    let b = mid + 1;
 
     for (let i = lo; i <= hi; i += 1) {
         if (a > mid) {
