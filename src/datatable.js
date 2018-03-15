@@ -285,7 +285,7 @@ class DataTable extends Relation {
             const fieldsData = suppliedFields.map(field => field.data[i]);
             // get the computed value based on user supplied callback
             const computedValue = callback(...fieldsData);
-            computedValues.push(computedValue);
+            computedValues[i] = computedValue;
         });
         // create a field in datatable to store this field
         const nameSpaceEntry = new Measure(name, computedValues, {

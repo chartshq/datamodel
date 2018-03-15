@@ -38,6 +38,24 @@ d3.json('../../js/cars.json', (data) => {
         return data.Acceleration.value >= 15;
     });
     console.log(dts.getData());
+    const data1 = [
+        { profit: 10, sales: 20, city: 'a', state: 'aa' },
+        { profit: 15, sales: 25, city: 'b', state: 'bb' },
+        { profit: 10, sales: 20, city: 'a', state: 'ab' },
+        { profit: 15, sales: 25, city: 'b', state: 'ba' },
+    ];
+    const schema1 = [
+        { name: 'profit', type: 'measure' },
+        { name: 'sales', type: 'measure' },
+        { name: 'city', type: 'dimension' },
+        { name: 'state', type: 'dimension' },
+    ];
+    const dataTable = new DataTable(data1, schema1, 'Yo');
+    const next = dataTable.project(['profit', 'sales']).select(f => +f.profit > 10);
+    const child = next.calculatedMeasure({
+        name: 'Efficiency'
+    }, ['profit', 'sales'], (profit, sales) => profit / sales);
+    console.log(child.getData().data);
 });
 
 function load (url) {

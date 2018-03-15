@@ -446,7 +446,8 @@ describe('#Datatable', () => {
             { name: 'state', type: 'dimension' },
         ];
         const dataTable = new DataTable(data1, schema1, 'Yo');
-        const child = dataTable.calculatedMeasure({
+        const next = dataTable.project(['profit', 'sales']).select(f => +f.profit > 10);
+        const child = next.calculatedMeasure({
             name: 'Efficiency'
         }, ['profit', 'sales'], (profit, sales) => profit / sales);
         const childData = child.getData().data;
