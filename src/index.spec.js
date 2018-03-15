@@ -454,6 +454,6 @@ describe('#Datatable', () => {
         const efficiency = childData[0][childData[0].length - 1];
         expect(
             efficiency
-        ).to.equal(0.5);
+        ).to.equal(0.6);
     });
 });
