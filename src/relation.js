@@ -4,6 +4,73 @@ import rowDiffsetIterator from './operator/row-diffset-iterator';
 import defaultConfig from './defalult-config';
 import * as converter from './converter';
 
+/*
+ * @todo the value cell is the most basic class. We would have support for StringValue, NumberValue, DateTimeValue
+ * and GeoValue. This types exposes API (predicate mostly) for specific types
+ */
+
+/**
+ * Each privitive value of a fild is exporsed as Value. This is a wrapper on top of the primitive value for easy
+ * operations.
+ *
+ * @class
+ */
+class Value {
+    /**
+     * @param {object} val primitive value from the cell
+     * @param {Field} field field from which the value belongs
+     */
+    constructor (val, field) {
+        Object.defineProperty(this, '_value', {
+            enumerable: false,
+            configurable: false,
+            writable: false,
+            value: val
+        });
+
+        this.field = field;
+    }
+
+    /**
+     * @setter
+     * This does not set any value as the value is immutable for a cell.
+     */
+    set value (val) {
+        /* dont let the outside setter set the value */
+        return this;
+    }
+
+    /**
+     * @getter
+     */
+    get value () {
+        return this._value;
+    }
+
+    /**
+     * @override
+     */
+    toString () {
+        return this.value;
+    }
+
+    /**
+     * @override
+     */
+    valueOf () {
+        return this.value;
+    }
+}
+
+const prepareSelectionData = (fields, i) => {
+    const resp = {};
+    for (let field of fields) {
+        resp[field.name] = new Value(field.data[i], field);
+    }
+
+    return resp;
+};
+
 /**
  * Contains all the relational algebra part
  */
@@ -35,12 +102,6 @@ class Relation {
 
         const [header, formattedData] = converterFn(data, options);
         const fieldArr = createFields(formattedData, schema, header);
-
-        // This will create a generealise data structure consumable from
-        // different type of data (different type of json or CSV)
-        // const normalizeData = normalize(data, schema),
-        //     // This will create array of fields possible from the data
-            // fieldArr = createFields(normalizeData, schema),
 
         // This will create a new fieldStore with the fields
         const nameSpace = fieldStore.createNameSpace(fieldArr, name);
@@ -85,8 +146,9 @@ class Relation {
         let lastInsertedValue = -1;
             // newRowDiffSet last index
         let li;
+        const store = {};
         rowDiffsetIterator(this.rowDiffset, (i) => {
-            if (selectFn(fields, i)) {
+            if (selectFn(prepareSelectionData(fields, i), i, this, store)) {
                 // Check for if this value to be attached to the last diffset ie. 1-5 format
                 if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
                     li = newRowDiffSet.length - 1;

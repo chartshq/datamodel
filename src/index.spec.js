@@ -70,8 +70,8 @@ describe('#Datatable', () => {
             { name: 'aaaa', type: 'dimension' },
         ];
         const dataTable = new DataTable(data, schema);
-        const projectedDataTable = (dataTable.project('aaaa,a')).select((fields, i) =>
-            fields[0].data[i] <= 10 && fields[2].data[i] === 'demo');
+        const projectedDataTable = (dataTable.project('aaaa,a')).select(fields =>
+            fields.a.value <= 10 && fields.aaaa.value === 'demo');
         const expData = {
             schema: [
                 { name: 'aaaa', type: 'dimension' },
@@ -108,11 +108,11 @@ describe('#Datatable', () => {
             { name: 'aaaa', type: 'dimension' },
         ];
         const dataTable = new DataTable(data, schema);
-        const projectedDataTable = (dataTable.project('aaaa,a')).select((fields, i) =>
-                fields[2].data[i] === 'demo');
+        const projectedDataTable = (dataTable.project('aaaa,a')).select(fields =>
+                fields.aaaa.value === 'demo');
             // Check if repetation select works
         const projectedDataTable1 = projectedDataTable.select((fields, i) =>
-                fields[0].data[i] === 10);
+                fields.a.value === 10);
         let expData = {
             schema: [
                 { name: 'aaaa', type: 'dimension' },

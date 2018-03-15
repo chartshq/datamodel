@@ -34,6 +34,10 @@ d3.json('../../js/cars.json', (data) => {
             type: 'dimension'
         }];
     dt = new DataTable(jsonData, schema);
+    dts = dt.select((data) => {
+        return data.Acceleration.value >= 15;
+    });
+    console.log(dts.getData());
 });
 
 function load (url) {
