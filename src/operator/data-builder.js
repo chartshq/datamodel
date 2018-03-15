@@ -68,12 +68,6 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, opti
         }
     });
 
-    if (addUid) {
-        retObj.schema[0] = {
-            name: 'uid',
-            type: 'identifier'
-        };
-    }
     // =============== column filter takes place here end ================= //
     // // insert the schema to the schema object
     tmpDataArr.forEach((field) => {
@@ -82,22 +76,25 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, opti
          */
         retObj.schema.push(field.schema);
     });
+
+    if (addUid) {
+        retObj.schema.push({
+            name: 'uid',
+            type: 'identifier'
+        });
+    }
+
     // =============== row filter takes place here ================= //
     rowDiffsetIterator(rowDiffset, (i) => {
         retObj.data.push([]);
         const insertInd = retObj.data.length - 1;
-        let start;
-        if (addUid) {
-            retObj.data[insertInd][0] = i;
-            start = 1;
-        }
-        else {
-            start = 0;
-        }
+        let start = 0;
         tmpDataArr.forEach((field, ii) => {
             retObj.data[insertInd][ii + start] = field.data[i];
         });
-
+        if (addUid) {
+            retObj.data[insertInd][tmpDataArr.length] = i;
+        }
         // Create an array of unique identifiers for each row
         retObj.uids.push(i);
         // if sorting needed then there is the need to expose the index mapping from the old index
