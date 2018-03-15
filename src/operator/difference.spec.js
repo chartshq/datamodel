@@ -32,8 +32,8 @@ const schema2 = [
 
 describe('Checking difference', () => {
     it('Basic difference test cases', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA')).project('city,state');
-        const dataTable2 = (new DataTable(data2, schema2, 'TableB')).project('city,state');
+        const dataTable1 = (new DataTable(data1, schema1, 'TableA')).project(['city', 'state']);
+        const dataTable2 = (new DataTable(data2, schema2, 'TableB')).project(['city', 'state']);
         const differenceDataTable = difference(dataTable1, dataTable2);
         expect(differenceDataTable.getData()).to.deep.equal({
             schema: [

@@ -28,8 +28,8 @@ const schema2 = [
 
 describe('Checking union', () => {
     it('Basic union test cases', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA')).project('city,state');
-        const dataTable2 = (new DataTable(data2, schema2, 'TableB')).project('city,state');
+        const dataTable1 = (new DataTable(data1, schema1, 'TableA')).project(['city', 'state']);
+        const dataTable2 = (new DataTable(data2, schema2, 'TableB')).project(['city', 'state']);
         const unionDataTable = union(dataTable1, dataTable2);
         expect(unionDataTable.getData()).to.deep.equal({
             schema: [
@@ -46,8 +46,8 @@ describe('Checking union', () => {
         });
     });
     it('union if fields are not same', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA')).project('city,state');
-        const dataTable2 = (new DataTable(data2, schema2, 'TableB')).project('city,profit');
+        const dataTable1 = (new DataTable(data1, schema1, 'TableA')).project(['city', 'state']);
+        const dataTable2 = (new DataTable(data2, schema2, 'TableB')).project(['city', 'profit']);
         const unionDataTable = union(dataTable1, dataTable2);
         expect(unionDataTable.getData()).to.deep.equal(dataTable1.getData());
     });

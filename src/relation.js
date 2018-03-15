@@ -86,6 +86,12 @@ class Relation {
      */
     constructor(data, schema, name, options) {
         if (data instanceof Relation) {
+            // parent datatable was passed as part of source
+            const source = data;
+            // Copy the required property
+            this.colIdentifier = source.colIdentifier;
+            this.rowDiffset = source.rowDiffset;
+            this.fieldMap = source.fieldMap;
             return this;
         }
 
@@ -128,10 +134,16 @@ class Relation {
      * @return {instance}            Instance of the class (this).
      */
     projectHelper(projString) {
-        /**
-         * @todo need to have validation
-         */
+        let presentField = Object.keys(this.fieldMap);
         this.colIdentifier = projString;
+
+        presentField = presentField.filter(field =>
+            projString.search(new RegExp(`^${field}\\,|\\,${field}\\,|\\,${field}$`, 'i')) !== -1);
+
+        this.fieldMap = presentField.reduce((acc, val) => {
+            acc[val] = this.fieldMap[val];
+            return acc;
+        }, {});
         return this;
     }
 

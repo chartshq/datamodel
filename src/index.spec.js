@@ -38,7 +38,7 @@ describe('#Datatable', () => {
             { name: 'aaaa', type: 'dimension' },
         ];
         const dataTable = new DataTable(data, schema);
-        const projectedDataTable = dataTable.project('aaaa,a');
+        const projectedDataTable = dataTable.project(['aaaa', 'a']);
         const expData = {
             schema: [
                 { name: 'aaaa', type: 'dimension' },
@@ -70,7 +70,7 @@ describe('#Datatable', () => {
             { name: 'aaaa', type: 'dimension' },
         ];
         const dataTable = new DataTable(data, schema);
-        const projectedDataTable = (dataTable.project('aaaa,a')).select(fields =>
+        const projectedDataTable = (dataTable.project(['aaaa', 'a'])).select(fields =>
             fields.a.value <= 10 && fields.aaaa.value === 'demo');
         const expData = {
             schema: [
@@ -108,10 +108,10 @@ describe('#Datatable', () => {
             { name: 'aaaa', type: 'dimension' },
         ];
         const dataTable = new DataTable(data, schema);
-        const projectedDataTable = (dataTable.project('aaaa,a')).select(fields =>
+        const projectedDataTable = (dataTable.project(['aaaa', 'a'])).select(fields =>
                 fields.aaaa.value === 'demo');
             // Check if repetation select works
-        const projectedDataTable1 = projectedDataTable.select((fields, i) =>
+        const projectedDataTable1 = projectedDataTable.select(fields =>
                 fields.a.value === 10);
         let expData = {
             schema: [
@@ -402,8 +402,8 @@ describe('#Datatable', () => {
             { name: 'city', type: 'dimension' },
             { name: 'state', type: 'dimension' },
         ];
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA')).project('city,state');
-        const dataTable2 = (new DataTable(data2, schema2, 'TableB')).project('city,state');
+        const dataTable1 = (new DataTable(data1, schema1, 'TableA')).project(['city', 'state']);
+        const dataTable2 = (new DataTable(data2, schema2, 'TableB')).project(['city', 'state']);
 
         expect(dataTable1.difference(dataTable2).getData()).to.deep.equal({
             schema: [

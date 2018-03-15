@@ -29,20 +29,15 @@ class DataTable extends Relation {
      * the clone of the DataTable.
      * @return {DataTable} The cloned DataTable.
      */
-    clone () {
-        const retDataTable = new DataTable(this);
-        // Copy the required property
-        retDataTable.colIdentifier = this.colIdentifier;
-        retDataTable.rowDiffset = this.rowDiffset;
-        retDataTable.fieldMap = this.fieldMap;
-        return retDataTable;
+    clone() {
+        return new DataTable(this);
     }
 
     /**
      * extends the clone functionality with the child parent relationship
      * @return {DataTable} The cloned DataTable
      */
-    cloneAsChild () {
+    cloneAsChild() {
         const retDataTable = this.clone();
         this.child.push(retDataTable);
         retDataTable.parent = this;
@@ -54,7 +49,7 @@ class DataTable extends Relation {
      * to it's parent for the same
      * @return {Object} Field store
      */
-    getNameSpace () {
+    getNameSpace() {
         let child = this;
         let nameSpace;
         if (this.columnNameSpace) { return this.columnNameSpace; }
@@ -75,7 +70,7 @@ class DataTable extends Relation {
      * @param {boolean} rowWise this define how the data need to be returned row wise or column wise
      * @return {Array} multidimensional array of the data
      */
-    getData (rowWise = false) {
+    getData(rowWise = false) {
         return dataBuilder.call(this, this.getNameSpace().fields, this.rowDiffset,
             this.colIdentifier, this.sortingDetails, { rowWise });
     }
@@ -96,7 +91,7 @@ class DataTable extends Relation {
      * name as the value
      * @return {DataTable}           The cloned DataTable with the rename columns
      */
-    rename (schemaObj) {
+    rename(schemaObj) {
         const cloneDataTable = this.cloneAsChild();
         const schemaArr = cloneDataTable.colIdentifier.split(',');
         const fieldStore = this.getNameSpace().fields;
@@ -131,7 +126,7 @@ class DataTable extends Relation {
      * DataTable
      * @return {DataTable}          the new DataTable created by joining
      */
-    join (joinWith, filterFn) {
+    join(joinWith, filterFn) {
         return crossProduct(this, joinWith, filterFn);
     }
 
@@ -143,7 +138,7 @@ class DataTable extends Relation {
      * @param  {DataTable} joinWith the DataTable with whome this DataTable will be joined
      * @return {DataTable}          The new joind DataTable
      */
-    naturalJoin (joinWith) {
+    naturalJoin(joinWith) {
         return crossProduct(this, joinWith, naturalJoinFilter(this, joinWith), true);
     }
 
@@ -154,7 +149,7 @@ class DataTable extends Relation {
      * @param  {DataTable} unionWith The DataTable with which this table will be united
      * @return {DataTable}           The new DataTable with the vertical joining
      */
-    union (unionWith) {
+    union(unionWith) {
         return union(this, unionWith);
     }
 
@@ -165,19 +160,31 @@ class DataTable extends Relation {
      * @param  {DataTable} differenceWith The DataTable with which this table will be united
      * @return {DataTable}           The new DataTable with the vertical joining
      */
-    difference (differenceWith) {
+    difference(differenceWith) {
         return difference(this, differenceWith);
     }
 
     /**
      * Set the projection of the DataTable. It actually create a clone DataTable
      * then it will apply the projection on the cloned DataTable.
-     * @param {string} projString the string with column to be project seperated by comma.
+     * @param {Array.<string | Regexp>} projField column name or regular expression.
      * @return {DataTable} newly created DataTable with the given projection.
      */
-    project (projString) {
+    project(projField) {
         const cloneDataTable = this.cloneAsChild();
-        cloneDataTable.projectHelper(projString);
+        const allFields = Object.keys(this.fieldMap);
+
+        let normalizedProjField = projField.reduce((acc, field) => {
+            if (field.constructor.name === 'RegExp') {
+                acc.push(...allFields.filter(fieldName => fieldName.search(field) !== -1));
+            } else if (field in this.fieldMap) {
+                // If the field is string and it really exists
+                acc.push(field);
+            }
+            return acc;
+        }, []);
+        normalizedProjField = Array.from(new Set(normalizedProjField)).map(field => field.trim());
+        cloneDataTable.projectHelper(normalizedProjField.join(','));
         return cloneDataTable;
     }
 
@@ -187,7 +194,7 @@ class DataTable extends Relation {
      * if it return true the row will be there in the DataTable
      * @return {DataTable} The cloned DataTable with the required selection;
      */
-    select (selectFn) {
+    select(selectFn) {
         const cloneDataTable = this.cloneAsChild();
         cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn);
         return cloneDataTable;
@@ -204,7 +211,7 @@ class DataTable extends Relation {
      * @param  {Object|Function|string} reducers  reducer function
      * @return {DataTable}           new DataTable with the required operations
      */
-    groupBy (fieldsArr, reducers) {
+    groupBy(fieldsArr, reducers) {
         return groupBy(this, fieldsArr, reducers);
     }
 
@@ -227,7 +234,7 @@ class DataTable extends Relation {
      * @param  {Array} sortList The array of all the column that need to be sorted
      * @return {DataTable}            it's own instance
      */
-    sort (sortList) {
+    sort(sortList) {
         sortList.forEach((row) => {
             const currRow = row;
             currRow[1] = row[1] === 'desc' ? 'desc' : 'asc';
