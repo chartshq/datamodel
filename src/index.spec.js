@@ -432,4 +432,27 @@ describe('#Datatable', () => {
             uids: [0, 1, 2, 3, 4, 5]
         });
     });
+    it('tests creating a computed measure', () => {
+        const data1 = [
+            { profit: 10, sales: 20, city: 'a', state: 'aa' },
+            { profit: 15, sales: 25, city: 'b', state: 'bb' },
+            { profit: 10, sales: 20, city: 'a', state: 'ab' },
+            { profit: 15, sales: 25, city: 'b', state: 'ba' },
+        ];
+        const schema1 = [
+            { name: 'profit', type: 'measure' },
+            { name: 'sales', type: 'measure' },
+            { name: 'city', type: 'dimension' },
+            { name: 'state', type: 'dimension' },
+        ];
+        const dataTable = new DataTable(data1, schema1, 'Yo');
+        const child = dataTable.calculatedMeasure({
+            name: 'Efficiency'
+        }, ['profit', 'sales'], (profit, sales) => profit / sales);
+        const childData = child.getData().data;
+        const efficiency = childData[0][childData[0].length - 1];
+        expect(
+            efficiency
+        ).to.equal(0.5);
+    });
 });
