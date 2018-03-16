@@ -6,7 +6,7 @@ import union from './operator/union';
 import difference from './operator/difference';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import { groupBy } from './operator/group-by';
-import { FIELD_TYPE } from './enums';
+import { FIELD_TYPE, SELECTION_MODE, PROJECTION_MODE } from './enums';
 import { Measure } from './fields';
 
 /**
@@ -173,10 +173,9 @@ class DataTable extends Relation {
      * @param {Array.<string | Regexp>} projField column name or regular expression.
      * @return {DataTable} newly created DataTable with the given projection.
      */
-    project(projField) {
-        const cloneDataTable = this.cloneAsChild();
+    project(projField, config = {}) {
         const allFields = Object.keys(this.fieldMap);
-
+        const { mode } = config;
         let normalizedProjField = projField.reduce((acc, field) => {
             if (field.constructor.name === 'RegExp') {
                 acc.push(...allFields.filter(fieldName => fieldName.search(field) !== -1));
@@ -187,6 +186,11 @@ class DataTable extends Relation {
             return acc;
         }, []);
         normalizedProjField = Array.from(new Set(normalizedProjField)).map(field => field.trim());
+        if (mode === PROJECTION_MODE.EXCLUDE) {
+            const rejectionSet = allFields.filter(fieldName => normalizedProjField.indexOf(fieldName) === -1);
+            normalizedProjField = rejectionSet;
+        }
+        const cloneDataTable = this.cloneAsChild();
         cloneDataTable.projectHelper(normalizedProjField.join(','));
         return cloneDataTable;
     }
@@ -195,11 +199,26 @@ class DataTable extends Relation {
      * Set the selection of the cloned DataTable
      * @param  {functiona} selectFn The function which will be looped through all the data
      * if it return true the row will be there in the DataTable
+     * @param {Object} config The mode configuration.
+     * @param {string} config.mode The mode of selection.
      * @return {DataTable} The cloned DataTable with the required selection;
      */
-    select(selectFn) {
+    select(selectFn, config = {}) {
+        // handle ALL selection mode
+        if (config.mode === SELECTION_MODE.ALL) {
+            // do anormal selection
+            const firstClone = this.cloneAsChild();
+            firstClone.selectHelper(firstClone.getNameSpace().fields, selectFn, {});
+            // do an inverse selection
+            const rejectClone = this.cloneAsChild();
+            rejectClone.selectHelper(rejectClone.getNameSpace().fields, selectFn, {
+                mode: SELECTION_MODE.INVERSE,
+            });
+            // return an array with both selections
+            return [firstClone, rejectClone];
+        }
         const cloneDataTable = this.cloneAsChild();
-        cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn);
+        cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
         return cloneDataTable;
     }
 
@@ -248,7 +267,7 @@ class DataTable extends Relation {
 
     /**
      * This function is used to create a calculated measure in the datatable.
-     * 
+     *
      * @param {Object} config The input config.
      * @param {string} config.name The name of the field.
      * @param {Array<string>} fields Array of fields to take as input.

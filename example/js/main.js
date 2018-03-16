@@ -56,6 +56,55 @@ d3.json('../../js/cars.json', (data) => {
         name: 'Efficiency'
     }, ['profit', 'sales'], (profit, sales) => profit / sales);
     console.log(child.getData().data);
+    // test selection
+    console.log('Testing selection')
+    const selected = dataTable.select((fields) => {
+        return fields.profit.value === 10;
+    });
+    console.log(selected.getData())
+
+    console.log('Testing rejection');
+    const rejected = dataTable.select((fields) => {
+        return fields.profit.value === 10;
+    }, {
+        mode: 'inverse'
+    });
+    console.log(rejected.getData());
+
+    console.log('Testing all mode');
+    const teenTitansUnite = dataTable.select((fields) => {
+        return fields.profit.value === 10;
+    }, {
+        mode: 'all'
+    });
+    console.log('ALL: selection')
+    console.log(teenTitansUnite[0].getData());
+    console.log('ALL: rejection');
+    console.log(teenTitansUnite[1].getData());
+
+    console.log('Test projection')
+    const project = dataTable.project(['profit', 'sales']);
+    console.log(project.getData().data);
+    const reject = dataTable.project(['profit', 'sales'], {
+        mode: 'exclude'
+    });
+    console.log(reject.getData().data);
+
+    const yodata = [
+        { a: 10, aaa: 20, aaaa: 'd' },
+        { a: 15, aaa: 25, aaaa: 'demo' },
+    ];
+    const yoschema = [
+        { name: 'a', type: 'measure' },
+        { name: 'aaa', type: 'measure' },
+        { name: 'aaaa', type: 'dimension' },
+    ];
+    const yodataTable = new DataTable(yodata, yoschema);
+    const yoprojectedDataTable = yodataTable.project(['aaaa', 'a']);
+    const invProjectedDataTable = yodataTable.project(['aaaa', 'a'], {
+        mode: 'exclude'
+    });
+    console.log(invProjectedDataTable.getData())
 });
 
 function load (url) {
