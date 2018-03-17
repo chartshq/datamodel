@@ -38,6 +38,73 @@ d3.json('../../js/cars.json', (data) => {
         return data.Acceleration.value >= 15;
     });
     console.log(dts.getData());
+    const data1 = [
+        { profit: 10, sales: 20, city: 'a', state: 'aa' },
+        { profit: 15, sales: 25, city: 'b', state: 'bb' },
+        { profit: 10, sales: 20, city: 'a', state: 'ab' },
+        { profit: 15, sales: 25, city: 'b', state: 'ba' },
+    ];
+    const schema1 = [
+        { name: 'profit', type: 'measure' },
+        { name: 'sales', type: 'measure' },
+        { name: 'city', type: 'dimension' },
+        { name: 'state', type: 'dimension' },
+    ];
+    const dataTable = new DataTable(data1, schema1, 'Yo');
+    const next = dataTable.project(['profit', 'sales']).select(f => +f.profit > 10);
+    const child = next.calculatedMeasure({
+        name: 'Efficiency'
+    }, ['profit', 'sales'], (profit, sales) => profit / sales);
+    console.log(child.getData().data);
+    // test selection
+    console.log('Testing selection')
+    const selected = dataTable.select((fields) => {
+        return fields.profit.value === 10;
+    });
+    console.log(selected.getData())
+
+    console.log('Testing rejection');
+    const rejected = dataTable.select((fields) => {
+        return fields.profit.value === 10;
+    }, {
+        mode: 'inverse'
+    });
+    console.log(rejected.getData());
+
+    console.log('Testing all mode');
+    const teenTitansUnite = dataTable.select((fields) => {
+        return fields.profit.value === 10;
+    }, {
+        mode: 'all'
+    });
+    console.log('ALL: selection')
+    console.log(teenTitansUnite[0].getData());
+    console.log('ALL: rejection');
+    console.log(teenTitansUnite[1].getData());
+
+    console.log('Test projection')
+    const project = dataTable.project(['profit', 'sales']);
+    console.log(project.getData().data);
+    const reject = dataTable.project(['profit', 'sales'], {
+        mode: 'exclude'
+    });
+    console.log(reject.getData().data);
+
+    const yodata = [
+        { a: 10, aaa: 20, aaaa: 'd' },
+        { a: 15, aaa: 25, aaaa: 'demo' },
+    ];
+    const yoschema = [
+        { name: 'a', type: 'measure' },
+        { name: 'aaa', type: 'measure' },
+        { name: 'aaaa', type: 'dimension' },
+    ];
+    const yodataTable = new DataTable(yodata, yoschema);
+    const yoprojectedDataTable = yodataTable.project(['aaaa', 'a']);
+    const invProjectedDataTable = yodataTable.project(['aaaa', 'a'], {
+        mode: 'exclude'
+    });
+    console.log(invProjectedDataTable.getData())
 });
 
 function load (url) {

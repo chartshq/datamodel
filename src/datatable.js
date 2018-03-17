@@ -4,7 +4,10 @@ import crossProduct from './operator/cross-product';
 import naturalJoinFilter from './operator/natural-join-filter-function';
 import union from './operator/union';
 import difference from './operator/difference';
+import rowDiffsetIterator from './operator/row-diffset-iterator';
 import { groupBy } from './operator/group-by';
+import { FIELD_TYPE, SELECTION_MODE, PROJECTION_MODE } from './enums';
+import { Measure } from './fields';
 
 /**
  * The main class
@@ -170,10 +173,9 @@ class DataTable extends Relation {
      * @param {Array.<string | Regexp>} projField column name or regular expression.
      * @return {DataTable} newly created DataTable with the given projection.
      */
-    project(projField) {
-        const cloneDataTable = this.cloneAsChild();
+    project(projField, config = {}) {
         const allFields = Object.keys(this.fieldMap);
-
+        const { mode } = config;
         let normalizedProjField = projField.reduce((acc, field) => {
             if (field.constructor.name === 'RegExp') {
                 acc.push(...allFields.filter(fieldName => fieldName.search(field) !== -1));
@@ -184,6 +186,11 @@ class DataTable extends Relation {
             return acc;
         }, []);
         normalizedProjField = Array.from(new Set(normalizedProjField)).map(field => field.trim());
+        if (mode === PROJECTION_MODE.EXCLUDE) {
+            const rejectionSet = allFields.filter(fieldName => normalizedProjField.indexOf(fieldName) === -1);
+            normalizedProjField = rejectionSet;
+        }
+        const cloneDataTable = this.cloneAsChild();
         cloneDataTable.projectHelper(normalizedProjField.join(','));
         return cloneDataTable;
     }
@@ -192,11 +199,26 @@ class DataTable extends Relation {
      * Set the selection of the cloned DataTable
      * @param  {functiona} selectFn The function which will be looped through all the data
      * if it return true the row will be there in the DataTable
+     * @param {Object} config The mode configuration.
+     * @param {string} config.mode The mode of selection.
      * @return {DataTable} The cloned DataTable with the required selection;
      */
-    select(selectFn) {
+    select(selectFn, config = {}) {
+        // handle ALL selection mode
+        if (config.mode === SELECTION_MODE.ALL) {
+            // do anormal selection
+            const firstClone = this.cloneAsChild();
+            firstClone.selectHelper(firstClone.getNameSpace().fields, selectFn, {});
+            // do an inverse selection
+            const rejectClone = this.cloneAsChild();
+            rejectClone.selectHelper(rejectClone.getNameSpace().fields, selectFn, {
+                mode: SELECTION_MODE.INVERSE,
+            });
+            // return an array with both selections
+            return [firstClone, rejectClone];
+        }
         const cloneDataTable = this.cloneAsChild();
-        cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn);
+        cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
         return cloneDataTable;
     }
 
@@ -241,6 +263,68 @@ class DataTable extends Relation {
         });
         this.sortingDetails = sortList;
         return this;
+    }
+
+    /**
+     * This function is used to create a calculated measure in the datatable.
+     *
+     * @param {Object} config The input config.
+     * @param {string} config.name The name of the field.
+     * @param {Array<string>} fields Array of fields to take as input.
+     * @param {Function} callback Callback supplied to calculate the property.
+     * @return {DataTable} New instance of datatable.
+     * @memberof DataTable
+     */
+    calculatedMeasure(config, fields, callback) {
+        const {
+            name,
+        } = config;
+        // get the fields present in datatable
+        const fieldMap = this.getFieldMap();
+        // validate that the supplied fields are present in datatable
+        // and are measures
+        const fieldIndices = fields.map((field) => {
+            const fieldSpec = fieldMap[field];
+            if (!fieldSpec) {
+                throw new Error(`${field} is not a valid column name.`);
+            }
+            if (fieldSpec.def.type !== FIELD_TYPE.MEASURE) {
+                throw new Error(`${field} is not a ${FIELD_TYPE.MEASURE}.`);
+            }
+            return fieldSpec.index;
+        });
+        const clone = this.cloneAsChild();
+        const namespaceFields = clone.getNameSpace().fields;
+        const suppliedFields = fieldIndices.map(idx => namespaceFields[idx]);
+        // array of computed data values
+        const computedValues = [];
+        // iterate over data based on row diffset
+        rowDiffsetIterator(clone.rowDiffset, (i) => {
+            // get the data corresponding to supplied fields
+            const fieldsData = suppliedFields.map(field => field.data[i]);
+            // get the computed value based on user supplied callback
+            const computedValue = callback(...fieldsData);
+            computedValues[i] = computedValue;
+        });
+        // create a field in datatable to store this field
+        const nameSpaceEntry = new Measure(name, computedValues, {
+            name,
+            type: FIELD_TYPE.MEASURE,
+        });
+        // push this to the child datatables field store
+        namespaceFields.push(nameSpaceEntry);
+        // update the field map of child datatable
+        const childFieldMap = clone.getFieldMap();
+        childFieldMap[name] = {
+            index: namespaceFields.length - 1,
+            def: {
+                name,
+                type: FIELD_TYPE.MEASURE,
+            },
+        };
+        // update the column identifier
+        clone.colIdentifier += `,${name}`;
+        return clone;
     }
     // ============================== Accessable functionality ends ======================= //
 }

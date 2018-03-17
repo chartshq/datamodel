@@ -3,6 +3,7 @@ import fieldStore from './field-store';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import defaultConfig from './defalult-config';
 import * as converter from './converter';
+import { SELECTION_MODE } from './enums';
 
 /*
  * @todo the value cell is the most basic class. We would have support for StringValue, NumberValue, DateTimeValue
@@ -151,16 +152,23 @@ class Relation {
      * Set the selection to the DataTable
      * @param  {Array} fields   FieldStore fields array
      * @param  {Function} selectFn The filter function
+     * @param {Object} config The mode configuration.
+     * @param {String} config.mode The type of mode to use.
      * @return {Instance}          Instance of the class (this)
      */
-    selectHelper(fields, selectFn) {
+    selectHelper(fields, selectFn, config) {
         const newRowDiffSet = [];
         let lastInsertedValue = -1;
+        let { mode } = config;
             // newRowDiffSet last index
         let li;
         const store = {};
+        let checker = index => selectFn(prepareSelectionData(fields, index));
+        if (mode === SELECTION_MODE.INVERSE) {
+            checker = index => !selectFn(prepareSelectionData(fields, index));
+        }
         rowDiffsetIterator(this.rowDiffset, (i) => {
-            if (selectFn(prepareSelectionData(fields, i), i, this, store)) {
+            if (checker(i)) {
                 // Check for if this value to be attached to the last diffset ie. 1-5 format
                 if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
                     li = newRowDiffSet.length - 1;

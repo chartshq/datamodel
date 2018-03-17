@@ -55,6 +55,35 @@ describe('#Datatable', () => {
         // Check The return data
         expect(projectedDataTable.getData()).to.deep.equal(expData);
     });
+    it('tests inverted projection', () => {
+        const yodata = [
+            { a: 10, aaa: 20, aaaa: 'd' },
+            { a: 15, aaa: 25, aaaa: 'demo' },
+        ];
+        const yoschema = [
+            { name: 'a', type: 'measure' },
+            { name: 'aaa', type: 'measure' },
+            { name: 'aaaa', type: 'dimension' },
+        ];
+        const yodataTable = new DataTable(yodata, yoschema);
+        const invProjectedDataTable = yodataTable.project(['aaaa', 'a'], {
+            mode: 'exclude'
+        });
+        const expected = {
+            data: [
+                [20],
+                [25]
+            ],
+            schema: [
+                {
+                    name: 'aaa',
+                    type: 'measure'
+                }
+            ],
+            uids: [0, 1]
+        };
+        expect(expected).to.deep.equal(invProjectedDataTable.getData());
+    });
     it('Selection functionality', () => {
         const data = [
             { a: 10, aaa: 20, aaaa: 'd' },
@@ -88,6 +117,60 @@ describe('#Datatable', () => {
         expect(projectedDataTable.rowDiffset).to.equal('2-3');
         // Check The return data
         expect(projectedDataTable.getData()).to.deep.equal(expData);
+    });
+    it('tests selection modes', () => {
+        const data1 = [
+            { profit: 10, sales: 20, city: 'a', state: 'aa' },
+            { profit: 15, sales: 25, city: 'b', state: 'bb' },
+            { profit: 10, sales: 20, city: 'a', state: 'ab' },
+            { profit: 15, sales: 25, city: 'b', state: 'ba' },
+        ];
+        const schema1 = [
+            { name: 'profit', type: 'measure' },
+            { name: 'sales', type: 'measure' },
+            { name: 'city', type: 'dimension' },
+            { name: 'state', type: 'dimension' },
+        ];
+        const dataTable = new DataTable(data1, schema1, 'Yo');
+        const selected = dataTable.select(fields => fields.profit.value === 10).getData();
+        const rejected = dataTable.select(fields => fields.profit.value === 10, {
+            mode: 'inverse'
+        }).getData();
+        const teenTitansUnite = dataTable.select(fields => fields.profit.value === 10, {
+            mode: 'all'
+        });
+        expect(selected).to.deep.equal({
+            schema: schema1,
+            data: [
+                [10, 20, 'a', 'aa'],
+                [10, 20, 'a', 'ab']
+            ],
+            uids: [0, 2]
+        });
+        expect(rejected).to.deep.equal({
+            schema: schema1,
+            data: [
+                [15, 25, 'b', 'bb'],
+                [15, 25, 'b', 'ba']
+            ],
+            uids: [1, 3]
+        });
+        expect(teenTitansUnite[0].getData()).to.deep.equal({
+            schema: schema1,
+            data: [
+                [10, 20, 'a', 'aa'],
+                [10, 20, 'a', 'ab']
+            ],
+            uids: [0, 2]
+        });
+        expect(teenTitansUnite[1].getData()).to.deep.equal({
+            schema: schema1,
+            data: [
+                [15, 25, 'b', 'bb'],
+                [15, 25, 'b', 'ba']
+            ],
+            uids: [1, 3]
+        });
     });
     it('Selection functionality extreme', () => {
         const data = [
@@ -431,5 +514,29 @@ describe('#Datatable', () => {
             ],
             uids: [0, 1, 2, 3, 4, 5]
         });
+    });
+    it('tests creating a computed measure', () => {
+        const data1 = [
+            { profit: 10, sales: 20, city: 'a', state: 'aa' },
+            { profit: 15, sales: 25, city: 'b', state: 'bb' },
+            { profit: 10, sales: 20, city: 'a', state: 'ab' },
+            { profit: 15, sales: 25, city: 'b', state: 'ba' },
+        ];
+        const schema1 = [
+            { name: 'profit', type: 'measure' },
+            { name: 'sales', type: 'measure' },
+            { name: 'city', type: 'dimension' },
+            { name: 'state', type: 'dimension' },
+        ];
+        const dataTable = new DataTable(data1, schema1, 'Yo');
+        const next = dataTable.project(['profit', 'sales']).select(f => +f.profit > 10);
+        const child = next.calculatedMeasure({
+            name: 'Efficiency'
+        }, ['profit', 'sales'], (profit, sales) => profit / sales);
+        const childData = child.getData().data;
+        const efficiency = childData[0][childData[0].length - 1];
+        expect(
+            efficiency
+        ).to.equal(0.6);
     });
 });

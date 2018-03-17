@@ -24,3 +24,14 @@ export const DIM_SUBTYPE = {
     TEMPORAL: 'temporal',
     GEO: 'geo'
 };
+
+export const SELECTION_MODE = {
+    SELECTION: 'selection',
+    INVERSE: 'inverse',
+    ALL: 'all'
+};
+
+export const PROJECTION_MODE = {
+    INCLUDE: 'include',
+    EXCLUDE: 'exclude',
+};
