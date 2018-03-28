@@ -7,7 +7,7 @@ import difference from './operator/difference';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import { groupBy } from './operator/group-by';
 import { FIELD_TYPE, SELECTION_MODE, PROJECTION_MODE } from './enums';
-import { Measure } from './fields';
+import { Measure, Dimension } from './fields';
 
 /**
  * The main class
@@ -324,6 +324,76 @@ class DataTable extends Relation {
         };
         // update the column identifier
         clone.colIdentifier += `,${name}`;
+        return clone;
+    }
+
+    /**
+     * This method is used to generate new dimensions from existing
+     * dimensions by using the supllied callback.
+     *
+     * @param {Array<Object>} dimArray Array of objects with the names of new dimensions to create.
+     * @param {Array<string>} dependents Array of the dimensions to use to create new dimensions.
+     * @param {Function} callback callback to execute to create new dimensions.
+     * @param {Object} config Object wth configuration options.
+     * @param {string} config.removeDependentDimensions Flag to indicate whether dependent dimensions should be removed.
+     * @memberof DataTable
+     */
+    generateDimensions(dimArray, dependents, callback, config = {}) {
+        // get the fields present in datatable
+        const fieldMap = this.getFieldMap();
+        // validate that the supplied fields are present in datatable
+        // and are measures
+        const depIndices = dependents.map((field) => {
+            const fieldSpec = fieldMap[field];
+            if (!fieldSpec) {
+                throw new Error(`${field} is not a valid column name.`);
+            }
+            if (fieldSpec.def.type !== FIELD_TYPE.DIMENSION) {
+                throw new Error(`${field} is not a ${FIELD_TYPE.DIMENSION}.`);
+            }
+            return fieldSpec.index;
+        });
+        const clone = this.cloneAsChild();
+        const namespaceFields = clone.getNameSpace().fields;
+        const suppliedFields = depIndices.map(idx => namespaceFields[idx]);
+        // array of computed data values
+        const computedValues = [];
+        // iterate over data based on row diffset
+        rowDiffsetIterator(clone.rowDiffset, (i) => {
+            // get the data corresponding to supplied fields
+            const fieldsData = suppliedFields.map(field => field.data[i]);
+            // get the computed value based on user supplied callback
+            const computedValue = callback(...fieldsData);
+            computedValues[i] = computedValue;
+        });
+        // create new fields in the datatable
+        dimArray.forEach((dimObj, dIdx) => {
+            const { name } = dimObj;
+            const dimensionData = computedValues.map(dataArray => dataArray[dIdx]);
+            // create a field in datatable to store this field
+            const nameSpaceEntry = new Dimension(name, dimensionData, {
+                name,
+                type: FIELD_TYPE.DIMENSION,
+            });
+            // push this to the child datatables field store
+            namespaceFields.push(nameSpaceEntry);
+            // update the field map of child datatable
+            const childFieldMap = clone.getFieldMap();
+            childFieldMap[name] = {
+                index: namespaceFields.length - 1,
+                def: {
+                    name,
+                    type: FIELD_TYPE.DIMENSION,
+                },
+            };
+            // update the column identifier
+            clone.colIdentifier += `,${name}`;
+        });
+        if (config.removeDependentDimensions) {
+            return clone.project(dependents, {
+                mode: PROJECTION_MODE.EXCLUDE,
+            });
+        }
         return clone;
     }
     // ============================== Accessable functionality ends ======================= //

@@ -539,4 +539,48 @@ describe('#Datatable', () => {
             efficiency
         ).to.equal(0.6);
     });
+    it('tests generating new dimensions', () => {
+        const data1 = [
+            { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+            { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+            { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+            { profit: 15, sales: 25, first: 'White', second: 'walls' },
+        ];
+        const schema1 = [
+            { name: 'profit', type: 'measure' },
+            { name: 'sales', type: 'measure' },
+            { name: 'first', type: 'dimension' },
+            { name: 'second', type: 'dimension' },
+        ];
+        const dataTable = new DataTable(data1, schema1, 'Yo');
+        const newDt = dataTable.generateDimensions([{
+            name: 'Song'
+        }, {
+            name: 'InvertedSong'
+        }], ['first', 'second'], (first, second) => [
+            `${first} ${second}`,
+            `${second} ${first}`
+        ]);
+        const songData = newDt.project(['Song']).getData().data;
+        const invSongData = newDt.project(['InvertedSong']).getData().data;
+        expect(
+            songData.length === 4 &&
+            invSongData.length === 4
+        ).to.be.true;
+        // test removing dependents
+        const exDt = dataTable.generateDimensions([{
+            name: 'Song'
+        }, {
+            name: 'InvertedSong'
+        }], ['first', 'second'], (first, second) => [
+            `${first} ${second}`,
+            `${second} ${first}`
+        ], {
+            removeDependentDimensions: true
+        });
+        const fieldMap = exDt.getFieldMap();
+        expect(
+            !(fieldMap.first && fieldMap.second)
+        ).to.be.true;
+    });
 });
