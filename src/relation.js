@@ -139,7 +139,7 @@ class Relation {
         this.colIdentifier = projString;
 
         presentField = presentField.filter(field =>
-            projString.search(new RegExp(`^${field}\\,|\\,${field}\\,|\\,${field}$`, 'i')) !== -1);
+            projString.search(new RegExp(`^${field}\\,|\\,${field}\\,|\\,${field}$|^${field}$`, 'i')) !== -1);
 
         this.fieldMap = presentField.reduce((acc, val) => {
             acc[val] = this.fieldMap[val];
@@ -180,6 +180,10 @@ class Relation {
         });
         this.rowDiffset = newRowDiffSet.join(',');
         return this;
+    }
+
+    isEmpty () {
+        return !this.rowDiffset.length;
     }
 }
 
