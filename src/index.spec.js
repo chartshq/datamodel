@@ -583,4 +583,45 @@ describe('#Datatable', () => {
             !(fieldMap.first && fieldMap.second)
         ).to.be.true;
     });
+    it('tests datatable propogation', () => {
+        const data1 = [
+            { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+            { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+            { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+            { profit: 15, sales: 25, first: 'White', second: 'walls' },
+        ];
+        const schema1 = [
+            { name: 'profit', type: 'measure' },
+            { name: 'sales', type: 'measure' },
+            { name: 'first', type: 'dimension' },
+            { name: 'second', type: 'dimension' },
+        ];
+        let projetionFlag = false;
+        let selectionFlag = false;
+        let groupByFlag = false;
+        const dataTable = new DataTable(data1, schema1, 'Yo');
+        const projected = dataTable.project(['profit']);
+        const selected = dataTable.select(fields => fields.profit.value > 10);
+        const grouped = dataTable.groupBy(['sales']);
+        // setup listeners
+        projected.on('propogation', ({ payload, data }) => {
+            projetionFlag = true;
+        });
+        selected.on('propogation', ({ payload, data }) => {
+            selectionFlag = true;
+        });
+        grouped.on('propogation', ({ payload, data }) => {
+            groupByFlag = true;
+        });
+        const identifiers = [
+            ['first', 'second'],
+            ['Hey', 'Jude']
+        ];
+        dataTable.propogate({
+            action: 'reaction'
+        }, identifiers);
+        expect(
+            projetionFlag && selectionFlag && groupByFlag
+        ).to.be.true;
+    });
 });

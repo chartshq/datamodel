@@ -35,3 +35,5 @@ export const PROJECTION_MODE = {
     INCLUDE: 'include',
     EXCLUDE: 'exclude',
 };
+
+export const PROPOGATION = 'propogation';

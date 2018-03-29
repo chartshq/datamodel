@@ -6,7 +6,13 @@ import union from './operator/union';
 import difference from './operator/difference';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import { groupBy } from './operator/group-by';
-import { FIELD_TYPE, SELECTION_MODE, PROJECTION_MODE } from './enums';
+import {
+    FIELD_TYPE,
+    SELECTION_MODE,
+    PROJECTION_MODE,
+    PROPOGATION,
+    DATA_FORMAT,
+ } from './enums';
 import { Measure, Dimension } from './fields';
 
 /**
@@ -22,6 +28,10 @@ class DataTable extends Relation {
         super(...args);
         // This will hold all the children DataTable
         this.child = [];
+        // array to hold all the grouped children
+        this.groupedChildren = {};
+        // callback to call on propogation
+        this._onPropogation = () => {};
         this.sortingDetails = {
             column: [],
             type: [],
@@ -234,7 +244,10 @@ class DataTable extends Relation {
      * @return {DataTable}           new DataTable with the required operations
      */
     groupBy(fieldsArr, reducers) {
-        return groupBy(this, fieldsArr, reducers);
+        const newDatatable = groupBy(this, fieldsArr, reducers);
+        this.groupedChildren[fieldsArr.join()] = newDatatable;
+        newDatatable.parent = this;
+        return newDatatable;
     }
 
     /**
@@ -396,6 +409,100 @@ class DataTable extends Relation {
         }
         return clone;
     }
+
+    /**
+     * This method is used to propogate changes across all connected
+     *
+     * @param {Object} payload Interaction specific details.
+     * @param {Array} identifiers list of identifiers that were interacted with.
+     * @memberof DataTable
+     */
+    propogate(payload, identifiers, fromSource) {
+        let propTable = identifiers;
+        if (!(propTable instanceof DataTable)) {
+            const schema = identifiers[0].map(val => ({
+                name: val,
+                type: FIELD_TYPE.DIMENSION,
+            }));
+            // format the data
+            // @TODO: no documentation on how CSV_ARR data format works.
+            const data = [];
+            const header = identifiers[0];
+            for (let i = 0; i < identifiers.length; i += 1) {
+                const vals = identifiers[i];
+                const temp = {};
+                vals.forEach((fieldVal, cIdx) => {
+                    temp[header[cIdx]] = fieldVal;
+                });
+                data.push(temp);
+            }
+            propTable = new DataTable(data, schema);
+        }
+        // source won't be defined the first time around
+        const source = fromSource || this;
+        const forward = (dataTable) => {
+            dataTable.handlePropogation({
+                payload,
+                data: propTable,
+            });
+            dataTable.propogate(payload, propTable, source);
+        };
+        // propogate event to parent
+        if (this.parent && source !== this.parent) {
+            forward(this.parent);
+        }
+        // handle children
+        this.child.forEach((cDt) => {
+            if (cDt !== source) {
+                forward(cDt);
+            }
+        });
+        // handle grouped childen
+        Object.keys(this.groupedChildren).forEach((groupString) => {
+            const joinedDT = this.join(propTable);
+            const projectionParams = groupString.split(',');
+            const groupedDT = joinedDT.project(projectionParams);
+            const target = this.groupedChildren[groupString];
+            target.handlePropogation({
+                payload,
+                data: groupedDT,
+            });
+            target.propogate(payload, groupedDT, source);
+        });
+    }
+
+    /**
+     * This method is used to associate a callback with an
+     * event name
+     *
+     * @param {string} eventName The name of the event.
+     * @param {Function} callback The callback to invoke.
+     * @return {DataTable} This instance.
+     * @memberof DataTable
+     */
+    on(eventName, callback) {
+        switch (eventName) {
+        case PROPOGATION:
+            this._onPropogation = callback;
+            break;
+        default:
+            break;
+        }
+        return this;
+    }
+
+    /**
+     * This method is used to invoke the method associated with
+     * prpogation.
+     *
+     * @param {Object} payload The interaction payload.
+     * @param {Array} identifiers The list of identifiers.
+     * @memberof DataTable
+     */
+    handlePropogation(payload, identifiers) {
+        this._onPropogation(payload, identifiers);
+    }
+
     // ============================== Accessable functionality ends ======================= //
 }
 
