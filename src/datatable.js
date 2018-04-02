@@ -515,7 +515,7 @@ class DataTable extends Relation {
                 payload,
                 data: propTable,
             });
-            dataTable.propogate(propTable, payload, source);
+            dataTable.propogate(propTable, payload, this);
         };
         // propogate event to parent
         if (this.parent && source !== this.parent) {
@@ -537,7 +537,7 @@ class DataTable extends Relation {
                 payload,
                 data: groupedDT,
             });
-            target.propogate(groupedDT, payload, source);
+            target.propogate(groupedDT, payload, this);
         });
     }
 
@@ -571,6 +571,53 @@ class DataTable extends Relation {
      */
     handlePropogation(payload, identifiers) {
         this._onPropogation(payload, identifiers);
+    }
+
+    bin(measureName, config, binnedFieldName) {
+        // get the data for field to be binned
+        const fieldIndex = this.fieldMap[measureName].index;
+        const fieldData = this.getNameSpace().fields[fieldIndex].data;
+        // get the buckets
+        const { buckets } = config;
+        const startVals = buckets.map(item => item.start || 0);
+        const end = startVals.length - 1;
+        const getLabel = (value, start) => {
+            if (start === end) {
+                return buckets[start].label;
+            }
+            const midIdx = start + Math.floor((end - start) / 2);
+            const midVal = startVals[midIdx];
+            if (value > midVal) {
+                return getLabel(value, midIdx);
+            }
+            return buckets[midIdx].label;
+        };
+        const labelData = [];
+        // iterate over field data and assign label
+        rowDiffsetIterator(this.rowDiffset, (i) => {
+            const value = fieldData[i];
+            const label = getLabel(value, 0);
+            labelData.push(label);
+        });
+        const clone = this.cloneAsChild();
+        const namespaceFields = clone.getNameSpace().fields;
+        const nameSpaceEntry = new Dimension(binnedFieldName, labelData, {
+            name: binnedFieldName,
+            type: FIELD_TYPE.DIMENSION,
+        });
+        // push this to the child datatables field store
+        namespaceFields.push(nameSpaceEntry);
+        // update the field map of child datatable
+        const childFieldMap = clone.getFieldMap();
+        childFieldMap[binnedFieldName] = {
+            index: namespaceFields.length - 1,
+            def: {
+                name: binnedFieldName,
+                type: FIELD_TYPE.DIMENSION,
+            },
+        };
+        // update the column identifier
+        clone.colIdentifier += `,${binnedFieldName}`;
     }
 
     // ============================== Accessable functionality ends ======================= //
