@@ -411,6 +411,76 @@ class DataTable extends Relation {
     }
 
     /**
+     * This method is used to create a dimension by converting
+     * existing dimensions.
+     *
+     * @param {Array.<string>} sourceFields The names of the source fields.
+     * @param {string} category The name of the new category.
+     * @param {string} valueName the name of the measure.
+     * @param {Function} callback callback used to calculate new names of source fields.
+     * @return {DataTable} A new datatable instance.
+     * @memberof DataTable
+     */
+    createDimensionFrom(sourceFields, category, valueName, callback) {
+        const fieldMap = this.getFieldMap();
+        const newNames = sourceFields.map(callback);
+        // create a data table with all the fields except sourceFields
+        const excluded = this.project(sourceFields, {
+            mode: PROJECTION_MODE.EXCLUDE,
+        });
+        // get the new field indices
+        const fieldIndices = sourceFields.map(name => fieldMap[name].index);
+        const projectedFields = excluded.getNameSpace().fields;
+        const existingFields = this.getNameSpace().fields;
+        const oldNames = excluded.colIdentifier.split(',');
+        const newData = [];
+        rowDiffsetIterator(excluded.rowDiffset, (i) => {
+            const temp = {};
+            oldNames.forEach((name, nIdx) => {
+                temp[name] = projectedFields[nIdx].data[i];
+            });
+            // add the new fields
+            const newTuples = fieldIndices.map((fieldsIndex, idx) => {
+                const addedTuple = {};
+                addedTuple[category] = newNames[idx];
+                addedTuple[valueName] = existingFields[fieldsIndex].data[i];
+                return addedTuple;
+            });
+            const newDataTuples = newTuples.map((tuple) => {
+                const finalTuple = {};
+                Object.entries(temp).forEach((entry) => {
+                    finalTuple[entry[0]] = entry[1];
+                });
+                Object.entries(tuple).forEach((secEntry) => {
+                    finalTuple[secEntry[0]] = secEntry[1];
+                });
+                return finalTuple;
+            });
+            newData.push(...newDataTuples);
+        });
+        // create a new data table with this data
+        const schema = Object.keys(newData[0]).map((fieldName) => {
+            if (fieldMap[fieldName]) {
+                return {
+                    name: fieldName,
+                    type: fieldMap[fieldName].def.type
+                };
+            }
+            if (fieldName === category) {
+                return {
+                    name: fieldName,
+                    type: FIELD_TYPE.DIMENSION,
+                };
+            }
+            return {
+                name: fieldName,
+                type: FIELD_TYPE.MEASURE,
+            };
+        });
+        return new DataTable(newData, schema);
+    }
+
+    /**
      * This method is used to propogate changes across all connected
      *
      * @param {Object} payload Interaction specific details.

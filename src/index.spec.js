@@ -624,4 +624,61 @@ describe('#Datatable', () => {
             projetionFlag && selectionFlag && groupByFlag
         ).to.be.true;
     });
+    it('tests create dimensions from function', () => {
+        const dataLicious = [
+            {
+                year: '2010',
+                Import_yo: 4000,
+                Export_dude: 3000
+            },
+            {
+                year: '2011',
+                Import_yo: 4000,
+                Export_dude: 7000
+            },
+            {
+                year: '2012',
+                Import_yo: 3000,
+                Export_dude: 5000
+            }
+        ];
+        const d_schema = [
+            {
+                name: 'year',
+                type: 'dimension'
+            },
+            {
+                name: 'Import_yo',
+                type: 'measure'
+            },
+            {
+                name: 'Export_dude',
+                type: 'measure'
+            }
+        ];
+        const dataInstance = new DataTable(dataLicious, d_schema);
+        const almostPivoted = dataInstance.createDimensionFrom(
+            ['Import_yo', 'Export_dude'],
+            'type',
+            'values',
+             values => values.split('_')[0]
+            );
+        const { schema, data } = almostPivoted.getData();
+        console.log(schema);
+        expect(schema).to.deep.equal([
+            {
+                name: 'year',
+                type: 'dimension',
+            },
+            {
+                name: 'type',
+                type: 'dimension'
+            },
+            {
+                name: 'values',
+                type: 'measure'
+            }
+        ]);
+        expect(data.length).to.equal(6);
+    });
 });

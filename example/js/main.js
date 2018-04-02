@@ -105,6 +105,41 @@ d3.json('../../js/cars.json', (data) => {
         mode: 'exclude'
     });
     console.log(invProjectedDataTable.getData())
+
+    const dataLicious = [
+        {
+            year: '2010',
+            Import_yo: 4000,
+            Export_dude: 3000
+        },
+        {
+            year: '2011',
+            Import_yo: 4000,
+            Export_dude: 7000
+        },
+        {
+            year: '2012',
+            Import_yo: 3000,
+            Export_dude: 5000
+        }
+    ];
+    const d_schema = [
+        {
+            name: 'year',
+            type: 'dimension'
+        },
+        {
+            name: 'Import_yo',
+            type: 'measure'
+        },
+        {
+            name: 'Export_dude',
+            type: 'measure'
+        }
+    ];
+    const dataInstance = new DataTable(dataLicious, d_schema);
+    const almostPivoted = dataInstance.createDimensionFrom(['Import_yo', 'Export_dude'], 'type', 'values', values => values.split('_')[0]);
+    console.log(almostPivoted.getData())
 });
 
 function load (url) {
