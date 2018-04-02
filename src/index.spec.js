@@ -617,7 +617,7 @@ describe('#Datatable', () => {
             ['first', 'second'],
             ['Hey', 'Jude']
         ];
-        dataTable.propogate(identifiers, {
+        dataTable.propagate(identifiers, {
             action: 'reaction'
         });
         expect(

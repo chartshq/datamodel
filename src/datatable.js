@@ -487,7 +487,7 @@ class DataTable extends Relation {
      * @param {Array} identifiers list of identifiers that were interacted with.
      * @memberof DataTable
      */
-    propogate(identifiers, payload, fromSource) {
+    propagate(identifiers, payload, fromSource) {
         let propTable = identifiers;
         if (!(propTable instanceof DataTable)) {
             const schema = identifiers[0].map(val => ({
@@ -515,7 +515,7 @@ class DataTable extends Relation {
                 payload,
                 data: propTable,
             });
-            dataTable.propogate(propTable, payload, this);
+            dataTable.propagate(propTable, payload, this);
         };
         // propogate event to parent
         if (this.parent && source !== this.parent) {
@@ -537,7 +537,7 @@ class DataTable extends Relation {
                 payload,
                 data: groupedDT,
             });
-            target.propogate(groupedDT, payload, this);
+            target.propagate(groupedDT, payload, this);
         });
     }
 
