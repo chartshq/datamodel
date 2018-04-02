@@ -617,9 +617,9 @@ describe('#Datatable', () => {
             ['first', 'second'],
             ['Hey', 'Jude']
         ];
-        dataTable.propogate({
+        dataTable.propogate(identifiers, {
             action: 'reaction'
-        }, identifiers);
+        });
         expect(
             projetionFlag && selectionFlag && groupByFlag
         ).to.be.true;
