@@ -705,30 +705,42 @@ describe('#Datatable', () => {
             { start: 4, end: 6, label: 'firstclass' },
             { start: 6, end: 10, label: 'decent' }
         ];
-        const newSchema = [{
+
+        let binnedDT = toBinDatatable.bin('marks', {
+            buckets,
+        }, 'rating1');
+        let binnedDTnum = toBinDatatable.bin('marks', {
+            numOfBins: 4
+        }, 'rating2');
+        let binnedDTSize = toBinDatatable.bin('marks', {
+            binSize: 4,
+        });
+        expect(
+            binnedDT.getData().schema
+        ).to.deep.equal([{
             name: 'marks',
             type: 'measure',
         }, {
-            name: 'rating',
+            name: 'rating1',
             type: 'dimension'
-        }];
-        let binnedDT = toBinDatatable.bin('marks', {
-            buckets,
-        }, 'rating');
-        let binnedDTnum = toBinDatatable.bin('marks', {
-            numOfBins: 4
-        }, 'rating');
-        let binnedDTSize = toBinDatatable.bin('marks', {
-            binSize: 4,
-        }, 'rating');
-        expect(
-            binnedDT.getData().schema
-        ).to.deep.equal(newSchema);
+        }]);
         expect(
             binnedDTnum.getData().schema
-        ).to.deep.equal(newSchema);
+        ).to.deep.equal([{
+            name: 'marks',
+            type: 'measure',
+        }, {
+            name: 'rating2',
+            type: 'dimension'
+        }]);
         expect(
             binnedDTSize.getData().schema
-        ).to.deep.equal(newSchema);
+        ).to.deep.equal([{
+            name: 'marks',
+            type: 'measure',
+        }, {
+            name: 'marks_binned',
+            type: 'dimension'
+        }]);
     });
 });

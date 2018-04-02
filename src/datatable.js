@@ -590,13 +590,16 @@ class DataTable extends Relation {
      * @memberof DataTable
      */
     bin(measureName, config, binnedFieldName) {
-        // const fieldMap = this.fieldMap;
-        // if (fieldMap[binnedFieldName]) {
-        //     throw new Error(`Field ${measureName} already exists.`);
-        // }
-        // if (!fieldMap[measureName]) {
-        //     throw new Error(`Field ${measureName} does not exist.`);
-        // }
+        const clone = this.cloneAsChild();
+        const namespaceFields = clone.getNameSpace().fields;
+        const fieldMap = this.fieldMap;
+        binnedFieldName = binnedFieldName || `${measureName}_binned`;
+        if (fieldMap[binnedFieldName]) {
+            throw new Error(`Field ${measureName} already exists.`);
+        }
+        if (!fieldMap[measureName]) {
+            throw new Error(`Field ${measureName} does not exist.`);
+        }
         // get the data for field to be binned
         const fieldIndex = this.fieldMap[measureName].index;
         const fieldData = this.getNameSpace().fields[fieldIndex].data;
@@ -625,8 +628,6 @@ class DataTable extends Relation {
             const label = getLabel(value, 0, startVals.length - 1);
             labelData.push(label);
         });
-        const clone = this.cloneAsChild();
-        const namespaceFields = clone.getNameSpace().fields;
         const nameSpaceEntry = new Dimension(binnedFieldName, labelData, {
             name: binnedFieldName,
             type: FIELD_TYPE.DIMENSION,

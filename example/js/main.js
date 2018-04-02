@@ -140,6 +140,48 @@ d3.json('../../js/cars.json', (data) => {
     const dataInstance = new DataTable(dataLicious, d_schema);
     const almostPivoted = dataInstance.createDimensionFrom(['Import_yo', 'Export_dude'], 'type', 'values', values => values.split('_')[0]);
     console.log(almostPivoted.getData())
+
+    // testing binning in datatable
+    const toBinData = [{
+        marks: 1,
+    }, {
+        marks: 2,
+    },{
+        marks: 3,
+    },{
+        marks: 4
+    },{
+        marks: 4,
+    },{
+        marks: 5,
+    },{
+        marks: 5,
+    },{
+        marks: 9,
+    }];
+    const toBinSchema = [{
+        name: 'marks',
+        type: 'measure'
+    }];
+    const toBinDatatable = new DataTable(toBinData, toBinSchema);
+    const buckets = [
+        { end: 1, label: 'useless'},
+        { start: 1, end: 4, label: 'failure'},
+        { start: 4, end: 6, label: 'firstclass'},
+        { start: 6, end: 10, label: 'decent'}
+    ];
+    let binnedDT = toBinDatatable.bin('marks', {
+        buckets,
+    }, 'rating1');
+    console.log(binnedDT.getData());
+    let binnedDTnum = toBinDatatable.bin('marks', {
+        numOfBins: 4
+    }, 'rating2');
+    console.log(binnedDTnum.getData());
+    let binnedDTSize = toBinDatatable.bin('marks', {
+        binSize: 4,
+    }, 'rating3');
+    console.log(binnedDTSize.getData());
 });
 
 function load (url) {

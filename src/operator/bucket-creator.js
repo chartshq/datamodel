@@ -25,10 +25,11 @@ export function createBuckets(data, config) {
         min = val < min ? val : min;
         max = val > max ? val : max;
     });
+    max += 5;
     min = config.origin || min;
     const bins = [];
     if (binSize) {
-        const count = ((max - min) / binSize).toFixed();
+        const count = Math.ceil((max - min) / binSize);
         for (let i = 0; i < count; i += 1) {
             const start = min + (i * binSize);
             const end = min + ((i + 1) * binSize);
@@ -41,10 +42,10 @@ export function createBuckets(data, config) {
         return bins;
     }
     const count = numOfBins;
-    const size = ((max - min) / numOfBins).toFixed();
+    const size = Math.ceil((max - min) / numOfBins);
     for (let i = 0; i < count; i += 1) {
         const start = min + (i * size);
-        const end = min + ((i + 1) * size);
+        let end = min + ((i + 1) * size);
         bins.push({
             start,
             end,
