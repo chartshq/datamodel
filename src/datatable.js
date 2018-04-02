@@ -6,6 +6,7 @@ import union from './operator/union';
 import difference from './operator/difference';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import { groupBy } from './operator/group-by';
+import { createBuckets } from './operator/bucket-creator';
 import {
     FIELD_TYPE,
     SELECTION_MODE,
@@ -533,11 +534,13 @@ class DataTable extends Relation {
             const projectionParams = groupString.split(',');
             const groupedDT = joinedDT.project(projectionParams);
             const target = this.groupedChildren[groupString];
-            target.handlePropogation({
-                payload,
-                data: groupedDT,
-            });
-            target.propagate(groupedDT, payload, this);
+            if (target !== source) {
+                target.handlePropogation({
+                    payload,
+                    data: groupedDT,
+                });
+                target.propagate(groupedDT, payload, this);
+            }
         });
     }
 
@@ -573,30 +576,53 @@ class DataTable extends Relation {
         this._onPropogation(payload, identifiers);
     }
 
+    /**
+     * This method is used bin a measure based on provided
+     * buckets or based on calculated buckets created from configuration.
+     *
+     * @param {string} measureName The name of the measure to bin.
+     * @param {Object} config The binning configuration.
+     * @param {Array} config.buckets The array of buckets.
+     * @param {number} config.binSize The size of a bin.
+     * @param {number} config.numOfBins The number of bins to create.
+     * @param {string} binnedFieldName the name of the new field.
+     * @return {DataTable} The cloned datatable.
+     * @memberof DataTable
+     */
     bin(measureName, config, binnedFieldName) {
+        // const fieldMap = this.fieldMap;
+        // if (fieldMap[binnedFieldName]) {
+        //     throw new Error(`Field ${measureName} already exists.`);
+        // }
+        // if (!fieldMap[measureName]) {
+        //     throw new Error(`Field ${measureName} does not exist.`);
+        // }
         // get the data for field to be binned
         const fieldIndex = this.fieldMap[measureName].index;
         const fieldData = this.getNameSpace().fields[fieldIndex].data;
         // get the buckets
-        const { buckets } = config;
+        const buckets = config.buckets || createBuckets(fieldData, config);
         const startVals = buckets.map(item => item.start || 0);
-        const end = startVals.length - 1;
-        const getLabel = (value, start) => {
-            if (start === end) {
+        startVals.push(buckets[buckets.length - 1].end);
+        const getLabel = (value, start, end) => {
+            if (end - start === 1) {
                 return buckets[start].label;
             }
-            const midIdx = start + Math.floor((end - start) / 2);
+            const midIdx = start + Math.ceil((end - start) / 2);
             const midVal = startVals[midIdx];
-            if (value > midVal) {
-                return getLabel(value, midIdx);
+            if (value === midVal) {
+                return buckets[midIdx].label;
             }
-            return buckets[midIdx].label;
+            if (value > midVal) {
+                return getLabel(value, midIdx, end);
+            }
+            return getLabel(value, start, midIdx);
         };
         const labelData = [];
         // iterate over field data and assign label
         rowDiffsetIterator(this.rowDiffset, (i) => {
             const value = fieldData[i];
-            const label = getLabel(value, 0);
+            const label = getLabel(value, 0, startVals.length - 1);
             labelData.push(label);
         });
         const clone = this.cloneAsChild();
@@ -618,6 +644,7 @@ class DataTable extends Relation {
         };
         // update the column identifier
         clone.colIdentifier += `,${binnedFieldName}`;
+        return clone;
     }
 
     // ============================== Accessable functionality ends ======================= //

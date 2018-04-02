@@ -680,4 +680,55 @@ describe('#Datatable', () => {
         ]);
         expect(data.length).to.equal(6);
     });
+    it('tests datatable binning', () => {
+        const toBinData = [{
+            marks: 1,
+        }, {
+            marks: 2,
+        }, {
+            marks: 3,
+        }, {
+            marks: 4,
+        }, {
+            marks: 5,
+        }, {
+            marks: 9,
+        }];
+        const toBinSchema = [{
+            name: 'marks',
+            type: 'measure'
+        }];
+        const toBinDatatable = new DataTable(toBinData, toBinSchema);
+        const buckets = [
+            { end: 1, label: 'useless' },
+            { start: 1, end: 4, label: 'failure' },
+            { start: 4, end: 6, label: 'firstclass' },
+            { start: 6, end: 10, label: 'decent' }
+        ];
+        const newSchema = [{
+            name: 'marks',
+            type: 'measure',
+        }, {
+            name: 'rating',
+            type: 'dimension'
+        }];
+        let binnedDT = toBinDatatable.bin('marks', {
+            buckets,
+        }, 'rating');
+        let binnedDTnum = toBinDatatable.bin('marks', {
+            numOfBins: 4
+        }, 'rating');
+        let binnedDTSize = toBinDatatable.bin('marks', {
+            binSize: 4,
+        }, 'rating');
+        expect(
+            binnedDT.getData().schema
+        ).to.deep.equal(newSchema);
+        expect(
+            binnedDTnum.getData().schema
+        ).to.deep.equal(newSchema);
+        expect(
+            binnedDTSize.getData().schema
+        ).to.deep.equal(newSchema);
+    });
 });
