@@ -11,7 +11,6 @@ import {
     SELECTION_MODE,
     PROJECTION_MODE,
     PROPOGATION,
-    DATA_FORMAT,
  } from './enums';
 import { Measure, Dimension } from './fields';
 
@@ -349,6 +348,7 @@ class DataTable extends Relation {
      * @param {Function} callback callback to execute to create new dimensions.
      * @param {Object} config Object wth configuration options.
      * @param {string} config.removeDependentDimensions Flag to indicate whether dependent dimensions should be removed.
+     * @return {DataTable} The new datatable instance.
      * @memberof DataTable
      */
     generateDimensions(dimArray, dependents, callback, config = {}) {

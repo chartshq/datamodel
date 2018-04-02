@@ -604,13 +604,13 @@ describe('#Datatable', () => {
         const selected = dataTable.select(fields => fields.profit.value > 10);
         const grouped = dataTable.groupBy(['sales']);
         // setup listeners
-        projected.on('propogation', ({ payload, data }) => {
+        projected.on('propogation', () => {
             projetionFlag = true;
         });
-        selected.on('propogation', ({ payload, data }) => {
+        selected.on('propogation', () => {
             selectionFlag = true;
         });
-        grouped.on('propogation', ({ payload, data }) => {
+        grouped.on('propogation', () => {
             groupByFlag = true;
         });
         const identifiers = [
@@ -642,7 +642,7 @@ describe('#Datatable', () => {
                 Export_dude: 5000
             }
         ];
-        const d_schema = [
+        const dSchema = [
             {
                 name: 'year',
                 type: 'dimension'
@@ -656,7 +656,7 @@ describe('#Datatable', () => {
                 type: 'measure'
             }
         ];
-        const dataInstance = new DataTable(dataLicious, d_schema);
+        const dataInstance = new DataTable(dataLicious, dSchema);
         const almostPivoted = dataInstance.createDimensionFrom(
             ['Import_yo', 'Export_dude'],
             'type',
@@ -664,7 +664,6 @@ describe('#Datatable', () => {
              values => values.split('_')[0]
             );
         const { schema, data } = almostPivoted.getData();
-        console.log(schema);
         expect(schema).to.deep.equal([
             {
                 name: 'year',
