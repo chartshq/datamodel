@@ -50,9 +50,11 @@ class DataTable extends Relation {
      * extends the clone functionality with the child parent relationship
      * @return {DataTable} The cloned DataTable
      */
-    cloneAsChild() {
+    cloneAsChild(saveChild = true) {
         const retDataTable = this.clone();
-        this.child.push(retDataTable);
+        if (saveChild) {
+            this.child.push(retDataTable);
+        }
         retDataTable.parent = this;
         return retDataTable;
     }
@@ -213,7 +215,7 @@ class DataTable extends Relation {
      * @param {string} config.mode The mode of selection.
      * @return {DataTable} The cloned DataTable with the required selection;
      */
-    select(selectFn, config = {}) {
+    select(selectFn, config = {}, saveChild = true) {
         // handle ALL selection mode
         if (config.mode === SELECTION_MODE.ALL) {
             // do anormal selection
@@ -227,7 +229,7 @@ class DataTable extends Relation {
             // return an array with both selections
             return [firstClone, rejectClone];
         }
-        const cloneDataTable = this.cloneAsChild();
+        const cloneDataTable = this.cloneAsChild(saveChild);
         cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
         return cloneDataTable;
     }
@@ -243,9 +245,11 @@ class DataTable extends Relation {
      * @param  {Object|Function|string} reducers  reducer function
      * @return {DataTable}           new DataTable with the required operations
      */
-    groupBy(fieldsArr, reducers) {
+    groupBy(fieldsArr, reducers, saveChild = true) {
         const newDatatable = groupBy(this, fieldsArr, reducers);
-        this.groupedChildren[fieldsArr.join()] = newDatatable;
+        if (saveChild) {
+            this.groupedChildren[fieldsArr.join()] = newDatatable;
+        }
         newDatatable.parent = this;
         return newDatatable;
     }
@@ -538,8 +542,8 @@ class DataTable extends Relation {
                     include = include && fields[propField.name].valueOf() === data[0][idx];
                 });
                 return include;
-            });
-            const groupedPropTable = filteredTable.groupBy(groupString.split(','));
+            }, {}, false);
+            const groupedPropTable = filteredTable.groupBy(groupString.split(','), undefined, false);
             if (target !== source) {
                 target.handlePropogation({
                     payload,
