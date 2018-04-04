@@ -499,7 +499,7 @@ class DataTable extends Relation {
             // @TODO: no documentation on how CSV_ARR data format works.
             const data = [];
             const header = identifiers[0];
-            for (let i = 0; i < identifiers.length; i += 1) {
+            for (let i = 1; i < identifiers.length; i += 1) {
                 const vals = identifiers[i];
                 const temp = {};
                 vals.forEach((fieldVal, cIdx) => {
@@ -530,16 +530,22 @@ class DataTable extends Relation {
         });
         // handle grouped childen
         Object.keys(this.groupedChildren).forEach((groupString) => {
-            const joinedDT = this.join(propTable);
-            const projectionParams = groupString.split(',');
-            const groupedDT = joinedDT.project(projectionParams);
             const target = this.groupedChildren[groupString];
+            const { data, schema } = propTable.getData();
+            const filteredTable = this.select((fields) => {
+                let include = true;
+                schema.forEach((propField, idx) => {
+                    include = include && fields[propField.name].valueOf() === data[0][idx];
+                });
+                return include;
+            });
+            const groupedPropTable = filteredTable.groupBy(groupString.split(','));
             if (target !== source) {
                 target.handlePropogation({
                     payload,
-                    data: groupedDT,
+                    data: groupedPropTable,
                 });
-                target.propagate(groupedDT, payload, this);
+                target.propagate(groupedPropTable, payload, this);
             }
         });
     }
