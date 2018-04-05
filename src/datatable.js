@@ -12,6 +12,7 @@ import {
     SELECTION_MODE,
     PROJECTION_MODE,
     PROPOGATION,
+    ROW_ID,
  } from './enums';
 import { Measure, Dimension } from './fields';
 
@@ -536,13 +537,23 @@ class DataTable extends Relation {
         Object.keys(this.groupedChildren).forEach((groupString) => {
             const target = this.groupedChildren[groupString];
             const { data, schema } = propTable.getData();
-            const filteredTable = this.select((fields) => {
-                let include = true;
-                schema.forEach((propField, idx) => {
-                    include = include && fields[propField.name].valueOf() === data[0][idx];
+            let filteredTable;
+            if (schema[0].name === ROW_ID) {
+                // iterate over data and create occurence map
+                const occMap = {};
+                data.forEach((val) => {
+                    occMap[val[0]] = true;
                 });
-                return include;
-            }, {}, false);
+                filteredTable = this.select((fields, rIdx) => occMap[rIdx], {}, false);
+            } else {
+                filteredTable = this.select((fields) => {
+                    let include = true;
+                    schema.forEach((propField, idx) => {
+                        include = include && fields[propField.name].valueOf() === data[0][idx];
+                    });
+                    return include;
+                }, {}, false);
+            }
             const groupedPropTable = filteredTable.groupBy(groupString.split(','), undefined, false);
             if (target !== source) {
                 target.handlePropogation({
@@ -551,7 +562,7 @@ class DataTable extends Relation {
                 });
                 target.propagate(groupedPropTable, payload, this);
             }
-        });
+        }, this);
     }
 
     /**

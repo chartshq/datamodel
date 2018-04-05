@@ -162,7 +162,7 @@ class Relation {
         let { mode } = config;
             // newRowDiffSet last index
         let li;
-        let checker = index => selectFn(prepareSelectionData(fields, index));
+        let checker = index => selectFn(prepareSelectionData(fields, index), index);
         if (mode === SELECTION_MODE.INVERSE) {
             checker = index => !selectFn(prepareSelectionData(fields, index));
         }
