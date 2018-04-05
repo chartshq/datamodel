@@ -38,4 +38,6 @@ export const PROJECTION_MODE = {
 
 export const PROPOGATION = 'propogation';
 
+export const INTERPOLATED_PROPAGATION = 'interpolated-propagation';
+
 export const ROW_ID = '__id__';

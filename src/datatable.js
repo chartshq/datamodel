@@ -13,6 +13,7 @@ import {
     PROJECTION_MODE,
     PROPOGATION,
     ROW_ID,
+    INTERPOLATED_PROPAGATION,
  } from './enums';
 import { Measure, Dimension } from './fields';
 
@@ -33,6 +34,7 @@ class DataTable extends Relation {
         this.groupedChildren = {};
         // callback to call on propogation
         this._onPropogation = () => {};
+        this._onInterpolatedPropagation = () => {};
         this.sortingDetails = {
             column: [],
             type: [],
@@ -566,6 +568,54 @@ class DataTable extends Relation {
     }
 
     /**
+     * This is a very special method that only applies
+     * to crosstab group where propagation of is won't
+     * work so we propagate the selected range of the fields
+     * instead.
+     *
+     * @private
+     * @param {Object} rangeObj Object with fieldnames and corresponsding selected ranges.
+     * @param {Object} payload Object with interation related fields.
+     * @memberof DataTable
+     */
+    propagateInterpolatedValues(rangeObj, payload, fromSource) {
+        const source = fromSource || this;
+        let propTable = rangeObj;
+        if (!(propTable instanceof DataTable)) {
+            const measures = Object.keys(rangeObj);
+            propTable = this.select((fields) => {
+                let include = true;
+                measures.forEach((fieldName) => {
+                    const domain = rangeObj[fieldName];
+                    include = include && fields[fieldName] >= domain[0];
+                    include = include && fields[fieldName] <= domain[1];
+                });
+                return include;
+            }, {}, false);
+        }
+        const forward = (dataTable) => {
+            dataTable.handleInterpolatedPropagation(payload, propTable);
+            dataTable.propagateInterpolatedValues(propTable, payload, this);
+        };
+        // propogate event to parent
+        if (this.parent && source !== this.parent) {
+            forward(this.parent);
+        }
+        // handle children
+        this.child.forEach((cDt) => {
+            if (cDt !== source) {
+                forward(cDt);
+            }
+        });
+        Object.keys(this.groupedChildren).forEach((groupString) => {
+            const target = this.groupedChildren[groupString];
+            if (target !== source) {
+                forward(target);
+            }
+        });
+    }
+
+    /**
      * This method is used to associate a callback with an
      * event name
      *
@@ -579,6 +629,9 @@ class DataTable extends Relation {
         case PROPOGATION:
             this._onPropogation = callback;
             break;
+        case INTERPOLATED_PROPAGATION:
+            this._onInterpolatedPropagation = callback;
+            break;
         default:
             break;
         }
@@ -589,12 +642,26 @@ class DataTable extends Relation {
      * This method is used to invoke the method associated with
      * prpogation.
      *
+     * @private
      * @param {Object} payload The interaction payload.
      * @param {Array} identifiers The list of identifiers.
      * @memberof DataTable
      */
     handlePropogation(payload, identifiers) {
         this._onPropogation(payload, identifiers);
+    }
+
+    /**
+     * This method is used to invoke the method associated with
+     * interpolated propagation.
+     *
+     * @private
+     * @param {Object} payload The interaction details.
+     * @param {DataTable} identifiers Datatable matching range criteria.
+     * @memberof DataTable
+     */
+    handleInterpolatedPropagation(payload, identifiers) {
+        this._onInterpolatedPropagation(payload, identifiers);
     }
 
     /**

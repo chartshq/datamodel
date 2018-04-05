@@ -599,6 +599,9 @@ describe('#Datatable', () => {
         let projetionFlag = false;
         let selectionFlag = false;
         let groupByFlag = false;
+        let inProjetionFlag = false;
+        let inSelectionFlag = false;
+        let inGroupByFlag = false;
         const dataTable = new DataTable(data1, schema1, 'Yo');
         const projected = dataTable.project(['profit']);
         const selected = dataTable.select(fields => fields.profit.value > 10);
@@ -613,6 +616,16 @@ describe('#Datatable', () => {
         grouped.on('propogation', () => {
             groupByFlag = true;
         });
+        // interpolated propagation handlers
+        projected.on('interpolated-propagation', () => {
+            inProjetionFlag = true;
+        });
+        selected.on('interpolated-propagation', () => {
+            inSelectionFlag = true;
+        });
+        grouped.on('interpolated-propagation', () => {
+            inGroupByFlag = true;
+        });
         const identifiers = [
             ['first', 'second'],
             ['Hey', 'Jude']
@@ -620,8 +633,17 @@ describe('#Datatable', () => {
         dataTable.propagate(identifiers, {
             action: 'reaction'
         });
+        dataTable.propagateInterpolatedValues({
+            profit: [2, 12],
+            sales: [18, 30]
+        }, {
+            action: 'reaction'
+        });
         expect(
             projetionFlag && selectionFlag && groupByFlag
+        ).to.be.true;
+        expect(
+            inProjetionFlag && inSelectionFlag && inGroupByFlag
         ).to.be.true;
     });
     it('tests create dimensions from function', () => {
