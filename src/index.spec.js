@@ -599,9 +599,6 @@ describe('#Datatable', () => {
         let projetionFlag = false;
         let selectionFlag = false;
         let groupByFlag = false;
-        let inProjetionFlag = false;
-        let inSelectionFlag = false;
-        let inGroupByFlag = false;
         const dataTable = new DataTable(data1, schema1, 'Yo');
         const projected = dataTable.project(['profit']);
         const selected = dataTable.select(fields => fields.profit.value > 10);
@@ -616,16 +613,7 @@ describe('#Datatable', () => {
         grouped.on('propogation', () => {
             groupByFlag = true;
         });
-        // interpolated propagation handlers
-        projected.on('interpolated-propagation', () => {
-            inProjetionFlag = true;
-        });
-        selected.on('interpolated-propagation', () => {
-            inSelectionFlag = true;
-        });
-        grouped.on('interpolated-propagation', () => {
-            inGroupByFlag = true;
-        });
+
         const identifiers = [
             ['first', 'second'],
             ['Hey', 'Jude']
@@ -633,15 +621,46 @@ describe('#Datatable', () => {
         dataTable.propagate(identifiers, {
             action: 'reaction'
         });
+        expect(
+            projetionFlag && selectionFlag && groupByFlag
+        ).to.be.true;
+    });
+    it('tests interpolated propagation', () => {
+        const data1 = [
+            { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+            { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+            { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+            { profit: 15, sales: 25, first: 'White', second: 'walls' },
+        ];
+        const schema1 = [
+            { name: 'profit', type: 'measure' },
+            { name: 'sales', type: 'measure' },
+            { name: 'first', type: 'dimension' },
+            { name: 'second', type: 'dimension' },
+        ];
+        let inProjetionFlag = false;
+        let inSelectionFlag = false;
+        let inGroupByFlag = false;
+        const dataTable = new DataTable(data1, schema1, 'Yo');
+        const projected = dataTable.project(['profit']);
+        const selected = dataTable.select(fields => fields.profit.value > 10);
+        const grouped = dataTable.groupBy(['sales']);
+         // interpolated propagation handlers
+        projected.on('propogation', () => {
+            inProjetionFlag = true;
+        });
+        selected.on('propogation', () => {
+            inSelectionFlag = true;
+        });
+        grouped.on('propogation', () => {
+            inGroupByFlag = true;
+        });
         dataTable.propagateInterpolatedValues({
             profit: [2, 12],
             sales: [18, 30]
         }, {
             action: 'reaction'
         });
-        expect(
-            projetionFlag && selectionFlag && groupByFlag
-        ).to.be.true;
         expect(
             inProjetionFlag && inSelectionFlag && inGroupByFlag
         ).to.be.true;

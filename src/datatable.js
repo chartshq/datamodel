@@ -13,7 +13,6 @@ import {
     PROJECTION_MODE,
     PROPOGATION,
     ROW_ID,
-    INTERPOLATED_PROPAGATION,
  } from './enums';
 import { Measure, Dimension } from './fields';
 
@@ -594,7 +593,7 @@ class DataTable extends Relation {
             }, {}, false);
         }
         const forward = (dataTable) => {
-            dataTable.handleInterpolatedPropagation(payload, propTable);
+            dataTable.handlePropogation(payload, propTable);
             dataTable.propagateInterpolatedValues(propTable, payload, this);
         };
         // propogate event to parent
@@ -629,9 +628,6 @@ class DataTable extends Relation {
         case PROPOGATION:
             this._onPropogation = callback;
             break;
-        case INTERPOLATED_PROPAGATION:
-            this._onInterpolatedPropagation = callback;
-            break;
         default:
             break;
         }
@@ -649,19 +645,6 @@ class DataTable extends Relation {
      */
     handlePropogation(payload, identifiers) {
         this._onPropogation(payload, identifiers);
-    }
-
-    /**
-     * This method is used to invoke the method associated with
-     * interpolated propagation.
-     *
-     * @private
-     * @param {Object} payload The interaction details.
-     * @param {DataTable} identifiers Datatable matching range criteria.
-     * @memberof DataTable
-     */
-    handleInterpolatedPropagation(payload, identifiers) {
-        this._onInterpolatedPropagation(payload, identifiers);
     }
 
     /**
