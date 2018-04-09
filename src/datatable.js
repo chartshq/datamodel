@@ -8,6 +8,11 @@ import rowDiffsetIterator from './operator/row-diffset-iterator';
 import { groupBy } from './operator/group-by';
 import { createBuckets } from './operator/bucket-creator';
 import {
+    selectIterator,
+    projectIterator,
+    groupByIterator,
+} from './operator/child-iterator';
+import {
     FIELD_TYPE,
     SELECTION_MODE,
     PROJECTION_MODE,
@@ -31,6 +36,8 @@ class DataTable extends Relation {
         this.child = [];
         // array to hold all the grouped children
         this.groupedChildren = {};
+        this.selectedChildren = [];
+        this.projectedChildren = {};
         // callback to call on propogation
         this._onPropogation = () => {};
         this._onInterpolatedPropagation = () => {};
@@ -206,6 +213,7 @@ class DataTable extends Relation {
         }
         const cloneDataTable = this.cloneAsChild();
         cloneDataTable.projectHelper(normalizedProjField.join(','));
+        this.projectedChildren[normalizedProjField.join(',')] = cloneDataTable;
         return cloneDataTable;
     }
 
@@ -233,6 +241,13 @@ class DataTable extends Relation {
         }
         const cloneDataTable = this.cloneAsChild(saveChild);
         cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
+        // store reference to chld table and selector function
+        if (saveChild) {
+            this.selectedChildren.push({
+                table: cloneDataTable,
+                selectionFunction: selectFn
+            });
+        }
         return cloneDataTable;
     }
 
@@ -488,82 +503,113 @@ class DataTable extends Relation {
     }
 
     /**
-     * This method is used to propogate changes across all connected
+     * This method is used to assemble a Datatable instance from
+     * the propagated identifiers.
      *
-     * @param {Object} payload Interaction specific details.
-     * @param {Array} identifiers list of identifiers that were interacted with.
+     * @private
+     * @param {Array} identifiers Array of dimensions that were interacted upon
+     * @return {DataTable} DataTable assembled from identfiers.
      * @memberof DataTable
      */
-    propagate(identifiers, payload, fromSource) {
+    _assembleTableFromIdentifiers(identifiers) {
+        const schema = identifiers[0].map(val => ({
+            name: val,
+            type: FIELD_TYPE.DIMENSION,
+        }));
+        // format the data
+        // @TODO: no documentation on how CSV_ARR data format works.
+        const data = [];
+        const header = identifiers[0];
+        for (let i = 1; i < identifiers.length; i += 1) {
+            const vals = identifiers[i];
+            const temp = {};
+            vals.forEach((fieldVal, cIdx) => {
+                temp[header[cIdx]] = fieldVal;
+            });
+            data.push(temp);
+        }
+        return new DataTable(data, schema);
+    }
+
+    /**
+     * This method is used to filter this DataTable instance
+     * and only return those fields that appear in the propagation table
+     * or only those ROW_ID's that appear in the prop table.
+     *
+     * @private
+     * @param {DataTable} propTable The propagation datatable instance.
+     * @return {Datatbale} Filtered prpgation table.
+     * @memberof DataTable
+     */
+    _filterPropagationTable(propTable) {
+        const { data, schema } = propTable.getData();
+        let filteredTable;
+        if (schema[0].name === ROW_ID) {
+                // iterate over data and create occurence map
+            const occMap = {};
+            data.forEach((val) => {
+                occMap[val[0]] = true;
+            });
+            filteredTable = this.select((fields, rIdx) => occMap[rIdx], {}, false);
+        } else {
+            filteredTable = this.select((fields) => {
+                let include = true;
+                schema.forEach((propField, idx) => {
+                    include = include && fields[propField.name].valueOf() === data[0][idx];
+                });
+                return include;
+            }, {}, false);
+        }
+        return filteredTable;
+    }
+
+    /**
+     * This method is used to propogate changes across all connected
+     *
+     * @param {Array} identifiers list of identifiers that were interacted with.
+     * @param {Object} payload Interaction specific details.
+     * @memberof DataTable
+     */
+    propagate(identifiers, payload, source) {
         let propTable = identifiers;
         if (!(propTable instanceof DataTable)) {
-            const schema = identifiers[0].map(val => ({
-                name: val,
-                type: FIELD_TYPE.DIMENSION,
-            }));
-            // format the data
-            // @TODO: no documentation on how CSV_ARR data format works.
-            const data = [];
-            const header = identifiers[0];
-            for (let i = 1; i < identifiers.length; i += 1) {
-                const vals = identifiers[i];
-                const temp = {};
-                vals.forEach((fieldVal, cIdx) => {
-                    temp[header[cIdx]] = fieldVal;
-                });
-                data.push(temp);
-            }
-            propTable = new DataTable(data, schema);
+            propTable = this._assembleTableFromIdentifiers(identifiers);
         }
-        // source won't be defined the first time around
-        const source = fromSource || this;
-        const forward = (dataTable) => {
-            dataTable.handlePropogation({
+        // function to propogate datatble to target datatable
+        const forwardPropagation = (targetDT, propogationData) => {
+            targetDT.handlePropogation({
                 payload,
-                data: propTable,
+                data: propogationData,
             });
-            dataTable.propagate(propTable, payload, this);
+            targetDT.propagate(propogationData, payload, this);
         };
-        // propogate event to parent
-        if (this.parent && source !== this.parent) {
-            forward(this.parent);
-        }
-        // handle children
-        this.child.forEach((cDt) => {
-            if (cDt !== source) {
-                forward(cDt);
+        // propogate to children created by SELECT operation
+        selectIterator(this, (targetDT) => {
+            if (targetDT !== source) {
+                forwardPropagation(targetDT, propTable);
             }
         });
-        // handle grouped childen
-        Object.keys(this.groupedChildren).forEach((groupString) => {
-            const target = this.groupedChildren[groupString];
-            const { data, schema } = propTable.getData();
-            let filteredTable;
-            if (schema[0].name === ROW_ID) {
-                // iterate over data and create occurence map
-                const occMap = {};
-                data.forEach((val) => {
-                    occMap[val[0]] = true;
-                });
-                filteredTable = this.select((fields, rIdx) => occMap[rIdx], {}, false);
-            } else {
-                filteredTable = this.select((fields) => {
-                    let include = true;
-                    schema.forEach((propField, idx) => {
-                        include = include && fields[propField.name].valueOf() === data[0][idx];
-                    });
-                    return include;
-                }, {}, false);
+        // propagate to children created by PROJECT operation
+        projectIterator(this, (targetDT) => {
+            if (targetDT !== source) {
+                // pass al the props cause it won't make a difference
+                forwardPropagation(targetDT, propTable);
             }
-            const groupedPropTable = filteredTable.groupBy(groupString.split(','), undefined, false);
-            if (target !== source) {
-                target.handlePropogation({
-                    payload,
-                    data: groupedPropTable,
-                });
-                target.propagate(groupedPropTable, payload, this);
+        });
+        // create the filtered table
+        const filteredTable = this._filterPropagationTable(propTable);
+        // propogate to children created by GROUPBY operation
+        groupByIterator(this, (targetDT, groupByString) => {
+            if (targetDT !== source) {
+                // group the filtered table based on groupBy string of target
+                const groupedPropTable = filteredTable.groupBy(groupByString.split(','), undefined, false);
+                forwardPropagation(targetDT, groupedPropTable);
             }
-        }, this);
+        });
+        // propagate to parent if parent is not source
+        if (this.parent && source !== this.parent) {
+            forwardPropagation(this.parent, propTable);
+        }
     }
 
     /**
@@ -592,26 +638,33 @@ class DataTable extends Relation {
                 return include;
             }, {}, false);
         }
-        const forward = (dataTable) => {
-            dataTable.handlePropogation(payload, propTable);
-            dataTable.propagateInterpolatedValues(propTable, payload, this);
+        const forward = (dataTable, propagationTable) => {
+            dataTable.handlePropogation(payload, propagationTable);
+            dataTable.propagateInterpolatedValues(propagationTable, payload, this);
         };
-        // propogate event to parent
+        // propogate to children created by SELECT operation
+        selectIterator(this, (targetDT) => {
+            if (targetDT !== source) {
+                forward(targetDT, propTable);
+            }
+        });
+                // propagate to children created by PROJECT operation
+        projectIterator(this, (targetDT) => {
+            if (targetDT !== source) {
+                        // pass al the props cause it won't make a difference
+                forward(targetDT, propTable);
+            }
+        });
+                // propogate to children created by GROUPBY operation
+        groupByIterator(this, (targetDT) => {
+            if (targetDT !== source) {
+                forward(targetDT, propTable);
+            }
+        });
+                // propagate to parent if parent is not source
         if (this.parent && source !== this.parent) {
-            forward(this.parent);
+            forward(this.parent, propTable);
         }
-        // handle children
-        this.child.forEach((cDt) => {
-            if (cDt !== source) {
-                forward(cDt);
-            }
-        });
-        Object.keys(this.groupedChildren).forEach((groupString) => {
-            const target = this.groupedChildren[groupString];
-            if (target !== source) {
-                forward(target);
-            }
-        });
     }
 
     /**
@@ -640,7 +693,7 @@ class DataTable extends Relation {
      *
      * @private
      * @param {Object} payload The interaction payload.
-     * @param {Array} identifiers The list of identifiers.
+     * @param {DataTable} identifiers The propogated DataTable.
      * @memberof DataTable
      */
     handlePropogation(payload, identifiers) {

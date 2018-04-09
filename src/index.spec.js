@@ -601,7 +601,7 @@ describe('#Datatable', () => {
         let groupByFlag = false;
         const dataTable = new DataTable(data1, schema1, 'Yo');
         const projected = dataTable.project(['profit']);
-        const selected = dataTable.select(fields => fields.profit.value > 10);
+        const selected = dataTable.select(fields => fields.profit.valueOf() > 10);
         const grouped = dataTable.groupBy(['sales']);
         // setup listeners
         projected.on('propogation', () => {
