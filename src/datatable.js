@@ -638,24 +638,30 @@ class DataTable extends Relation {
                 return include;
             }, {}, false);
         }
-        const forward = (dataTable, propagationTable) => {
-            dataTable.handlePropogation(payload, propagationTable);
-            dataTable.propagateInterpolatedValues(propagationTable, payload, this);
+        const forward = (dataTable, propagationTable, isParent) => {
+            dataTable.handlePropogation({
+                payload,
+                data: propagationTable,
+            });
+            dataTable.propagateInterpolatedValues(isParent ?
+                rangeObj : propagationTable, payload, this);
         };
         // propogate to children created by SELECT operation
-        selectIterator(this, (targetDT) => {
+        selectIterator(this, (targetDT, fn) => {
             if (targetDT !== source) {
-                forward(targetDT, propTable);
+                let selectTable;
+                selectTable = propTable.select(fn, {}, false);
+                forward(targetDT, selectTable);
             }
         });
-                // propagate to children created by PROJECT operation
+        // propagate to children created by PROJECT operation
         projectIterator(this, (targetDT) => {
             if (targetDT !== source) {
-                        // pass al the props cause it won't make a difference
+                // pass al the props cause it won't make a difference
                 forward(targetDT, propTable);
             }
         });
-                // propogate to children created by GROUPBY operation
+        // propogate to children created by GROUPBY operation
         groupByIterator(this, (targetDT) => {
             if (targetDT !== source) {
                 forward(targetDT, propTable);
@@ -663,7 +669,7 @@ class DataTable extends Relation {
         });
                 // propagate to parent if parent is not source
         if (this.parent && source !== this.parent) {
-            forward(this.parent, propTable);
+            forward(this.parent, propTable, true);
         }
     }
 
