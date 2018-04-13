@@ -15,7 +15,7 @@ class Dimension extends Field {
      */
     parse (val) {
         const value = (val !== undefined && val !== null) ? val.toString() : '';
-        return (`${value === undefined ? '' : value}`).replace(/^\s+|\s+$/g, '');
+        return value.replace(/^\s+|\s+$/g, '');
     }
 
     /**
