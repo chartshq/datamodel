@@ -38,7 +38,7 @@ export function projectIterator(datatable, callback) {
     const projectedChildren = datatable.projectedChildren;
     Object.keys(projectedChildren).forEach((projString) => {
         const targetDT = projectedChildren[projString];
-        callback(targetDT, callback);
+        callback(targetDT, projString);
     });
 }
 

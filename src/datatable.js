@@ -194,7 +194,7 @@ class DataTable extends Relation {
      * @param {Array.<string | Regexp>} projField column name or regular expression.
      * @return {DataTable} newly created DataTable with the given projection.
      */
-    project(projField, config = {}) {
+    project(projField, config = {}, saveChild = true) {
         const allFields = Object.keys(this.fieldMap);
         const { mode } = config;
         let normalizedProjField = projField.reduce((acc, field) => {
@@ -211,9 +211,11 @@ class DataTable extends Relation {
             const rejectionSet = allFields.filter(fieldName => normalizedProjField.indexOf(fieldName) === -1);
             normalizedProjField = rejectionSet;
         }
-        const cloneDataTable = this.cloneAsChild();
+        const cloneDataTable = this.cloneAsChild(saveChild);
         cloneDataTable.projectHelper(normalizedProjField.join(','));
-        this.projectedChildren[normalizedProjField.join(',')] = cloneDataTable;
+        if (saveChild) {
+            this.projectedChildren[normalizedProjField.join(',')] = cloneDataTable;
+        }
         return cloneDataTable;
     }
 
@@ -655,10 +657,11 @@ class DataTable extends Relation {
             }
         });
         // propagate to children created by PROJECT operation
-        projectIterator(this, (targetDT) => {
+        projectIterator(this, (targetDT, projString) => {
             if (targetDT !== source) {
-                // pass al the props cause it won't make a difference
-                forward(targetDT, propTable);
+                let projectTable;
+                projectTable = propTable.project(projString.split(','), {}, false);
+                forward(targetDT, projectTable);
             }
         });
         // propogate to children created by GROUPBY operation
