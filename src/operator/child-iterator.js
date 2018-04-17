@@ -54,8 +54,13 @@ export function projectIterator(datatable, callback) {
  */
 export function groupByIterator(datatable, callback) {
     const groupByChildren = datatable.groupedChildren;
-    Object.keys(groupByChildren).forEach((groupString) => {
-        const targetDT = groupByChildren[groupString];
-        callback(targetDT, groupString);
+    Object.keys(groupByChildren).forEach((groupByString) => {
+        const tableReducerMap = groupByChildren[groupByString];
+        const targetDT = tableReducerMap.child;
+        const reducer = tableReducerMap.reducer;
+        callback(targetDT, {
+            groupByString,
+            reducer,
+        });
     });
 }

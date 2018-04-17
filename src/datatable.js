@@ -265,7 +265,11 @@ class DataTable extends Relation {
     groupBy(fieldsArr, reducers, saveChild = true) {
         const newDatatable = groupBy(this, fieldsArr, reducers);
         if (saveChild) {
-            this.groupedChildren[fieldsArr.join()] = newDatatable;
+            const key = fieldsArr.join();
+            const temp = {};
+            temp.child = newDatatable;
+            temp.reducer = reducers;
+            this.groupedChildren[key] = temp;
         }
         newDatatable.parent = this;
         return newDatatable;
@@ -599,10 +603,14 @@ class DataTable extends Relation {
         // create the filtered table
         const filteredTable = this._filterPropagationTable(propTable);
         // propogate to children created by GROUPBY operation
-        groupByIterator(this, (targetDT, groupByString) => {
+        groupByIterator(this, (targetDT, conf) => {
             if (targetDT !== source) {
+                const {
+                    reducer,
+                    groupByString,
+                } = conf;
                 // group the filtered table based on groupBy string of target
-                const groupedPropTable = filteredTable.groupBy(groupByString.split(','), undefined, false);
+                const groupedPropTable = filteredTable.groupBy(groupByString.split(','), reducer, false);
                 forwardPropagation(targetDT, groupedPropTable);
             }
         });
