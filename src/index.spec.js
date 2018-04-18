@@ -538,6 +538,13 @@ describe('#Datatable', () => {
         expect(
             efficiency
         ).to.equal(0.6);
+        expect(
+            () => {
+                next.calculatedMeasure({
+                    name: 'Efficiency'
+                }, ['profit', 'sales'], (profit, sales) => profit / sales);
+            }
+        ).to.throw('Efficiency field already exists in table.');
     });
     it('tests generating new dimensions', () => {
         const data1 = [

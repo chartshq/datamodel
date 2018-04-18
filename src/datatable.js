@@ -321,6 +321,9 @@ class DataTable extends Relation {
         } = config;
         // get the fields present in datatable
         const fieldMap = this.getFieldMap();
+        if (fieldMap[name]) {
+            throw new Error(`${name} field already exists in table.`);
+        }
         // validate that the supplied fields are present in datatable
         // and are measures
         const fieldIndices = fields.map((field) => {
