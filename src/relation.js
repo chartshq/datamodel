@@ -100,6 +100,11 @@ class Relation {
             throw new Error('No data found.');
         }
 
+        this.updateData(data, schema, name, options);
+        return this;
+    }
+
+    updateData (data, schema, name, options) {
         options = Object.assign(Object.assign({}, this.constructor.defaultConfig()), options);
         const converterFn = converter[options.dataformat];
 
@@ -123,6 +128,7 @@ class Relation {
         // If data is provided create the default colIdentifier and rowDiffset
         this.rowDiffset = `0-${formattedData[0] ? (formattedData[0].length - 1) : 0}`;
         this.colIdentifier = (schema.map(_ => _.name)).join();
+        return this;
     }
 
     static defaultConfig () {
@@ -153,8 +159,8 @@ class Relation {
      * @param  {Array} fields   FieldStore fields array
      * @param  {Function} selectFn The filter function
      * @param {Object} config The mode configuration.
-     * @param {String} config.mode The type of mode to use.
-     * @return {Instance}          Instance of the class (this)
+     * @param {string} config.mode The type of mode to use.
+     * @return {string} Row diffset
      */
     selectHelper(fields, selectFn, config) {
         const newRowDiffSet = [];
@@ -178,9 +184,9 @@ class Relation {
                 lastInsertedValue = i;
             }
         });
-        this.rowDiffset = newRowDiffSet.join(',');
-        return this;
+        return newRowDiffSet.join(',');
     }
+
 
     isEmpty () {
         return !this.rowDiffset.length;

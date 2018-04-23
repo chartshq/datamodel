@@ -11,6 +11,7 @@ import {
     selectIterator,
     projectIterator,
     groupByIterator,
+    calculatedMeasureIterator,
 } from './operator/child-iterator';
 import {
     FIELD_TYPE,
@@ -38,6 +39,7 @@ class DataTable extends Relation {
         this.groupedChildren = {};
         this.selectedChildren = [];
         this.projectedChildren = {};
+        this.calculatedMeasureChildren = [];
         // callback to call on propogation
         this._onPropogation = () => {};
         this._onInterpolatedPropagation = () => {};
@@ -211,7 +213,8 @@ class DataTable extends Relation {
             const rejectionSet = allFields.filter(fieldName => normalizedProjField.indexOf(fieldName) === -1);
             normalizedProjField = rejectionSet;
         }
-        const cloneDataTable = this.cloneAsChild(saveChild);
+        let cloneDataTable;
+        cloneDataTable = this.cloneAsChild(saveChild);
         cloneDataTable.projectHelper(normalizedProjField.join(','));
         if (saveChild) {
             this.projectedChildren[normalizedProjField.join(',')] = cloneDataTable;
@@ -221,36 +224,92 @@ class DataTable extends Relation {
 
     /**
      * Set the selection of the cloned DataTable
+     * If an existing datatable is passed in the last argument, then it mutates the existing datatable
+     * instead of cloning a new datatable.
      * @param  {functiona} selectFn The function which will be looped through all the data
      * if it return true the row will be there in the DataTable
      * @param {Object} config The mode configuration.
      * @param {string} config.mode The mode of selection.
-     * @return {DataTable} The cloned DataTable with the required selection;
+     * @param {string} saveChild Whether to save the clonedatatable in children
+     * @param {DataTable} existingDataTable existing data table instance
+     * @return {DataTable} The cloned DataTable with the required selection
      */
-    select(selectFn, config = {}, saveChild = true) {
+    select(selectFn, config = {}, saveChild = true, existingDataTable) {
+        let cloneDataTable;
+        let newDataTable;
+        let replaceFn;
+        let rowDiffset;
         // handle ALL selection mode
         if (config.mode === SELECTION_MODE.ALL) {
             // do anormal selection
             const firstClone = this.cloneAsChild();
-            firstClone.selectHelper(firstClone.getNameSpace().fields, selectFn, {});
+            rowDiffset = firstClone.selectHelper(firstClone.getNameSpace().fields, selectFn, {});
+            firstClone.rowDiffset = rowDiffset;
             // do an inverse selection
             const rejectClone = this.cloneAsChild();
-            rejectClone.selectHelper(rejectClone.getNameSpace().fields, selectFn, {
+            rowDiffset = rejectClone.selectHelper(rejectClone.getNameSpace().fields, selectFn, {
                 mode: SELECTION_MODE.INVERSE,
             });
+            rejectClone.rowDiffset = rowDiffset;
             // return an array with both selections
             return [firstClone, rejectClone];
         }
-        const cloneDataTable = this.cloneAsChild(saveChild);
-        cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
+        if (existingDataTable instanceof DataTable) {
+            replaceFn = true;
+            newDataTable = existingDataTable;
+            rowDiffset = this.selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
+            existingDataTable.mutate('rowDiffset', rowDiffset);
+        }
+        else {
+            cloneDataTable = this.cloneAsChild(saveChild);
+            rowDiffset = cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
+            cloneDataTable.rowDiffset = rowDiffset;
+            newDataTable = cloneDataTable;
+        }
+
         // store reference to chld table and selector function
         if (saveChild) {
-            this.selectedChildren.push({
-                table: cloneDataTable,
-                selectionFunction: selectFn
-            });
+            let selectedChildren = this.selectedChildren;
+            if (replaceFn) {
+                let child = this.selectedChildren.find(obj => obj.table === newDataTable);
+                child.selectionFunction = selectFn;
+            }
+            else {
+                selectedChildren.push({
+                    table: cloneDataTable,
+                    selectionFunction: selectFn
+                });
+            }
         }
-        return cloneDataTable;
+
+        return newDataTable;
+    }
+
+    /**
+     * Mutates a property of the datatable with a new value
+     * @param {string} key Property of the datatable
+     * @param {string} value Value of the property
+     * @return {DataTable} Instance of the datatable
+     */
+    mutate (key, value) {
+        this[key] = value;
+        selectIterator(this, (table, fn) => {
+            this.select(fn, {}, false, table);
+        });
+
+        projectIterator(this, (table) => {
+            table.mutate(key, value);
+        });
+
+        calculatedMeasureIterator(this, (table, params) => {
+            table[key] = value;
+            this.calculatedMeasure(...[...params, false, table]);
+        });
+
+        groupByIterator(this, (table, params) => {
+            this.groupBy(...[params.groupByString.split(','), params.reducer], false, table);
+        });
+        return this;
     }
 
     /**
@@ -262,16 +321,27 @@ class DataTable extends Relation {
      * is provided sum will be the default reducer.
      * @param  {Array} fieldsArr array containing the name of the columns
      * @param  {Object|Function|string} reducers  reducer function
-     * @return {DataTable}           new DataTable with the required operations
+     * @param {string} saveChild Whether to save the child or not
+     * @param {DataTable} existingDataTable Existing datatable instance
+     * @return {DataTable} new DataTable with the required operations
      */
-    groupBy(fieldsArr, reducers, saveChild = true) {
-        const newDatatable = groupBy(this, fieldsArr, reducers);
+    groupBy(fieldsArr, reducers = {}, saveChild = true, existingDataTable) {
+        const values = Object.values(reducers);
+        const names = values.map(value => (value instanceof Function ? value.name : value));
+        const reducerString = reducers ? `${Object.keys(reducers)}-${names}` : null;
+        const newDatatable = groupBy(this, fieldsArr, reducers, existingDataTable);
+
         if (saveChild) {
-            const key = fieldsArr.join();
+            const groupByString = `${fieldsArr.join()}`;
+            const key = `${groupByString}-${reducerString}`;
             const temp = {};
             temp.child = newDatatable;
             temp.reducer = reducers;
+            temp.groupByString = groupByString;
             this.groupedChildren[key] = temp;
+        }
+        if (existingDataTable) {
+            existingDataTable.mutate('rowDiffset', existingDataTable.rowDiffset);
         }
         newDatatable.parent = this;
         return newDatatable;
@@ -315,13 +385,14 @@ class DataTable extends Relation {
      * @return {DataTable} New instance of datatable.
      * @memberof DataTable
      */
-    calculatedMeasure(config, fields, callback) {
+    calculatedMeasure(config, fields, callback, saveChild = true, datatable) {
         const {
             name,
         } = config;
+        let clone;
         // get the fields present in datatable
         const fieldMap = this.getFieldMap();
-        if (fieldMap[name]) {
+        if (fieldMap[name] && !datatable) {
             throw new Error(`${name} field already exists in table.`);
         }
         // validate that the supplied fields are present in datatable
@@ -336,7 +407,13 @@ class DataTable extends Relation {
             }
             return fieldSpec.index;
         });
-        const clone = this.cloneAsChild();
+        if (datatable) {
+            clone = datatable;
+            saveChild = false;
+        }
+        else {
+            clone = this.cloneAsChild(saveChild);
+        }
         const namespaceFields = clone.getNameSpace().fields;
         const suppliedFields = fieldIndices.map(idx => namespaceFields[idx]);
         // array of computed data values
@@ -355,7 +432,16 @@ class DataTable extends Relation {
             type: FIELD_TYPE.MEASURE,
         });
         // push this to the child datatables field store
-        namespaceFields.push(nameSpaceEntry);
+        let index = namespaceFields.findIndex(d => d.name === name);
+        if (index !== -1) {
+            namespaceFields[index] = nameSpaceEntry;
+            datatable.mutate('rowDiffset', datatable.rowDiffset);
+        }
+        else {
+            namespaceFields.push(nameSpaceEntry);
+            // update the column identifier
+            clone.colIdentifier += `,${name}`;
+        }
         // update the field map of child datatable
         const childFieldMap = clone.getFieldMap();
         childFieldMap[name] = {
@@ -365,8 +451,13 @@ class DataTable extends Relation {
                 type: FIELD_TYPE.MEASURE,
             },
         };
-        // update the column identifier
-        clone.colIdentifier += `,${name}`;
+        if (saveChild) {
+            this.calculatedMeasureChildren.push({
+                table: clone,
+                params: [config, fields, callback]
+            });
+        }
+
         return clone;
     }
 
@@ -791,7 +882,6 @@ class DataTable extends Relation {
         clone.colIdentifier += `,${binnedFieldName}`;
         return clone;
     }
-
     // ============================== Accessable functionality ends ======================= //
 }
 

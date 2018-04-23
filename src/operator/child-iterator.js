@@ -24,6 +24,17 @@ export function selectIterator(datatable, callback) {
     });
 }
 
+export function calculatedMeasureIterator(datatable, callback) {
+    const calculatedMeasureChildren = datatable.calculatedMeasureChildren;
+    calculatedMeasureChildren.forEach((item) => {
+        const {
+            table,
+            params,
+        } = item;
+        callback(table, params);
+    });
+}
+
 /**
  * This function is used to invoke a callback on each of the projected
  * children of a daatable.
@@ -54,10 +65,11 @@ export function projectIterator(datatable, callback) {
  */
 export function groupByIterator(datatable, callback) {
     const groupByChildren = datatable.groupedChildren;
-    Object.keys(groupByChildren).forEach((groupByString) => {
-        const tableReducerMap = groupByChildren[groupByString];
+    Object.keys(groupByChildren).forEach((key) => {
+        const tableReducerMap = groupByChildren[key];
         const targetDT = tableReducerMap.child;
         const reducer = tableReducerMap.reducer;
+        const groupByString = tableReducerMap.groupByString;
         callback(targetDT, {
             groupByString,
             reducer,

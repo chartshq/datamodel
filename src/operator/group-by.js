@@ -60,9 +60,10 @@ function getReducerObj(dataTable, reducers = {}) {
  * @param  {DataTable} dataTable the dataTable to worked
  * @param  {Array} fieldArr  fields according to which the groupby should be worked
  * @param  {Object|Function} reducers  reducers function
- * @return {DataTable}           new dataTable with the group by
+ * @param {DataTable} existingDataTable Existing datatable instance
+ * @return {DataTable} new dataTable with the group by
  */
-function groupBy(dataTable, fieldArr, reducers) {
+function groupBy(dataTable, fieldArr, reducers, existingDataTable) {
     const sFieldArr = getFieldArr(dataTable, fieldArr);
     const reducerObj = getReducerObj(dataTable, reducers);
     const fieldStore = dataTable.getNameSpace();
@@ -73,6 +74,7 @@ function groupBy(dataTable, fieldArr, reducers) {
     const schema = [];
     const hashMap = {};
     const data = [];
+    let newDataTable;
     // Prepare the schema
     Object.entries(fieldStoreObj).forEach(([key, value]) => {
         if (sFieldArr.indexOf(key) !== -1 || reducerObj[key]) {
@@ -114,7 +116,14 @@ function groupBy(dataTable, fieldArr, reducers) {
             tuple[_] = reducerObj[_](row[_]);
         });
     });
-    return new DataTable(data, schema, dbName);
+    if (existingDataTable) {
+        existingDataTable.updateData(data, schema, dbName);
+        newDataTable = existingDataTable;
+    }
+    else {
+        newDataTable = new DataTable(data, schema, dbName);
+    }
+    return newDataTable;
 }
 
 export { groupBy, getFieldArr, getReducerObj };

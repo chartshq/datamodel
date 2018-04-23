@@ -609,7 +609,7 @@ describe('#Datatable', () => {
         const dataTable = new DataTable(data1, schema1, 'Yo');
         const projected = dataTable.project(['profit']);
         const selected = dataTable.select(fields => fields.profit.valueOf() > 10);
-        const grouped = dataTable.groupBy(['sales']);
+        const grouped = dataTable.groupBy(['first']);
         // setup listeners
         projected.on('propogation', () => {
             projetionFlag = true;
