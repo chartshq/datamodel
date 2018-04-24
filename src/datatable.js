@@ -257,7 +257,7 @@ class DataTable extends Relation {
         if (existingDataTable instanceof DataTable) {
             replaceFn = true;
             newDataTable = existingDataTable;
-            rowDiffset = this.selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
+            rowDiffset = this.selectHelper(this.getNameSpace().fields, selectFn, config);
             existingDataTable.mutate('rowDiffset', rowDiffset);
         }
         else {
