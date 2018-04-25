@@ -1,4 +1,5 @@
 import { extend2 } from '../utils';
+import { generateDomain, getUniqueValues } from '../utils/domain-generator';
 /**
  * This is the base class of all the field type all the common functionality and data will be in this class
  */
@@ -16,6 +17,14 @@ class Field {
         this.schema = schema;
 
         this.sanitize();
+    }
+
+    getUniqueValues() {
+        return getUniqueValues(this.data);
+    }
+
+    getDomain() {
+        return generateDomain(this);
     }
 
     /**
@@ -36,6 +45,10 @@ class Field {
      */
     parsed (val) {
         return val;
+    }
+
+    domain() {
+
     }
 
     /**
