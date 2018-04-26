@@ -1,9 +1,14 @@
 import Field from './field';
+import { generateMeasureDomain } from '../utils/domain-generator';
 /**
  * The Field for storing measure/numeric data
  * @extends Field
  */
 class Measure extends Field {
+
+    getDomain() {
+        return generateMeasureDomain(this.data);
+    }
     /**
      * This funciton is called once for every entries of the column. The parse is called with raw data in cell and its
      * parse's responsibility to return the correct parsed value.

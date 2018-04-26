@@ -7,7 +7,6 @@ import difference from './operator/difference';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import { groupBy } from './operator/group-by';
 import { createBuckets } from './operator/bucket-creator';
-import { generateDomain, getUniqueValues } from './utils/domain-generator';
 import {
     selectIterator,
     projectIterator,
@@ -100,16 +99,6 @@ class DataTable extends Relation {
     getData(rowWise = false) {
         return dataBuilder.call(this, this.getNameSpace().fields, this.rowDiffset,
             this.colIdentifier, this.sortingDetails, { rowWise });
-    }
-
-    getUniqueValues(field) {
-        const index = this.fieldMap[field].index;
-        return getUniqueValues(this.columnNameSpace.fields[index].data);
-    }
-
-    getDomain(field) {
-        const index = this.fieldMap[field].index;
-        return generateDomain(this.columnNameSpace.fields[index]);
     }
 
     /**
