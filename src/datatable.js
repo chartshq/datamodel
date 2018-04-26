@@ -88,6 +88,9 @@ class DataTable extends Relation {
         }
         return nameSpace;
     }
+    getSchema() {
+        return this.getNameSpace().fields.map(d => d.schema);
+    }
 
     // ============================== Accessable functionality ======================= //
     /**
