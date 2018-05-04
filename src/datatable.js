@@ -19,6 +19,7 @@ import {
     PROJECTION_MODE,
     PROPOGATION,
     ROW_ID,
+    EMPTYFN,
  } from './enums';
 import { Measure, Dimension } from './fields';
 
@@ -41,8 +42,8 @@ class DataTable extends Relation {
         this.projectedChildren = {};
         this.calculatedMeasureChildren = [];
         // callback to call on propogation
-        this._onPropogation = () => {};
-        this._onInterpolatedPropagation = () => {};
+        this._onPropogation = EMPTYFN;
+        this._onInterpolatedPropagation =
         this.sortingDetails = {
             column: [],
             type: [],
@@ -486,9 +487,9 @@ class DataTable extends Relation {
             if (!fieldSpec) {
                 throw new Error(`${field} is not a valid column name.`);
             }
-            if (fieldSpec.def.type !== FIELD_TYPE.DIMENSION) {
-                throw new Error(`${field} is not a ${FIELD_TYPE.DIMENSION}.`);
-            }
+            // if (fieldSpec.def.type !== FIELD_TYPE.DIMENSION) {
+            //     throw new Error(`${field} is not a ${FIELD_TYPE.DIMENSION}.`);
+            // }
             return fieldSpec.index;
         });
         const clone = this.cloneAsChild();
@@ -801,6 +802,16 @@ class DataTable extends Relation {
         return this;
     }
 
+    unsubscribe (eventName) {
+        switch (eventName) {
+        case PROPOGATION:
+            this._onPropogation = EMPTYFN;
+            break;
+        default:
+            break;
+        }
+        return this;
+    }
     /**
      * This method is used to invoke the method associated with
      * prpogation.
