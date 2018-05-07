@@ -6,7 +6,6 @@ import Dimension from './dimension';
  * @extends Field
  */
 class Categorical extends Dimension {
-    
 }
 
 export { Categorical as default };
