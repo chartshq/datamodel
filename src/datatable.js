@@ -376,7 +376,10 @@ class DataTable extends Relation {
             currRow[1] = row[1] === 'desc' ? 'desc' : 'asc';
         });
         this.sortingDetails = sortList;
-        return this;
+        const struct = this.getData();
+        // append header
+        const header = struct.schema.map(field => field.name);
+        return new this.constructor([header].concat(struct.data), struct.schema, null, { dataformat: 'CSVArr' });
     }
 
     /**
@@ -406,9 +409,9 @@ class DataTable extends Relation {
             if (!fieldSpec) {
                 throw new Error(`${field} is not a valid column name.`);
             }
-            if (fieldSpec.def.type !== FIELD_TYPE.MEASURE) {
-                throw new Error(`${field} is not a ${FIELD_TYPE.MEASURE}.`);
-            }
+            // if (fieldSpec.def.type !== FIELD_TYPE.MEASURE) {
+            //     throw new Error(`${field} is not a ${FIELD_TYPE.MEASURE}.`);
+            // }
             return fieldSpec.index;
         });
         if (datatable) {
