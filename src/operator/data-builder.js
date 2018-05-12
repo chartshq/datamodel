@@ -14,6 +14,7 @@ function getSortFn(dataType, sortType, index) {
     let retFunc;
     switch (dataType) {
     case 'measure':
+    case 'temporal':
         if (sortType === 'desc') {
             retFunc = (a, b) => b[index] - a[index];
         } else {
@@ -108,7 +109,8 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, opti
         for (let i = sortingDetails.length - 1; i >= 0; i -= 1) {
             retObj.schema.forEach((schema, ii) => {
                 if (sortingDetails[i][0] === schema.name) {
-                    mergeSort(retObj.data, getSortFn(schema.type, sortingDetails[i][1], ii));
+                    let type = schema.subtype || schema.type;
+                    mergeSort(retObj.data, getSortFn(type, sortingDetails[i][1], ii));
                 }
             });
         }
