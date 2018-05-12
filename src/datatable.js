@@ -43,7 +43,6 @@ class DataTable extends Relation {
         this.calculatedMeasureChildren = [];
         // callback to call on propogation
         this._onPropogation = EMPTYFN;
-        this._onInterpolatedPropagation =
         this.sortingDetails = {
             column: [],
             type: [],
