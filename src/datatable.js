@@ -18,8 +18,7 @@ import {
     SELECTION_MODE,
     PROJECTION_MODE,
     PROPOGATION,
-    ROW_ID,
-    EMPTYFN,
+    ROW_ID
  } from './enums';
 import { Measure, Dimension } from './fields';
 
@@ -42,7 +41,7 @@ class DataTable extends Relation {
         this.projectedChildren = {};
         this.calculatedMeasureChildren = [];
         // callback to call on propogation
-        this._onPropogation = EMPTYFN;
+        this._onPropogation = [];
         this.sortingDetails = {
             column: [],
             type: [],
@@ -826,7 +825,7 @@ class DataTable extends Relation {
     on(eventName, callback) {
         switch (eventName) {
         case PROPOGATION:
-            this._onPropogation = callback;
+            this._onPropogation.push(callback);
             break;
         default:
             break;
@@ -837,7 +836,7 @@ class DataTable extends Relation {
     unsubscribe (eventName) {
         switch (eventName) {
         case PROPOGATION:
-            this._onPropogation = EMPTYFN;
+            this._onPropogation = [];
             break;
         default:
             break;
@@ -854,7 +853,8 @@ class DataTable extends Relation {
      * @memberof DataTable
      */
     handlePropogation(payload, identifiers) {
-        this._onPropogation(payload, identifiers);
+        let propListeners = this._onPropogation;
+        propListeners.forEach(fn => fn.call(this, payload, identifiers));
     }
 
     /**
