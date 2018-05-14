@@ -240,7 +240,6 @@ class DataTable extends Relation {
     select(selectFn, config = {}, saveChild = true, existingDataTable) {
         let cloneDataTable;
         let newDataTable;
-        let replaceFn;
         let rowDiffset;
         // handle ALL selection mode
         if (config.mode === SELECTION_MODE.ALL) {
@@ -257,11 +256,15 @@ class DataTable extends Relation {
             // return an array with both selections
             return [firstClone, rejectClone];
         }
+        let child;
         if (existingDataTable instanceof DataTable) {
-            replaceFn = true;
+            child = this.selectedChildren.find(obj => obj.table === existingDataTable);
+        }
+        if (child) {
             newDataTable = existingDataTable;
             rowDiffset = this.selectHelper(this.getNameSpace().fields, selectFn, config);
             existingDataTable.mutate('rowDiffset', rowDiffset);
+            child.selectionFunction = selectFn;
         }
         else {
             cloneDataTable = this.cloneAsChild(saveChild);
@@ -271,18 +274,11 @@ class DataTable extends Relation {
         }
 
         // store reference to chld table and selector function
-        if (saveChild) {
-            let selectedChildren = this.selectedChildren;
-            if (replaceFn) {
-                let child = this.selectedChildren.find(obj => obj.table === newDataTable);
-                child.selectionFunction = selectFn;
-            }
-            else {
-                selectedChildren.push({
-                    table: cloneDataTable,
-                    selectionFunction: selectFn
-                });
-            }
+        if (saveChild && !child) {
+            this.selectedChildren.push({
+                table: cloneDataTable,
+                selectionFunction: selectFn
+            });
         }
 
         return newDataTable;
@@ -332,18 +328,36 @@ class DataTable extends Relation {
         const values = Object.values(reducers);
         const names = values.map(value => (value instanceof Function ? value.name : value));
         const reducerString = reducers ? `${Object.keys(reducers)}-${names}` : null;
-        const newDatatable = groupBy(this, fieldsArr, reducers, existingDataTable);
-
-        if (saveChild) {
-            const groupByString = `${fieldsArr.join()}`;
-            const key = `${groupByString}-${reducerString}`;
+        const groupByString = `${fieldsArr.join()}`;
+        const key = `${groupByString}-${reducerString}`;
+        const groupedChildren = this.groupedChildren;
+        let present = false;
+        if (existingDataTable instanceof DataTable) {
+            for (let groupByKey in groupedChildren) {
+                if ({}.hasOwnProperty.call(groupedChildren, key)) {
+                    let child = groupedChildren[groupByKey];
+                    if (child === existingDataTable) {
+                        present = true;
+                        child.reducer = reducers;
+                        child.groupByString = groupByString;
+                        break;
+                    }
+                }
+            }
+        }
+        let params = [this, fieldsArr, reducers];
+        if (present) {
+            params.push(existingDataTable);
+        }
+        const newDatatable = groupBy(...params);
+        if (saveChild && !present) {
             const temp = {};
             temp.child = newDatatable;
             temp.reducer = reducers;
             temp.groupByString = groupByString;
-            this.groupedChildren[key] = temp;
+            groupedChildren[key] = temp;
         }
-        if (existingDataTable) {
+        if (present) {
             existingDataTable.mutate('rowDiffset', existingDataTable.rowDiffset);
         }
         newDatatable.parent = this;
@@ -391,14 +405,15 @@ class DataTable extends Relation {
      * @return {DataTable} New instance of datatable.
      * @memberof DataTable
      */
-    calculatedMeasure(config, fields, callback, saveChild = true, datatable) {
+    calculatedMeasure(config, fields, callback, saveChild = true, existingDataTable) {
         const {
             name,
         } = config;
         let clone;
+        let existingChild = this.calculatedMeasureChildren.find(dt => dt === existingDataTable);
         // get the fields present in datatable
         const fieldMap = this.getFieldMap();
-        if (fieldMap[name] && !datatable) {
+        if (fieldMap[name] && !existingChild) {
             throw new Error(`${name} field already exists in table.`);
         }
         // validate that the supplied fields are present in datatable
@@ -413,9 +428,8 @@ class DataTable extends Relation {
             // }
             return fieldSpec.index;
         });
-        if (datatable) {
-            clone = datatable;
-            saveChild = false;
+        if (existingChild) {
+            clone = existingDataTable;
         }
         else {
             clone = this.cloneAsChild(saveChild);
@@ -439,9 +453,10 @@ class DataTable extends Relation {
         });
         // push this to the child datatables field store
         let index = namespaceFields.findIndex(d => d.name === name);
-        if (index !== -1) {
+        if (index !== -1 && existingChild) {
             namespaceFields[index] = nameSpaceEntry;
-            datatable.mutate('rowDiffset', datatable.rowDiffset);
+            existingChild.params = [config, fields, callback];
+            existingDataTable.mutate('rowDiffset', existingDataTable.rowDiffset);
         }
         else {
             namespaceFields.push(nameSpaceEntry);
@@ -457,7 +472,7 @@ class DataTable extends Relation {
                 type: FIELD_TYPE.MEASURE,
             },
         };
-        if (saveChild) {
+        if (saveChild && !existingChild) {
             this.calculatedMeasureChildren.push({
                 table: clone,
                 params: [config, fields, callback]
@@ -618,21 +633,29 @@ class DataTable extends Relation {
      * @memberof DataTable
      */
     _assembleTableFromIdentifiers(identifiers) {
-        const schema = identifiers[0].map(val => ({
-            name: val,
-            type: FIELD_TYPE.DIMENSION,
-        }));
-        // format the data
-        // @TODO: no documentation on how CSV_ARR data format works.
-        const data = [];
-        const header = identifiers[0];
-        for (let i = 1; i < identifiers.length; i += 1) {
-            const vals = identifiers[i];
-            const temp = {};
-            vals.forEach((fieldVal, cIdx) => {
-                temp[header[cIdx]] = fieldVal;
-            });
-            data.push(temp);
+        let schema;
+        let data;
+        if (identifiers.length) {
+            schema = identifiers[0].map(val => ({
+                name: val,
+                type: FIELD_TYPE.DIMENSION,
+            }));
+            // format the data
+            // @TODO: no documentation on how CSV_ARR data format works.
+            data = [];
+            const header = identifiers[0];
+            for (let i = 1; i < identifiers.length; i += 1) {
+                const vals = identifiers[i];
+                const temp = {};
+                vals.forEach((fieldVal, cIdx) => {
+                    temp[header[cIdx]] = fieldVal;
+                });
+                data.push(temp);
+            }
+        }
+        else {
+            data = [];
+            schema = [];
         }
         return new DataTable(data, schema);
     }
@@ -650,22 +673,29 @@ class DataTable extends Relation {
     _filterPropagationTable(propTable) {
         const { data, schema } = propTable.getData();
         let filteredTable;
-        if (schema[0].name === ROW_ID) {
+        if (schema.length) {
+            if (schema[0].name === ROW_ID) {
                 // iterate over data and create occurence map
-            const occMap = {};
-            data.forEach((val) => {
-                occMap[val[0]] = true;
-            });
-            filteredTable = this.select((fields, rIdx) => occMap[rIdx], {}, false);
-        } else {
-            filteredTable = this.select((fields) => {
-                let include = true;
-                schema.forEach((propField, idx) => {
-                    include = include && fields[propField.name].valueOf() === data[0][idx];
+                const occMap = {};
+                data.forEach((val) => {
+                    occMap[val[0]] = true;
                 });
-                return include;
-            }, {}, false);
+                filteredTable = this.select((fields, rIdx) => occMap[rIdx], {}, false);
+            } else {
+                filteredTable = this.select((fields) => {
+                    let include = true;
+                    schema.forEach((propField, idx) => {
+                        let index = data.findIndex(d => d[idx] === fields[propField.name].valueOf());
+                        include = include && index !== -1;
+                    });
+                    return include;
+                }, {}, false);
+            }
         }
+        else {
+            filteredTable = propTable;
+        }
+
         return filteredTable;
     }
 
