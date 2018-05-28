@@ -20,7 +20,7 @@ import { columnMajor } from '../utils';
  *
  * @return {Array.<Object>} two elements. Headers and data in column major format.
  */
-export default function (str, options) {
+function CSVStr(str, options) {
     let header = [];
 
     const defaultOption = {
@@ -45,3 +45,5 @@ export default function (str, options) {
 
     return [header, columns];
 }
+
+export default CSVStr;
