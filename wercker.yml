@@ -52,6 +52,7 @@ build:
 
   after-steps:
     - slack-notifier:
-        url: https://hooks.slack.com/services/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
-        channel: #fusionboard-wercker
+        url: https://hooks.slack.com/services/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
+        channel: fusionboard-wercker
         username: werckerbot
+  
