@@ -14,12 +14,13 @@ import {
     calculatedMeasureIterator,
 } from './operator/child-iterator';
 import {
-    FIELD_TYPE,
-    SELECTION_MODE,
-    PROJECTION_MODE,
-    PROPOGATION,
-    ROW_ID
+    FieldType,
+    SelectionMode,
+    ProjectionMode
  } from './enums';
+
+import { PROPOGATION, ROW_ID } from './constants';
+
 import { Measure, Dimension } from './fields';
 
 /**
@@ -211,7 +212,7 @@ class DataTable extends Relation {
             return acc;
         }, []);
         normalizedProjField = Array.from(new Set(normalizedProjField)).map(field => field.trim());
-        if (mode === PROJECTION_MODE.EXCLUDE) {
+        if (mode === ProjectionMode.EXCLUDE) {
             const rejectionSet = allFields.filter(fieldName => normalizedProjField.indexOf(fieldName) === -1);
             normalizedProjField = rejectionSet;
         }
@@ -241,7 +242,7 @@ class DataTable extends Relation {
         let newDataTable;
         let rowDiffset;
         // handle ALL selection mode
-        if (config.mode === SELECTION_MODE.ALL) {
+        if (config.mode === SelectionMode.ALL) {
             // do anormal selection
             const firstClone = this.cloneAsChild();
             rowDiffset = firstClone.selectHelper(firstClone.getNameSpace().fields, selectFn, {});
@@ -249,7 +250,7 @@ class DataTable extends Relation {
             // do an inverse selection
             const rejectClone = this.cloneAsChild();
             rowDiffset = rejectClone.selectHelper(rejectClone.getNameSpace().fields, selectFn, {
-                mode: SELECTION_MODE.INVERSE,
+                mode: SelectionMode.INVERSE,
             });
             rejectClone.rowDiffset = rowDiffset;
             // return an array with both selections
@@ -422,8 +423,8 @@ class DataTable extends Relation {
             if (!fieldSpec) {
                 throw new Error(`${field} is not a valid column name.`);
             }
-            // if (fieldSpec.def.type !== FIELD_TYPE.MEASURE) {
-            //     throw new Error(`${field} is not a ${FIELD_TYPE.MEASURE}.`);
+            // if (fieldSpec.def.type !== FieldType.MEASURE) {
+            //     throw new Error(`${field} is not a ${FieldType.MEASURE}.`);
             // }
             return fieldSpec.index;
         });
@@ -448,7 +449,7 @@ class DataTable extends Relation {
         // create a field in datatable to store this field
         const nameSpaceEntry = new Measure(name, computedValues, {
             name,
-            type: FIELD_TYPE.MEASURE,
+            type: FieldType.MEASURE,
         });
         // push this to the child datatables field store
         let index = namespaceFields.findIndex(d => d.name === name);
@@ -468,7 +469,7 @@ class DataTable extends Relation {
             index: namespaceFields.length - 1,
             def: {
                 name,
-                type: FIELD_TYPE.MEASURE,
+                type: FieldType.MEASURE,
             },
         };
         if (saveChild && !existingChild) {
@@ -503,8 +504,8 @@ class DataTable extends Relation {
             if (!fieldSpec) {
                 throw new Error(`${field} is not a valid column name.`);
             }
-            // if (fieldSpec.def.type !== FIELD_TYPE.DIMENSION) {
-            //     throw new Error(`${field} is not a ${FIELD_TYPE.DIMENSION}.`);
+            // if (fieldSpec.def.type !== FieldType.DIMENSION) {
+            //     throw new Error(`${field} is not a ${FieldType.DIMENSION}.`);
             // }
             return fieldSpec.index;
         });
@@ -528,7 +529,7 @@ class DataTable extends Relation {
             // create a field in datatable to store this field
             const nameSpaceEntry = new Dimension(name, dimensionData, {
                 name,
-                type: FIELD_TYPE.DIMENSION,
+                type: FieldType.DIMENSION,
             });
             // push this to the child datatables field store
             namespaceFields.push(nameSpaceEntry);
@@ -538,7 +539,7 @@ class DataTable extends Relation {
                 index: namespaceFields.length - 1,
                 def: {
                     name,
-                    type: FIELD_TYPE.DIMENSION,
+                    type: FieldType.DIMENSION,
                 },
             };
             // update the column identifier
@@ -546,7 +547,7 @@ class DataTable extends Relation {
         });
         if (config.removeDependentDimensions) {
             return clone.project(dependents, {
-                mode: PROJECTION_MODE.EXCLUDE,
+                mode: ProjectionMode.EXCLUDE,
             });
         }
         return clone;
@@ -568,7 +569,7 @@ class DataTable extends Relation {
         const newNames = sourceFields.map(callback);
         // create a data table with all the fields except sourceFields
         const excluded = this.project(sourceFields, {
-            mode: PROJECTION_MODE.EXCLUDE,
+            mode: ProjectionMode.EXCLUDE,
         });
         // get the new field indices
         const fieldIndices = sourceFields.map(name => fieldMap[name].index);
@@ -611,12 +612,12 @@ class DataTable extends Relation {
             if (fieldName === category) {
                 return {
                     name: fieldName,
-                    type: FIELD_TYPE.DIMENSION,
+                    type: FieldType.DIMENSION,
                 };
             }
             return {
                 name: fieldName,
-                type: FIELD_TYPE.MEASURE,
+                type: FieldType.MEASURE,
             };
         });
         return new DataTable(newData, schema);
@@ -637,7 +638,7 @@ class DataTable extends Relation {
         if (identifiers.length) {
             schema = identifiers[0].map(val => ({
                 name: val,
-                type: FIELD_TYPE.DIMENSION,
+                type: FieldType.DIMENSION,
             }));
             // format the data
             // @TODO: no documentation on how CSV_ARR data format works.
@@ -911,7 +912,7 @@ class DataTable extends Relation {
         });
         const nameSpaceEntry = new Dimension(binnedFieldName, labelData, {
             name: binnedFieldName,
-            type: FIELD_TYPE.DIMENSION,
+            type: FieldType.DIMENSION,
         });
         // push this to the child datatables field store
         namespaceFields.push(nameSpaceEntry);
@@ -921,7 +922,7 @@ class DataTable extends Relation {
             index: namespaceFields.length - 1,
             def: {
                 name: binnedFieldName,
-                type: FIELD_TYPE.DIMENSION,
+                type: FieldType.DIMENSION,
             },
         };
         // update the column identifier

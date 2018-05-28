@@ -1,25 +1,25 @@
 import { Measure, Categorical, DateTime } from './fields';
-import { FIELD_TYPE, DIM_SUBTYPE } from './enums';
+import { FieldType, DimensionSubtype } from './enums';
 
 function createUnitField (data, schema) {
     let field;
     switch (schema.type) {
-    case FIELD_TYPE.MEASURE:
+    case FieldType.MEASURE:
         field = new Measure(schema.name, data, schema);
         break;
 
-    case FIELD_TYPE.DIMENSION:
+    case FieldType.DIMENSION:
     default:
         switch (schema.subtype) {
-        case DIM_SUBTYPE.CATEGORICAL:
+        case DimensionSubtype.CATEGORICAL:
             field = new Categorical(schema.name, data, schema);
             break;
 
-        case DIM_SUBTYPE.TEMPORAL:
+        case DimensionSubtype.TEMPORAL:
             field = new DateTime(schema.name, data, schema);
             break;
 
-        case DIM_SUBTYPE.GEO:
+        case DimensionSubtype.GEO:
             // @todo no geo support as of now. Will do after v1.
             field = new Categorical(schema.name, data, schema);
             break;
