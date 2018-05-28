@@ -14,7 +14,7 @@ class DateTime extends Dimension {
     /**
     * @returns {String} SubType of field
     */
-    getSubType() {
+    subType() {
         return this.subtype;
     }
     /**

@@ -36,51 +36,26 @@ class Measure extends Field {
     /**
      * @returns {String} unit of fields
      */
-    getUnit() {
+    unit() {
         return this.unit;
     }
     /**
      * @returns {String} Scale of fields
      */
-    getScale() {
+    scale() {
         return this.getScale;
     }
     /**
      * @returns {String} NumberFormat of fields
      */
-    getNumberformat() {
+    numberformat() {
         return this.numberformat;
     }
     /**
      * @returns {String} Agg Function of fields
      */
-    getdefAggFn() {
+    defAggFn() {
         return this.defAggFn;
-    }
-
-    /**
-     * @param {String} unit of fields
-     */
-    setUnit(unit) {
-        this.unit = unit;
-    }
-    /**
-     * @param {String} Scale of fields
-     */
-    setScale(scale) {
-        this.scale = scale;
-    }
-    /**
-     * @param {String} NumberFormat of fields
-     */
-    setNumberformat(numberformat) {
-        this.numberformat = numberformat;
-    }
-    /**
-     * @returns {String} Agg Function of fields
-     */
-    setdefAggFn(defAggFn) {
-        this.defAggFn = defAggFn;
     }
 }
 

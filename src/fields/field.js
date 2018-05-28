@@ -71,45 +71,22 @@ class Field {
     /**
      * @return {string} Name of the field
      */
-    getName() {
+    name() {
         return this.name;
     }
 
      /**
      * @return {string} Type of the field
      */
-    getType() {
+    type() {
         return this.type;
-    }
-
-    /**
-     * Sets name of the fields
-     * @param {string} Name of the field
-     */
-    setType(type) {
-        this.type = type;
     }
 
     /**
      * @return {description} Name of the field
      */
-    getDescription() {
+    description() {
         return this.description;
-    }
-
-    /**
-     * Sets name of the fields
-     * @param {string} Name of the field
-     */
-    setName(name) {
-        this.name = name;
-    }
-
-    /**
-     * @param {String} Description of the field
-     */
-    setDescription(description) {
-        this.description = description;
     }
 }
 
