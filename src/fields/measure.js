@@ -28,4 +28,4 @@ class Measure extends Field {
     }
 }
 
-export default Field;
+export default Measure;
