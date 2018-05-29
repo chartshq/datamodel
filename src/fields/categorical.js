@@ -16,6 +16,26 @@ class Categorical extends Dimension {
     subType() {
         return this.subtype;
     }
+     /**
+     * @return {string} Name of the field
+     */
+    fieldName() {
+        return super.fieldName();
+    }
+
+     /**
+     * @return {string} Type of the field
+     */
+    type() {
+        return super.type();
+    }
+
+    /**
+     * @return {description} Name of the field
+     */
+    description() {
+        return super.description();
+    }
 }
 
 export { Categorical as default };

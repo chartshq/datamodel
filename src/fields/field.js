@@ -15,8 +15,8 @@ class Field {
         this.name = name;
         this.data = data || [];
         this.schema = schema;
-        this.description = schema.description;
-        this.type = schema.type;
+        this.fieldDescription = schema.description;
+        this.fieldType = schema.type;
         this.sanitize();
     }
 
@@ -71,7 +71,7 @@ class Field {
     /**
      * @return {string} Name of the field
      */
-    name() {
+    fieldName() {
         return this.name;
     }
 
@@ -79,14 +79,14 @@ class Field {
      * @return {string} Type of the field
      */
     type() {
-        return this.type;
+        return this.fieldType;
     }
 
     /**
      * @return {description} Name of the field
      */
     description() {
-        return this.description;
+        return this.fieldDescription;
     }
 }
 

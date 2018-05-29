@@ -7,10 +7,10 @@ import { generateMeasureDomain } from '../utils/domain-generator';
 class Measure extends Field {
     constructor(name, data, schema) {
         super(name, data, schema);
-        this.unit = schema.unit;
-        this.scale = schema.scale;
-        this.numberformat = schema.numberformat;
-        this.defAggFn = schema.defAggFn;
+        this.fieldUnit = schema.unit;
+        this.fieldScale = schema.scale;
+        this.fieldNumberformat = schema.numberformat;
+        this.fieldDefAggFn = schema.defAggFn;
     }
     getDomain() {
         return generateMeasureDomain(this.data);
@@ -37,25 +37,46 @@ class Measure extends Field {
      * @returns {String} unit of fields
      */
     unit() {
-        return this.unit;
+        return this.fieldUnit;
     }
     /**
      * @returns {String} Scale of fields
      */
     scale() {
-        return this.getScale;
+        return this.fieldScale;
     }
     /**
      * @returns {String} NumberFormat of fields
      */
     numberformat() {
-        return this.numberformat;
+        return this.fieldNumberformat;
     }
     /**
      * @returns {String} Agg Function of fields
      */
     defAggFn() {
-        return this.defAggFn;
+        return this.fieldDefAggFn;
+    }
+
+    /**
+     * @return {string} Name of the field
+     */
+    fieldName() {
+        return super.fieldName();
+    }
+
+     /**
+     * @return {string} Type of the field
+     */
+    type() {
+        return super.type();
+    }
+
+    /**
+     * @return {description} Name of the field
+     */
+    description() {
+        return super.description();
     }
 }
 
