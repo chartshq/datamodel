@@ -57,27 +57,6 @@ class Measure extends Field {
     defAggFn() {
         return this.fieldDefAggFn;
     }
-
-    /**
-     * @return {string} Name of the field
-     */
-    fieldName() {
-        return super.fieldName();
-    }
-
-     /**
-     * @return {string} Type of the field
-     */
-    type() {
-        return super.type();
-    }
-
-    /**
-     * @return {description} Name of the field
-     */
-    description() {
-        return super.description();
-    }
 }
 
 export { Measure as default };
