@@ -3,13 +3,12 @@ module.exports = function (config) {
         basePath: './',
         frameworks: ['mocha', 'chai'],
         files: [
-    // 'dist/fusiontime.js',
             'test.webpack.js',
         ],
         webpack: {
             module: {
                 rules: [
-        // instrument only testing sources with Istanbul
+                    // instrument only testing sources with Istanbul
                     {
                         test: /\.js$/,
                         use: {
@@ -30,17 +29,10 @@ module.exports = function (config) {
                         exclude: /node_modules|src\/utils\/|\.spec\.js$/,
                     },
                 ],
-      // loaders: [{
-      //   loader: 'babel-loader',
-      //   query: {
-      //     presets: ['es2015'],
-      //   },
-      // }],
             },
         },
         preprocessors: {
-    // add webpack as preprocessor
-    // 'dist/fusiontime.js': ['webpack'],
+            // add webpack as preprocessor
             'test.webpack.js': ['webpack'],
         },
         exclude: [
@@ -50,15 +42,18 @@ module.exports = function (config) {
         coverageIstanbulReporter: {
             dir: 'coverage/',
             thresholds: {
-                emitWarning: false, // set to `true` to not fail the test command when
+                // set to `true` to not fail the test command when
                 // thresholds are not met
-                global: { // thresholds for all files
+                emitWarning: false,
+                // thresholds for all files
+                global: {
                     statements: 80,
                     lines: 80,
                     branches: 80,
                     functions: 80,
                 },
-                each: { // thresholds per file
+                // thresholds per file
+                each: {
                     statements: 80,
                     lines: 80,
                     branches: 80,
@@ -81,12 +76,18 @@ module.exports = function (config) {
 
         reporters: ['spec', 'coverage-istanbul'],
         specReporter: {
-            maxLogLines: 5, // limit number of lines logged per test
-            suppressErrorSummary: true, // do not print error summary
-            suppressFailed: false, // do not print information about failed tests
-            suppressPassed: false, // do not print information about passed tests
-            suppressSkipped: true, // do not print information about skipped tests
-            showSpecTiming: false, // print the time elapsed for each spec
+            // limit number of lines logged per test
+            maxLogLines: 5,
+            // do not print error summary
+            suppressErrorSummary: true,
+            // do not print information about failed tests
+            suppressFailed: false,
+            // do not print information about passed tests
+            suppressPassed: false,
+            // do not print information about skipped tests
+            suppressSkipped: true,
+            // print the time elapsed for each spec
+            showSpecTiming: false,
         },
         port: 9876,
         colors: true,

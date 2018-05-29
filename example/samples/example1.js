@@ -1,9 +1,9 @@
 /* eslint-disable */
 
-const DataTable = datatable.default;
+const DataTable = window.DataTable.default;
 let dt;
 
-d3.json('../../js/cars.json', (data) => {
+d3.json('./data/cars.json', (data) => {
     const jsonData = data,
         schema = [{
             name: 'Name',

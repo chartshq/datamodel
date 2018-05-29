@@ -1,11 +1,11 @@
-const libraryName = 'datatable',
-    OUT_FILE = `${libraryName}.js`;
+const libraryName = 'DataTable';
+const outFile = 'datatable.js';
 
 module.exports = {
     entry: './src/index.js',
     output: {
         path: `${__dirname}/dist`,
-        filename: OUT_FILE,
+        filename: outFile,
         library: libraryName,
         libraryTarget: 'umd',
         umdNamedDefine: true,

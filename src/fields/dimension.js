@@ -43,4 +43,4 @@ class Dimension extends Field {
     }
 }
 
-export { Dimension as default };
+export default Dimension;

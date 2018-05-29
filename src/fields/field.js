@@ -67,4 +67,4 @@ class Field {
     }
 }
 
-export { Field as default };
+export default Field;

@@ -14,7 +14,7 @@ import { columnMajor } from '../utils';
  *
  * @return {Array.<Object>} list of headers and column major data.
  */
-export default function (arr, options) {
+function CSVArr(arr, options) {
     let header;
 
     const defaultOption = {
@@ -33,3 +33,5 @@ export default function (arr, options) {
 
     return [header, columns];
 }
+
+export default CSVArr;
