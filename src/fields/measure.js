@@ -6,9 +6,16 @@ import { generateMeasureDomain } from '../utils';
  */
 class Measure extends Field {
 
-    getDomain() {
+    /**
+     * Returns the domain for the measure field.
+     *
+     * @override
+     * @return {Array} Returns min and max values from measure values.
+     */
+    domain() {
         return generateMeasureDomain(this.data);
     }
+
     /**
      * This funciton is called once for every entries of the column. The parse is called with raw data in cell and its
      * parse's responsibility to return the correct parsed value.
