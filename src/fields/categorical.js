@@ -3,9 +3,10 @@ import Dimension from './dimension';
 
 /**
  * The Field for categorical entries.
- * @extends Field
+ * @extends Dimension
  */
 class Categorical extends Dimension {
+
 }
 
-export { Categorical as default };
+export default Categorical;

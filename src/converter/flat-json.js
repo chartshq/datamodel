@@ -15,7 +15,7 @@ import { columnMajor } from '../utils';
  *
  * @return {Array.<Object>} two elements. Headers and data in column major format.
  */
-export default function (arr) {
+function FlatJSON(arr) {
     const header = {};
     let i = 0;
     let insertionIndex;
@@ -38,3 +38,5 @@ export default function (arr) {
 
     return [Object.keys(header), columns];
 }
+
+export default FlatJSON;

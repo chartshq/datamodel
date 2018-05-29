@@ -3,7 +3,7 @@ import fieldStore from './field-store';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import defaultConfig from './defalult-config';
 import * as converter from './converter';
-import { SELECTION_MODE } from './enums';
+import { SelectionMode } from './enums';
 
 /*
  * @todo the value cell is the most basic class. We would have support for StringValue, NumberValue, DateTimeValue
@@ -165,7 +165,7 @@ class Relation {
             // newRowDiffSet last index
         let li;
         let checker = index => selectFn(prepareSelectionData(fields, index), index);
-        if (mode === SELECTION_MODE.INVERSE) {
+        if (mode === SelectionMode.INVERSE) {
             checker = index => !selectFn(prepareSelectionData(fields, index));
         }
         rowDiffsetIterator(this.rowDiffset, (i) => {

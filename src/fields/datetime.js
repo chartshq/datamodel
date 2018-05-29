@@ -3,7 +3,7 @@ import { DateTimeFormatter } from '../utils';
 
 /**
  * The Field for storing datetime data.
- * @extends Field
+ * @extends Dimension
  */
 class DateTime extends Dimension {
     /**
@@ -20,4 +20,4 @@ class DateTime extends Dimension {
     }
 }
 
-export { DateTime as default };
+export default DateTime;
