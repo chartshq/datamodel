@@ -1,5 +1,6 @@
 /**
  * SelectionMode enum defines the selection modes of DataTable.
+ *
  * @readonly
  * @enum {string}
  */

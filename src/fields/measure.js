@@ -1,5 +1,5 @@
 import Field from './field';
-import { generateMeasureDomain } from '../utils/domain-generator';
+import { generateMeasureDomain } from '../utils';
 /**
  * The Field for storing measure/numeric data
  * @extends Field

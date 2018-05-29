@@ -3,6 +3,7 @@ import { DateTimeFormatter } from '../utils';
 
 /**
  * The Field for storing datetime data.
+ *
  * @extends Dimension
  */
 class DateTime extends Dimension {
