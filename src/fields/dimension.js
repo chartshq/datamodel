@@ -1,16 +1,24 @@
 import Field from './field';
 
-import { getUniqueValues } from '../utils/domain-generator';
+import { uniqueValues } from '../utils';
 
 /**
  * The Field for storing dimensional data
+ *
  * @extends Field
  */
 class Dimension extends Field {
 
-    getDomain() {
-        return getUniqueValues(this.data);
+    /**
+     * Returns the domain for the dimension field.
+     *
+     * @override
+     * @return {Array} Returns the unique values from dimension values.
+     */
+    domain() {
+        return uniqueValues(this.data);
     }
+
     /**
      * This funciton is called once for every entries of the column. The parse is called with raw data in cell and its
      * parse's responsibility to return the correct parsed value.

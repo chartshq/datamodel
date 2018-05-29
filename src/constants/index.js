@@ -1,5 +1,6 @@
 /**
  * Contains constants values.
+ *
  * @module constants
  */
 

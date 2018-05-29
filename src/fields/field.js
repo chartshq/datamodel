@@ -1,14 +1,17 @@
 import { extend2 } from '../utils';
-/**
- * This is the base class of all the field type all the common functionality and data will be in this class
- */
+
+ /**
+  * The base class for every field type.
+  * It provides common functionalities across all the field types.
+  */
 class Field {
+
     /**
      * Field constructor. Abstract class for all the fields.
      *
-     * @param  {string} name Name or identifier of the field
-     * @param  {Array} data The data array
-     * @param  {json} schema Details of the data type and other related information
+     * @param  {string} name - Name or identifier of the field
+     * @param  {Array} data - The data array
+     * @param  {json} schema - Details of the data type and other related information
      */
     constructor(name, data, schema) {
         this.name = name;
@@ -38,9 +41,12 @@ class Field {
         return val;
     }
 
-    domain() {
-
-    }
+    /**
+     * Generates and returns the domain for the field.
+     *
+     * @abstract
+     */
+    domain() {}
 
     /**
      * @abstract

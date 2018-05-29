@@ -100,12 +100,12 @@ class Relation {
             throw new Error('No data found.');
         }
 
-        this.updateData(data, schema, name, options);
+        this._updateData(data, schema, name, options);
         return this;
     }
 
-    updateData (data, schema, name, options) {
-        options = Object.assign(Object.assign({}, this.constructor.defaultConfig()), options);
+    _updateData (data, schema, name, options) {
+        options = Object.assign(Object.assign({}, defaultConfig), options);
         const converterFn = converter[options.dataformat];
 
         if (!(converterFn && typeof converterFn === 'function')) {
@@ -131,16 +131,12 @@ class Relation {
         return this;
     }
 
-    static defaultConfig () {
-        return defaultConfig;
-    }
-
     /**
      * Set the projection to the DataTable only the projection string
      * @param  {string} projString The projection to be applied
      * @return {instance}            Instance of the class (this).
      */
-    projectHelper(projString) {
+    _projectHelper(projString) {
         let presentField = Object.keys(this.fieldMap);
         this.colIdentifier = projString;
 
@@ -162,7 +158,7 @@ class Relation {
      * @param {string} config.mode The type of mode to use.
      * @return {string} Row diffset
      */
-    selectHelper(fields, selectFn, config) {
+    _selectHelper(fields, selectFn, config) {
         const newRowDiffSet = [];
         let lastInsertedValue = -1;
         let { mode } = config;
@@ -188,7 +184,7 @@ class Relation {
     }
 
 
-    isEmpty () {
+    _isEmpty () {
         return !this.rowDiffset.length;
     }
 }
