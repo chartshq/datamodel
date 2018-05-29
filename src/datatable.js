@@ -218,7 +218,7 @@ class DataTable extends Relation {
         }
         let cloneDataTable;
         cloneDataTable = this.cloneAsChild(saveChild);
-        cloneDataTable.projectHelper(normalizedProjField.join(','));
+        cloneDataTable._projectHelper(normalizedProjField.join(','));
         if (saveChild) {
             this.projectedChildren[normalizedProjField.join(',')] = cloneDataTable;
         }
@@ -245,11 +245,11 @@ class DataTable extends Relation {
         if (config.mode === SelectionMode.ALL) {
             // do anormal selection
             const firstClone = this.cloneAsChild();
-            rowDiffset = firstClone.selectHelper(firstClone.getNameSpace().fields, selectFn, {});
+            rowDiffset = firstClone._selectHelper(firstClone.getNameSpace().fields, selectFn, {});
             firstClone.rowDiffset = rowDiffset;
             // do an inverse selection
             const rejectClone = this.cloneAsChild();
-            rowDiffset = rejectClone.selectHelper(rejectClone.getNameSpace().fields, selectFn, {
+            rowDiffset = rejectClone._selectHelper(rejectClone.getNameSpace().fields, selectFn, {
                 mode: SelectionMode.INVERSE,
             });
             rejectClone.rowDiffset = rowDiffset;
@@ -262,13 +262,13 @@ class DataTable extends Relation {
         }
         if (child) {
             newDataTable = existingDataTable;
-            rowDiffset = this.selectHelper(this.getNameSpace().fields, selectFn, config);
+            rowDiffset = this._selectHelper(this.getNameSpace().fields, selectFn, config);
             existingDataTable.mutate('rowDiffset', rowDiffset);
             child.selectionFunction = selectFn;
         }
         else {
             cloneDataTable = this.cloneAsChild(saveChild);
-            rowDiffset = cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
+            rowDiffset = cloneDataTable._selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
             cloneDataTable.rowDiffset = rowDiffset;
             newDataTable = cloneDataTable;
         }

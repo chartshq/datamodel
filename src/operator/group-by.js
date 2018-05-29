@@ -117,7 +117,7 @@ function groupBy(dataTable, fieldArr, reducers, existingDataTable) {
         });
     });
     if (existingDataTable) {
-        existingDataTable.updateData(data, schema, dbName);
+        existingDataTable._updateData(data, schema, dbName);
         newDataTable = existingDataTable;
     }
     else {
