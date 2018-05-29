@@ -32,7 +32,9 @@
       "email": "ujjal@fusioncharts.com"
     }
   ],
-  "dependencies": {},
+  "dependencies": {
+    "picasso-util": "git+ssh://git@bitbucket.org/fusioncharts/picasso-util.git#develop"
+  },
   "devDependencies": {
     "babel-cli": "6.26.0",
     "babel-core": "6.24.0",
