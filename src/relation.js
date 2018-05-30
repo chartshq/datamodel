@@ -1,9 +1,9 @@
+import { SelectionMode } from 'picasso-util';
 import createFields from './create-fields';
 import fieldStore from './field-store';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import defaultConfig from './defalult-config';
 import * as converter from './converter';
-import { SelectionMode } from './enums';
 
 /*
  * @todo the value cell is the most basic class. We would have support for StringValue, NumberValue, DateTimeValue

@@ -1,5 +1,12 @@
+import { DataFormat, DimensionSubtype, FieldType, SelectionMode, ProjectionMode } from 'picasso-util';
 import DataTable from './datatable';
-import * as TYPES from './enums';
 
-export { DataTable as default };
-export { TYPES };
+export default DataTable;
+
+export const TYPES = {
+    DataFormat,
+    DimensionSubtype,
+    FieldType,
+    SelectionMode,
+    ProjectionMode
+};

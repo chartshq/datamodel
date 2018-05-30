@@ -1,3 +1,8 @@
+import {
+    FieldType,
+    SelectionMode,
+    ProjectionMode
+ } from 'picasso-util';
 import Relation from './relation';
 import dataBuilder from './operator/data-builder';
 import crossProduct from './operator/cross-product';
@@ -13,11 +18,6 @@ import {
     groupByIterator,
     calculatedMeasureIterator,
 } from './operator/child-iterator';
-import {
-    FieldType,
-    SelectionMode,
-    ProjectionMode
- } from './enums';
 
 import { PROPOGATION, ROW_ID } from './constants';
 
