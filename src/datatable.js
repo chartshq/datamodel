@@ -933,9 +933,7 @@ class DataTable extends Relation {
     }
 
     static get Reducers() {
-        let temp = REDUCER;
-        debugger;
-        return temp;
+        return REDUCER;
     }
     // ============================== Accessable functionality ends ======================= //
 }

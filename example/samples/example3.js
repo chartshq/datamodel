@@ -36,6 +36,10 @@ d3.json('./data/cars.json', (data) => {
 
     
     dt = new DataTable(jsonData, schema)
-
+    dt1 = dt.groupBy([ 'Origin'], {
+        Acceleration: null
+    });
+    console.log(dt.getData())
+    console.log(dt1.getData())
     DataTable.Reducers.register('mySum',(num)=>{return num +2})
 });
