@@ -1,0 +1,4 @@
+1. Refactored all method names of Relation class with private mode.
+2. Delete getDefaultConfig() static method from Relation class
+3. PROPOGATION and ROW_ID has been moved to constants folder.
+4. Enum class names are changed to: DataFormat, DimensionSubtype, FieldType, ProjectionMode, SelectionMode.
