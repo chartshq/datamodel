@@ -35,9 +35,12 @@ class ReducerStore {
             this.store.delete(name);
         }
     }
+    _resolve(name) {
+        return this.store.get(name);
+    }
 }
 
-const REDUCER = function() {
+const REDUCER = (function() {
     let store = null;
 
     function getStore() {
@@ -47,6 +50,6 @@ const REDUCER = function() {
         return store;
     }
     return getStore();
-};
+}());
 
 export default REDUCER;

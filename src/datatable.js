@@ -23,7 +23,7 @@ import { PROPOGATION, ROW_ID } from './constants';
 
 import { Measure, Dimension } from './fields';
 
-import { REDUCER } from './utils/reducer';
+import REDUCER from './utils/reducer';
 
 /**
  * The main class
@@ -933,7 +933,9 @@ class DataTable extends Relation {
     }
 
     static get Reducers() {
-        return REDUCER;
+        let temp = REDUCER;
+        debugger;
+        return temp;
     }
     // ============================== Accessable functionality ends ======================= //
 }
