@@ -7,6 +7,7 @@ import Measure from './measure';
 import Field from './field';
 import Categorical from './categorical';
 import { DIM_SUBTYPE } from '../enums/index';
+import DateTime from './datetime';
 
 describe('Field Testing', () => {
     it('should clone a measure ', () => {
@@ -73,6 +74,12 @@ describe('Field Testing', () => {
             expect(dimField instanceof Categorical).to.be.true;
             expect(dimField.type()).to.deep.equal(schema[2].type);
             expect(dimField.subType()).to.deep.equal(DIM_SUBTYPE.CATEGORICAL);
+        });
+        it('Test DateObject Object', () => {
+            let dimField = new DateTime(schema[2].name, [], schema[2]);
+            expect(dimField instanceof DateTime).to.be.true;
+            expect(dimField.type()).to.deep.equal(schema[2].type);
+            expect(dimField.subType()).to.deep.equal(DIM_SUBTYPE.TEMPORAL);
         });
     });
 });
