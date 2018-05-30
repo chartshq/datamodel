@@ -23,6 +23,8 @@ import { PROPOGATION, ROW_ID } from './constants';
 
 import { Measure, Dimension } from './fields';
 
+import { REDUCER } from './utils/reducer';
+
 /**
  * The main class
  * @extends Relation
@@ -928,6 +930,10 @@ class DataTable extends Relation {
         // update the column identifier
         clone.colIdentifier += `,${binnedFieldName}`;
         return clone;
+    }
+
+    static get Reducers() {
+        return REDUCER;
     }
     // ============================== Accessable functionality ends ======================= //
 }
