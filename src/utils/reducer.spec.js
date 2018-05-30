@@ -13,24 +13,25 @@ describe('Checking Reducer Functionality', () => {
         it('check if default reducer is sum', () => {
             expect(REDUCER.defaultReducer).to.equal(defReducer);
         });
-        it('check if default reducer is updates', () => {
+        it('check if default reducer is update', () => {
             REDUCER.defaultReducer = fnList.min;
             expect(REDUCER.defaultReducer).to.equal(fnList.min);
         });
         it('check if reducer resolving is correct', () => {
             REDUCER.defaultReducer = fnList.min;
-            expect(REDUCER._resolve('min')).to.equal(fnList.min);
+            expect(REDUCER.resolve('min')).to.equal(fnList.min);
         });
+        let sum2 = function() {
+            return 3 + 6;
+        };
+        let mysum = REDUCER.register('mySum', sum2);
         it('check if reducer register a function correctly', () => {
-            let sum2 = function() {
-                return 3 + 6;
-            };
             REDUCER.register('mySum', sum2);
-            expect(REDUCER._resolve('mySum')).to.equal(sum2);
+            expect(REDUCER.resolve('mySum')).to.equal(sum2);
         });
         it('check if reducer un-register a function correctly', () => {
-            REDUCER.unregister('mySum');
-            expect(REDUCER._resolve('mySum')).to.equal(undefined);
+            mysum();
+            expect(REDUCER.resolve('mySum')).to.equal(undefined);
         });
     });
 });

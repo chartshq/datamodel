@@ -18,6 +18,7 @@ class ReducerStore {
                 this.store.set('defReducer', fnList[reducer]);
             }
         }
+        return this;
     }
 
     get defaultReducer() {
@@ -28,6 +29,8 @@ class ReducerStore {
         if (typeof name === 'string' && typeof reducer === 'function') {
             this.store.set(name, reducer);
         }
+
+        return () => { this.unregister(name); };
     }
 
     unregister(name) {
@@ -35,7 +38,8 @@ class ReducerStore {
             this.store.delete(name);
         }
     }
-    _resolve(name) {
+
+    resolve(name) {
         return this.store.get(name);
     }
 }

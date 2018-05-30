@@ -41,5 +41,6 @@ d3.json('./data/cars.json', (data) => {
     });
     console.log(dt.getData())
     console.log(dt1.getData())
+    
     DataTable.Reducers.register('mySum',(num)=>{return num +2})
 });

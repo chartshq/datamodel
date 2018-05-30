@@ -45,7 +45,7 @@ function getReducerObj(dataTable, reducers = {}) {
     }
     Object.entries(measures).forEach(([key]) => {
         if (typeof reducers[key] === 'string') {
-            pReducers[key] = REDUCER._resolve(pReducers[key]) ? REDUCER._resolve(pReducers[key]) : reducer;
+            pReducers[key] = REDUCER.resolve(pReducers[key]) ? REDUCER.resolve(pReducers[key]) : reducer;
         }
         if (typeof reducers[key] !== 'function') {
             pReducers[key] = undefined;
