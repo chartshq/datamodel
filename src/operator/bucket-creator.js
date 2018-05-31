@@ -1,24 +1,15 @@
 /**
- * This file exports a funtion taht is used to create bins for
- * a particular measure.
- */
-
-/**
- * This function is used to create bins from the
- * data and supplied config.
+ * Creates bin from the data and the supplied config.
  *
- * @export
- * @param {Array} data Array of data.
- * @param {Object} config The config.
- * @param {number} config.binSize The size of the bin.
- * @param {number} config.numOfBins The number of bins to create.
- * @return {Array} array of objects with bin sizes.
+ * @param {Array} data - The input data.
+ * @param {Object} config - The config object.
+ * @param {number} config.binSize - The size of the bin.
+ * @param {number} config.numOfBins - The number of bins to be created.
+ * @return {Array} Returns an array of created bins.
  */
 export function createBuckets(data, config) {
-    const {
-        binSize,
-        numOfBins,
-    } = config;
+    const { binSize, numOfBins } = config;
+
     let min = data[0];
     let max = data[0];
     data.forEach((val) => {
@@ -27,6 +18,7 @@ export function createBuckets(data, config) {
     });
     max += 5;
     min = config.origin || min;
+
     const bins = [];
     if (binSize) {
         const count = Math.ceil((max - min) / binSize);
