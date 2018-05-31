@@ -10,7 +10,10 @@ d3.json('./data/cars.json', (data) => {
             type: 'dimension'
         }, {
             name: 'Miles_per_Gallon',
-            type: 'measure'
+            type: 'measure',
+            unit : 'cm',
+            scale: '1000',
+            numberformat: '12-3-3'
         }, {
             name: 'Cylinders',
             type: 'dimension'

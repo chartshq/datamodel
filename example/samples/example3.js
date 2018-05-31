@@ -7,10 +7,13 @@ d3.json('./data/cars.json', (data) => {
     const jsonData = data,
         schema = [{
             name: 'Name',
-            type: 'dimension'
+            type: 'dimension',
+            
         }, {
             name: 'Miles_per_Gallon',
-            type: 'measure'
+            type: 'measure',
+            unit:'hello',
+            defAggFn:'avg'
         }, {
             name: 'Cylinders',
             type: 'dimension'
@@ -19,7 +22,8 @@ d3.json('./data/cars.json', (data) => {
             type: 'measure'
         }, {
             name: 'Horsepower',
-            type: 'measure'
+            type: 'measure',
+            defAggFn:'avg'
         }, {
             name: 'Weight_in_lbs',
             type: 'measure',
@@ -36,6 +40,7 @@ d3.json('./data/cars.json', (data) => {
 
     
     dt = new DataTable(jsonData, schema)
+    DataTable.Reducers.defaultReducer('min');
     dt1 = dt.groupBy([ 'Origin'], {
         Acceleration: null
     });

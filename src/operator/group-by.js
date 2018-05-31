@@ -50,7 +50,7 @@ function getReducerObj(dataTable, reducers = {}) {
         if (typeof reducers[key] !== 'function') {
             pReducers[key] = undefined;
         }
-        retObj[key] = pReducers[key] || reducer;
+        retObj[key] = reducerStore.resolve(measures[key].defAggFn()) || (pReducers[key] || reducer);
     });
     return retObj;
 }
