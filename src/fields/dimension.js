@@ -1,9 +1,8 @@
 import Field from './field';
-
 import { uniqueValues } from '../utils';
 
 /**
- * The Field for storing dimensional data
+ * Represents dimension field type.
  *
  * @extends Field
  */
@@ -20,24 +19,23 @@ class Dimension extends Field {
     }
 
     /**
-     * This funciton is called once for every entries of the column. The parse is called with raw data in cell and its
-     * parse's responsibility to return the correct parsed value.
+     * A hook which is called for every entry(cell) of the column.
      *
-     * @param {Object} val entries present in a column
+     * @todo Fix the null data e.g. undefined or null etc.
      *
-     * @return {integer} the string representation of the value
+     * @param {*} val - The current entry present in the column while iteration.
+     * @return {string} Returns the string representation of the value.
      */
     parse (val) {
-        const value = (val !== undefined && val !== null) ? val.toString() : '';
-        return value.replace(/^\s+|\s+$/g, '');
+        val = (val === undefined || val === null) ? '' : val.toString();
+        return val.trim();
     }
 
     /**
-     * Hooks if any set up needs to be done post parsing. For dimension it saves the cardinality of the dimensional
-     * values.
+     * Saves the cardinality of the dimensional values after parsing the data.
      *
-     * @param {string} val parsed value for dimension
-     * @return {string} same val which was passed
+     * @param {string} val - The parsed value.
+     * @return {string} Returns the input val.
      */
     parsed (val) {
         this._unique = this._unique || {};

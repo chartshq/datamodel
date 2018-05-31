@@ -1,13 +1,10 @@
 import Dimension from './dimension';
 
-
 /**
- * The Field for categorical entries.
+ * Represents categorical field subtype.
  *
  * @extends Dimension
  */
-class Categorical extends Dimension {
-
-}
+class Categorical extends Dimension {}
 
 export default Categorical;
