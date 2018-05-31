@@ -443,7 +443,7 @@ class DataTable extends Relation {
             // get the data corresponding to supplied fields
             const fieldsData = suppliedFields.map(field => field.data[i]);
             // get the computed value based on user supplied callback
-            const computedValue = callback(...fieldsData);
+            const computedValue = callback(...fieldsData, i, namespaceFields);
             computedValues[i] = computedValue;
         });
         // create a field in datatable to store this field

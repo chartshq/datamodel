@@ -1,4 +1,4 @@
-/* global describe, it */
+/* global describe, it ,context */
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
@@ -790,5 +790,28 @@ describe('#Datatable', () => {
             name: 'marks_binned',
             type: 'dimension'
         }]);
+    });
+    context('Check for correct values in callback function', () => {
+        const data = [
+            { a: 10, aaa: 20, aaaa: 'd' },
+            { a: 15, aaa: 25, aaaa: 'demo' },
+        ];
+        const schema = [
+            { name: 'a', type: 'measure' },
+            { name: 'aaa', type: 'measure' },
+            { name: 'aaaa', type: 'dimension' },
+        ];
+        const dataTable = new DataTable(data, schema);
+
+        let callback2 = function (a, aaa, ...arg) {
+            return a + aaa + arg[0];
+        };
+        const child = dataTable.calculatedMeasure({
+            name: 'bbbb'
+        }, ['a', 'aaa'], callback2);
+
+        const childData = child.getData().data;
+        const efficiency = childData[1][childData[1].length - 1];
+        expect(efficiency).to.equal(41);
     });
 });
