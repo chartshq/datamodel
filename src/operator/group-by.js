@@ -2,7 +2,7 @@
 import { extend2 } from '../utils';
 import rowDiffsetIterator from './row-diffset-iterator';
 import DataTable from '../index';
-import REDUCER from '../utils/reducer';
+import reducerStore from '../utils/reducer';
 
 /**
  * This function sanitize the user given field and return a common Array structure field
@@ -39,13 +39,13 @@ function getReducerObj(dataTable, reducers = {}) {
     const pReducers = reducers;
     const fieldStore = dataTable.getNameSpace();
     const measures = fieldStore.getMeasure();
-    let reducer = REDUCER.defaultReducer;
+    let reducer = reducerStore.defaultReducer;
     if (typeof reducers === 'function') {
         reducer = reducers;
     }
     Object.entries(measures).forEach(([key]) => {
         if (typeof reducers[key] === 'string') {
-            pReducers[key] = REDUCER.resolve(pReducers[key]) ? REDUCER.resolve(pReducers[key]) : reducer;
+            pReducers[key] = reducerStore.resolve(pReducers[key]) ? reducerStore.resolve(pReducers[key]) : reducer;
         }
         if (typeof reducers[key] !== 'function') {
             pReducers[key] = undefined;

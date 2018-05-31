@@ -44,7 +44,7 @@ class ReducerStore {
     }
 }
 
-const REDUCER = (function() {
+const reducerStore = (function() {
     let store = null;
 
     function getStore() {
@@ -56,4 +56,4 @@ const REDUCER = (function() {
     return getStore();
 }());
 
-export default REDUCER;
+export default reducerStore;
