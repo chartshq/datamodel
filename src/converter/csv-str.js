@@ -1,24 +1,26 @@
-/**
- * Support very basic version of csv string.
- *
- * @todo Support to be given for https://tools.ietf.org/html/rfc4180
- * @todo Sample implementation https://github.com/knrz/CSV.js/
- *
- * Current version only do basic csv parsing
- */
 import { columnMajor } from '../utils';
 
 /**
- * From a csv string forms an column-like store which will later be passed to create field object. This column like
- * store is created to reduce additional parsing as the fields store data in a column.
+ * Parses and converts data formatted in CSV string to a manageable internal format.
  *
- * @param {string} str csv string
- * @param {Object} options option to control the behaviour of the parsing
- * @param {boolean} options.firstRowHeader if the first row of the csv string is header or not. Default is true.
- * @param {string} options.fieldSeparator separator of two consecutive field. Default is comma (,).
- * @param {string} options.lineSeparator separator of two consecutive line. Default is newline (\n).
+ * @todo Support to be given for https://tools.ietf.org/html/rfc4180.
+ * @todo Sample implementation https://github.com/knrz/CSV.js/.
  *
- * @return {Array.<Object>} two elements. Headers and data in column major format.
+ * @param {string} str - The input CSV string.
+ * @param {Object} options - Option to control the behaviour of the parsing.
+ * @param {boolean} [options.firstRowHeader=true] - Whether the first row of the csv string data is header or not.
+ * @param {string} [options.fieldSeparator=","] - The separator of two consecutive field.
+ * @param {string} [options.lineSeparator="\n"] - The separator of two consecutive line.
+ * @return {Array} Returns an array of headers and column major data.
+ * @example
+ *
+ * // Sample input data:
+ * const data = `
+ * a,b,c
+ * 1,2,3
+ * 4,5,6
+ * 7,8,9
+ * `
  */
 function CSVStr(str, options) {
     let header = [];
@@ -34,7 +36,8 @@ function CSVStr(str, options) {
     const arr = str.split(options.lineSeparator);
 
     if (options.firstRowHeader) {
-        // If header present then mutate the array. In place mutation to save space.
+        // If header present then mutate the array.
+        // Do in-place mutation to save space.
         header = arr.splice(0, 1)[0].split(options.fieldSeparator);
     }
 

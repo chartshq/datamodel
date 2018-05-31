@@ -1,18 +1,21 @@
-/**
- * This is JavaScript array from of CSV string. If a CSV string is str then
- * str.split('\n').map(line => line.split(',')) is the CSV array format
- */
 import { columnMajor } from '../utils';
 
 /**
- * From a csv array forms an column-like store which will later be passed to create field object. This column like
- * store is created to reduce additional parsing as the fields store data in a column.
+ * Parses and converts data formatted in CSV array to a manageable internal format.
  *
- * @param {Array.<Object>} arr 2D matrix in the shape of the csv string
- * @param {Object} options option to control the behaviour of the parsing
- * @param {boolean} options.firstRowHeader if the first row of the csv string is header or not. Default is true.
+ * @param {Array.<Array>} arr - A 2D array containing of the CSV data.
+ * @param {Object} options - Option to control the behaviour of the parsing.
+ * @param {boolean} [options.firstRowHeader=true] - Whether the first row of the csv data is header or not.
+ * @return {Array} Returns an array of headers and column major data.
+ * @example
  *
- * @return {Array.<Object>} list of headers and column major data.
+ * // Sample input data:
+ * const data = [
+ *    ["a", "b", "c"]
+ *    [1, 2, 3],
+ *    [4, 5, 6],
+ *    [7, 8, 9]
+ * ];
  */
 function CSVArr(arr, options) {
     let header;
@@ -25,7 +28,8 @@ function CSVArr(arr, options) {
     const push = columnMajor(columns);
 
     if (options.firstRowHeader) {
-        // If header present then mutate the array. In place mutation to save space.
+        // If header present then mutate the array.
+        // Do in-place mutation to save space.
         header = arr.splice(0, 1)[0];
     }
 
