@@ -10,21 +10,21 @@ class ReducerStore {
         });
     }
 
-    set defaultReducer(reducer) {
-        if (typeof reducer === 'function') {
-            this.store.set('defReducer', reducer);
-        } else if (typeof reducer === 'string') {
-            if (Object.keys(fnList).indexOf(reducer) !== -1) {
-                this.store.set('defReducer', fnList[reducer]);
+    defaultReducer(...params) {
+        if (params.length) {
+            let reducer = params[0];
+            if (typeof reducer === 'function') {
+                this.store.set('defReducer', reducer);
+            } else if (typeof reducer === 'string') {
+                if (Object.keys(fnList).indexOf(reducer) !== -1) {
+                    this.store.set('defReducer', fnList[reducer]);
+                }
             }
+            return this;
         }
-        return this;
-    }
 
-    get defaultReducer() {
         return this.store.get('defReducer');
     }
-
     register(name, reducer) {
         if (typeof name === 'string' && typeof reducer === 'function') {
             this.store.set(name, reducer);

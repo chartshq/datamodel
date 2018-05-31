@@ -11,14 +11,14 @@ describe('Checking Reducer Functionality', () => {
             expect(typeof REDUCER.defaultReducer).to.equal('function');
         });
         it('check if default reducer is sum', () => {
-            expect(REDUCER.defaultReducer).to.equal(defReducer);
+            expect(REDUCER.defaultReducer()).to.equal(defReducer);
         });
         it('check if default reducer is update', () => {
-            REDUCER.defaultReducer = fnList.min;
-            expect(REDUCER.defaultReducer).to.equal(fnList.min);
+            REDUCER.defaultReducer(fnList.min);
+            expect(REDUCER.defaultReducer()).to.equal(fnList.min);
         });
         it('check if reducer resolving is correct', () => {
-            REDUCER.defaultReducer = fnList.min;
+            REDUCER.defaultReducer(fnList.min);
             expect(REDUCER.resolve('min')).to.equal(fnList.min);
         });
         let sum2 = function() {

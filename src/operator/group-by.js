@@ -39,7 +39,7 @@ function getReducerObj(dataTable, reducers = {}) {
     const pReducers = reducers;
     const fieldStore = dataTable.getNameSpace();
     const measures = fieldStore.getMeasure();
-    let reducer = reducerStore.defaultReducer;
+    let reducer = reducerStore.defaultReducer();
     if (typeof reducers === 'function') {
         reducer = reducers;
     }
