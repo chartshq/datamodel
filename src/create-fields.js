@@ -1,5 +1,5 @@
+import { FieldType, DimensionSubtype } from 'picasso-util';
 import { Measure, Categorical, DateTime } from './fields';
-import { FieldType, DimensionSubtype } from './enums';
 
 function createUnitField (data, schema) {
     let field;
