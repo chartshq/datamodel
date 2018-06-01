@@ -47,5 +47,14 @@ d3.json('./data/cars.json', (data) => {
     console.log(dt.getData())
     console.log(dt1.getData())
     
-    DataTable.Reducers.register('mySum',(num)=>{return num +2})
+    DataTable.Reducers.register('mySum', (arr) => {
+        const isNestedArray = arr[0] instanceof Array;
+        let sum = arr.reduce((carry, a) => {
+            if (isNestedArray) {
+                return carry.map((x, i) => x + a[i]);
+            }
+            return carry + a;
+        }, isNestedArray ? Array(...Array(arr[0].length)).map(() => 0) : 0);
+        return sum * 100;
+    });
 });
