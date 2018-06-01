@@ -1,4 +1,3 @@
-
 /* eslint-disable */
 
 const DataTable = window.DataTable.default;

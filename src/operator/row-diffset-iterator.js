@@ -1,11 +1,11 @@
 /**
- * This will iterate through the diffSet Array and call the callback with the current
- * index
- * @param {string}   rowDiffset the row diffset string eg. '0-4,6,10-13'
- * @param {Function} callback   function to be called with every index
+ * Iterates through the diffSet array and call the callback with the current
+ * index.
+ *
+ * @param {string} rowDiffset - The row diffset string e.g. '0-4,6,10-13'.
+ * @param {Function} callback - The callback function to be called with every index.
  */
 function rowDiffsetIterator(rowDiffset, callback) {
-    // Checking if the diffset is empty don't do anything.
     if (rowDiffset.length > 0) {
         const rowDiffArr = rowDiffset.split(',');
         rowDiffArr.forEach((diffStr) => {
@@ -21,4 +21,4 @@ function rowDiffsetIterator(rowDiffset, callback) {
     }
 }
 
-export { rowDiffsetIterator as default };
+export default rowDiffsetIterator;
