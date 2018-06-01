@@ -1,6 +1,6 @@
 import Dimension from './dimension';
 import { DateTimeFormatter } from '../utils';
-import DimensionSubtype from '../enums/dimension-subtype';
+import { DimensionSubtype } from '../enums';
 
 /**
 * The Field for storing datetime data.

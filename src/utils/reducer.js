@@ -30,10 +30,10 @@ class ReducerStore {
             this.store.set(name, reducer);
         }
 
-        return () => { this.unregister(name); };
+        return () => { this.__unregister(name); };
     }
 
-    unregister(name) {
+    __unregister(name) {
         if (this.store.has(name)) {
             this.store.delete(name);
         }

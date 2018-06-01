@@ -1,5 +1,5 @@
 import Dimension from './dimension';
-import DimensionSubtype from '../enums/dimension-subtype';
+import { DimensionSubtype } from '../enums';
 
 /**
  * The Field for categorical entries.
