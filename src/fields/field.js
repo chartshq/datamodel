@@ -17,7 +17,8 @@ class Field {
         this.name = name;
         this.data = data || [];
         this.schema = schema;
-
+        this.fieldDescription = schema.description;
+        this.fieldType = schema.type;
         this.sanitize();
     }
 
@@ -73,6 +74,27 @@ class Field {
         // Here call the constructor to create an instance of
         // the current field class type e.g. Measure, Dimension etc.
         return new this.constructor(this.name, data, schema);
+    }
+
+    /**
+     * @return {string} Name of the field
+     */
+    fieldName() {
+        return this.name;
+    }
+
+     /**
+     * @return {string} Type of the field
+     */
+    type() {
+        return this.fieldType;
+    }
+
+    /**
+     * @return {description} Name of the field
+     */
+    description() {
+        return this.fieldDescription;
     }
 }
 

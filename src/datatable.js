@@ -10,12 +10,14 @@ import { groupBy } from './operator/group-by';
 import { createBuckets } from './operator/bucket-creator';
 import { PROPOGATION, ROW_ID } from './constants';
 import { Measure, Dimension } from './fields';
+import reducerStore from './utils/reducer';
 import {
     selectIterator,
     projectIterator,
     groupByIterator,
     calculatedMeasureIterator
 } from './operator/child-iterator';
+
 
 /**
  * The data model which has been built on the concept of relational algebra.
@@ -1000,6 +1002,10 @@ class DataTable extends Relation {
         // update the column identifier
         clone.colIdentifier += `,${binnedFieldName}`;
         return clone;
+    }
+
+    static get Reducers() {
+        return reducerStore;
     }
 }
 
