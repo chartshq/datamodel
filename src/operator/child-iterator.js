@@ -1,9 +1,9 @@
 /**
- * Invokes a callback for every child created by a selection operation on a datatable.
+ * Invokes a callback for every child created by a selection operation on a DataTable.
  *
- * @param {DataTable} datatable - The input datatable instance.
+ * @param {DataTable} datatable - The input DataTable instance.
  * @param {Function} callback - The callback to be invoked on each child. The parameters
- * provided to the callback are the child datatable instance and the selection
+ * provided to the callback are the child DataTable instance and the selection
  * function used to create it.
  */
 export function selectIterator(datatable, callback) {
@@ -18,11 +18,11 @@ export function selectIterator(datatable, callback) {
 }
 
 /**
- * Invokes a callback for every measure child of a datatable.
+ * Invokes a callback for every measure child of a DataTable.
  *
- * @param {DataTable} datatable - The input datatable instance.
+ * @param {DataTable} datatable - The input DataTable instance.
  * @param {Function} callback - The callback to be invoked on each measure child. The parameters
- * provided to the callback are the child datatable instance and the child params.
+ * provided to the callback are the child DataTable instance and the child params.
  */
 export function calculatedMeasureIterator(datatable, callback) {
     const calculatedMeasureChildren = datatable.calculatedMeasureChildren;
@@ -36,11 +36,11 @@ export function calculatedMeasureIterator(datatable, callback) {
 }
 
 /**
- * Invokes a callback for every projected child of a datatable.
+ * Invokes a callback for every projected child of a DataTable.
  *
- * @param {DataTable} datatable - The input datatable instance.
+ * @param {DataTable} datatable - The input DataTable instance.
  * @param {Function} callback - The callback to be invoked on each projected child. The parameters
- * provided to the callback are the child datatable instance and the
+ * provided to the callback are the child DataTable instance and the
  * projection string.
  */
 export function projectIterator(datatable, callback) {
@@ -53,11 +53,11 @@ export function projectIterator(datatable, callback) {
 
 /**
  * Invokes a callback over the children created by a groupBy
- * operation on a datatable.
+ * operation on a DataTable.
  *
- * @param {DataTable} datatable - The input datatable instance.
+ * @param {DataTable} datatable - The input DataTable instance.
  * @param {Function} callback - The callback to be invoked. The parameters
- * provided to the callback are the child datatable instance and the groupBy string used to create it.
+ * provided to the callback are the child DataTable instance and the groupBy string used to create it.
  */
 export function groupByIterator(datatable, callback) {
     const groupByChildren = datatable.groupedChildren;

@@ -70,7 +70,9 @@ class Field {
     clone(data) {
         data = data || extend2([], this.data);
         const schema = extend2({}, this.schema);
-        return new Field(this.name, data, schema);
+        // Here call the constructor to create an instance of
+        // the current field class type e.g. Measure, Dimension etc.
+        return new this.constructor(this.name, data, schema);
     }
 }
 
