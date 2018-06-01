@@ -2,7 +2,7 @@
  * Generates domain for measure field.
  *
  * @param {Array} data - The array of data.
- * @return {Array} The measure domain.
+ * @return {Array} Returns the measure domain.
  */
 export default function generateMeasureDomain(data) {
     let min = Number.POSITIVE_INFINITY;
