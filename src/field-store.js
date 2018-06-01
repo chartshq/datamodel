@@ -2,9 +2,12 @@ import { FieldType } from 'picasso-util';
 
 const fieldStore = {
     data: {},
+
     /**
-     * This add a new data to the fieldStore data and return the data
-     * @todo function need to be written freshly
+     * Adds a new data to the fieldStore and returns the data.
+     *
+     * @todo This function needs to write freshly.
+     *
      * @param  {Array} fieldArr the list of field that will be present in this data
      * @param  {string} name name of the field store
      * @return {Object}          the data as a object which is added
@@ -44,4 +47,4 @@ const fieldStore = {
     },
 };
 
-export { fieldStore as default };
+export default fieldStore;

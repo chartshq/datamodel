@@ -1,38 +1,42 @@
 import { FieldType, DimensionSubtype } from 'picasso-util';
 import { Measure, Categorical, DateTime } from './fields';
 
+/**
+ * Creates a field instance according to the provided data and schema.
+ *
+ * @todo Add logic for GEO dimension subtype.
+ *
+ * @param {Array} data - The field data array.
+ * @param {Object} schema - The field schema object.
+ * @return {Field} Returns the newly created field instance.
+ */
 function createUnitField (data, schema) {
-    let field;
     switch (schema.type) {
     case FieldType.MEASURE:
-        field = new Measure(schema.name, data, schema);
-        break;
-
+        return new Measure(schema.name, data, schema);
     case FieldType.DIMENSION:
     default:
         switch (schema.subtype) {
         case DimensionSubtype.CATEGORICAL:
-            field = new Categorical(schema.name, data, schema);
-            break;
-
+            return new Categorical(schema.name, data, schema);
         case DimensionSubtype.TEMPORAL:
-            field = new DateTime(schema.name, data, schema);
-            break;
-
+            return new DateTime(schema.name, data, schema);
         case DimensionSubtype.GEO:
-            // @todo no geo support as of now. Will do after v1.
-            field = new Categorical(schema.name, data, schema);
-            break;
-
+            return new Categorical(schema.name, data, schema);
         default:
-            field = new Categorical(schema.name, data, schema);
+            return new Categorical(schema.name, data, schema);
         }
-        break;
     }
-
-    return field;
 }
 
+/**
+ * Creates the field instances with input data and schema.
+ *
+ * @param {Array} dataColumn - The data array for fields.
+ * @param {Array} schema - The schema array for fields.
+ * @param {Array} headers - The array of header names.
+ * @return {Array.<Field>} Returns an array of newly created field instances.
+ */
 function createFields(dataColumn, schema, headers) {
     const headersObj = {};
 
@@ -47,4 +51,4 @@ function createFields(dataColumn, schema, headers) {
     return schema.map(item => createUnitField(dataColumn[headersObj[item.name]], item));
 }
 
-export { createFields as default };
+export default createFields;

@@ -2,17 +2,16 @@ import { extend2 } from '../utils';
 
  /**
   * The base class for every field type.
-  * It provides common functionalities across all the field types.
+  * It provides some common functionalities.
   */
 class Field {
 
     /**
-     * Field constructor. Abstract class for all the fields.
+     * Sets basic setups to each Field instance.
      *
-     * @param  {string} name Name or identifier of the field
-     * @param  {Array} data The data array
-     * @param  {json} schema Details of the data type and other related information
-     * @param  {string} description Description of the field
+     * @param {string} name - The name or identifier of the field.
+     * @param {Array} data - The data array.
+     * @param {Object} schema - The schema of the data type.
      */
     constructor(name, data, schema) {
         this.name = name;
@@ -24,9 +23,9 @@ class Field {
     }
 
     /**
-     * Parses values for the field.
+     * Sanitizes the field data.
      *
-     * @return {Field} instance of the current field instance
+     * @return {Field} - Returns the instance of the current context for chaining.
      */
     sanitize () {
         this.data = this.data.map(d => this.parsed(this.parse(d)));
@@ -34,10 +33,10 @@ class Field {
     }
 
     /**
-     * Hook which enbales post parsing setup.
+     * The post parsing hook for field instance.
      *
-     * @param {Object} val parsed value
-     * @return {Object} parsed value itself
+     * @param {*} val - The value to be parsed.
+     * @return {*} Returns the parsed value.
      */
     parsed (val) {
         return val;
@@ -48,30 +47,33 @@ class Field {
      *
      * @abstract
      */
-    domain() {}
-
-    /**
-     * @abstract
-     *
-     * Parse implementation has to be provided by child classes.
-     * @param {Object} value value of the cell
-     */
-    parse () {
-        throw new Error('Funciton not implemented. ');
+    domain() {
+        throw new Error('Not yet implemented!');
     }
 
     /**
-     * create a fresh new copy of the field type, if data is provided the data will not be copied. Data copy is
-     * expensive so if optimization required pass the reference of the parent field.
+     * Parse the input value before using.
      *
-     * @param  {Array} data data array if provided data will not be cloned
+     * @abstract
+     */
+    parse () {
+        throw new Error('Not yet implemented!');
+    }
+
+    /**
+     * Creates brand new copy of current field instance. To avoid optimization issue
+     * pass the required data otherwise current data would be copied which might
+     * be expensive.
      *
-     * @return {Object} copy Field type
+     * @param {Array} data - The input data, if provided current data will not be cloned.
+     * @return {Field} Returns the cloned field instance.
      */
     clone(data) {
-        const newField = new this.constructor(this.name, (data || extend2([], this.data)),
-            extend2({}, this.schema));
-        return newField;
+        data = data || extend2([], this.data);
+        const schema = extend2({}, this.schema);
+        // Here call the constructor to create an instance of
+        // the current field class type e.g. Measure, Dimension etc.
+        return new this.constructor(this.name, data, schema);
     }
 
     /**

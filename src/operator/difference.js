@@ -3,10 +3,13 @@ import { extend2 } from '../utils';
 import rowDiffsetIterator from './row-diffset-iterator';
 
 /**
- * Helper function that execute the union operation
- * @param  {DataTable} dataTable1 First DataTable
- * @param  {DataTable} dataTable2 Second DataTable
- * @return {DataTable}            the DataTable after union operation
+ * Performs the union operation between two DataTable instances.
+ *
+ * @todo Fix the conflicts between union and difference terminology here.
+ *
+ * @param {DataTable} dataTable1 - The first DataTable instance.
+ * @param {DataTable} dataTable2 - The second DataTable instance.
+ * @return {DataTable} Returns the newly created DataTable after union operation.
  */
 function difference(dataTable1, dataTable2) {
     const hashTable = {};
@@ -18,7 +21,8 @@ function difference(dataTable1, dataTable2) {
     const dataTable1FieldStoreFieldObj = dataTable1FieldStore.fieldsObj();
     const dataTable2FieldStoreFieldObj = dataTable2FieldStore.fieldsObj();
     const name = `${dataTable1FieldStore.name} union ${dataTable2FieldStore.name}`;
-    // For union the columns should match otherwise return the first dataTable;
+
+    // For union the columns should match otherwise return a clone of the dataTable1
     if (dataTable1.colIdentifier !== dataTable2.colIdentifier) {
         return dataTable1.clone();
     }
@@ -29,12 +33,13 @@ function difference(dataTable1, dataTable2) {
         schema.push(extend2({}, field.schema));
         schemaNameArr.push(field.schema.name);
     });
-    // Prepare Data
+
     /**
-     * create the data from the two dataTable
-     * @param  {DataTable} dataTable DataTable for which data is inserted
-     * @param  {Object} fieldsObj fieldStore object format
-     * @param  {boolean} addData if true only tuple will be added to the data
+     * The helper function to create the data.
+     *
+     * @param {DataTable} dataTable - The DataTable instance for which the data is inserted.
+     * @param {Object} fieldsObj - The fieldStore object format.
+     * @param {boolean} addData - If true only tuple will be added to the data.
      */
     function prepareDataHelper(dataTable, fieldsObj, addData) {
         rowDiffsetIterator(dataTable.rowDiffset, (i) => {
@@ -51,10 +56,12 @@ function difference(dataTable1, dataTable2) {
             }
         });
     }
+
+    // Prepare the data
     prepareDataHelper(dataTable2, dataTable2FieldStoreFieldObj, false);
     prepareDataHelper(dataTable1, dataTable1FieldStoreFieldObj, true);
 
     return new DataTable(data, schema, name);
 }
 
-export { difference as default };
+export default difference;

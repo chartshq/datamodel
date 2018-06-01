@@ -1,8 +1,10 @@
 /**
- * Helper function that return an Array of common schema from both the fieldStore
- * @param  {FieldStore} fs1 first FieldStore
- * @param  {FieldStore} fs2 second FieldStore
- * @return {Array}     array containing the common name
+ * The helper function that returns an array of common schema
+ * from two fieldStore instances.
+ *
+ * @param {FieldStore} fs1 - The first FieldStore instance.
+ * @param {FieldStore} fs2 - The second FieldStore instance.
+ * @return {Array} An array containing the common schema.
  */
 function getCommonSchema(fs1, fs2) {
     const retArr = [];
@@ -18,4 +20,4 @@ function getCommonSchema(fs1, fs2) {
     return retArr;
 }
 
-export { getCommonSchema as default };
+export default getCommonSchema;

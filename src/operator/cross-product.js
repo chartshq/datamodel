@@ -1,34 +1,29 @@
-import DataTable from '../index';
+import DataTable from '../datatable';
 import { extend2 } from '../utils';
 import getCommonSchema from './get-common-schema';
 import rowDiffsetIterator from './row-diffset-iterator';
 
 /**
- * Default filter function for crossProduct. If the user doesnot provide any filter function
- * then all the combination tuples will be there, this function always return false.
- * @return {boolean} true
+ * Default filter function for crossProduct.
+ *
+ * @return {boolean} Always returns true.
  */
-function defFilterFn() { return true; }
+function defaultFilterFn() { return true; }
 
 /**
- * It helps to implement the cross product opereation on two DataTables.
+ * Implementation of cross product operation between two DataTable instances.
+ * It internally creates the data and schema for the new DataTable.
  *
- * It internally create the data and schema for the new DataTable to be created from the
- * two given DataTable. We can create the field store directly which will be a little optimal
- * but this is more general so we take this path.
- * @param  {DataTable}  dataTable1                  First dataTable
- * @param  {DataTable}  dataTable2                  Second DataTable
- * @param  {Function}  filterFn                    The fiter function that filter the tuples of the
- * crossProduct DataTable
- * @param  {boolean} [replaceCommonSchema=false] flag if the common name schema should be there
- * with there parent name or replace tmpSchema
- * @return {DataTable}                              The newly created dataTable from the
- * crossProduct operations
+ * @param {DataTable} dataTable1 - The left DataTable instance.
+ * @param {DataTable} dataTable2 - The right DataTable instance.
+ * @param {Function} filterFn - The filter function which is used to filter the tuples.
+ * @param {boolean} [replaceCommonSchema=false] - The flag if the common name schema should be there.
+ * @return {DataTable} Returns The newly created DataTable instance from the crossProduct operation.
  */
 function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = false) {
     const schema = [];
     const data = [];
-    const applicableFilterFn = filterFn || defFilterFn;
+    const applicableFilterFn = filterFn || defaultFilterFn;
     const dataTable1FieldStore = dataTable1.getNameSpace();
     const dataTable2FieldStore = dataTable2.getNameSpace();
     const dataTable1FieldStoreName = dataTable1FieldStore.name;
@@ -36,7 +31,7 @@ function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = fa
     const name = `${dataTable1FieldStore.name}.${dataTable2FieldStore.name}`;
     const commonSchemaList = getCommonSchema(dataTable1FieldStore, dataTable2FieldStore);
 
-    // Prepare the schema
+    // Here prepare the schema
     dataTable1FieldStore.fields.forEach((field) => {
         const tmpSchema = extend2({}, field.schema);
         if (commonSchemaList.indexOf(tmpSchema.name) !== -1 && !replaceCommonSchema) {
@@ -55,7 +50,8 @@ function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = fa
             schema.push(tmpSchema);
         }
     });
-    // Prepare Data
+
+    // Here prepare Data
     rowDiffsetIterator(dataTable1.rowDiffset, (i) => {
         rowDiffsetIterator(dataTable2.rowDiffset, (ii) => {
             const tuple = [];
@@ -81,7 +77,8 @@ function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = fa
             }
         });
     });
+
     return new DataTable(data, schema, name);
 }
 
-export { crossProduct as default };
+export default crossProduct;

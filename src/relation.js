@@ -4,86 +4,33 @@ import fieldStore from './field-store';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import defaultConfig from './defalult-config';
 import * as converter from './converter';
-
-/*
- * @todo the value cell is the most basic class. We would have support for StringValue, NumberValue, DateTimeValue
- * and GeoValue. This types exposes API (predicate mostly) for specific types
- */
+import Value from './value';
 
 /**
- * Each privitive value of a fild is exporsed as Value. This is a wrapper on top of the primitive value for easy
- * operations.
- *
- * @class
+ * Prepares the selection data.
  */
-class Value {
-    /**
-     * @param {object} val primitive value from the cell
-     * @param {Field} field field from which the value belongs
-     */
-    constructor (val, field) {
-        Object.defineProperty(this, '_value', {
-            enumerable: false,
-            configurable: false,
-            writable: false,
-            value: val
-        });
-
-        this.field = field;
-    }
-
-    /**
-     * @setter
-     * This does not set any value as the value is immutable for a cell.
-     */
-    set value (val) {
-        /* dont let the outside setter set the value */
-        return this;
-    }
-
-    /**
-     * @getter
-     */
-    get value () {
-        return this._value;
-    }
-
-    /**
-     * @override
-     */
-    toString () {
-        return this.value;
-    }
-
-    /**
-     * @override
-     */
-    valueOf () {
-        return this.value;
-    }
-}
-
-const prepareSelectionData = (fields, i) => {
+function prepareSelectionData(fields, i) {
     const resp = {};
     for (let field of fields) {
         resp[field.name] = new Value(field.data[i], field);
     }
-
     return resp;
-};
+}
 
 /**
- * Contains all the relational algebra part
+ * Provides the relation algebra logics.
  */
 class Relation {
+
     /**
      * If passed any data this will create a field array and will create
      * a field store with these fields in global space which can be used
      * by other functions for calculations and other operations on data
-     * @param  {string|json} data The tabuler data csv or json format
-     * @param  {json} schema The details of the schema
-     * @param  {string} name name of the DataTable if not provided will assign a random name
-     * @param {object} options optional options for parsing and formatting
+     *
+     * @param {Object | string} data - The input tabular data in csv or json format.
+     * @param {Array} schema - An array of data schema.
+     * @param {string} [name] - The name of the DataTable instance, if not provided will assign a random name.
+     * @param {Object} [options] - The optional options.
      */
     constructor(data, schema, name, options) {
         if (data instanceof Relation) {
@@ -132,9 +79,10 @@ class Relation {
     }
 
     /**
-     * Set the projection to the DataTable only the projection string
-     * @param  {string} projString The projection to be applied
-     * @return {instance}            Instance of the class (this).
+     * Sets the projection to the DataTable instance only the projection string/
+     *
+     * @param {string} projString - The projection to be applied.
+     * @return {DataTable} Returns the current DataTable instance.
      */
     _projectHelper(projString) {
         let presentField = Object.keys(this.fieldMap);
@@ -151,18 +99,19 @@ class Relation {
     }
 
     /**
-     * Set the selection to the DataTable
-     * @param  {Array} fields   FieldStore fields array
-     * @param  {Function} selectFn The filter function
-     * @param {Object} config The mode configuration.
-     * @param {string} config.mode The type of mode to use.
-     * @return {string} Row diffset
+     * Sets the selection to the current DataTable instance.
+     *
+     * @param {Array} fields - The fields array.
+     * @param {Function} selectFn - The filter function.
+     * @param {Object} config - The mode configuration object.
+     * @param {string} config.mode - The type of mode to use.
+     * @return {string} Returns the Row diffset.
      */
     _selectHelper(fields, selectFn, config) {
         const newRowDiffSet = [];
         let lastInsertedValue = -1;
         let { mode } = config;
-            // newRowDiffSet last index
+        // newRowDiffSet last index
         let li;
         let checker = index => selectFn(prepareSelectionData(fields, index), index);
         if (mode === SelectionMode.INVERSE) {
@@ -189,4 +138,4 @@ class Relation {
     }
 }
 
-export { Relation as default };
+export default Relation;

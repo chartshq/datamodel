@@ -4,30 +4,31 @@ import { DateTimeFormatter } from '../utils';
 
 
 /**
- * The Field for storing datetime data.
+ * Represents datetime field subtype.
  *
  * @extends Dimension
  */
 class DateTime extends Dimension {
+
     constructor(name, data, schema) {
         super(name, data, schema);
         this.subtype = DimensionSubtype.TEMPORAL;
     }
+
     /**
     * @returns {String} SubType of field
     */
     subType() {
         return this.subtype;
     }
+
     /**
-    * This funciton is called once for every entries of the column. The parse is called with raw data in cell and its
-    * parse's responsibility to return the correct parsed value.
+    * A hook which is called for every entry(cell) of the column.
     *
-    * @param {string | Date | number} val date entries present in a column
-    *
-    * @return {integer} the ms from the native date
+    * @param {*} val - The current entry present in the column while iteration.
+    * @return {number} Returns the total timestamps in millisecond.
     */
-    parse (val) {
+    parse(val) {
         this._dtf = this._dtf || new DateTimeFormatter(this.schema.format || '');
         return this._dtf.getNativeDate(val).getTime();
     }

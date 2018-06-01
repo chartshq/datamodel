@@ -1,12 +1,13 @@
 import getCommonSchema from './get-common-schema';
 
 /**
- * Helper function for natural join filter function.
- * this generate a function that will have the logic to join two dataTable by the process of
- * natural join
- * @param  {DataTable} dataTable1 first dataTable
- * @param  {DataTable} dataTable2 second dataTable
- * @return {Function}            function that can be passed to the crossProduct function
+ * The filter function used in natural join.
+ * It generates a function that will have the logic to join two
+ * DataTable instances by the process of natural join.
+ *
+ * @param {DataTable} dataTable1 - The left DataTable instance.
+ * @param {DataTable} dataTable2 - The right DataTable instance.
+ * @return {Function} Returns a function that is used in cross-product operation.
  */
 function naturalJoinFilter(dataTable1, dataTable2) {
     const dataTable1FieldStore = dataTable1.getNameSpace();
@@ -16,17 +17,17 @@ function naturalJoinFilter(dataTable1, dataTable2) {
     const commonSchemaArr = getCommonSchema(dataTable1FieldStore, dataTable2FieldStore);
 
     return (obj) => {
-        let retainTupple = false;
+        let retainTuple = false;
         commonSchemaArr.forEach((fieldName) => {
             if (obj[dataTable1FieldStoreName][fieldName] ===
                 obj[dataTable2FieldStoreName][fieldName]) {
-                retainTupple = true;
+                retainTuple = true;
             } else {
-                retainTupple = false;
+                retainTuple = false;
             }
         });
-        return retainTupple;
+        return retainTuple;
     };
 }
 
-export { naturalJoinFilter as default };
+export default naturalJoinFilter;
