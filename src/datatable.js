@@ -49,6 +49,7 @@ class DataTable extends Relation {
             column: [],
             type: [],
         };
+        this.composedChildren = [];
     }
     /**
      * This function will create a new DataTable with the required field to have
@@ -934,6 +935,50 @@ class DataTable extends Relation {
 
     static get Reducers() {
         return reducerStore;
+    }
+
+    /**
+     * break the link between its parent and itself
+     */
+    dispose() {
+        this.parent.__removeChild(this);
+        this.parent = null;
+    }
+
+    __removeChild(child) {
+        // remove from child list
+        let idx = this.child.findIndex(sibling => sibling === child);
+        idx !== -1 ? this.child.splice(idx, 1) : true;
+        // let idx;
+        // remove from selectedchildren if present
+        idx = this.selectedChildren.findIndex(element => element.table === child);
+        idx !== -1 ? this.selectedChildren.splice(idx, 1) : true;
+
+
+        // remove from groupbylist if present
+        let childKey = Object.keys(this.groupedChildren).find(key => this.groupedChildren[key].child === child);
+        childKey !== undefined ? delete this.groupedChildren[childKey] : true;
+
+        // remove from projectedChildren
+        childKey = Object.keys(this.projectedChildren).find(key => this.projectedChildren[key] === child);
+        childKey !== undefined ? delete this.projectedChildren[childKey] : true;
+
+        // remover from calculatedMeasure
+        idx = this.calculatedMeasureChildren.findIndex(element => element.table === child);
+        idx !== -1 ? this.calculatedMeasureChildren.splice(idx, 1) : true;
+    }
+    /**
+     *
+     * @param { DataTable } parent datatable instance which will act as its parent of this.
+     * @param { Queue } criteriaQueue Queue contains in-between operation meta-data
+     */
+    __addParent(parent, criteriaQueue) {
+        parent.composedChildren.push({
+            criteria: criteriaQueue,
+            child: this
+        });
+        parent.child.push(this);
+        this.parent = parent;
     }
     // ============================== Accessable functionality ends ======================= //
 }

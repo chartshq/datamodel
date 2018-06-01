@@ -41,20 +41,22 @@ d3.json('./data/cars.json', (data) => {
     
     dt = new DataTable(jsonData, schema)
     DataTable.Reducers.defaultReducer('min');
-    dt1 = dt.groupBy([ 'Origin'], {
+    
+
+    dt2 = dt.select(fields => fields.Horsepower.value < 150)
+
+    dt1 = dt2.groupBy([ 'Origin'], {
         Acceleration: null
     });
-    console.log(dt.getData())
-    console.log(dt1.getData())
-    
-    DataTable.Reducers.register('mySum', (arr) => {
-        const isNestedArray = arr[0] instanceof Array;
-        let sum = arr.reduce((carry, a) => {
-            if (isNestedArray) {
-                return carry.map((x, i) => x + a[i]);
-            }
-            return carry + a;
-        }, isNestedArray ? Array(...Array(arr[0].length)).map(() => 0) : 0);
-        return sum * 100;
-    });
+
+    // dt3 = dt.project(['Displacement','Acceleration'])
+
+    dt4 = dt.calculatedMeasure({
+        name: 'Efficiency'
+    }, ['Displacement', 'Acceleration'], (Displacement, Acceleration) => Displacement / Acceleration);
+
+    // dt1.dispose()
+     dt2.dispose()
+    // dt3.dispose()
+    // dt4.dispose()
 });
