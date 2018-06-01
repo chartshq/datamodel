@@ -966,6 +966,10 @@ class DataTable extends Relation {
         // remover from calculatedMeasure
         idx = this.calculatedMeasureChildren.findIndex(element => element.table === child);
         idx !== -1 ? this.calculatedMeasureChildren.splice(idx, 1) : true;
+
+        // remove from composed children
+        idx = this.composedChildren.findIndex(element => element.child === child);
+        idx !== -1 ? this.composedChildren.splice(idx, 1) : true;
     }
     /**
      *
