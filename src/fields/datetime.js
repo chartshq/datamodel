@@ -1,11 +1,13 @@
+import { DimensionSubtype } from 'picasso-util';
 import Dimension from './dimension';
 import { DateTimeFormatter } from '../utils';
-import { DimensionSubtype } from '../enums';
+
 
 /**
-* The Field for storing datetime data.
-* @extends Field
-*/
+ * The Field for storing datetime data.
+ *
+ * @extends Dimension
+ */
 class DateTime extends Dimension {
     constructor(name, data, schema) {
         super(name, data, schema);

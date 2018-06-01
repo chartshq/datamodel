@@ -1,8 +1,8 @@
-/* global describe, it,context */
+/* global describe, it ,context */
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import DataTable from '..';
+import DataTable from './index';
 
 describe('#Datatable', () => {
     it('should clone successfully', () => {
@@ -869,5 +869,28 @@ describe('#Datatable', () => {
             DataTable.Reducers.defaultReducer('sum');
             expect(DataTable.Reducers.defaultReducer()).to.equal(DataTable.Reducers.resolve('sum'));
         });
+    });
+    context('Check for correct values in callback function', () => {
+        const data = [
+            { a: 10, aaa: 20, aaaa: 'd' },
+            { a: 15, aaa: 25, aaaa: 'demo' },
+        ];
+        const schema = [
+            { name: 'a', type: 'measure' },
+            { name: 'aaa', type: 'measure' },
+            { name: 'aaaa', type: 'dimension' },
+        ];
+        const dataTable = new DataTable(data, schema);
+
+        let callback2 = function (a, aaa, ...arg) {
+            return a + aaa + arg[0];
+        };
+        const child = dataTable.calculatedMeasure({
+            name: 'bbbb'
+        }, ['a', 'aaa'], callback2);
+
+        const childData = child.getData().data;
+        const efficiency = childData[1][childData[1].length - 1];
+        expect(efficiency).to.equal(41);
     });
 });

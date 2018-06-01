@@ -1,8 +1,9 @@
+import { DimensionSubtype } from 'picasso-util';
 import Dimension from './dimension';
-import { DimensionSubtype } from '../enums';
 
 /**
  * The Field for categorical entries.
+ *
  * @extends Dimension
  */
 class Categorical extends Dimension {

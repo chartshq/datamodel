@@ -1,3 +1,8 @@
+import {
+    FieldType,
+    SelectionMode,
+    ProjectionMode
+ } from 'picasso-util';
 import Relation from './relation';
 import dataBuilder from './operator/data-builder';
 import crossProduct from './operator/cross-product';
@@ -13,11 +18,6 @@ import {
     groupByIterator,
     calculatedMeasureIterator,
 } from './operator/child-iterator';
-import {
-    FieldType,
-    SelectionMode,
-    ProjectionMode
- } from './enums';
 
 import { PROPOGATION, ROW_ID } from './constants';
 
@@ -220,7 +220,7 @@ class DataTable extends Relation {
         }
         let cloneDataTable;
         cloneDataTable = this.cloneAsChild(saveChild);
-        cloneDataTable.projectHelper(normalizedProjField.join(','));
+        cloneDataTable._projectHelper(normalizedProjField.join(','));
         if (saveChild) {
             this.projectedChildren[normalizedProjField.join(',')] = cloneDataTable;
         }
@@ -247,11 +247,11 @@ class DataTable extends Relation {
         if (config.mode === SelectionMode.ALL) {
             // do anormal selection
             const firstClone = this.cloneAsChild();
-            rowDiffset = firstClone.selectHelper(firstClone.getNameSpace().fields, selectFn, {});
+            rowDiffset = firstClone._selectHelper(firstClone.getNameSpace().fields, selectFn, {});
             firstClone.rowDiffset = rowDiffset;
             // do an inverse selection
             const rejectClone = this.cloneAsChild();
-            rowDiffset = rejectClone.selectHelper(rejectClone.getNameSpace().fields, selectFn, {
+            rowDiffset = rejectClone._selectHelper(rejectClone.getNameSpace().fields, selectFn, {
                 mode: SelectionMode.INVERSE,
             });
             rejectClone.rowDiffset = rowDiffset;
@@ -264,13 +264,13 @@ class DataTable extends Relation {
         }
         if (child) {
             newDataTable = existingDataTable;
-            rowDiffset = this.selectHelper(this.getNameSpace().fields, selectFn, config);
+            rowDiffset = this._selectHelper(this.getNameSpace().fields, selectFn, config);
             existingDataTable.mutate('rowDiffset', rowDiffset);
             child.selectionFunction = selectFn;
         }
         else {
             cloneDataTable = this.cloneAsChild(saveChild);
-            rowDiffset = cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
+            rowDiffset = cloneDataTable._selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
             cloneDataTable.rowDiffset = rowDiffset;
             newDataTable = cloneDataTable;
         }
@@ -445,7 +445,7 @@ class DataTable extends Relation {
             // get the data corresponding to supplied fields
             const fieldsData = suppliedFields.map(field => field.data[i]);
             // get the computed value based on user supplied callback
-            const computedValue = callback(...fieldsData);
+            const computedValue = callback(...fieldsData, i, namespaceFields);
             computedValues[i] = computedValue;
         });
         // create a field in datatable to store this field

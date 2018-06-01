@@ -2,11 +2,11 @@
 /* eslint-disable no-unused-expressions */
 /* eslint no-undef: "off" */
 
+import { DimensionSubtype } from 'picasso-util';
 import { expect } from 'chai';
 import Measure from './measure';
 import Field from './field';
 import Categorical from './categorical';
-import { DimensionSubtype } from '../enums/index';
 import DateTime from './datetime';
 
 describe('Field Testing', () => {
