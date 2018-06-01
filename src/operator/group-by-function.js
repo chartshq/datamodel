@@ -20,7 +20,7 @@ function sum(arr) {
  * @param  {Array} arr array of values
  * @return {number}     mean of the array
  */
-function mean(arr) {
+function avg(arr) {
     const isNestedArray = arr[0] instanceof Array;
     const len = arr.length || 1;
     const arrSum = sum(arr);
@@ -63,7 +63,7 @@ function max(arr) {
  * @param  {Array} arr array of values
  * @return {number}     first value of the array
  */
-function firstValue(arr) {
+function first(arr) {
     return arr[0];
 }
 
@@ -72,7 +72,7 @@ function firstValue(arr) {
  * @param  {Array} arr array of values
  * @return {number}     last value of the array
  */
-function lastValue(arr) {
+function last(arr) {
     return arr[arr.length - 1];
 }
 
@@ -91,14 +91,25 @@ function count(arr) {
 }
 
 
+function variance(array) {
+    let mean = avg(array);
+    return avg(array.map(num => (num - mean) ** 2));
+}
+
+function std(array) {
+    return Math.sqrt(variance(array));
+}
+
+
 const fnList = {
     sum,
-    mean,
+    avg,
     min,
     max,
-    firstValue,
-    lastValue,
+    first,
+    last,
     count,
+    std
 };
 
 export {
