@@ -1,20 +1,40 @@
 {
   "name": "datatable",
-  "description": "JavaScript Data Visualisation Library",
-  "homepage": "http://www.fusioncharts.com/",
+  "description": "A data model which has been built on the concept of relational algebra",
+  "homepage": "https://bitbucket.org/fusioncharts/datatable",
   "version": "1.0.0-beta.1",
-  "license": "MIT",
+  "license": "ISC",
   "main": "src/index.js",
-  "author": "FusionCharts Technologies <support@fusioncharts.com>",
+  "author": "FusionCharts Technologies <support@fusioncharts.com> (https://fusioncharts.com)",
   "keywords": [
     "datatable"
   ],
-  "preferGlobal": false,
   "repository": {
     "type": "git",
     "url": "https://bitbucket.org/fusioncharts/datatable.git"
   },
-  "dependencies": {},
+  "contributors": [
+    {
+      "name": "Akash Ghoswami",
+      "email": "akash@fusioncharts.com"
+    },
+    {
+      "name": "Subhash Haldar",
+      "email": "subhash@fusioncharts.com"
+    },
+    {
+      "name": "Rousan Ali",
+      "email": "rousan@fusioncharts.com",
+      "url": "https://rousan.io"
+    },
+    {
+      "name": "Ujjal Kumar Dutta",
+      "email": "ujjal@fusioncharts.com"
+    }
+  ],
+  "dependencies": {
+    "picasso-util": "git+ssh://git@bitbucket.org/fusioncharts/picasso-util.git#develop"
+  },
   "devDependencies": {
     "babel-cli": "6.26.0",
     "babel-core": "6.24.0",
@@ -22,8 +42,8 @@
     "babel-loader": "6.2.10",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-es2015": "6.18.0",
-    "babel-preset-flow": "6.23.0",
     "babel-preset-latest": "6.24.0",
+    "babel-preset-flow": "^6.23.0",
     "chai": "3.5.0",
     "cross-env": "^5.0.5",
     "eslint": "3.19.0",
@@ -31,7 +51,6 @@
     "eslint-plugin-import": "2.7.0",
     "eslint-plugin-jsx-a11y": "5.1.1",
     "eslint-plugin-react": "7.3.0",
-    "flow-bin": "0.54.0",
     "istanbul-instrumenter-loader": "^3.0.0",
     "jsdoc": "3.4.3",
     "karma": "1.7.1",
@@ -48,13 +67,12 @@
     "webpack-dev-server": "2.4.2"
   },
   "scripts": {
-    "test": "npm run lint && npm run flow && karma start karma.conf.js",
+    "test": "npm run lint && npm run ut",
     "ut": "karma start karma.conf.js",
     "testinbrowser": "karma start --single-run false --browsers Chrome karma.conf.js ",
     "build": "webpack",
     "start": "webpack-dev-server",
     "lint": "eslint ./src",
-    "docs": "jsdoc -c ./jsdoc.conf.json",
-    "flow": "flow"
+    "docs": "jsdoc -c ./jsdoc.conf.json"
   }
 }

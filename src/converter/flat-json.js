@@ -1,21 +1,32 @@
-/**
- * FlatJSON  is the most common format of the JSON which is something like
- * [{
- *      name: 'Jack',
- *      age: 32
- * }, n-entries like that]
- */
 import { columnMajor } from '../utils';
 
 /**
- * From a flat json forms an column-like store which will later be passed to create field object. This column like
- * store is created to reduce additional parsing as the fields store data in a column.
+ * Parses and converts data formatted in JSON to a manageable internal format.
  *
- * @param {Array.<Object>} arr flat json format
+ * @param {Array.<Object>} arr - The input data formatted in JSON.
+ * @return {Array.<Object>} Returns an array of headers and column major data.
+ * @example
  *
- * @return {Array.<Object>} two elements. Headers and data in column major format.
+ * // Sample input data:
+ * const data = [
+ *    {
+ *      "a": 1,
+ *      "b": 2,
+ *      "c": 3
+ *    },
+ *    {
+ *      "a": 3,
+ *      "b": 4,
+ *      "c": 5
+ *    },
+ *    {
+ *      "a": 6,
+ *      "b": 7,
+ *      "c": 8
+ *    }
+ * ];
  */
-export default function (arr) {
+function FlatJSON(arr) {
     const header = {};
     let i = 0;
     let insertionIndex;
@@ -38,3 +49,5 @@ export default function (arr) {
 
     return [Object.keys(header), columns];
 }
+
+export default FlatJSON;

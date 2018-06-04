@@ -1,7 +1,8 @@
-import { defReducer, fnList } from './group-by-function';
+// import { defReducer, fnList } from './group-by-function';
 import { extend2 } from '../utils';
 import rowDiffsetIterator from './row-diffset-iterator';
 import DataTable from '../index';
+import reducerStore from '../utils/reducer';
 
 /**
  * This function sanitize the user given field and return a common Array structure field
@@ -38,18 +39,18 @@ function getReducerObj(dataTable, reducers = {}) {
     const pReducers = reducers;
     const fieldStore = dataTable.getNameSpace();
     const measures = fieldStore.getMeasure();
-    let reducer = defReducer;
+    let reducer = reducerStore.defaultReducer();
     if (typeof reducers === 'function') {
         reducer = reducers;
     }
     Object.entries(measures).forEach(([key]) => {
         if (typeof reducers[key] === 'string') {
-            pReducers[key] = fnList[pReducers[key]] ? fnList[pReducers[key]] : reducer;
+            pReducers[key] = reducerStore.resolve(pReducers[key]) ? reducerStore.resolve(pReducers[key]) : reducer;
         }
         if (typeof reducers[key] !== 'function') {
             pReducers[key] = undefined;
         }
-        retObj[key] = pReducers[key] || reducer;
+        retObj[key] = pReducers[key] || reducerStore.resolve(measures[key].defAggFn()) || reducer;
     });
     return retObj;
 }
@@ -117,7 +118,7 @@ function groupBy(dataTable, fieldArr, reducers, existingDataTable) {
         });
     });
     if (existingDataTable) {
-        existingDataTable.updateData(data, schema, dbName);
+        existingDataTable._updateData(data, schema, dbName);
         newDataTable = existingDataTable;
     }
     else {

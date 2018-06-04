@@ -1,8 +1,8 @@
-/* global describe, it */
+/* global describe, it ,context */
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import DataTable from '..';
+import DataTable from './index';
 
 describe('#Datatable', () => {
     it('should clone successfully', () => {
@@ -790,5 +790,107 @@ describe('#Datatable', () => {
             name: 'marks_binned',
             type: 'dimension'
         }]);
+    });
+    context('Test Default aggregation function', () => {
+        const data1 = [
+            { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+            { profit: 20, sales: 25, first: 'Hey', second: 'Wood' },
+            { profit: 10, sales: 20, first: 'White', second: 'the sun' },
+            { profit: 15, sales: 25, first: 'White', second: 'walls' },
+        ];
+        const schema1 = [
+            {
+                name: 'profit',
+                type: 'measure',
+                defAggFn: 'avg'
+            },
+            {
+                name: 'sales',
+                type: 'measure'
+            },
+            {
+                name: 'first',
+                type: 'dimension'
+            },
+            {
+                name: 'second',
+                type: 'dimension'
+            },
+        ];
+        const dataTable = new DataTable(data1, schema1);
+        it('Setting default Aggre fcn for profit', () => {
+            const grouped = dataTable.groupBy(['first']);
+            const childData = grouped.getData().data;
+            expect(childData[0][0]).to.equal(15);
+        });
+        it('Default Aggre fcn for sales should be sum', () => {
+            const grouped = dataTable.groupBy(['first']);
+            const childData = grouped.getData().data;
+            expect(childData[0][1]).to.equal(45);
+        });
+        it('Default Aggre fcn for sales should be min', () => {
+            DataTable.Reducers.defaultReducer('min');
+            const grouped = dataTable.groupBy(['first']);
+            const childData = grouped.getData().data;
+            expect(childData[0][1]).to.equal(20);
+        });
+        it('Default Aggre fcn for profit should be avg after setting default Reducer', () => {
+            DataTable.Reducers.defaultReducer('min');
+            const grouped = dataTable.groupBy(['first']);
+            const childData = grouped.getData().data;
+            expect(childData[0][1]).to.equal(20);
+        });
+        it('function provided in group by should overide default', () => {
+            DataTable.Reducers.defaultReducer('min');
+            const grouped = dataTable.groupBy(['first'], {
+                sales: 'sum'
+            });
+            const childData = grouped.getData().data;
+            expect(childData[0][1]).to.equal(45);
+        });
+        it('Should Register a global aggregation', () => {
+            DataTable.Reducers.register('mySum', (arr) => {
+                const isNestedArray = arr[0] instanceof Array;
+                let sum = arr.reduce((carry, a) => {
+                    if (isNestedArray) {
+                        return carry.map((x, i) => x + a[i]);
+                    }
+                    return carry + a;
+                }, isNestedArray ? Array(...Array(arr[0].length)).map(() => 0) : 0);
+                return sum * 100;
+            });
+            const grouped = dataTable.groupBy(['first'], {
+                sales: 'mySum'
+            });
+            const childData = grouped.getData().data;
+            expect(childData[0][1]).to.equal(4500);
+        });
+        it('Should reset default fnc', () => {
+            DataTable.Reducers.defaultReducer('sum');
+            expect(DataTable.Reducers.defaultReducer()).to.equal(DataTable.Reducers.resolve('sum'));
+        });
+    });
+    context('Check for correct values in callback function', () => {
+        const data = [
+            { a: 10, aaa: 20, aaaa: 'd' },
+            { a: 15, aaa: 25, aaaa: 'demo' },
+        ];
+        const schema = [
+            { name: 'a', type: 'measure' },
+            { name: 'aaa', type: 'measure' },
+            { name: 'aaaa', type: 'dimension' },
+        ];
+        const dataTable = new DataTable(data, schema);
+
+        let callback2 = function (a, aaa, ...arg) {
+            return a + aaa + arg[0];
+        };
+        const child = dataTable.calculatedMeasure({
+            name: 'bbbb'
+        }, ['a', 'aaa'], callback2);
+
+        const childData = child.getData().data;
+        const efficiency = childData[1][childData[1].length - 1];
+        expect(efficiency).to.equal(41);
     });
 });

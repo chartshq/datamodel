@@ -1,35 +1,41 @@
 import Field from './field';
-
-import { getUniqueValues } from '../utils/domain-generator';
+import { uniqueValues } from '../utils';
 
 /**
- * The Field for storing dimensional data
+ * Represents dimension field type.
+ *
  * @extends Field
  */
 class Dimension extends Field {
 
-    getDomain() {
-        return getUniqueValues(this.data);
-    }
     /**
-     * This funciton is called once for every entries of the column. The parse is called with raw data in cell and its
-     * parse's responsibility to return the correct parsed value.
+     * Returns the domain for the dimension field.
      *
-     * @param {Object} val entries present in a column
-     *
-     * @return {integer} the string representation of the value
+     * @override
+     * @return {Array} Returns the unique values from dimension values.
      */
-    parse (val) {
-        const value = (val !== undefined && val !== null) ? val.toString() : '';
-        return value.replace(/^\s+|\s+$/g, '');
+    domain() {
+        return uniqueValues(this.data);
     }
 
     /**
-     * Hooks if any set up needs to be done post parsing. For dimension it saves the cardinality of the dimensional
-     * values.
+     * A hook which is called for every entry(cell) of the column.
      *
-     * @param {string} val parsed value for dimension
-     * @return {string} same val which was passed
+     * @todo Fix the null data e.g. undefined or null etc.
+     *
+     * @param {*} val - The current entry present in the column while iteration.
+     * @return {string} Returns the string representation of the value.
+     */
+    parse (val) {
+        val = (val === undefined || val === null) ? '' : val.toString();
+        return val.trim();
+    }
+
+    /**
+     * Saves the cardinality of the dimensional values after parsing the data.
+     *
+     * @param {string} val - The parsed value.
+     * @return {string} Returns the input val.
      */
     parsed (val) {
         this._unique = this._unique || {};
@@ -43,4 +49,4 @@ class Dimension extends Field {
     }
 }
 
-export { Dimension as default };
+export default Dimension;

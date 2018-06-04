@@ -1,8 +1,9 @@
 /**
- * default sort function works same like default javascript sort
- * @param  {*} a first value
- * @param  {*} b second value
- * @return {number}   -1|1|0 according to the condition
+ * The default sort function.
+ *
+ * @param {*} a - The first value.
+ * @param {*} b - The second value.
+ * @return {number} Returns the comparison result e.g. 1 or 0 or -1.
  */
 function defSortFn(a, b) {
     const a1 = `${a}`;
@@ -17,12 +18,14 @@ function defSortFn(a, b) {
 }
 
 /**
- * create the sorted arrar from the two alternate part of the array
- * @param  {Array} arr    array which need to be merged
- * @param  {number} lo     starting point of the first array
- * @param  {number} mid    ending point of the first array
- * @param  {number} hi     ending point of the second array
- * @param  {Function} sortFn The function according to which the array will be changed
+ * The helper function for merge sort which creates the sorted array
+ * from the two halves of the input array.
+ *
+ * @param {Array} arr - The target array which needs to be merged.
+ * @param {number} lo - The starting index of the first array half.
+ * @param {number} mid - The ending index of the first array half.
+ * @param {number} hi - The ending index of the second array half.
+ * @param {Function} sortFn - The sort function.
  */
 function merge(arr, lo, mid, hi, sortFn) {
     const mainArr = arr;
@@ -51,33 +54,40 @@ function merge(arr, lo, mid, hi, sortFn) {
 }
 
 /**
- * Helper function of merge sort which will be called recursively to do the sorting
- * @param  {Array} arr    the array which need to be sorted
- * @param  {number} lo     starting point of the array need to be sorted
- * @param  {number} hi     ending point of the array need to be sorted
- * @param  {Function} sortFn function according to which the sorting will be happened
- * @return {Array}        same array with sorted
+ * The helper function for merge sort which would be called
+ * recursively for sorting the array halves.
+ *
+ * @param {Array} arr - The target array which needs to be sorted.
+ * @param {number} lo - The starting index of the array half.
+ * @param {number} hi - The ending index of the array half.
+ * @param {Function} sortFn - The sort function.
+ * @return {Array} Returns the target array itself.
  */
 function sort(arr, lo, hi, sortFn) {
-    // base case
     if (hi === lo) { return arr; }
+
     const mid = lo + Math.floor((hi - lo) / 2);
     sort(arr, lo, mid, sortFn);
     sort(arr, mid + 1, hi, sortFn);
     merge(arr, lo, mid, hi, sortFn);
+
     return arr;
 }
 
 /**
- * Implementation of merge sort. Its required by dataTable to have stable sorting, as it is not
- * sure what sorting algorithm used by browsers is stable or not.
- * @param  {Array} arr    array which need to be sorted
- * @param  {Function} sortFn sorting function which decide sorting ascending or decending.
- * @return {Array}        the same input array in sorted order
+ * The implementation of merge sort.
+ * It is used in DataTable for stable sorting as it is not sure
+ * what the sorting algorithm used by browsers is stable or not.
+ *
+ * @param {Array} arr - The target array which needs to be sorted.
+ * @param {Function} [sortFn=defSortFn] - The sort function.
+ * @return {Array} Returns the input array itself in sorted order.
  */
 function mergeSort(arr, sortFn = defSortFn) {
-    if (arr.length > 1) { sort(arr, 0, arr.length - 1, sortFn); }
+    if (arr.length > 1) {
+        sort(arr, 0, arr.length - 1, sortFn);
+    }
     return arr;
 }
 
-export { mergeSort as default };
+export default mergeSort;

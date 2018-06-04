@@ -1,16 +1,19 @@
 /* eslint-disable */
 
-const DataTable = datatable.default;
+const DataTable = window.DataTable.default;
 let dt;
 
-d3.json('../../js/cars.json', (data) => {
+d3.json('./data/cars.json', (data) => {
     const jsonData = data,
         schema = [{
             name: 'Name',
             type: 'dimension'
         }, {
             name: 'Miles_per_Gallon',
-            type: 'measure'
+            type: 'measure',
+            unit : 'cm',
+            scale: '1000',
+            numberformat: '12-3-3'
         }, {
             name: 'Cylinders',
             type: 'dimension'

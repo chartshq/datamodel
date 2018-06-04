@@ -1,3 +1,4 @@
+import { FieldType, SelectionMode, ProjectionMode } from 'picasso-util';
 import Relation from './relation';
 import dataBuilder from './operator/data-builder';
 import crossProduct from './operator/cross-product';
@@ -7,58 +8,64 @@ import difference from './operator/difference';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import { groupBy } from './operator/group-by';
 import { createBuckets } from './operator/bucket-creator';
+import { PROPOGATION, ROW_ID } from './constants';
+import { Measure, Dimension } from './fields';
+import reducerStore from './utils/reducer';
 import {
     selectIterator,
     projectIterator,
     groupByIterator,
-    calculatedMeasureIterator,
+    calculatedMeasureIterator
 } from './operator/child-iterator';
-import {
-    FIELD_TYPE,
-    SELECTION_MODE,
-    PROJECTION_MODE,
-    PROPOGATION,
-    ROW_ID
- } from './enums';
-import { Measure, Dimension } from './fields';
+
 
 /**
- * The main class
+ * The data model which has been built on the concept of relational algebra.
+ *
  * @extends Relation
  */
 class DataTable extends Relation {
+
     /**
-     * DataTable constructor
-     * @param  {Array} args Arguments passed to create DataTable class
+     * Creates a new DataTable instance.
+     *
+     * @param {Array} args - The arguments which is passed directly to the parent class.
      */
-    constructor (...args) {
+    constructor(...args) {
         super(...args);
-        // This will hold all the children DataTable
+
+        // It holds the children DataTable instances.
         this.child = [];
-        // array to hold all the grouped children
         this.groupedChildren = {};
         this.selectedChildren = [];
         this.projectedChildren = {};
         this.calculatedMeasureChildren = [];
-        // callback to call on propogation
+        // The callback to call on propogation
         this._onPropogation = [];
         this.sortingDetails = {
             column: [],
             type: [],
         };
     }
+
     /**
-     * This function will create a new DataTable with the required field to have
-     * the clone of the DataTable.
-     * @return {DataTable} The cloned DataTable.
+     * Creates a clone from the current DataTable instance.
+     *
+     * @public
+     * @return {DataTable} - Returns the newly cloned DataTable instance.
      */
     clone() {
         return new DataTable(this);
     }
 
     /**
-     * extends the clone functionality with the child parent relationship
-     * @return {DataTable} The cloned DataTable
+     * Creates a clone  from the current DataTable instance with
+     * child parent relationship.
+     *
+     * @public
+     * @param {boolean} [saveChild=true] - Whether the cloned instance would be recorded
+     * in the parent instance.
+     * @return {DataTable} - Returns the newly cloned DataTable instance.
      */
     cloneAsChild(saveChild = true) {
         const retDataTable = this.clone();
@@ -70,9 +77,11 @@ class DataTable extends Relation {
     }
 
     /**
-     * If the DataTable is cloned one and don't have the columnNameSpace then look
-     * to it's parent for the same
-     * @return {Object} Field store
+     * Returns the columnNameSpace for the current DataTable instance.
+     * If the columnNameSpace is not found, it looks to its parent DataTable.
+     *
+     * @public
+     * @return {Object} - Returns the columnNameSpace.
      */
     getNameSpace() {
         let child = this;
@@ -87,42 +96,68 @@ class DataTable extends Relation {
         }
         return nameSpace;
     }
+
+    /**
+     * Returns the schema details for all fields.
+     *
+     * @public
+     * @return {Array} Returns an array of field schema.
+     */
     getSchema() {
         return this.getNameSpace().fields.map(d => d.schema);
     }
 
-    // ============================== Accessable functionality ======================= //
     /**
-     * This Function will give the data after the operation in the format of
-     * multidimensional array with first row as schema
-     * @param {boolean} rowWise this define how the data need to be returned row wise or column wise
-     * @return {Array} multidimensional array of the data
+     * Returns the data after the operation in the format of
+     * multidimensional array with first row as schema.
+     *
+     * @public
+     * @param {boolean} [rowWise=false] - Define how the data need to be returned, row wise or column wise.
+     * @return {Array} Returns a multidimensional array of the data.
      */
     getData(rowWise = false) {
-        return dataBuilder.call(this, this.getNameSpace().fields, this.rowDiffset,
-            this.colIdentifier, this.sortingDetails, { rowWise });
+        return dataBuilder.call(
+            this,
+            this.getNameSpace().fields,
+            this.rowDiffset,
+            this.colIdentifier,
+            this.sortingDetails,
+            { rowWise }
+        );
     }
 
     /**
-     * This returns the data with the uids
+     * Returns the data with the uids.
+     *
+     * @public
+     * @return {Array} Returns a multidimensional array of the data.
      */
-    getDataWithUids () {
-        return dataBuilder.call(this, this.getNameSpace().fields, this.rowDiffset,
-            this.colIdentifier, this.sortingDetails, {
+    getDataWithUids() {
+        return dataBuilder.call(
+            this,
+            this.getNameSpace().fields,
+            this.rowDiffset,
+            this.colIdentifier,
+            this.sortingDetails,
+            {
                 addUid: true
-            });
+            }
+        );
     }
+
     /**
-     * This helps to rename the column name of the DataTable this helps in joining two dataTable.
-     * Also union and difference as these operations required to have same column name.
-     * @param  {Object} schemaObj object having the name of the field to rename as key and the new
-     * name as the value
-     * @return {DataTable}           The cloned DataTable with the rename columns
+     * Performs the rename operation to the column names of the DataTable instance.
+     *
+     * @public
+     * @param {Object} schemaObj - The object having the name of the field to rename
+     * as key and the new name as the value.
+     * @return {DataTable} Returns a new DataTable instance with the renamed columns.
      */
     rename(schemaObj) {
         const cloneDataTable = this.cloneAsChild();
         const schemaArr = cloneDataTable.colIdentifier.split(',');
         const fieldStore = this.getNameSpace().fields;
+
         Object.entries(schemaObj).forEach(([key, value]) => {
             if (schemaArr.indexOf(key) !== -1 && typeof value === 'string') {
                 for (let i = 0; i <= fieldStore.length; i += 1) {
@@ -138,6 +173,7 @@ class DataTable extends Relation {
             }
         });
         cloneDataTable.colIdentifier = schemaArr.join();
+
         return cloneDataTable;
     }
 
@@ -149,6 +185,9 @@ class DataTable extends Relation {
      * so the new DataTable tableA X tableB will have 7(4 + 3) rows and 30(5 * 6) columns (if no
      * filter function is provided).
      *
+     * @todo Make this API user-friendly.
+     *
+     * @public
      * @param  {DataTable} joinWith The DataTable to be joined with this DataTable
      * @param  {Function} filterFn Function that will filter the result of the crossProduct
      * DataTable
@@ -163,6 +202,10 @@ class DataTable extends Relation {
      * natural join.
      * it's not possible to pass a filter function as the filter function is decided according to
      * the definition of natural join
+     *
+     * @todo Make this API user-friendly.
+     *
+     * @public
      * @param  {DataTable} joinWith the DataTable with whome this DataTable will be joined
      * @return {DataTable}          The new joind DataTable
      */
@@ -171,32 +214,43 @@ class DataTable extends Relation {
     }
 
     /**
-     * This function handles the union operation of the relational algebra.
-     * It can be termed as vertical joining of all the unique tuples from both the dataTable.
-     * The requirement is both the DataTable should have same column name and order
-     * @param  {DataTable} unionWith The DataTable with which this table will be united
-     * @return {DataTable}           The new DataTable with the vertical joining
+     * Performs union operation of the relational algebra.
+     * It can be termed as vertical joining of all the unique tuples
+     * from both the DataTable instances. The requirement is both
+     * the DataTable instances should have same column name and order.
+     *
+     * @public
+     * @param {DataTable} unionWith - Another DataTable instance to which union
+     * operation is performed.
+     * @return {DataTable} Returns the new DataTable instance after operation.
      */
     union(unionWith) {
         return union(this, unionWith);
     }
 
     /**
-     * This function handles the difference operation of the relational algebra.
-     * It can be termed as vertical joining of all the tuples those are not in the second DataTable.
-     * The requirement is both the DataTable should have same column name and order
-     * @param  {DataTable} differenceWith The DataTable with which this table will be united
-     * @return {DataTable}           The new DataTable with the vertical joining
+     * Performs difference operation of the relational algebra.
+     * It can be termed as vertical joining of all the tuples
+     * those are not in the second DataTable. The requirement
+     * is both the DataTable instances should have same column name and order.
+     *
+     * @public
+     * @param {DataTable} differenceWith - Another DataTable instance to which difference
+     * operation is performed.
+     * @return {DataTable} Returns the new DataTable instance after operation.
      */
     difference(differenceWith) {
         return difference(this, differenceWith);
     }
 
     /**
-     * Set the projection of the DataTable. It actually create a clone DataTable
-     * then it will apply the projection on the cloned DataTable.
-     * @param {Array.<string | Regexp>} projField column name or regular expression.
-     * @return {DataTable} newly created DataTable with the given projection.
+     * Performs projection operation on the current DataTable instance.
+     *
+     * @public
+     * @param {Array.<string | Regexp>} projField - An array of column names in string or regular expression.
+     * @param {Object} [config={}] - An optional config.
+     * @param {boolean} [saveChild=true] - It is used while cloning.
+     * @return {DataTable} Returns the new DataTable instance after operation.
      */
     project(projField, config = {}, saveChild = true) {
         const allFields = Object.keys(this.fieldMap);
@@ -211,13 +265,13 @@ class DataTable extends Relation {
             return acc;
         }, []);
         normalizedProjField = Array.from(new Set(normalizedProjField)).map(field => field.trim());
-        if (mode === PROJECTION_MODE.EXCLUDE) {
+        if (mode === ProjectionMode.EXCLUDE) {
             const rejectionSet = allFields.filter(fieldName => normalizedProjField.indexOf(fieldName) === -1);
             normalizedProjField = rejectionSet;
         }
         let cloneDataTable;
         cloneDataTable = this.cloneAsChild(saveChild);
-        cloneDataTable.projectHelper(normalizedProjField.join(','));
+        cloneDataTable._projectHelper(normalizedProjField.join(','));
         if (saveChild) {
             this.projectedChildren[normalizedProjField.join(',')] = cloneDataTable;
         }
@@ -225,34 +279,37 @@ class DataTable extends Relation {
     }
 
     /**
-     * Set the selection of the cloned DataTable
-     * If an existing datatable is passed in the last argument, then it mutates the existing datatable
-     * instead of cloning a new datatable.
-     * @param  {functiona} selectFn The function which will be looped through all the data
-     * if it return true the row will be there in the DataTable
-     * @param {Object} config The mode configuration.
-     * @param {string} config.mode The mode of selection.
-     * @param {string} saveChild Whether to save the clonedatatable in children
-     * @param {DataTable} existingDataTable existing data table instance
-     * @return {DataTable} The cloned DataTable with the required selection
+     * Performs selection operation of the relational algebra.
+     * If an existing DataTable instance is passed in the last argument,
+     * then it mutates the that DataTable instead of cloning a new one.
+     *
+     * @public
+     * @param {Function} selectFn - The function which will be looped through all the data
+     * if it return true the row will be there in the DataTable.
+     * @param {Object} [config={}] - The mode configuration.
+     * @param {string} config.mode - The mode of the selection.
+     * @param {string} [saveChild=true] - It is used while cloning.
+     * @param {DataTable} [existingDataTable] - An optional existing DataTable instance.
+     * @return {DataTable} Returns the new DataTable instance after operation.
      */
     select(selectFn, config = {}, saveChild = true, existingDataTable) {
         let cloneDataTable;
         let newDataTable;
         let rowDiffset;
+
         // handle ALL selection mode
-        if (config.mode === SELECTION_MODE.ALL) {
-            // do anormal selection
+        if (config.mode === SelectionMode.ALL) {
+            // Do a normal selection
             const firstClone = this.cloneAsChild();
-            rowDiffset = firstClone.selectHelper(firstClone.getNameSpace().fields, selectFn, {});
+            rowDiffset = firstClone._selectHelper(firstClone.getNameSpace().fields, selectFn, {});
             firstClone.rowDiffset = rowDiffset;
-            // do an inverse selection
+            // Do an inverse selection
             const rejectClone = this.cloneAsChild();
-            rowDiffset = rejectClone.selectHelper(rejectClone.getNameSpace().fields, selectFn, {
-                mode: SELECTION_MODE.INVERSE,
+            rowDiffset = rejectClone._selectHelper(rejectClone.getNameSpace().fields, selectFn, {
+                mode: SelectionMode.INVERSE,
             });
             rejectClone.rowDiffset = rowDiffset;
-            // return an array with both selections
+            // Return an array with both selections
             return [firstClone, rejectClone];
         }
         let child;
@@ -261,18 +318,18 @@ class DataTable extends Relation {
         }
         if (child) {
             newDataTable = existingDataTable;
-            rowDiffset = this.selectHelper(this.getNameSpace().fields, selectFn, config);
+            rowDiffset = this._selectHelper(this.getNameSpace().fields, selectFn, config);
             existingDataTable.mutate('rowDiffset', rowDiffset);
             child.selectionFunction = selectFn;
         }
         else {
             cloneDataTable = this.cloneAsChild(saveChild);
-            rowDiffset = cloneDataTable.selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
+            rowDiffset = cloneDataTable._selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
             cloneDataTable.rowDiffset = rowDiffset;
             newDataTable = cloneDataTable;
         }
 
-        // store reference to chld table and selector function
+        // Store reference to child table and selector function
         if (saveChild && !child) {
             this.selectedChildren.push({
                 table: cloneDataTable,
@@ -284,12 +341,14 @@ class DataTable extends Relation {
     }
 
     /**
-     * Mutates a property of the datatable with a new value
-     * @param {string} key Property of the datatable
-     * @param {string} value Value of the property
-     * @return {DataTable} Instance of the datatable
+     * Mutates a property of the current DataTable instance with a new value.
+     *
+     * @public
+     * @param {string} key - The property name to be changed.
+     * @param {string} value - The new value of the property.
+     * @return {DataTable} Returns the current DataTable instance itself.
      */
-    mutate (key, value) {
+    mutate(key, value) {
         this[key] = value;
         selectIterator(this, (table, fn) => {
             this.select(fn, {}, false, table);
@@ -311,17 +370,17 @@ class DataTable extends Relation {
     }
 
     /**
-     * This function will perform group-by on the data table according to the fields
-     * and reducers provided.
+     * Performs group-by operation on the current DataTable instance according to
+     * the fields and reducers provided.
+     * The fields can be skipped in that case all field will be taken into consideration.
+     * The reducer can also be given, If nothing is provided sum will be the default reducer.
      *
-     * fields can be skipped in that case all field will be taken into consideration.
-     * reducres single function defination can be given or object for each field, If nothing
-     * is provided sum will be the default reducer.
-     * @param  {Array} fieldsArr array containing the name of the columns
-     * @param  {Object|Function|string} reducers  reducer function
-     * @param {string} saveChild Whether to save the child or not
-     * @param {DataTable} existingDataTable Existing datatable instance
-     * @return {DataTable} new DataTable with the required operations
+     * @public
+     * @param {Array} fieldsArr - An array containing the name of the columns.
+     * @param {Object | Function | string} [reducers={}] - The reducer function.
+     * @param {string} [saveChild=true] - Whether the child to save  or not.
+     * @param {DataTable} [existingDataTable] - An optional existing DataTable instance.
+     * @return {DataTable} Returns the new DataTable instance after operation.
      */
     groupBy(fieldsArr, reducers = {}, saveChild = true, existingDataTable) {
         const values = Object.values(reducers);
@@ -365,9 +424,11 @@ class DataTable extends Relation {
 
     /**
      * Returns index and field details in an object where key is the field name.
-     * @return {Object} field definitions
+     *
+     * @public
+     * @return {Object} - Returns the field definitions.
      */
-    getFieldMap () {
+    getFieldMap() {
         return this.fieldMap;
     }
 
@@ -379,6 +440,10 @@ class DataTable extends Relation {
      *
      * Please note no new DataTable will be created from this call, as this function overwrite the
      * previous sorting config
+     *
+     * @todo Fix whether a new DataTable instance is returned or not.
+     *
+     * @public
      * @param  {Array} sortList The array of all the column that need to be sorted
      * @return {DataTable}            it's own instance
      */
@@ -395,14 +460,16 @@ class DataTable extends Relation {
     }
 
     /**
-     * This function is used to create a calculated measure in the datatable.
+     * Creates a calculated measure from the current DataTable instance.
      *
-     * @param {Object} config The input config.
-     * @param {string} config.name The name of the field.
-     * @param {Array<string>} fields Array of fields to take as input.
-     * @param {Function} callback Callback supplied to calculate the property.
-     * @return {DataTable} New instance of datatable.
-     * @memberof DataTable
+     * @public
+     * @param {Object} config - The config.
+     * @param {string} config.name - The name of the field.
+     * @param {Array<string>} fields - An array of fields to take as input.
+     * @param {Function} callback - A callback supplied to calculate the property.
+     * @param {boolean} [saveChild=true] - Whether the child to save  or not.
+     * @param {DataTable} [existingDataTable] - An optional DataTable instance.
+     * @return {DataTable} - Returns a new DataTable instance.
      */
     calculatedMeasure(config, fields, callback, saveChild = true, existingDataTable) {
         const {
@@ -410,20 +477,20 @@ class DataTable extends Relation {
         } = config;
         let clone;
         let existingChild = this.calculatedMeasureChildren.find(dt => dt === existingDataTable);
-        // get the fields present in datatable
+        // Get the fields present
         const fieldMap = this.getFieldMap();
         if (fieldMap[name] && !existingChild) {
             throw new Error(`${name} field already exists in table.`);
         }
-        // validate that the supplied fields are present in datatable
-        // and are measures
+        // Validate that the supplied fields are present
+        // and measures
         const fieldIndices = fields.map((field) => {
             const fieldSpec = fieldMap[field];
             if (!fieldSpec) {
                 throw new Error(`${field} is not a valid column name.`);
             }
-            // if (fieldSpec.def.type !== FIELD_TYPE.MEASURE) {
-            //     throw new Error(`${field} is not a ${FIELD_TYPE.MEASURE}.`);
+            // if (fieldSpec.def.type !== FieldType.MEASURE) {
+            //     throw new Error(`${field} is not a ${FieldType.MEASURE}.`);
             // }
             return fieldSpec.index;
         });
@@ -442,15 +509,15 @@ class DataTable extends Relation {
             // get the data corresponding to supplied fields
             const fieldsData = suppliedFields.map(field => field.data[i]);
             // get the computed value based on user supplied callback
-            const computedValue = callback(...fieldsData);
+            const computedValue = callback(...fieldsData, i, namespaceFields);
             computedValues[i] = computedValue;
         });
-        // create a field in datatable to store this field
+        // create a field to store this field
         const nameSpaceEntry = new Measure(name, computedValues, {
             name,
-            type: FIELD_TYPE.MEASURE,
+            type: FieldType.MEASURE,
         });
-        // push this to the child datatables field store
+        // push this to the child DataTable instance field store
         let index = namespaceFields.findIndex(d => d.name === name);
         if (index !== -1 && existingChild) {
             namespaceFields[index] = nameSpaceEntry;
@@ -462,13 +529,13 @@ class DataTable extends Relation {
             // update the column identifier
             clone.colIdentifier += `,${name}`;
         }
-        // update the field map of child datatable
+        // update the field map of child DataTable instance
         const childFieldMap = clone.getFieldMap();
         childFieldMap[name] = {
             index: namespaceFields.length - 1,
             def: {
                 name,
-                type: FIELD_TYPE.MEASURE,
+                type: FieldType.MEASURE,
             },
         };
         if (saveChild && !existingChild) {
@@ -482,29 +549,29 @@ class DataTable extends Relation {
     }
 
     /**
-     * This method is used to generate new dimensions from existing
-     * dimensions by using the supllied callback.
+     * Generates new dimensions from existing dimensions by using the supplied callback.
      *
-     * @param {Array<Object>} dimArray Array of objects with the names of new dimensions to create.
-     * @param {Array<string>} dependents Array of the dimensions to use to create new dimensions.
-     * @param {Function} callback callback to execute to create new dimensions.
-     * @param {Object} config Object wth configuration options.
-     * @param {string} config.removeDependentDimensions Flag to indicate whether dependent dimensions should be removed.
-     * @return {DataTable} The new datatable instance.
-     * @memberof DataTable
+     * @public
+     * @param {Array<Object>} dimArray - An array of objects with the names of new dimensions to create.
+     * @param {Array<string>} dependents - An array of the dimensions to use to create new dimensions.
+     * @param {Function} callback - The callback to execute to create new dimensions.
+     * @param {Object} config - An object wth configuration options.
+     * @param {string} config.removeDependentDimensions - The flag to indicate whether dependent
+     * dimensions should be removed.
+     * @return {DataTable} Returns the new DataTable instance.
      */
     generateDimensions(dimArray, dependents, callback, config = {}) {
-        // get the fields present in datatable
+        // get the fields present
         const fieldMap = this.getFieldMap();
-        // validate that the supplied fields are present in datatable
-        // and are measures
+        // validate that the supplied fields are present
+        // and measures
         const depIndices = dependents.map((field) => {
             const fieldSpec = fieldMap[field];
             if (!fieldSpec) {
                 throw new Error(`${field} is not a valid column name.`);
             }
-            // if (fieldSpec.def.type !== FIELD_TYPE.DIMENSION) {
-            //     throw new Error(`${field} is not a ${FIELD_TYPE.DIMENSION}.`);
+            // if (fieldSpec.def.type !== FieldType.DIMENSION) {
+            //     throw new Error(`${field} is not a ${FieldType.DIMENSION}.`);
             // }
             return fieldSpec.index;
         });
@@ -521,24 +588,24 @@ class DataTable extends Relation {
             const computedValue = callback(...fieldsData);
             computedValues[i] = computedValue;
         });
-        // create new fields in the datatable
+        // create new fields
         dimArray.forEach((dimObj, dIdx) => {
             const { name } = dimObj;
             const dimensionData = computedValues.map(dataArray => dataArray[dIdx]);
-            // create a field in datatable to store this field
+            // create a field to store this field
             const nameSpaceEntry = new Dimension(name, dimensionData, {
                 name,
-                type: FIELD_TYPE.DIMENSION,
+                type: FieldType.DIMENSION,
             });
-            // push this to the child datatables field store
+            // push this to the child DataTable instance field store
             namespaceFields.push(nameSpaceEntry);
-            // update the field map of child datatable
+            // update the field map of child DataTable instance
             const childFieldMap = clone.getFieldMap();
             childFieldMap[name] = {
                 index: namespaceFields.length - 1,
                 def: {
                     name,
-                    type: FIELD_TYPE.DIMENSION,
+                    type: FieldType.DIMENSION,
                 },
             };
             // update the column identifier
@@ -546,29 +613,28 @@ class DataTable extends Relation {
         });
         if (config.removeDependentDimensions) {
             return clone.project(dependents, {
-                mode: PROJECTION_MODE.EXCLUDE,
+                mode: ProjectionMode.EXCLUDE,
             });
         }
         return clone;
     }
 
     /**
-     * This method is used to create a dimension by converting
-     * existing dimensions.
+     * Creates a dimension by converting existing dimensions.
      *
-     * @param {Array.<string>} sourceFields The names of the source fields.
-     * @param {string} category The name of the new category.
-     * @param {string} valueName the name of the measure.
-     * @param {Function} callback callback used to calculate new names of source fields.
-     * @return {DataTable} A new datatable instance.
-     * @memberof DataTable
+     * @public
+     * @param {Array.<string>} sourceFields - The names of the source fields.
+     * @param {string} category - The name of the new category.
+     * @param {string} valueName - The name of the measure.
+     * @param {Function} callback - The callback used to calculate new names of source fields.
+     * @return {DataTable} Returns a new DataTable instance.
      */
     createDimensionFrom(sourceFields, category, valueName, callback) {
         const fieldMap = this.getFieldMap();
         const newNames = sourceFields.map(callback);
         // create a data table with all the fields except sourceFields
         const excluded = this.project(sourceFields, {
-            mode: PROJECTION_MODE.EXCLUDE,
+            mode: ProjectionMode.EXCLUDE,
         });
         // get the new field indices
         const fieldIndices = sourceFields.map(name => fieldMap[name].index);
@@ -611,25 +677,23 @@ class DataTable extends Relation {
             if (fieldName === category) {
                 return {
                     name: fieldName,
-                    type: FIELD_TYPE.DIMENSION,
+                    type: FieldType.DIMENSION,
                 };
             }
             return {
                 name: fieldName,
-                type: FIELD_TYPE.MEASURE,
+                type: FieldType.MEASURE,
             };
         });
         return new DataTable(newData, schema);
     }
 
     /**
-     * This method is used to assemble a Datatable instance from
-     * the propagated identifiers.
+     * Assembles a Datatable instance from the propagated identifiers.
      *
      * @private
-     * @param {Array} identifiers Array of dimensions that were interacted upon
-     * @return {DataTable} DataTable assembled from identfiers.
-     * @memberof DataTable
+     * @param {Array} identifiers - An array of dimensions that were interacted upon.
+     * @return {DataTable} Returns a DataTable assembled from identifiers.
      */
     _assembleTableFromIdentifiers(identifiers) {
         let schema;
@@ -637,7 +701,7 @@ class DataTable extends Relation {
         if (identifiers.length) {
             schema = identifiers[0].map(val => ({
                 name: val,
-                type: FIELD_TYPE.DIMENSION,
+                type: FieldType.DIMENSION,
             }));
             // format the data
             // @TODO: no documentation on how CSV_ARR data format works.
@@ -660,14 +724,13 @@ class DataTable extends Relation {
     }
 
     /**
-     * This method is used to filter this DataTable instance
-     * and only return those fields that appear in the propagation table
-     * or only those ROW_ID's that appear in the prop table.
+     * Filters the current DataTable instance and only return those fields
+     * that appear in the propagation table or only those ROW_ID's
+     * that appear in the prop table.
      *
      * @private
-     * @param {DataTable} propTable The propagation datatable instance.
-     * @return {Datatbale} Filtered prpgation table.
-     * @memberof DataTable
+     * @param {DataTable} propTable - The propagation datatable instance.
+     * @return {DataTable} Returns the filtered propagation table.
      */
     _filterPropagationTable(propTable) {
         const { data, schema } = propTable.getData();
@@ -701,18 +764,19 @@ class DataTable extends Relation {
     }
 
     /**
-     * This method is used to propogate changes across all connected
+     * Propagates changes across all the connected DataTable instances.
      *
-     * @param {Array} identifiers list of identifiers that were interacted with.
-     * @param {Object} payload Interaction specific details.
-     * @memberof DataTable
+     * @public
+     * @param {Array} identifiers - A list of identifiers that were interacted with.
+     * @param {Object} payload - The interaction specific details.
+     * @param {DataTable} source - The source DataTable instance.
      */
     propagate(identifiers, payload, source) {
         let propTable = identifiers;
         if (!(propTable instanceof DataTable)) {
             propTable = this._assembleTableFromIdentifiers(identifiers);
         }
-        // function to propogate datatble to target datatable
+        // function to propagate to target the DataTable instance.
         const forwardPropagation = (targetDT, propogationData) => {
             targetDT.handlePropogation({
                 payload,
@@ -720,7 +784,7 @@ class DataTable extends Relation {
             });
             targetDT.propagate(propogationData, payload, this);
         };
-        // propogate to children created by SELECT operation
+        // propagate to children created by SELECT operation
         selectIterator(this, (targetDT) => {
             if (targetDT !== source) {
                 forwardPropagation(targetDT, propTable);
@@ -735,7 +799,7 @@ class DataTable extends Relation {
         });
         // create the filtered table
         const filteredTable = this._filterPropagationTable(propTable);
-        // propogate to children created by GROUPBY operation
+        // propagate to children created by groupBy operation
         groupByIterator(this, (targetDT, conf) => {
             if (targetDT !== source) {
                 const {
@@ -758,6 +822,8 @@ class DataTable extends Relation {
      * to crosstab group where propagation of is won't
      * work so we propagate the selected range of the fields
      * instead.
+     *
+     * @todo Need to check whether it is private or public API.
      *
      * @private
      * @param {Object} rangeObj Object with fieldnames and corresponsding selected ranges.
@@ -809,20 +875,19 @@ class DataTable extends Relation {
                 forward(targetDT, propTable);
             }
         });
-                // propagate to parent if parent is not source
+        // propagate to parent if parent is not source
         if (this.parent && source !== this.parent) {
             forward(this.parent, propTable, true);
         }
     }
 
     /**
-     * This method is used to associate a callback with an
-     * event name
+     * Associates a callback with an event name.
      *
-     * @param {string} eventName The name of the event.
-     * @param {Function} callback The callback to invoke.
-     * @return {DataTable} This instance.
-     * @memberof DataTable
+     * @public
+     * @param {string} eventName - The name of the event.
+     * @param {Function} callback - The callback to invoke.
+     * @return {DataTable} Returns this current DataTable instance itself.
      */
     on(eventName, callback) {
         switch (eventName) {
@@ -835,7 +900,14 @@ class DataTable extends Relation {
         return this;
     }
 
-    unsubscribe (eventName) {
+    /**
+     * Unsubscribes the callbacks for the provided event name.
+     *
+     * @public
+     * @param {string} eventName - The name of the event to unsubscribe.
+     * @return {DataTable} Returns the current DataTable instance itself.
+     */
+    unsubscribe(eventName) {
         switch (eventName) {
         case PROPOGATION:
             this._onPropogation = [];
@@ -845,9 +917,12 @@ class DataTable extends Relation {
         }
         return this;
     }
+
     /**
      * This method is used to invoke the method associated with
      * prpogation.
+     *
+     * @todo Fix whether this method would be public or not.
      *
      * @private
      * @param {Object} payload The interaction payload.
@@ -860,17 +935,17 @@ class DataTable extends Relation {
     }
 
     /**
-     * This method is used bin a measure based on provided
-     * buckets or based on calculated buckets created from configuration.
+     * Creates a bin based on provided buckets or based on
+     * calculated buckets created from configuration.
      *
-     * @param {string} measureName The name of the measure to bin.
-     * @param {Object} config The binning configuration.
-     * @param {Array} config.buckets The array of buckets.
-     * @param {number} config.binSize The size of a bin.
-     * @param {number} config.numOfBins The number of bins to create.
-     * @param {string} binnedFieldName the name of the new field.
-     * @return {DataTable} The cloned datatable.
-     * @memberof DataTable
+     * @public
+     * @param {string} measureName - The name of the measure to bin.
+     * @param {Object} config - The binning configuration.
+     * @param {Array} config.buckets - The array of buckets.
+     * @param {number} config.binSize - The size of a bin.
+     * @param {number} config.numOfBins - The number of bins to create.
+     * @param {string} binnedFieldName - The name of the new field.
+     * @return {DataTable} Returns the new DataTable instance.
      */
     bin(measureName, config, binnedFieldName) {
         const clone = this.cloneAsChild();
@@ -913,24 +988,27 @@ class DataTable extends Relation {
         });
         const nameSpaceEntry = new Dimension(binnedFieldName, labelData, {
             name: binnedFieldName,
-            type: FIELD_TYPE.DIMENSION,
+            type: FieldType.DIMENSION,
         });
-        // push this to the child datatables field store
+        // push this to the child DataTable instance field store
         namespaceFields.push(nameSpaceEntry);
-        // update the field map of child datatable
+        // update the field map of child DataTable instance
         const childFieldMap = clone.getFieldMap();
         childFieldMap[binnedFieldName] = {
             index: namespaceFields.length - 1,
             def: {
                 name: binnedFieldName,
-                type: FIELD_TYPE.DIMENSION,
+                type: FieldType.DIMENSION,
             },
         };
         // update the column identifier
         clone.colIdentifier += `,${binnedFieldName}`;
         return clone;
     }
-    // ============================== Accessable functionality ends ======================= //
+
+    static get Reducers() {
+        return reducerStore;
+    }
 }
 
-export { DataTable as default };
+export default DataTable;

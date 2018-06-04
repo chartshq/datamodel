@@ -13,10 +13,10 @@ describe('groupBy function tests', () => {
         expect(fnList.sum([[10, 20], [12, 22], [27, 17]])).to.deep.equal([49, 59]);
     });
     it('mean test', () => {
-        expect(fnList.mean([10, 12, 17])).to.equal(39 / 3);
+        expect(fnList.avg([10, 12, 17])).to.equal(39 / 3);
     });
     it('mean test', () => {
-        expect(fnList.mean([[10, 20], [12, 22], [27, 17]])).to.deep.equal([49 / 3, 59 / 3]);
+        expect(fnList.avg([[10, 20], [12, 22], [27, 17]])).to.deep.equal([49 / 3, 59 / 3]);
     });
     it('min test', () => {
         expect(fnList.min([10, 12, 17])).to.equal(10);
@@ -31,21 +31,24 @@ describe('groupBy function tests', () => {
         expect(fnList.max([[10, 20], [12, 22], [27, 17]])).to.deep.equal([27, 22]);
     });
     it('firstValue test', () => {
-        expect(fnList.firstValue([10, 12, 17])).to.equal(10);
+        expect(fnList.first([10, 12, 17])).to.equal(10);
     });
     it('firstValue test', () => {
-        expect(fnList.firstValue([[10, 20], [12, 22], [27, 17]])).to.deep.equal([10, 20]);
+        expect(fnList.first([[10, 20], [12, 22], [27, 17]])).to.deep.equal([10, 20]);
     });
     it('lastValue test', () => {
-        expect(fnList.lastValue([10, 12, 17])).to.equal(17);
+        expect(fnList.last([10, 12, 17])).to.equal(17);
     });
     it('lastValue test', () => {
-        expect(fnList.lastValue([[10, 20], [12, 22], [27, 17]])).to.deep.equal([27, 17]);
+        expect(fnList.last([[10, 20], [12, 22], [27, 17]])).to.deep.equal([27, 17]);
     });
     it('count test', () => {
         expect(fnList.count([10, 12, 17])).to.equal(3);
     });
     it('count test', () => {
         expect(fnList.count([[10, 20], [12, 22], [27, 17]])).to.deep.equal([3, 3]);
+    });
+    it('std test', () => {
+        expect(Math.ceil(fnList.std([10, 12, 17]))).to.equal(Math.ceil(2.9));
     });
 });

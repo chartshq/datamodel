@@ -1,5 +1,5 @@
-import { DATA_FORMAT } from './enums';
+import { DataFormat } from 'picasso-util';
 
 export default {
-    dataformat: DATA_FORMAT.FLAT_JSON
+    dataformat: DataFormat.FLAT_JSON
 };
