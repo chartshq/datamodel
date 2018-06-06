@@ -1,3 +1,4 @@
+/* eslint-disable default-case */
 import { FieldType, SelectionMode, ProjectionMode } from 'picasso-util';
 import Relation from './relation';
 import dataBuilder from './operator/data-builder';
@@ -895,8 +896,6 @@ class DataTable extends Relation {
         case PROPOGATION:
             this._onPropogation.push(callback);
             break;
-        default:
-            break;
         }
         return this;
     }
@@ -913,8 +912,7 @@ class DataTable extends Relation {
         case PROPOGATION:
             this._onPropogation = [];
             break;
-        default:
-            break;
+
         }
         return this;
     }

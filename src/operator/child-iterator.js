@@ -1,3 +1,4 @@
+/* eslint-disable default-case */
 import { DT_DERIVATIVES } from '../constants';
 
 /**
@@ -39,8 +40,6 @@ function childIterator(datatable, callback, operation) {
                     };
                     callback(child, params);
                 }
-                break;
-            default:
                 break;
             }
         }
