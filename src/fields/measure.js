@@ -7,6 +7,7 @@ import { generateMeasureDomain } from '../utils';
  * @extends Field
  */
 class Measure extends Field {
+
     constructor(name, data, schema) {
         super(name, data, schema);
         this.fieldUnit = schema.unit;
@@ -14,7 +15,14 @@ class Measure extends Field {
         this.fieldNumberformat = schema.numberformat;
         this.fieldDefAggFn = schema.defAggFn;
     }
-    getDomain() {
+
+    /**
+     * Returns the domain for the measure field.
+     *
+     * @override
+     * @return {Array} Returns min and max values from measure values.
+     */
+    domain() {
         return generateMeasureDomain(this.data);
     }
 
@@ -37,18 +45,21 @@ class Measure extends Field {
     unit() {
         return this.fieldUnit;
     }
+
     /**
      * @returns {String} Scale of fields
      */
     scale() {
         return this.fieldScale;
     }
+
     /**
      * @returns {String} NumberFormat of fields
      */
     numberformat() {
         return this.fieldNumberformat;
     }
+
     /**
      * @returns {String} Agg Function of fields
      */

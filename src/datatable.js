@@ -745,9 +745,11 @@ class DataTable extends Relation {
                 });
                 filteredTable = this.select((fields, rIdx) => occMap[rIdx], {}, false);
             } else {
+                let fieldMap = this.fieldMap;
+                let filteredSchema = schema.filter(d => d.name in fieldMap);
                 filteredTable = this.select((fields) => {
                     let include = true;
-                    schema.forEach((propField, idx) => {
+                    filteredSchema.forEach((propField, idx) => {
                         let index = data.findIndex(d => d[idx] === fields[propField.name].valueOf());
                         include = include && index !== -1;
                     });
