@@ -33,24 +33,15 @@ class DataTable extends Relation {
      */
     constructor(...args) {
         super(...args);
-
-        // It holds the children DataTable instances.
-        this.child = [];
-        this.groupedChildren = {};
-        this.selectedChildren = [];
-        this.projectedChildren = {};
-        this.calculatedMeasureChildren = [];
-        this.composedChildren = [];
         // The callback to call on propogation
+        // new Implementation
+        this.children = []; // contains all immediate children
+        this._derivation = []; // specify rules by which this data table is created
         this._onPropogation = [];
         this.sortingDetails = {
             column: [],
             type: [],
         };
-
-        // new Implementation
-        this.children = []; // contains all immediate children
-        this._derivation = []; // specify rules by which this data table is created
     }
 
     /**
@@ -75,8 +66,6 @@ class DataTable extends Relation {
     cloneAsChild(saveChild = true) {
         const retDataTable = this.clone();
         if (saveChild) {
-            this.child.push(retDataTable);
-            // Change12
             this.children.push(retDataTable);
         }
         retDataTable.parent = this;
@@ -280,12 +269,8 @@ class DataTable extends Relation {
         cloneDataTable = this.cloneAsChild(saveChild);
         cloneDataTable._projectHelper(normalizedProjField.join(','));
         if (saveChild) {
-            this.projectedChildren[normalizedProjField.join(',')] = cloneDataTable;
-        }
-        // Change12 -------------------
-
-        if (saveChild) {
-            this.__persistDerivation(cloneDataTable, DT_DERIVATIVES.PROJECT, { projField, config }, null);
+            this.__persistDerivation(cloneDataTable, DT_DERIVATIVES.PROJECT,
+                { projField, config, projString: normalizedProjField.join(',') }, null);
         }
 
         return cloneDataTable;
@@ -328,7 +313,6 @@ class DataTable extends Relation {
         let child;
 
         if (existingDataTable instanceof DataTable) {
-            // child = this.selectedChildren.find(obj => obj.table === existingDataTable);
             child = this.children.find(childElm => childElm._derivation
                              && childElm._derivation.length === 1
                              && childElm._derivation[0].op === DT_DERIVATIVES.SELECT
@@ -349,10 +333,6 @@ class DataTable extends Relation {
 
         // Store reference to child table and selector function
         if (saveChild && !child) {
-            this.selectedChildren.push({
-                table: cloneDataTable,
-                selectionFunction: selectFn
-            });
             this.__persistDerivation(newDataTable, DT_DERIVATIVES.SELECT, { config }, selectFn);
         }
 
@@ -402,33 +382,9 @@ class DataTable extends Relation {
      * @return {DataTable} Returns the new DataTable instance after operation.
      */
     groupBy(fieldsArr, reducers = {}, saveChild = true, existingDataTable) {
-        const values = Object.values(reducers);
-        const names = values.map(value => (value instanceof Function ? value.name : value));
-        const reducerString = reducers ? `${Object.keys(reducers)}-${names}` : null;
         const groupByString = `${fieldsArr.join()}`;
-        const key = `${groupByString}-${reducerString}`;
-        const groupedChildren = this.groupedChildren;
         let present = false;
         if (existingDataTable instanceof DataTable) {
-            // for (let groupByKey in groupedChildren) {
-            //     if ({}.hasOwnProperty.call(groupedChildren, key)) {
-            //         let child = groupedChildren[groupByKey];
-            //         // Change12
-
-            //         let child2 = this.children.find(childElm => childElm._derivation
-            //                                         && childElm._derivation.length === 1
-            //                                         && childElm._derivation[0].op === DT_DERIVATIVES.GROUPBY
-            //                                         && childElm._derivation[0].meta.groupByString === groupByKey
-            //                                         && childElm === existingDataTable);
-            //         console.log(child2);
-            //         if (child === existingDataTable) {
-            //             present = true;
-            //             child.reducer = reducers;
-            //             child.groupByString = groupByString;
-            //             break;
-            //         }
-            //     }
-            // }
             let child = this.children.find(childElm => childElm._derivation
                                             && childElm._derivation.length === 1
                                             && childElm._derivation[0].op === DT_DERIVATIVES.GROUPBY
@@ -448,11 +404,6 @@ class DataTable extends Relation {
         }
         const newDatatable = groupBy(...params);
         if (saveChild && !present) {
-            const temp = {};
-            temp.child = newDatatable;
-            temp.reducer = reducers;
-            temp.groupByString = groupByString;
-            groupedChildren[key] = temp;
             this.children.push(newDatatable);
             this.__persistDerivation(newDatatable, DT_DERIVATIVES.GROUPBY,
                 { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() }, reducers);
@@ -519,15 +470,11 @@ class DataTable extends Relation {
             name,
         } = config;
         let clone;
-        let existingChild2 = this.calculatedMeasureChildren.find(dt => dt === existingDataTable);
-        // Change12
-
         let existingChild = this.children.find(childElm => childElm._derivation
                                                 && childElm._derivation.length === 1
                                                 && childElm._derivation[0].op === DT_DERIVATIVES.CAL_MEASURE
                                                 && childElm === existingDataTable);
 
-        console.log(existingChild2);
         // Get the fields present
         const fieldMap = this.getFieldMap();
         if (fieldMap[name] && !existingChild) {
@@ -595,10 +542,6 @@ class DataTable extends Relation {
             existingDataTable._derivation[0].criteria = callback;
         }
         if (saveChild && !existingChild) {
-            this.calculatedMeasureChildren.push({
-                table: clone,
-                params: [config, fields, callback]
-            });
             this.__persistDerivation(clone, DT_DERIVATIVES.CAL_MEASURE, { config, fields }, callback);
         }
 
@@ -673,7 +616,6 @@ class DataTable extends Relation {
                 mode: ProjectionMode.EXCLUDE,
             });
         }
-        this.__persistDerivation(clone, DT_DERIVATIVES.CAL_DIMENSION, { config, dependents }, callback);
         return clone;
     }
 
@@ -1074,47 +1016,26 @@ class DataTable extends Relation {
         this.parent.__removeChild(this);
         this.parent = null;
     }
-
+    /**
+     *
+     * @param {DataTable} child : Delegates the parent to remove this child
+     */
     __removeChild(child) {
         // remove from child list
-        let idx = this.child.findIndex(sibling => sibling === child);
-        idx !== -1 ? this.child.splice(idx, 1) : true;
-        // let idx;
-        // remove from selectedchildren if present
-        idx = this.selectedChildren.findIndex(element => element.table === child);
-        idx !== -1 ? this.selectedChildren.splice(idx, 1) : true;
-
-
-        // remove from groupbylist if present
-        let childKey = Object.keys(this.groupedChildren).find(key => this.groupedChildren[key].child === child);
-        childKey !== undefined ? delete this.groupedChildren[childKey] : true;
-
-        // remove from projectedChildren
-        childKey = Object.keys(this.projectedChildren).find(key => this.projectedChildren[key] === child);
-        childKey !== undefined ? delete this.projectedChildren[childKey] : true;
-
-        // remover from calculatedMeasure
-        idx = this.calculatedMeasureChildren.findIndex(element => element.table === child);
-        idx !== -1 ? this.calculatedMeasureChildren.splice(idx, 1) : true;
-
-        // remove from composed children
-        idx = this.composedChildren.findIndex(element => element.child === child);
-        idx !== -1 ? this.composedChildren.splice(idx, 1) : true;
+        let idx = this.children.findIndex(sibling => sibling === child);
+        idx !== -1 ? this.children.splice(idx, 1) : true;
     }
     /**
      *
      * @param { DataTable } parent datatable instance which will act as its parent of this.
      * @param { Queue } criteriaQueue Queue contains in-between operation meta-data
+     * For eg : q => [{op: 'SELECT', criteria: () => { } }, {op: 'GROPBY', criteria: () => { } },...]
      */
     __addParent(parent, criteriaQueue = []) {
-        parent.composedChildren.push({
-            criteria: criteriaQueue,
-            child: this
-        });
-        parent.child.push(this);
         this.columnNameSpace = this.columnNameSpace === undefined ? this.parent.getNameSpace() : this.columnNameSpace;
-
+        this.__persistDerivation(this, DT_DERIVATIVES.COMPOSE, null, criteriaQueue);
         this.parent = parent;
+        parent.children.push(this);
     }
 
     /**
@@ -1125,11 +1046,17 @@ class DataTable extends Relation {
      * @param {Function} criteriaFn : Function which having used to do the derivation
      */
     __persistDerivation(table, operation, config = {}, criteriaFn) {
-        let derivative = {
-            op: operation,
-            meta: config,
-            criteria: criteriaFn
-        };
+        let derivative;
+        if (operation !== DT_DERIVATIVES.COMPOSE) {
+            derivative = {
+                op: operation,
+                meta: config,
+                criteria: criteriaFn
+            };
+        }
+        else {
+            derivative = criteriaFn;
+        }
         table._derivation.push(derivative);
     }
 
