@@ -568,6 +568,7 @@ describe('#Datatable', () => {
             `${first} ${second}`,
             `${second} ${first}`
         ]);
+        debugger;
         const songData = newDt.project(['Song']).getData().data;
         const invSongData = newDt.project(['InvertedSong']).getData().data;
         expect(
@@ -961,7 +962,9 @@ describe('#Datatable', () => {
             let dt3 = dt2.groupBy(['sales'], {
                 profit: null
             });
+            debugger;
             let dt4 = dt3.project(['sales']);
+            let datas = dt4.getData();
             let criteria = [
                 {
                     op: 'select',
@@ -981,7 +984,7 @@ describe('#Datatable', () => {
             dt4.__addParent(dt2, criteria);
             expect(dt2.composedChildren.length).to.equal(1);
             expect(dt2.composedChildren[0].criteria).to.deep.equal(criteria);
-            expect(dt2.composedChildren[0].child.getData()).to.deep.equal(dt4.getData());
+            expect(dt2.composedChildren[0].child.getData()).to.deep.equal(datas);
             expect(dt4.parent).to.equal(dt2);
         });
     });

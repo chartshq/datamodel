@@ -41,18 +41,24 @@ d3.json('./data/cars.json', (data) => {
     dt = new DataTable(jsonData, schema)
     DataTable.Reducers.defaultReducer('min');
     
+    const grouped = dt.groupBy(['Year']);
+    grouped = dt.groupBy(['Year'],{
+    },true,grouped);
+    //dt2 = dt.select(fields => fields.Horsepower.value < 150)
+    //dt33 = dt.select(fields => fields.Horsepower.value < 75,{},true,dt2)
 
-    dt2 = dt.select(fields => fields.Horsepower.value < 150)
+   // dt2 = dt.project(['Name','Year','Origin','Cylinders']);
 
-    dt1 = dt2.groupBy([ 'Origin'], {
-        Acceleration: null
-    });
 
     // dt3 = dt.project(['Displacement','Acceleration'])
 
-    dt4 = dt.calculatedMeasure({
-        name: 'Efficiency'
-    }, ['Displacement', 'Acceleration'], (Displacement, Acceleration) => Displacement / Acceleration);
+    // dt4 = dt.calculatedMeasure({
+    //     name: 'Efficiency'
+    // }, ['Displacement', 'Acceleration'], (Displacement, Acceleration) => Displacement / Acceleration);
+
+    // dt4 = dt.calculatedMeasure({
+    //     name: 'UNEfficiency'
+    // }, ['Acceleration', 'Displacement'], (Acceleration, Displacement) => Acceleration / Displacement,true,dt4);
 
     // dt1.dispose()
      dt2.dispose()
