@@ -1,3 +1,51 @@
+/* eslint-disable default-case */
+import { DT_DERIVATIVES } from '../constants';
+
+/**
+ * iterate the children and call the callback for each
+ *
+ * @param {DataTable} datatable
+ * @param {function} callback
+ * @param {OPERATION TYPEs} operation
+ */
+function childIterator(datatable, callback, operation) {
+    const children = datatable.children;
+    children.forEach((child) => {
+        if (child._derivation
+            && child._derivation.length === 1) {
+            switch (operation) {
+            case DT_DERIVATIVES.SELECT:
+                if (child._derivation[0].op === DT_DERIVATIVES.SELECT) {
+                    callback(child, child._derivation[0].criteria);
+                }
+                break;
+            case DT_DERIVATIVES.PROJECT:
+                if (child._derivation[0].op === DT_DERIVATIVES.PROJECT) {
+                    callback(child, child._derivation[0].meta.projString);
+                }
+                break;
+            case DT_DERIVATIVES.GROUPBY:
+                if (child._derivation[0].op === DT_DERIVATIVES.GROUPBY) {
+                    callback(child,
+                        { groupByString: child._derivation[0].meta.groupByString,
+                            reducer: child._derivation[0].criteria });
+                }
+                break;
+            case DT_DERIVATIVES.CAL_MEASURE:
+                if (child._derivation[0].op === DT_DERIVATIVES.CAL_MEASURE) {
+                    let params = {
+                        config: child._derivation[0].meta.config,
+                        fields: child._derivation[0].meta.fields,
+                        callback: child._derivation[0].criteria
+                    };
+                    callback(child, params);
+                }
+                break;
+            }
+        }
+    });
+}
+
 /**
  * Invokes a callback for every child created by a selection operation on a DataTable.
  *
@@ -7,14 +55,7 @@
  * function used to create it.
  */
 export function selectIterator(datatable, callback) {
-    const selectedChildren = datatable.selectedChildren;
-    selectedChildren.forEach((item) => {
-        const {
-            table,
-            selectionFunction,
-        } = item;
-        callback(table, selectionFunction);
-    });
+    childIterator(datatable, callback, DT_DERIVATIVES.SELECT);
 }
 
 /**
@@ -25,14 +66,7 @@ export function selectIterator(datatable, callback) {
  * provided to the callback are the child DataTable instance and the child params.
  */
 export function calculatedMeasureIterator(datatable, callback) {
-    const calculatedMeasureChildren = datatable.calculatedMeasureChildren;
-    calculatedMeasureChildren.forEach((item) => {
-        const {
-            table,
-            params,
-        } = item;
-        callback(table, params);
-    });
+    childIterator(datatable, callback, DT_DERIVATIVES.CAL_MEASURE);
 }
 
 /**
@@ -44,11 +78,7 @@ export function calculatedMeasureIterator(datatable, callback) {
  * projection string.
  */
 export function projectIterator(datatable, callback) {
-    const projectedChildren = datatable.projectedChildren;
-    Object.keys(projectedChildren).forEach((projString) => {
-        const targetDT = projectedChildren[projString];
-        callback(targetDT, projString);
-    });
+    childIterator(datatable, callback, DT_DERIVATIVES.PROJECT);
 }
 
 /**
@@ -60,15 +90,6 @@ export function projectIterator(datatable, callback) {
  * provided to the callback are the child DataTable instance and the groupBy string used to create it.
  */
 export function groupByIterator(datatable, callback) {
-    const groupByChildren = datatable.groupedChildren;
-    Object.keys(groupByChildren).forEach((key) => {
-        const tableReducerMap = groupByChildren[key];
-        const targetDT = tableReducerMap.child;
-        const reducer = tableReducerMap.reducer;
-        const groupByString = tableReducerMap.groupByString;
-        callback(targetDT, {
-            groupByString,
-            reducer,
-        });
-    });
+    childIterator(datatable, callback, DT_DERIVATIVES.GROUPBY);
 }
+

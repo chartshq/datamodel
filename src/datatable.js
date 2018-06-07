@@ -1,3 +1,4 @@
+/* eslint-disable default-case */
 import { FieldType, SelectionMode, ProjectionMode } from 'picasso-util';
 import Relation from './relation';
 import dataBuilder from './operator/data-builder';
@@ -8,7 +9,7 @@ import difference from './operator/difference';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import { groupBy } from './operator/group-by';
 import { createBuckets } from './operator/bucket-creator';
-import { PROPOGATION, ROW_ID } from './constants';
+import { PROPOGATION, ROW_ID, DT_DERIVATIVES } from './constants';
 import { Measure, Dimension } from './fields';
 import reducerStore from './utils/reducer';
 import {
@@ -33,14 +34,10 @@ class DataTable extends Relation {
      */
     constructor(...args) {
         super(...args);
-
-        // It holds the children DataTable instances.
-        this.child = [];
-        this.groupedChildren = {};
-        this.selectedChildren = [];
-        this.projectedChildren = {};
-        this.calculatedMeasureChildren = [];
         // The callback to call on propogation
+        // new Implementation
+        this.children = []; // contains all immediate children
+        this._derivation = []; // specify rules by which this data table is created
         this._onPropogation = [];
         this.sortingDetails = {
             column: [],
@@ -70,7 +67,7 @@ class DataTable extends Relation {
     cloneAsChild(saveChild = true) {
         const retDataTable = this.clone();
         if (saveChild) {
-            this.child.push(retDataTable);
+            this.children.push(retDataTable);
         }
         retDataTable.parent = this;
         return retDataTable;
@@ -273,8 +270,10 @@ class DataTable extends Relation {
         cloneDataTable = this.cloneAsChild(saveChild);
         cloneDataTable._projectHelper(normalizedProjField.join(','));
         if (saveChild) {
-            this.projectedChildren[normalizedProjField.join(',')] = cloneDataTable;
+            this.__persistDerivation(cloneDataTable, DT_DERIVATIVES.PROJECT,
+                { projField, config, projString: normalizedProjField.join(',') }, null);
         }
+
         return cloneDataTable;
     }
 
@@ -313,14 +312,18 @@ class DataTable extends Relation {
             return [firstClone, rejectClone];
         }
         let child;
+
         if (existingDataTable instanceof DataTable) {
-            child = this.selectedChildren.find(obj => obj.table === existingDataTable);
+            child = this.children.find(childElm => childElm._derivation
+                             && childElm._derivation.length === 1
+                             && childElm._derivation[0].op === DT_DERIVATIVES.SELECT
+                             && childElm === existingDataTable);
         }
         if (child) {
             newDataTable = existingDataTable;
             rowDiffset = this._selectHelper(this.getNameSpace().fields, selectFn, config);
             existingDataTable.mutate('rowDiffset', rowDiffset);
-            child.selectionFunction = selectFn;
+            child._derivation[0].criteria = selectFn;
         }
         else {
             cloneDataTable = this.cloneAsChild(saveChild);
@@ -331,10 +334,7 @@ class DataTable extends Relation {
 
         // Store reference to child table and selector function
         if (saveChild && !child) {
-            this.selectedChildren.push({
-                table: cloneDataTable,
-                selectionFunction: selectFn
-            });
+            this.__persistDerivation(newDataTable, DT_DERIVATIVES.SELECT, { config }, selectFn);
         }
 
         return newDataTable;
@@ -383,24 +383,20 @@ class DataTable extends Relation {
      * @return {DataTable} Returns the new DataTable instance after operation.
      */
     groupBy(fieldsArr, reducers = {}, saveChild = true, existingDataTable) {
-        const values = Object.values(reducers);
-        const names = values.map(value => (value instanceof Function ? value.name : value));
-        const reducerString = reducers ? `${Object.keys(reducers)}-${names}` : null;
         const groupByString = `${fieldsArr.join()}`;
-        const key = `${groupByString}-${reducerString}`;
-        const groupedChildren = this.groupedChildren;
         let present = false;
         if (existingDataTable instanceof DataTable) {
-            for (let groupByKey in groupedChildren) {
-                if ({}.hasOwnProperty.call(groupedChildren, key)) {
-                    let child = groupedChildren[groupByKey];
-                    if (child === existingDataTable) {
-                        present = true;
-                        child.reducer = reducers;
-                        child.groupByString = groupByString;
-                        break;
-                    }
-                }
+            let child = this.children.find(childElm => childElm._derivation
+                                            && childElm._derivation.length === 1
+                                            && childElm._derivation[0].op === DT_DERIVATIVES.GROUPBY
+                                            && childElm._derivation[0].meta.groupByString === groupByString
+                                            && childElm === existingDataTable);
+            if (child) {
+                present = true;
+                child._derivation[0].meta.fieldsArr = fieldsArr;
+                child._derivation[0].meta.groupByString = groupByString;
+                child._derivation[0].meta.defaultReducer = reducerStore.defaultReducer();
+                child._derivation[0].criteria = reducers;
             }
         }
         let params = [this, fieldsArr, reducers];
@@ -409,15 +405,14 @@ class DataTable extends Relation {
         }
         const newDatatable = groupBy(...params);
         if (saveChild && !present) {
-            const temp = {};
-            temp.child = newDatatable;
-            temp.reducer = reducers;
-            temp.groupByString = groupByString;
-            groupedChildren[key] = temp;
+            this.children.push(newDatatable);
+            this.__persistDerivation(newDatatable, DT_DERIVATIVES.GROUPBY,
+                { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() }, reducers);
         }
         if (present) {
             existingDataTable.mutate('rowDiffset', existingDataTable.rowDiffset);
         }
+
         newDatatable.parent = this;
         return newDatatable;
     }
@@ -476,7 +471,11 @@ class DataTable extends Relation {
             name,
         } = config;
         let clone;
-        let existingChild = this.calculatedMeasureChildren.find(dt => dt === existingDataTable);
+        let existingChild = this.children.find(childElm => childElm._derivation
+                                                && childElm._derivation.length === 1
+                                                && childElm._derivation[0].op === DT_DERIVATIVES.CAL_MEASURE
+                                                && childElm === existingDataTable);
+
         // Get the fields present
         const fieldMap = this.getFieldMap();
         if (fieldMap[name] && !existingChild) {
@@ -538,11 +537,13 @@ class DataTable extends Relation {
                 type: FieldType.MEASURE,
             },
         };
+        if (existingChild) {
+            existingDataTable._derivation[0].meta.config = config;
+            existingDataTable._derivation[0].meta.fields = fields;
+            existingDataTable._derivation[0].criteria = callback;
+        }
         if (saveChild && !existingChild) {
-            this.calculatedMeasureChildren.push({
-                table: clone,
-                params: [config, fields, callback]
-            });
+            this.__persistDerivation(clone, DT_DERIVATIVES.CAL_MEASURE, { config, fields }, callback);
         }
 
         return clone;
@@ -628,6 +629,7 @@ class DataTable extends Relation {
      * @param {string} valueName - The name of the measure.
      * @param {Function} callback - The callback used to calculate new names of source fields.
      * @return {DataTable} Returns a new DataTable instance.
+     * @TODO: Remove method as no one uses it or if aware what it does
      */
     createDimensionFrom(sourceFields, category, valueName, callback) {
         const fieldMap = this.getFieldMap();
@@ -894,8 +896,6 @@ class DataTable extends Relation {
         case PROPOGATION:
             this._onPropogation.push(callback);
             break;
-        default:
-            break;
         }
         return this;
     }
@@ -912,8 +912,7 @@ class DataTable extends Relation {
         case PROPOGATION:
             this._onPropogation = [];
             break;
-        default:
-            break;
+
         }
         return this;
     }
@@ -1009,6 +1008,59 @@ class DataTable extends Relation {
     static get Reducers() {
         return reducerStore;
     }
+
+    /**
+     * break the link between its parent and itself
+     */
+    dispose() {
+        this.parent.__removeChild(this);
+        this.parent = null;
+    }
+    /**
+     *
+     * @param {DataTable} child : Delegates the parent to remove this child
+     */
+    __removeChild(child) {
+        // remove from child list
+        let idx = this.children.findIndex(sibling => sibling === child);
+        idx !== -1 ? this.children.splice(idx, 1) : true;
+    }
+    /**
+     *
+     * @param { DataTable } parent datatable instance which will act as its parent of this.
+     * @param { Queue } criteriaQueue Queue contains in-between operation meta-data
+     */
+    __addParent(parent, criteriaQueue = []) {
+        this.columnNameSpace = this.columnNameSpace === undefined ? this.parent.getNameSpace() : this.columnNameSpace;
+        this.__persistDerivation(this, DT_DERIVATIVES.COMPOSE, null, criteriaQueue);
+        this.parent = parent;
+        parent.children.push(this);
+    }
+
+    /**
+     *
+     * @param {DataTable} table :Child table derived from operation
+     * @param {String} operation : Type of operation used
+     * @param {Object} config : Contains metaData used in this operation
+     * @param {Function} criteriaFn : Function which having used to do the derivation
+     */
+    __persistDerivation(table, operation, config = {}, criteriaFn) {
+        let derivative;
+        if (operation !== DT_DERIVATIVES.COMPOSE) {
+            derivative = {
+                op: operation,
+                meta: config,
+                criteria: criteriaFn
+            };
+        }
+        else {
+            derivative = criteriaFn;
+        }
+        table._derivation.push(derivative);
+    }
+
+
+    // ============================== Accessable functionality ends ======================= //
 }
 
 export default DataTable;

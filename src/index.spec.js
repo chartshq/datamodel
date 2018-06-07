@@ -893,4 +893,117 @@ describe('#Datatable', () => {
         const efficiency = childData[1][childData[1].length - 1];
         expect(efficiency).to.equal(41);
     });
+    context('Checking api for updating parent child relasionship', () => {
+        const data1 = [
+            { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+            { profit: 20, sales: 25, first: 'Hey', second: 'Wood' },
+            { profit: 10, sales: 20, first: 'White', second: 'the sun' },
+            { profit: 15, sales: 25, first: 'White', second: 'walls' },
+        ];
+        const schema1 = [
+            {
+                name: 'profit',
+                type: 'measure',
+                defAggFn: 'avg'
+            },
+            {
+                name: 'sales',
+                type: 'measure'
+            },
+            {
+                name: 'first',
+                type: 'dimension'
+            },
+            {
+                name: 'second',
+                type: 'dimension'
+            },
+        ];
+        const dataTable = new DataTable(data1, schema1);
+        it('Should remove child on calling dispose', () => {
+            let dt2 = dataTable.select(fields => fields.profit.value < 150);
+            expect(dataTable.children.length).to.equal(1);
+            dt2.dispose();
+            expect(dataTable.children.length).to.equal(0);
+        });
+
+        it('Adding parent should save criteria in parent', () => {
+            let dt2 = dataTable.select(fields => fields.profit.value < 150);
+            let dt3 = dt2.groupBy(['sales'], {
+                profit: null
+            });
+            let dt4 = dt3.project(['sales']);
+            let datas = dt4.getData();
+            let projFields = ['first'];
+            let projectConfig = {};
+            let normalizedprojFields = [];
+            let criteriaQueue = [
+                {
+                    op: 'select',
+                    meta: '',
+                    criteria: fields => fields.profit.value < 150
+                },
+                {
+                    op: 'project',
+                    meta: { projFields, projectConfig, normalizedprojFields },
+                    criteria: null
+                }
+            ];
+            dt3.dispose();
+            dt4.__addParent(dt2, criteriaQueue);
+            expect(dt2.children.length).to.equal(1);
+            expect(dt2.children[0].getData()).to.deep.equal(datas);
+            expect(dt4.parent).to.equal(dt2);
+        });
+    });
+    context('Checking for immutablity for datatable when existing dt is given', () => {
+        const data1 = [
+            { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+            { profit: 20, sales: 25, first: 'Hey', second: 'Wood' },
+            { profit: 10, sales: 20, first: 'White', second: 'the sun' },
+            { profit: 15, sales: 25, first: 'White', second: 'walls' },
+        ];
+        const schema1 = [
+            {
+                name: 'profit',
+                type: 'measure',
+                defAggFn: 'avg'
+            },
+            {
+                name: 'sales',
+                type: 'measure'
+            },
+            {
+                name: 'first',
+                type: 'dimension'
+            },
+            {
+                name: 'second',
+                type: 'dimension'
+            },
+        ];
+        const dataTable = new DataTable(data1, schema1);
+        let dt2 = dataTable.select(fields => fields.profit.value < 150);
+        let dt3 = dataTable.groupBy(['sales'], {
+            profit: null
+        });
+        let dt4 = dataTable.select(fields => fields.profit.value < 150, {}, true, dt2);
+        let dt5 = dataTable.groupBy(['Year'], {
+        }, true, dt3);
+        let dt6 = dataTable.calculatedMeasure({
+            name: 'Efficiency'
+        }, ['profit', 'sales'], (profit, sales) => profit / sales);
+        let dt7 = dataTable.calculatedMeasure({
+            name: 'UnEfficiency'
+        }, ['sales', 'profit'], (sales, profit) => sales / profit, true, dt6);
+        it('datatable select instance should not change', () => {
+            expect(dt2).to.equal(dt4);
+        });
+        it('datatable groupby instance should not change it namespace', () => {
+            expect(dt3.getNameSpace().name).to.equal(dt5.getNameSpace().name);
+        });
+        it('datatable createdMeasure instance should not change', () => {
+            expect(dt6).to.equal(dt7);
+        });
+    });
 });
