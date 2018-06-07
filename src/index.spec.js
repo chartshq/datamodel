@@ -934,23 +934,23 @@ describe('#Datatable', () => {
             });
             let dt4 = dt3.project(['sales']);
             let datas = dt4.getData();
-            let criteria = [
+            let projFields = ['first'];
+            let projectConfig = {};
+            let normalizedprojFields = [];
+            let criteriaQueue = [
                 {
                     op: 'select',
-                    condition: 'profit.value < 150'
-                },
-                {
-                    op: 'groupBy',
-                    string: '["sales"]',
-                    agg: 'profit : null'
+                    meta: '',
+                    criteria: fields => fields.profit.value < 150
                 },
                 {
                     op: 'project',
-                    string: '["sales"]'
+                    meta: { projFields, projectConfig, normalizedprojFields },
+                    criteria: null
                 }
             ];
             dt3.dispose();
-            dt4.__addParent(dt2, criteria);
+            dt4.__addParent(dt2, criteriaQueue);
             expect(dt2.children.length).to.equal(1);
             expect(dt2.children[0].getData()).to.deep.equal(datas);
             expect(dt4.parent).to.equal(dt2);

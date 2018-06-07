@@ -1029,7 +1029,6 @@ class DataTable extends Relation {
      *
      * @param { DataTable } parent datatable instance which will act as its parent of this.
      * @param { Queue } criteriaQueue Queue contains in-between operation meta-data
-     * For eg : q => [{op: 'SELECT', criteria: () => { } }, {op: 'GROPBY', criteria: () => { } },...]
      */
     __addParent(parent, criteriaQueue = []) {
         this.columnNameSpace = this.columnNameSpace === undefined ? this.parent.getNameSpace() : this.columnNameSpace;
