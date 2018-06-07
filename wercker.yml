@@ -16,6 +16,12 @@ build:
       code: |
         export CHROME_BIN=/usr/bin/google-chrome-unstable
 
+    - script:
+      name: add SSH keys for Bitbucket
+      code: |
+        chmod +x scripts/add-ssh-keys.sh
+        scripts/add-ssh-keys.sh
+
     - npm-install
     - npm-test
 
