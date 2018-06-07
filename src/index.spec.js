@@ -990,11 +990,20 @@ describe('#Datatable', () => {
         let dt4 = dataTable.select(fields => fields.profit.value < 150, {}, true, dt2);
         let dt5 = dataTable.groupBy(['Year'], {
         }, true, dt3);
+        let dt6 = dataTable.calculatedMeasure({
+            name: 'Efficiency'
+        }, ['profit', 'sales'], (profit, sales) => profit / sales);
+        let dt7 = dataTable.calculatedMeasure({
+            name: 'UnEfficiency'
+        }, ['sales', 'profit'], (sales, profit) => sales / profit, true, dt6);
         it('datatable select instance should not change', () => {
             expect(dt2).to.equal(dt4);
         });
         it('datatable groupby instance should not change it namespace', () => {
             expect(dt3.getNameSpace().name).to.equal(dt5.getNameSpace().name);
+        });
+        it('datatable createdMeasure instance should not change', () => {
+            expect(dt6).to.equal(dt7);
         });
     });
 });
