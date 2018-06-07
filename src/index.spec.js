@@ -984,18 +984,17 @@ describe('#Datatable', () => {
         ];
         const dataTable = new DataTable(data1, schema1);
         let dt2 = dataTable.select(fields => fields.profit.value < 150);
-        // let dt3 = dataTable.groupBy(['sales'], {
-        //     profit: null
-        // });
+        let dt3 = dataTable.groupBy(['sales'], {
+            profit: null
+        });
         let dt4 = dataTable.select(fields => fields.profit.value < 150, {}, true, dt2);
-       // let dt5 = dataTable.groupBy(['Year'], {
-        // }, true, dt3);
+        let dt5 = dataTable.groupBy(['Year'], {
+        }, true, dt3);
         it('datatable select instance should not change', () => {
             expect(dt2).to.equal(dt4);
         });
-        // debugger;
-        // it('datatable groupby instance should not change', () => {
-        //     expect(dt3).to.equal(dt5);
-        // });
+        it('datatable groupby instance should not change it namespace', () => {
+            expect(dt3.getNameSpace().name).to.equal(dt5.getNameSpace().name);
+        });
     });
 });
