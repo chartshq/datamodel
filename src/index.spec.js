@@ -193,7 +193,7 @@ describe('#Datatable', () => {
         const dataTable = new DataTable(data, schema);
         const projectedDataTable = (dataTable.project(['aaaa', 'a'])).select(fields =>
                 fields.aaaa.value === 'demo');
-            // Check if repetation select works
+            // Check if repetition select works
         const projectedDataTable1 = projectedDataTable.select(fields =>
                 fields.a.value === 10);
         let expData = {
@@ -933,7 +933,7 @@ describe('#Datatable', () => {
                 profit: null
             });
             let dt4 = dt3.project(['sales']);
-            let datas = dt4.getData();
+            let data = dt4.getData();
             let projFields = ['first'];
             let projectConfig = {};
             let normalizedprojFields = [];
@@ -952,11 +952,11 @@ describe('#Datatable', () => {
             dt3.dispose();
             dt4.__addParent(dt2, criteriaQueue);
             expect(dt2.children.length).to.equal(1);
-            expect(dt2.children[0].getData()).to.deep.equal(datas);
+            expect(dt2.children[0].getData()).to.deep.equal(data);
             expect(dt4.parent).to.equal(dt2);
         });
     });
-    context('Checking for immutablity for datatable when existing dt is given', () => {
+    context('Checking for immutability for datatable when existing dt is given', () => {
         const data1 = [
             { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
             { profit: 20, sales: 25, first: 'Hey', second: 'Wood' },

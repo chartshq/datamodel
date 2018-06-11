@@ -178,7 +178,7 @@ class DataTable extends Relation {
      * this reflect the cross-product of the relational algebra or can be called as theta join.
      * It take another DataTable instance and create new DataTable with the cross-product data and
      * filter the data according to the filter function provided.
-     * Say there are two dataTablw tableA with 4 column 5 rows and tableB with 3 column 6 row
+     * Say there are two dataTable tableA with 4 column 5 rows and tableB with 3 column 6 row
      * so the new DataTable tableA X tableB will have 7(4 + 3) rows and 30(5 * 6) columns (if no
      * filter function is provided).
      *
@@ -203,8 +203,8 @@ class DataTable extends Relation {
      * @todo Make this API user-friendly.
      *
      * @public
-     * @param  {DataTable} joinWith the DataTable with whome this DataTable will be joined
-     * @return {DataTable}          The new joind DataTable
+     * @param  {DataTable} joinWith the DataTable with whom this DataTable will be joined
+     * @return {DataTable}          The new joined DataTable
      */
     naturalJoin(joinWith) {
         return crossProduct(this, joinWith, naturalJoinFilter(this, joinWith), true);
@@ -821,15 +821,15 @@ class DataTable extends Relation {
 
     /**
      * This is a very special method that only applies
-     * to crosstab group where propagation of is won't
+     * to cross-tab group where propagation of is won't
      * work so we propagate the selected range of the fields
      * instead.
      *
      * @todo Need to check whether it is private or public API.
      *
      * @private
-     * @param {Object} rangeObj Object with fieldnames and corresponsding selected ranges.
-     * @param {Object} payload Object with interation related fields.
+     * @param {Object} rangeObj Object with field names and corresponding selected ranges.
+     * @param {Object} payload Object with insertion related fields.
      * @memberof DataTable
      */
     propagateInterpolatedValues(rangeObj, payload, fromSource) {
@@ -855,7 +855,7 @@ class DataTable extends Relation {
             dataTable.propagateInterpolatedValues(isParent ?
                 rangeObj : propagationTable, payload, this);
         };
-        // propogate to children created by SELECT operation
+        // propagate to children created by SELECT operation
         selectIterator(this, (targetDT, fn) => {
             if (targetDT !== source) {
                 let selectTable;
@@ -871,7 +871,7 @@ class DataTable extends Relation {
                 forward(targetDT, projectTable);
             }
         });
-        // propogate to children created by GROUPBY operation
+        // propagate to children created by GROUPBY operation
         groupByIterator(this, (targetDT) => {
             if (targetDT !== source) {
                 forward(targetDT, propTable);
@@ -919,13 +919,13 @@ class DataTable extends Relation {
 
     /**
      * This method is used to invoke the method associated with
-     * prpogation.
+     * propagation.
      *
      * @todo Fix whether this method would be public or not.
      *
      * @private
      * @param {Object} payload The interaction payload.
-     * @param {DataTable} identifiers The propogated DataTable.
+     * @param {DataTable} identifiers The propagated DataTable.
      * @memberof DataTable
      */
     handlePropagation(payload, identifiers) {
@@ -1058,9 +1058,6 @@ class DataTable extends Relation {
         }
         table._derivation.push(derivative);
     }
-
-
-    // ============================== Accessable functionality ends ======================= //
 }
 
 export default DataTable;
