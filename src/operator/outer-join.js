@@ -11,5 +11,5 @@ export function rightOuterJoin(table1, table2, filterFn) {
 }
 
 export function fullOuterJoin(table1, table2, filterFn) {
-    return union(this.leftJoin(table1, table2, filterFn), this.rightJoin(table1, table2, filterFn));
+    return union(leftOuterJoin(table1, table2, filterFn), rightOuterJoin(table1, table2, filterFn));
 }

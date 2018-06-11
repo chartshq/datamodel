@@ -99,27 +99,6 @@ function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = fa
                 rowPosition = i;
                 data.push(tupleObj);
             }
-            else if (jointype === JOINS.FULLOUTER) {
-                const tupleObj = {};
-                dataTable1FieldStore.fields.forEach((field) => {
-                    tupleObj[field.name] = field.data[i];
-                });
-                dataTable2FieldStore.fields.forEach((field) => {
-                    if (commonSchemaList.indexOf(field.name) === -1) {
-                        tupleObj[field.name] = null;
-                    }
-                });
-                data.push(tupleObj);
-                dataTable1FieldStore.fields.forEach((field) => {
-                    if (commonSchemaList.indexOf(field.name) === -1) {
-                        tupleObj[field.name] = null;
-                    }
-                });
-                dataTable2FieldStore.fields.forEach((field) => {
-                    tupleObj[field.name] = field.data[ii];
-                });
-                data.push(tupleObj);
-            }
         });
     });
 

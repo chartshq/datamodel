@@ -125,5 +125,5 @@ const schema2 = [
 ];
 const data23 = new DataTable(data1, schema1,'TableA');
 const data24 = new DataTable(data2, schema2,'TableB');
-let dt = data23.fullJoin(data23,data24,obj => obj.TableA.id === obj.TableB.id);
+
 });
