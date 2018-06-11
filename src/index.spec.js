@@ -590,7 +590,7 @@ describe('#Datatable', () => {
             !(fieldMap.first && fieldMap.second)
         ).to.be.true;
     });
-    it('tests datatable propogation', () => {
+    it('tests datatable propagation', () => {
         const data1 = [
             { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
             { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
@@ -611,13 +611,13 @@ describe('#Datatable', () => {
         const selected = dataTable.select(fields => fields.profit.valueOf() > 10);
         const grouped = dataTable.groupBy(['first']);
         // setup listeners
-        projected.on('propogation', () => {
+        projected.on('propagation', () => {
             projetionFlag = true;
         });
-        selected.on('propogation', () => {
+        selected.on('propagation', () => {
             selectionFlag = true;
         });
-        grouped.on('propogation', () => {
+        grouped.on('propagation', () => {
             groupByFlag = true;
         });
 
@@ -653,13 +653,13 @@ describe('#Datatable', () => {
         const selected = dataTable.select(fields => fields.profit.value > 10);
         const grouped = dataTable.groupBy(['sales']);
          // interpolated propagation handlers
-        projected.on('propogation', () => {
+        projected.on('propagation', () => {
             inProjetionFlag = true;
         });
-        selected.on('propogation', () => {
+        selected.on('propagation', () => {
             inSelectionFlag = true;
         });
-        grouped.on('propogation', () => {
+        grouped.on('propagation', () => {
             inGroupByFlag = true;
         });
         dataTable.propagateInterpolatedValues({

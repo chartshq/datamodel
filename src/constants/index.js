@@ -4,7 +4,7 @@
  * @module constants
  */
 
-export const PROPOGATION = 'propogation';
+export const PROPAGATION = 'propagation';
 export const ROW_ID = '__id__';
 export const DT_DERIVATIVES = {
     SELECT: 'select',

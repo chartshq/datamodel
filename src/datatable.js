@@ -9,7 +9,7 @@ import difference from './operator/difference';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import { groupBy } from './operator/group-by';
 import { createBuckets } from './operator/bucket-creator';
-import { PROPOGATION, ROW_ID, DT_DERIVATIVES } from './constants';
+import { PROPAGATION, ROW_ID, DT_DERIVATIVES } from './constants';
 import { Measure, Dimension } from './fields';
 import reducerStore from './utils/reducer';
 import {
@@ -34,11 +34,11 @@ class DataTable extends Relation {
      */
     constructor(...args) {
         super(...args);
-        // The callback to call on propogation
+        // The callback to call on propagation
         // new Implementation
         this.children = []; // contains all immediate children
         this._derivation = []; // specify rules by which this data table is created
-        this._onPropogation = [];
+        this._onPropagation = [];
         this.sortingDetails = {
             column: [],
             type: [],
@@ -779,12 +779,12 @@ class DataTable extends Relation {
             propTable = this._assembleTableFromIdentifiers(identifiers);
         }
         // function to propagate to target the DataTable instance.
-        const forwardPropagation = (targetDT, propogationData) => {
-            targetDT.handlePropogation({
+        const forwardPropagation = (targetDT, propagationData) => {
+            targetDT.handlePropagation({
                 payload,
-                data: propogationData,
+                data: propagationData,
             });
-            targetDT.propagate(propogationData, payload, this);
+            targetDT.propagate(propagationData, payload, this);
         };
         // propagate to children created by SELECT operation
         selectIterator(this, (targetDT) => {
@@ -848,7 +848,7 @@ class DataTable extends Relation {
             }, {}, false);
         }
         const forward = (dataTable, propagationTable, isParent) => {
-            dataTable.handlePropogation({
+            dataTable.handlePropagation({
                 payload,
                 data: propagationTable,
             });
@@ -893,8 +893,8 @@ class DataTable extends Relation {
      */
     on(eventName, callback) {
         switch (eventName) {
-        case PROPOGATION:
-            this._onPropogation.push(callback);
+        case PROPAGATION:
+            this._onPropagation.push(callback);
             break;
         }
         return this;
@@ -909,8 +909,8 @@ class DataTable extends Relation {
      */
     unsubscribe(eventName) {
         switch (eventName) {
-        case PROPOGATION:
-            this._onPropogation = [];
+        case PROPAGATION:
+            this._onPropagation = [];
             break;
 
         }
@@ -928,8 +928,8 @@ class DataTable extends Relation {
      * @param {DataTable} identifiers The propogated DataTable.
      * @memberof DataTable
      */
-    handlePropogation(payload, identifiers) {
-        let propListeners = this._onPropogation;
+    handlePropagation(payload, identifiers) {
+        let propListeners = this._onPropagation;
         propListeners.forEach(fn => fn.call(this, payload, identifiers));
     }
 
