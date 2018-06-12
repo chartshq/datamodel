@@ -20,7 +20,7 @@ function defaultFilterFn() { return true; }
  * @param {boolean} [replaceCommonSchema=false] - The flag if the common name schema should be there.
  * @return {DataTable} Returns The newly created DataTable instance from the crossProduct operation.
  */
-function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = false, jointype = JOINS.NATURAL) {
+function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = false, jointype = JOINS.CROSS) {
     const schema = [];
     const data = [];
     const applicableFilterFn = filterFn || defaultFilterFn;
@@ -75,7 +75,7 @@ function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = fa
                 tuple.forEach((cellVal, iii) => {
                     tupleObj[schema[iii].name] = cellVal;
                 });
-                if (rowAdded) {
+                if (rowAdded && JOINS.CROSS !== jointype) {
                     data[rowPosition] = tupleObj;
                 }
                 else {
