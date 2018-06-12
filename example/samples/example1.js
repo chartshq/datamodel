@@ -173,15 +173,15 @@ d3.json('./data/cars.json', (data) => {
         { start: 4, end: 6, label: 'firstclass'},
         { start: 6, end: 10, label: 'decent'}
     ];
-    let binnedDT = toBinDatatable.bin('marks', {
+    let binnedDT = toBinDatatable.createBin('marks', {
         buckets,
     }, 'rating1');
     console.log(binnedDT.getData());
-    let binnedDTnum = toBinDatatable.bin('marks', {
+    let binnedDTnum = toBinDatatable.createBin('marks', {
         numOfBins: 4
     }, 'rating2');
     console.log(binnedDTnum.getData());
-    let binnedDTSize = toBinDatatable.bin('marks', {
+    let binnedDTSize = toBinDatatable.createBin('marks', {
         binSize: 4,
     }, 'rating3');
     console.log(binnedDTSize.getData());
