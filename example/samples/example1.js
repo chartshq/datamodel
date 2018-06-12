@@ -208,5 +208,5 @@ function load (url) {
 
 // load('../../js/cars.csv')
 //     .then((res) => {
-//         dt = new DataTable(res.split('\n').map(line => line.split(',')), {}, 'mytable', { dataformat: 'CSVArr' });
+//         dt = new DataTable(res.split('\n').map(line => line.split(',')), {}, 'mytable', { dataFormat: 'CSVArr' });
 //     });
