@@ -1,4 +1,3 @@
-// import { defReducer, fnList } from './group-by-function';
 import { extend2 } from '../utils';
 import rowDiffsetIterator from './row-diffset-iterator';
 import DataTable from '../index';

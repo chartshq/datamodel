@@ -6,7 +6,7 @@ import dataBuilder from './data-builder';
 import createFields from '../create-fields';
 
 describe('Checking dataBuilder', () => {
-    it('Checking for normal case with row filteration', () => {
+    it('Checking for normal case with row filter', () => {
         const data = [
             [10, 15, 7, 9, 20, 35],
             [20, 25, 8, 40, 77, 9],
@@ -35,7 +35,7 @@ describe('Checking dataBuilder', () => {
         };
         expect(expObj).to.deep.equal(oriObj);
     });
-    it('Checking for normal case with row filteration and rowWise data', () => {
+    it('Checking for normal case with row filter and rowWise data', () => {
         const data = [
             [10, 15, 7, 9, 20, 35],
             [20, 25, 8, 40, 77, 9],
@@ -99,7 +99,7 @@ describe('Checking dataBuilder', () => {
         };
         expect(expObj).to.deep.equal(oriObj);
     });
-    it('Checking for normal case with column filteration', () => {
+    it('Checking for normal case with column filter', () => {
         const data = [
             [10, 15, 7, 9, 20, 35],
             [20, 25, 8, 40, 77, 9],

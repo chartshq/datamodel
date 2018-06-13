@@ -2,7 +2,7 @@ import { SelectionMode } from 'picasso-util';
 import createFields from './create-fields';
 import fieldStore from './field-store';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
-import defaultConfig from './defalult-config';
+import defaultConfig from './default-config';
 import * as converter from './converter';
 import Value from './value';
 
@@ -53,10 +53,10 @@ class Relation {
 
     _updateData (data, schema, name, options) {
         options = Object.assign(Object.assign({}, defaultConfig), options);
-        const converterFn = converter[options.dataformat];
+        const converterFn = converter[options.dataFormat];
 
         if (!(converterFn && typeof converterFn === 'function')) {
-            throw new Error(`No converter function found for ${options.dataformat} format`);
+            throw new Error(`No converter function found for ${options.dataFormat} format`);
         }
 
         const [header, formattedData] = converterFn(data, options);

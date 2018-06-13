@@ -6,7 +6,7 @@ import { DT_DERIVATIVES } from '../constants';
  *
  * @param {DataTable} datatable
  * @param {function} callback
- * @param {OPERATION TYPEs} operation
+ * @param {DT_DERIVATIVES} operation
  */
 function childIterator(datatable, callback, operation) {
     const children = datatable.children;

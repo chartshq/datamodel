@@ -1,11 +1,16 @@
 /**
- * Contains constants values.
- *
- * @module constants
+ * The event name for data propagation.
  */
+export const PROPAGATION = 'propagation';
 
-export const PROPOGATION = 'propogation';
+/**
+ * The name of the unique row id column in DataTable.
+ */
 export const ROW_ID = '__id__';
+
+/**
+ * The enums for operation names performed on DataTable.
+ */
 export const DT_DERIVATIVES = {
     SELECT: 'select',
     PROJECT: 'project',
