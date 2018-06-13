@@ -83,11 +83,9 @@ function sort(arr, lo, hi, sortFn) {
  * @param {Function} [sortFn=defSortFn] - The sort function.
  * @return {Array} Returns the input array itself in sorted order.
  */
-function mergeSort(arr, sortFn = defSortFn) {
+export function mergeSort(arr, sortFn = defSortFn) {
     if (arr.length > 1) {
         sort(arr, 0, arr.length - 1, sortFn);
     }
     return arr;
 }
-
-export default mergeSort;

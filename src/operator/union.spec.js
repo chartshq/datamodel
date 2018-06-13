@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import union from './union';
+import { union } from './union';
 import DataTable from '../index';
 
 const data1 = [

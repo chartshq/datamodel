@@ -1,8 +1,14 @@
-import { DataFormat, DimensionSubtype, FieldType, SelectionMode, ProjectionMode } from 'picasso-util';
-import { leftOuterJoin, rightOuterJoin, fullOuterJoin } from './operator/outer-join';
-import { naturalJoin } from './operator/natural-join';
-import { compose, columnFilter, rowFilter, bin, groupby } from './operator/compose';
+import { DataFormat, DimensionSubtype, FieldType, ProjectionMode, SelectionMode } from 'picasso-util';
 import DataTable from './datatable';
+import { bin,
+     columnFilter,
+     compose,
+     fullOuterJoin,
+     groupby,
+     leftOuterJoin,
+     naturalJoin,
+     rightOuterJoin,
+     rowFilter } from './operator';
 
 DataTable.Operators = {
     leftOuterJoin,

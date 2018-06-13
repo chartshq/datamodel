@@ -1,23 +1,21 @@
 /* eslint-disable default-case */
-import { FieldType, SelectionMode, ProjectionMode } from 'picasso-util';
-import Relation from './relation';
-import dataBuilder from './operator/data-builder';
-import crossProduct from './operator/cross-product';
-import naturalJoinFilter from './operator/natural-join-filter-function';
-import union from './operator/union';
-import difference from './operator/difference';
-import rowDiffsetIterator from './operator/row-diffset-iterator';
-import { groupBy } from './operator/group-by';
-import { createBuckets } from './operator/bucket-creator';
-import { PROPAGATION, ROW_ID, DT_DERIVATIVES } from './constants';
-import { Measure, Dimension } from './fields';
-import reducerStore from './utils/reducer';
-import {
-    selectIterator,
-    projectIterator,
+import { FieldType, ProjectionMode, SelectionMode } from 'picasso-util';
+import { DT_DERIVATIVES, PROPAGATION, ROW_ID } from './constants';
+import { Dimension, Measure } from './fields';
+import { createBuckets,
+    crossProduct,
+    dataBuilder,
+    difference,
+    naturalJoinFilter,
+    rowDiffsetIterator,
+    union,
+    groupBy,
+    calculatedMeasureIterator,
     groupByIterator,
-    calculatedMeasureIterator
-} from './operator/child-iterator';
+    projectIterator,
+    selectIterator } from './operator';
+import Relation from './relation';
+import reducerStore from './utils/reducer';
 
 
 /**
