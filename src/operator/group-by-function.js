@@ -1,5 +1,3 @@
-/** ******** reducer function definition **************** */
-
 /**
  * reducer function that takes care about the sum aggregation
  * @param  {Array} arr array of values
@@ -90,14 +88,25 @@ function count(arr) {
     return len;
 }
 
-
-function variance(array) {
-    let mean = avg(array);
-    return avg(array.map(num => (num - mean) ** 2));
+/**
+ * Calculates the variance of the input array.
+ *
+ * @param {Array.<number>} arr - The input array.
+ * @return {number} Returns the variance of the input array.
+ */
+function variance(arr) {
+    let mean = avg(arr);
+    return avg(arr.map(num => (num - mean) ** 2));
 }
 
-function std(array) {
-    return Math.sqrt(variance(array));
+/**
+ * Calculates the square root of the variance of the input array.
+ *
+ * @param {Array.<number>} arr - The input array.
+ * @return {number} Returns the square root of the variance.
+ */
+function std(arr) {
+    return Math.sqrt(variance(arr));
 }
 
 

@@ -9,7 +9,7 @@ import difference from './operator/difference';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
 import { groupBy } from './operator/group-by';
 import { createBuckets } from './operator/bucket-creator';
-import { PROPOGATION, ROW_ID, DT_DERIVATIVES } from './constants';
+import { PROPAGATION, ROW_ID, DT_DERIVATIVES } from './constants';
 import { Measure, Dimension } from './fields';
 import reducerStore from './utils/reducer';
 import {
@@ -34,11 +34,11 @@ class DataTable extends Relation {
      */
     constructor(...args) {
         super(...args);
-        // The callback to call on propogation
+        // The callback to call on propagation
         // new Implementation
         this.children = []; // contains all immediate children
         this._derivation = []; // specify rules by which this data table is created
-        this._onPropogation = [];
+        this._onPropagation = [];
         this.sortingDetails = {
             column: [],
             type: [],
@@ -178,7 +178,7 @@ class DataTable extends Relation {
      * this reflect the cross-product of the relational algebra or can be called as theta join.
      * It take another DataTable instance and create new DataTable with the cross-product data and
      * filter the data according to the filter function provided.
-     * Say there are two dataTablw tableA with 4 column 5 rows and tableB with 3 column 6 row
+     * Say there are two dataTable tableA with 4 column 5 rows and tableB with 3 column 6 row
      * so the new DataTable tableA X tableB will have 7(4 + 3) rows and 30(5 * 6) columns (if no
      * filter function is provided).
      *
@@ -203,8 +203,8 @@ class DataTable extends Relation {
      * @todo Make this API user-friendly.
      *
      * @public
-     * @param  {DataTable} joinWith the DataTable with whome this DataTable will be joined
-     * @return {DataTable}          The new joind DataTable
+     * @param  {DataTable} joinWith the DataTable with whom this DataTable will be joined
+     * @return {DataTable}          The new joined DataTable
      */
     naturalJoin(joinWith) {
         return crossProduct(this, joinWith, naturalJoinFilter(this, joinWith), true);
@@ -779,12 +779,12 @@ class DataTable extends Relation {
             propTable = this._assembleTableFromIdentifiers(identifiers);
         }
         // function to propagate to target the DataTable instance.
-        const forwardPropagation = (targetDT, propogationData) => {
-            targetDT.handlePropogation({
+        const forwardPropagation = (targetDT, propagationData) => {
+            targetDT.handlePropagation({
                 payload,
-                data: propogationData,
+                data: propagationData,
             });
-            targetDT.propagate(propogationData, payload, this);
+            targetDT.propagate(propagationData, payload, this);
         };
         // propagate to children created by SELECT operation
         selectIterator(this, (targetDT) => {
@@ -821,15 +821,15 @@ class DataTable extends Relation {
 
     /**
      * This is a very special method that only applies
-     * to crosstab group where propagation of is won't
+     * to cross-tab group where propagation of is won't
      * work so we propagate the selected range of the fields
      * instead.
      *
      * @todo Need to check whether it is private or public API.
      *
      * @private
-     * @param {Object} rangeObj Object with fieldnames and corresponsding selected ranges.
-     * @param {Object} payload Object with interation related fields.
+     * @param {Object} rangeObj Object with field names and corresponding selected ranges.
+     * @param {Object} payload Object with insertion related fields.
      * @memberof DataTable
      */
     propagateInterpolatedValues(rangeObj, payload, fromSource) {
@@ -848,14 +848,14 @@ class DataTable extends Relation {
             }, {}, false);
         }
         const forward = (dataTable, propagationTable, isParent) => {
-            dataTable.handlePropogation({
+            dataTable.handlePropagation({
                 payload,
                 data: propagationTable,
             });
             dataTable.propagateInterpolatedValues(isParent ?
                 rangeObj : propagationTable, payload, this);
         };
-        // propogate to children created by SELECT operation
+        // propagate to children created by SELECT operation
         selectIterator(this, (targetDT, fn) => {
             if (targetDT !== source) {
                 let selectTable;
@@ -871,7 +871,7 @@ class DataTable extends Relation {
                 forward(targetDT, projectTable);
             }
         });
-        // propogate to children created by GROUPBY operation
+        // propagate to children created by GROUPBY operation
         groupByIterator(this, (targetDT) => {
             if (targetDT !== source) {
                 forward(targetDT, propTable);
@@ -893,8 +893,8 @@ class DataTable extends Relation {
      */
     on(eventName, callback) {
         switch (eventName) {
-        case PROPOGATION:
-            this._onPropogation.push(callback);
+        case PROPAGATION:
+            this._onPropagation.push(callback);
             break;
         }
         return this;
@@ -909,8 +909,8 @@ class DataTable extends Relation {
      */
     unsubscribe(eventName) {
         switch (eventName) {
-        case PROPOGATION:
-            this._onPropogation = [];
+        case PROPAGATION:
+            this._onPropagation = [];
             break;
 
         }
@@ -919,17 +919,17 @@ class DataTable extends Relation {
 
     /**
      * This method is used to invoke the method associated with
-     * prpogation.
+     * propagation.
      *
      * @todo Fix whether this method would be public or not.
      *
      * @private
      * @param {Object} payload The interaction payload.
-     * @param {DataTable} identifiers The propogated DataTable.
+     * @param {DataTable} identifiers The propagated DataTable.
      * @memberof DataTable
      */
-    handlePropogation(payload, identifiers) {
-        let propListeners = this._onPropogation;
+    handlePropagation(payload, identifiers) {
+        let propListeners = this._onPropagation;
         propListeners.forEach(fn => fn.call(this, payload, identifiers));
     }
 
@@ -1058,9 +1058,6 @@ class DataTable extends Relation {
         }
         table._derivation.push(derivative);
     }
-
-
-    // ============================== Accessable functionality ends ======================= //
 }
 
 export default DataTable;

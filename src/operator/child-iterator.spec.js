@@ -24,7 +24,7 @@ describe('Testing Child Iterator', () => {
         name: 'Efficiency'
     }, ['profit', 'sales'], createdCallBack);
 
-    let calback = function(table, params) {
+    let callback = function(table, params) {
         if (dt.children.find(childElm => childElm === table)) {
             hasSameChild = true;
         }
@@ -33,7 +33,7 @@ describe('Testing Child Iterator', () => {
         }
     };
     it('Should return expected child and its callback', () => {
-        calculatedMeasureIterator(dt, calback);
+        calculatedMeasureIterator(dt, callback);
         expect(hasSameChild).to.equal(true);
         expect(hasSameFunction).to.equal(true);
     });

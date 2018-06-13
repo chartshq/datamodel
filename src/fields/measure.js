@@ -8,6 +8,13 @@ import { generateMeasureDomain } from '../utils';
  */
 class Measure extends Field {
 
+    /**
+     * Creates new Measure field instance.
+     *
+     * @param {string} name - The name of the field.
+     * @param {Array} data - An array containing the field data.
+     * @param {Object} schema - The schema for the field.
+     */
     constructor(name, data, schema) {
         super(name, data, schema);
         this.fieldUnit = schema.unit;
@@ -40,28 +47,36 @@ class Measure extends Field {
     }
 
     /**
-     * @returns {String} unit of fields
+     * Getter for unit value of the field.
+     *
+     * @return {string} Returns unit of the field.
      */
     unit() {
         return this.fieldUnit;
     }
 
     /**
-     * @returns {String} Scale of fields
+     * Getter for scale value of the field.
+     *
+     * @return {string} Returns scale of the field.
      */
     scale() {
         return this.fieldScale;
     }
 
     /**
-     * @returns {String} NumberFormat of fields
+     * Getter for number format value of the field.
+     *
+     * @return {string} Returns number format of the field.
      */
     numberformat() {
         return this.fieldNumberformat;
     }
 
     /**
-     * @returns {String} Agg Function of fields
+     * Getter for aggregation function of the field.
+     *
+     * @return {Function} Returns aggregation function of the field.
      */
     defAggFn() {
         return this.fieldDefAggFn;

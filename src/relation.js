@@ -2,7 +2,7 @@ import { SelectionMode } from 'picasso-util';
 import createFields from './create-fields';
 import fieldStore from './field-store';
 import rowDiffsetIterator from './operator/row-diffset-iterator';
-import defaultConfig from './defalult-config';
+import defaultConfig from './default-config';
 import * as converter from './converter';
 import Value from './value';
 
