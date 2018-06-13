@@ -104,4 +104,85 @@ describe('Testing compose functionlity', () => {
         // debugger;
         expect(normalDt.getData()).to.deep.equal(composedDt.getData());
     });
+    it('Should compose bin', () => {
+        const toBinData = [{
+            marks: 1,
+        }, {
+            marks: 2,
+        }, {
+            marks: 3,
+        }, {
+            marks: 4,
+        }, {
+            marks: 5,
+        }, {
+            marks: 9,
+        }];
+        const toBinSchema = [{
+            name: 'marks',
+            type: 'measure'
+        }];
+        const toBinDatatable = new DataTable(toBinData, toBinSchema);
+        const toBinDatatable2 = new DataTable(toBinData, toBinSchema);
+        const buckets = [
+            { end: 1, label: 'useless' },
+            { start: 1, end: 4, label: 'failure' },
+            { start: 4, end: 6, label: 'firstclass' },
+            { start: 6, end: 10, label: 'decent' }
+        ];
+
+        let binnedDT = toBinDatatable.bin('marks', {
+            buckets,
+        }, 'rating1');
+
+        let composedFn = compose(
+           bin('marks', {
+               buckets,
+           }, 'rating1'),
+
+        );
+
+        let composedDt = composedFn(toBinDatatable2);
+        expect(binnedDT.getData()).to.deep.equal(composedDt.getData());
+    });
+    it('Should compose bin and select', () => {
+        const toBinData = [{
+            marks: 1,
+        }, {
+            marks: 2,
+        }, {
+            marks: 3,
+        }, {
+            marks: 4,
+        }, {
+            marks: 5,
+        }, {
+            marks: 9,
+        }];
+        const toBinSchema = [{
+            name: 'marks',
+            type: 'measure'
+        }];
+        const toBinDatatable = new DataTable(toBinData, toBinSchema);
+        const toBinDatatable2 = new DataTable(toBinData, toBinSchema);
+        const buckets = [
+            { end: 1, label: 'useless' },
+            { start: 1, end: 4, label: 'failure' },
+            { start: 4, end: 6, label: 'firstclass' },
+            { start: 6, end: 10, label: 'decent' }
+        ];
+
+        let binnedDT = toBinDatatable.bin('marks', {
+            buckets,
+        }, 'rating1');
+        let selectedBin = binnedDT.select(fields => fields.rating1.value === 'failure');
+        let composedFn = compose(
+           bin('marks', {
+               buckets,
+           }, 'rating1'),
+           rowFilter(fields => fields.rating1.value === 'failure')
+        );
+        let composedDt = composedFn(toBinDatatable2);
+        expect(selectedBin.getData()).to.deep.equal(composedDt.getData());
+    });
 });
