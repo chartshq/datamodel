@@ -19,3 +19,11 @@ export const DT_DERIVATIVES = {
     CAL_MEASURE: 'calculatedMeasure',
     CAL_DIMENSION: 'generatedDimension'
 };
+
+export const JOINS = {
+    CROSS: 'cross',
+    LEFTOUTER: 'leftOuter',
+    RIGHTOUTER: 'rightOuter',
+    NATURAL: 'natural',
+    FULLOUTER: 'fullOuter'
+};
