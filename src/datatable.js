@@ -358,7 +358,7 @@ class DataTable extends Relation {
 
         calculatedMeasureIterator(this, (table, params) => {
             table[key] = value;
-            this.calculatedMeasure(...[...params, false, table]);
+            this.createMeasure(...[...params, false, table]);
         });
 
         groupByIterator(this, (table, params) => {
@@ -464,7 +464,7 @@ class DataTable extends Relation {
      * @param {DataTable} [existingDataTable] - An optional DataTable instance.
      * @return {DataTable} - Returns a new DataTable instance.
      */
-    calculatedMeasure(config, fields, callback, saveChild = true, existingDataTable) {
+    createMeasure(config, fields, callback, saveChild = true, existingDataTable) {
         const {
             name,
         } = config;
@@ -559,7 +559,7 @@ class DataTable extends Relation {
      * dimensions should be removed.
      * @return {DataTable} Returns the new DataTable instance.
      */
-    generateDimensions(dimArray, dependents, callback, config = {}) {
+    createDimensions(dimArray, dependents, callback, config = {}) {
         // get the fields present
         const fieldMap = this.getFieldMap();
         // validate that the supplied fields are present

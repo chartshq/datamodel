@@ -1,26 +1,8 @@
 import { DataFormat, DimensionSubtype, FieldType, ProjectionMode, SelectionMode } from 'picasso-util';
 import DataTable from './datatable';
-import { bin,
-     columnFilter,
-     compose,
-     fullOuterJoin,
-     groupby,
-     leftOuterJoin,
-     naturalJoin,
-     rightOuterJoin,
-     rowFilter } from './operator';
+import * as Operators from './operator';
 
-DataTable.Operators = {
-    leftOuterJoin,
-    rightOuterJoin,
-    fullOuterJoin,
-    naturalJoin,
-    compose,
-    columnFilter,
-    rowFilter,
-    bin,
-    groupby
-};
+DataTable.Operators = Operators;
 
 export default DataTable;
 
