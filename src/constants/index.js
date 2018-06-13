@@ -17,7 +17,7 @@ export const DT_DERIVATIVES = {
     GROUPBY: 'group',
     COMPOSE: 'compose',
     CAL_MEASURE: 'calculatedMeasure',
-    CAL_DIMENSION: 'generatedDimention',
+    CAL_DIMENSION: 'generatedDimension',
     BIN: 'bin'
 };
 
