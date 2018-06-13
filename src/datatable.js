@@ -451,7 +451,7 @@ class DataTable extends Relation {
         const struct = this.getData();
         // append header
         const header = struct.schema.map(field => field.name);
-        return new this.constructor([header].concat(struct.data), struct.schema, null, { dataformat: 'CSVArr' });
+        return new this.constructor([header].concat(struct.data), struct.schema, null, { dataFormat: 'CSVArr' });
     }
 
     /**

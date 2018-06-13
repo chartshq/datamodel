@@ -53,10 +53,10 @@ class Relation {
 
     _updateData (data, schema, name, options) {
         options = Object.assign(Object.assign({}, defaultConfig), options);
-        const converterFn = converter[options.dataformat];
+        const converterFn = converter[options.dataFormat];
 
         if (!(converterFn && typeof converterFn === 'function')) {
-            throw new Error(`No converter function found for ${options.dataformat} format`);
+            throw new Error(`No converter function found for ${options.dataFormat} format`);
         }
 
         const [header, formattedData] = converterFn(data, options);
