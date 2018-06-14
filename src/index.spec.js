@@ -2,7 +2,6 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { DateTimeFormatter } from './utils';
 import DataTable from './index';
 
 describe('Datatable', () => {
