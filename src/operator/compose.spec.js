@@ -131,7 +131,7 @@ describe('Testing compose functionlity', () => {
             { start: 6, end: 10, label: 'decent' }
         ];
 
-        let binnedDT = toBinDatatable.bin('marks', {
+        let binnedDT = toBinDatatable.createBin('marks', {
             buckets,
         }, 'rating1');
 
@@ -172,7 +172,7 @@ describe('Testing compose functionlity', () => {
             { start: 6, end: 10, label: 'decent' }
         ];
 
-        let binnedDT = toBinDatatable.bin('marks', {
+        let binnedDT = toBinDatatable.createBin('marks', {
             buckets,
         }, 'rating1');
         let selectedBin = binnedDT.select(fields => fields.rating1.value === 'failure');
