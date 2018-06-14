@@ -958,12 +958,22 @@ describe('#Datatable', () => {
     });
     context('Checking for immutability for datatable when existing dt is given', () => {
         const data1 = [
-            { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-            { profit: 20, sales: 25, first: 'Hey', second: 'Wood' },
-            { profit: 10, sales: 20, first: 'White', second: 'the sun' },
-            { profit: 15, sales: 25, first: 'White', second: 'walls' },
+            { id: 1, profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+            { id: 2, profit: 20, sales: 25, first: 'Hey', second: 'Wood' },
+            { id: 3, profit: 10, sales: 20, first: 'White', second: 'the sun' },
+            { id: 4, profit: 15, sales: 25, first: 'White', second: 'walls' },
         ];
+        const data2 = [
+            { id: 1, netprofit: 100, netsales: 200, _first: 'Hello', _second: 'Jude' },
+            { id: 4, netprofit: 200, netsales: 250, _first: 'Bollo', _second: 'Wood' },
+
+        ];
+
         const schema1 = [
+            {
+                name: 'id',
+                type: 'dimention'
+            },
             {
                 name: 'profit',
                 type: 'measure',
@@ -982,7 +992,32 @@ describe('#Datatable', () => {
                 type: 'dimension'
             },
         ];
+        const schema2 = [
+            {
+                name: 'id',
+                type: 'dimention'
+            },
+            {
+                name: 'netprofit',
+                type: 'measure',
+                defAggFn: 'avg'
+            },
+            {
+                name: 'netsales',
+                type: 'measure'
+            },
+            {
+                name: '_first',
+                type: 'dimension'
+            },
+            {
+                name: '_second',
+                type: 'dimension'
+            },
+        ];
         const dataTable = new DataTable(data1, schema1);
+        const dataTable2 = new DataTable(data2, schema2);
+        dataTable2;
         let dt2 = dataTable.select(fields => fields.profit.value < 150);
         let dt3 = dataTable.groupBy(['sales'], {
             profit: null

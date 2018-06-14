@@ -28,7 +28,6 @@ describe('Checking crossProduct', () => {
         const dataTable1 = new DataTable(data1, schema1, 'TableA');
         const dataTable2 = new DataTable(data2, schema2, 'TableB');
         const crossDataTable = crossProduct(dataTable1, dataTable2);
-
         expect(crossDataTable.getData()).to.deep.equal({
             schema: [
                 { name: 'profit', type: 'measure' },
