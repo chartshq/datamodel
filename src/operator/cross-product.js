@@ -2,7 +2,7 @@ import DataTable from '../datatable';
 import { extend2 } from '../utils';
 import getCommonSchema from './get-common-schema';
 import rowDiffsetIterator from './row-diffset-iterator';
-
+import { JOINS } from '../constants';
 /**
  * Default filter function for crossProduct.
  *
@@ -20,7 +20,7 @@ function defaultFilterFn() { return true; }
  * @param {boolean} [replaceCommonSchema=false] - The flag if the common name schema should be there.
  * @return {DataTable} Returns The newly created DataTable instance from the crossProduct operation.
  */
-function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = false) {
+function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = false, jointype = JOINS.CROSS) {
     const schema = [];
     const data = [];
     const applicableFilterFn = filterFn || defaultFilterFn;
@@ -53,6 +53,8 @@ function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = fa
 
     // Here prepare Data
     rowDiffsetIterator(dataTable1.rowDiffset, (i) => {
+        let rowAdded = false;
+        let rowPosition;
         rowDiffsetIterator(dataTable2.rowDiffset, (ii) => {
             const tuple = [];
             const userArg = {};
@@ -73,6 +75,28 @@ function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = fa
                 tuple.forEach((cellVal, iii) => {
                     tupleObj[schema[iii].name] = cellVal;
                 });
+                if (rowAdded && JOINS.CROSS !== jointype) {
+                    data[rowPosition] = tupleObj;
+                }
+                else {
+                    data.push(tupleObj);
+                    rowAdded = true;
+                    rowPosition = i;
+                }
+            }
+            else if ((jointype === JOINS.LEFTOUTER || jointype === JOINS.RIGHTOUTER) && !rowAdded) {
+                const tupleObj = {};
+                let len = dataTable1FieldStore.fields.length - 1;
+                tuple.forEach((cellVal, iii) => {
+                    if (iii <= len) {
+                        tupleObj[schema[iii].name] = cellVal;
+                    }
+                    else {
+                        tupleObj[schema[iii].name] = null;
+                    }
+                });
+                rowAdded = true;
+                rowPosition = i;
                 data.push(tupleObj);
             }
         });

@@ -17,5 +17,14 @@ export const DT_DERIVATIVES = {
     GROUPBY: 'group',
     COMPOSE: 'compose',
     CAL_MEASURE: 'calculatedMeasure',
-    CAL_DIMENSION: 'generatedDimension'
+    CAL_DIMENSION: 'generatedDimension',
+    BIN: 'bin'
+};
+
+export const JOINS = {
+    CROSS: 'cross',
+    LEFTOUTER: 'leftOuter',
+    RIGHTOUTER: 'rightOuter',
+    NATURAL: 'natural',
+    FULLOUTER: 'fullOuter'
 };
