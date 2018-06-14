@@ -105,23 +105,96 @@ class DataTable extends Relation {
     }
 
     /**
-     * Returns the data after the operation in the format of
-     * multidimensional array with first row as schema.
+     * Returns the data after operation in the format of
+     * multidimensional array according to the given option value.
      *
      * @public
-     * @param {boolean} [rowWise=false] - Define how the data need to be returned, row wise or column wise.
+     * @param {Object} [options] - Define how the data need to be returned.
+     * @param {Object} [options.order='row'] - Define the order of the data: row or column.
+     * @param {Object} [options.formatter=null] - An object map containing field specific formatter function.
      * @return {Array} Returns a multidimensional array of the data.
+     * @example
+     *
+     * // Return data with formatted date value.
+     * const options = {
+     *  order: 'row',
+     *  formatter: {
+     *      birthday: (val, rowId, schema) => {
+     *          return yourCustomFormatter(val, "%Y-%m-%d");
+     *      }
+     *  }
+     * }
+     *
+     *  const dt = new DataTable(data, schema);
+     *  const dataFormatted = dt.getData(options);
      */
-    getData(rowWise = false) {
-        return dataBuilder.call(
+    getData(options) {
+        const defOptions = {
+            order: 'row',
+            formatter: null,
+        };
+        options = Object.assign({}, defOptions, options);
+
+        const dataGenerated = dataBuilder.call(
             this,
             this.getNameSpace().fields,
             this.rowDiffset,
             this.colIdentifier,
             this.sortingDetails,
-            { rowWise }
+            {
+                columnWise: options.order === 'column'
+            }
         );
+
+        if (!options.formatter) {
+            return dataGenerated;
+        }
+
+        const { formatter } = options;
+        const { data, schema, uids } = dataGenerated;
+        const fieldNames = schema.map((e => e.name));
+        const fmtFieldNames = Object.keys(formatter);
+        const fmtFieldIdx = fmtFieldNames.reduce((acc, next) => {
+            const idx = fieldNames.indexOf(next);
+            if (idx !== -1) {
+                acc.push([idx, formatter[next]]);
+            }
+            return acc;
+        }, []);
+
+        if (options.order === 'column') {
+            fmtFieldIdx.forEach((elem) => {
+                const fIdx = elem[0];
+                const fmtFn = elem[1];
+
+                data[fIdx].forEach((datum, datumIdx) => {
+                    data[fIdx][datumIdx] = fmtFn.call(
+                        undefined,
+                        datum,
+                        uids[datumIdx],
+                        schema[fIdx]
+                    );
+                });
+            });
+        } else {
+            data.forEach((datum, datumIdx) => {
+                fmtFieldIdx.forEach((elem) => {
+                    const fIdx = elem[0];
+                    const fmtFn = elem[1];
+
+                    datum[fIdx] = fmtFn.call(
+                        undefined,
+                        datum[fIdx],
+                        uids[datumIdx],
+                        schema[fIdx]
+                    );
+                });
+            });
+        }
+
+        return dataGenerated;
     }
+
 
     /**
      * Returns the data with the uids.

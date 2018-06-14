@@ -35,7 +35,7 @@ describe('Checking dataBuilder', () => {
         };
         expect(expObj).to.deep.equal(oriObj);
     });
-    it('Checking for normal case with row filter and rowWise data', () => {
+    it('Checking for normal case with row filter and columnWise data', () => {
         const data = [
             [10, 15, 7, 9, 20, 35],
             [20, 25, 8, 40, 77, 9],
@@ -47,7 +47,7 @@ describe('Checking dataBuilder', () => {
             { name: 'city', type: 'dimension' },
         ];
         const fieldsArr = createFields(data, schema);
-        const expObj = dataBuilder(fieldsArr, '0-2,4', 'profit,sales,city', undefined, { rowWise: true });
+        const expObj = dataBuilder(fieldsArr, '0-2,4', 'profit,sales,city', undefined, { columnWise: true });
         const oriObj = {
             schema: [
                 { name: 'profit', type: 'measure' },

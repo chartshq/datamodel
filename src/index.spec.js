@@ -2,9 +2,10 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
+import { DateTimeFormatter } from './utils';
 import DataTable from './index';
 
-describe('#Datatable', () => {
+describe('Datatable', () => {
     it('should clone successfully', () => {
         const data = [
             { a: 10, aaa: 20, aaaa: 'd' },
@@ -27,6 +28,203 @@ describe('#Datatable', () => {
         expect(cloneRelation.colIdentifier).to.equal('1-20');
         expect(cloneRelation.rowDiffset).to.equal('a, aaa, aaaa');
     });
+
+    it('Getting data', () => {
+        const schema = [
+            {
+                name: 'name',
+                type: 'dimension'
+            },
+            {
+                name: 'birthday',
+                type: 'dimension',
+                subtype: 'temporal',
+                format: '%Y-%m-%d'
+            }
+        ];
+
+        const data = [
+            {
+                name: 'Rousan',
+                birthday: '1995-07-05',
+                roll: 12
+            },
+            {
+                name: 'Sumant',
+                birthday: '1996-08-04',
+                roll: 89
+            },
+            {
+                name: 'Akash',
+                birthday: '1994-01-03',
+                roll: 33
+            }
+        ];
+        const dataTable = new DataTable(data, schema);
+
+        let generatedData = dataTable.getData({
+            order: 'row'
+        });
+        let expected = {
+            data: [
+                [
+                    'Rousan',
+                    804882600000
+                ],
+                [
+                    'Sumant',
+                    839097000000
+                ],
+                [
+                    'Akash',
+                    757535400000
+                ]
+            ],
+            schema: [
+                {
+                    name: 'name',
+                    type: 'dimension'
+                },
+                {
+                    name: 'birthday',
+                    type: 'dimension',
+                    subtype: 'temporal',
+                    format: '%Y-%m-%d'
+                }
+            ],
+            uids: [
+                0,
+                1,
+                2
+            ]
+        };
+        expect(generatedData).to.deep.equal(expected);
+
+        generatedData = dataTable.getData({
+            order: 'column'
+        });
+        expected = {
+            data: [
+                [
+                    'Rousan',
+                    'Sumant',
+                    'Akash'
+                ],
+                [
+                    804882600000,
+                    839097000000,
+                    757535400000
+                ]
+            ],
+            schema: [
+                {
+                    name: 'name',
+                    type: 'dimension'
+                },
+                {
+                    name: 'birthday',
+                    type: 'dimension',
+                    subtype: 'temporal',
+                    format: '%Y-%m-%d'
+                }
+            ],
+            uids: [
+                0,
+                1,
+                2
+            ]
+        };
+        expect(generatedData).to.deep.equal(expected);
+
+        generatedData = dataTable.getData({
+            order: 'row',
+            formatter: {
+                name: val => val.toUpperCase(),
+                birthday: (val) => {
+                    const dt = new Date(val);
+                    return `${dt.getFullYear()}-${dt.getMonth() + 1}-${dt.getDay()}`;
+                }
+            }
+        });
+        expected = {
+            schema: [
+                {
+                    name: 'name',
+                    type: 'dimension'
+                },
+                {
+                    name: 'birthday',
+                    type: 'dimension',
+                    subtype: 'temporal',
+                    format: '%Y-%m-%d'
+                }
+            ],
+            data: [
+                [
+                    'ROUSAN',
+                    '1995-7-3'
+                ],
+                [
+                    'SUMANT',
+                    '1996-8-0'
+                ],
+                [
+                    'AKASH',
+                    '1994-1-1'
+                ]
+            ],
+            uids: [
+                0,
+                1,
+                2
+            ]
+        };
+        expect(generatedData).to.deep.equal(expected);
+
+        generatedData = dataTable.getData({
+            order: 'column',
+            formatter: {
+                name: val => val.toUpperCase(),
+                birthday: (val) => {
+                    const dt = new Date(val);
+                    return `${dt.getFullYear()}-${dt.getMonth() + 1}-${dt.getDay()}`;
+                }
+            }
+        });
+        expected = {
+            schema: [
+                {
+                    name: 'name',
+                    type: 'dimension'
+                },
+                {
+                    name: 'birthday',
+                    type: 'dimension',
+                    subtype: 'temporal',
+                    format: '%Y-%m-%d'
+                }
+            ],
+            data: [
+                [
+                    'ROUSAN',
+                    'SUMANT',
+                    'AKASH'
+                ],
+                [
+                    '1995-7-3',
+                    '1996-8-0',
+                    '1994-1-1'
+                ]
+            ],
+            uids: [
+                0,
+                1,
+                2
+            ]
+        };
+        expect(generatedData).to.deep.equal(expected);
+    });
+
     it('Projection functionality', () => {
         const data = [
             { a: 10, aaa: 20, aaaa: 'd' },

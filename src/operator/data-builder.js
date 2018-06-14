@@ -48,7 +48,13 @@ function getSortFn(dataType, sortType, index) {
  * @param {Object} options - The options required to create the type of the data.
  * @return {Object} Returns an object containing the multidimensional array and the relative schema.
  */
-function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, options = {}) {
+function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, options) {
+    const defOptions = {
+        addUid: false,
+        columnWise: false
+    };
+    options = Object.assign({}, defOptions, options);
+
     const retObj = {
         schema: [],
         data: [],
@@ -119,12 +125,7 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, opti
         });
     }
 
-    /**
-     * @todo Normally the data is created column wise but there is some situation
-     * where data is required in row wise.
-     * So need to fix this.
-     */
-    if (options.rowWise) {
+    if (options.columnWise) {
         const tmpData = Array(...Array(retObj.schema.length)).map(() => []);
         retObj.data.forEach((tuple) => {
             tuple.forEach((data, i) => {
