@@ -1002,6 +1002,9 @@ class DataTable extends Relation {
         };
         // update the column identifier
         clone.colIdentifier += `,${binnedFieldName}`;
+
+        this.__persistDerivation(clone, DT_DERIVATIVES.BIN, { measureName, config, binnedFieldName }, null);
+
         return clone;
     }
 
@@ -1052,11 +1055,13 @@ class DataTable extends Relation {
                 meta: config,
                 criteria: criteriaFn
             };
+            table._derivation.push(derivative);
         }
         else {
-            derivative = criteriaFn;
+            derivative = [...criteriaFn];
+            table._derivation.length = 0;
+            table._derivation.push(...derivative);
         }
-        table._derivation.push(derivative);
     }
 }
 
