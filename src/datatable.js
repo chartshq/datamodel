@@ -769,13 +769,19 @@ class DataTable extends Relation {
      * @return {DataTable} Returns a DataTable assembled from identifiers.
      */
     _assembleTableFromIdentifiers(identifiers) {
-        let schema;
+        let schema = [];
         let data;
+        let fieldMap = this.fieldMap;
         if (identifiers.length) {
-            schema = identifiers[0].map(val => ({
-                name: val,
-                type: FieldType.DIMENSION,
-            }));
+            let fields = identifiers[0];
+            let len = fields.length;
+            for (let i = 0; i < len; i++) {
+                let field = fields[i];
+                let fieldObj = fieldMap[field].def;
+                if (fieldObj) {
+                    schema.push(Object.assign(fieldMap[field].def));
+                }
+            }
             // format the data
             // @TODO: no documentation on how CSV_ARR data format works.
             data = [];
