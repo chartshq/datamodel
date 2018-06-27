@@ -1,4 +1,4 @@
-import getCommonSchema from './get-common-schema';
+import { getCommonSchema } from './get-common-schema';
 
 /**
  * The filter function used in natural join.
@@ -9,7 +9,7 @@ import getCommonSchema from './get-common-schema';
  * @param {DataTable} dataTable2 - The right DataTable instance.
  * @return {Function} Returns a function that is used in cross-product operation.
  */
-function naturalJoinFilter(dataTable1, dataTable2) {
+export function naturalJoinFilter(dataTable1, dataTable2) {
     const dataTable1FieldStore = dataTable1.getNameSpace();
     const dataTable2FieldStore = dataTable2.getNameSpace();
     const dataTable1FieldStoreName = dataTable1FieldStore.name;
@@ -29,5 +29,3 @@ function naturalJoinFilter(dataTable1, dataTable2) {
         return retainTuple;
     };
 }
-
-export default naturalJoinFilter;

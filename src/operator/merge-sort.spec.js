@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import mergeSort from './merge-sort';
+import { mergeSort } from './merge-sort';
 
 
 describe('merge sort test', () => {

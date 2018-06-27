@@ -1,4 +1,4 @@
-import { defReducer, fnList } from '../operator/group-by-function';
+import { defReducer, fnList } from '../operator';
 
 class ReducerStore {
     constructor() {

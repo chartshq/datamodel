@@ -20,7 +20,7 @@ describe('Testing Child Iterator', () => {
     let createdCallBack = (profit, sales) => profit / sales;
     let hasSameChild = false;
     let hasSameFunction = false;
-    const child = dt.calculatedMeasure({
+    const child = dt.createMeasure({
         name: 'Efficiency'
     }, ['profit', 'sales'], createdCallBack);
 

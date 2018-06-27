@@ -1,5 +1,5 @@
 import { extend2 } from '../utils';
-import rowDiffsetIterator from './row-diffset-iterator';
+import { rowDiffsetIterator } from './row-diffset-iterator';
 import DataTable from '../index';
 import reducerStore from '../utils/reducer';
 
