@@ -1,6 +1,6 @@
 import DataTable from '../index';
 import { extend2 } from '../utils';
-import rowDiffsetIterator from './row-diffset-iterator';
+import { rowDiffsetIterator } from './row-diffset-iterator';
 
 /**
  * Performs the union operation between two DataTable instances.
@@ -11,7 +11,7 @@ import rowDiffsetIterator from './row-diffset-iterator';
  * @param {DataTable} dataTable2 - The second DataTable instance.
  * @return {DataTable} Returns the newly created DataTable after union operation.
  */
-function difference(dataTable1, dataTable2) {
+export function difference(dataTable1, dataTable2) {
     const hashTable = {};
     const schema = [];
     const schemaNameArr = [];
@@ -64,4 +64,3 @@ function difference(dataTable1, dataTable2) {
     return new DataTable(data, schema, name);
 }
 
-export default difference;

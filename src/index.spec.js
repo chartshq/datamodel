@@ -727,7 +727,7 @@ describe('Datatable', () => {
         ];
         const dataTable = new DataTable(data1, schema1, 'Yo');
         const next = dataTable.project(['profit', 'sales']).select(f => +f.profit > 10);
-        const child = next.calculatedMeasure({
+        const child = next.createMeasure({
             name: 'Efficiency'
         }, ['profit', 'sales'], (profit, sales) => profit / sales);
         const childData = child.getData().data;
@@ -737,7 +737,7 @@ describe('Datatable', () => {
         ).to.equal(0.6);
         expect(
             () => {
-                next.calculatedMeasure({
+                next.createMeasure({
                     name: 'Efficiency'
                 }, ['profit', 'sales'], (profit, sales) => profit / sales);
             }
@@ -757,7 +757,7 @@ describe('Datatable', () => {
             { name: 'second', type: 'dimension' },
         ];
         const dataTable = new DataTable(data1, schema1, 'Yo');
-        const newDt = dataTable.generateDimensions([{
+        const newDt = dataTable.createDimensions([{
             name: 'Song'
         }, {
             name: 'InvertedSong'
@@ -772,7 +772,7 @@ describe('Datatable', () => {
             invSongData.length === 4
         ).to.be.true;
         // test removing dependents
-        const exDt = dataTable.generateDimensions([{
+        const exDt = dataTable.createDimensions([{
             name: 'Song'
         }, {
             name: 'InvertedSong'
@@ -1082,7 +1082,7 @@ describe('Datatable', () => {
         let callback2 = function (a, aaa, ...arg) {
             return a + aaa + arg[0];
         };
-        const child = dataTable.calculatedMeasure({
+        const child = dataTable.createMeasure({
             name: 'bbbb'
         }, ['a', 'aaa'], callback2);
 
@@ -1222,10 +1222,10 @@ describe('Datatable', () => {
         let dt4 = dataTable.select(fields => fields.profit.value < 150, {}, true, dt2);
         let dt5 = dataTable.groupBy(['Year'], {
         }, true, dt3);
-        let dt6 = dataTable.calculatedMeasure({
+        let dt6 = dataTable.createMeasure({
             name: 'Efficiency'
         }, ['profit', 'sales'], (profit, sales) => profit / sales);
-        let dt7 = dataTable.calculatedMeasure({
+        let dt7 = dataTable.createMeasure({
             name: 'UnEfficiency'
         }, ['sales', 'profit'], (sales, profit) => sales / profit, true, dt6);
         it('datatable select instance should not change', () => {

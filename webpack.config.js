@@ -12,13 +12,14 @@ module.exports = {
     },
     devtool: 'source-map',
     module: {
-        loaders: [{
-            test: /\.js$/,
-            loader: 'babel-loader',
-            query: {
-                presets: ['es2015'],
-            },
-        }],
+        rules: [
+            {
+                test: /\.js$/,
+                use: {
+                    loader: 'babel-loader'
+                }
+            }
+        ]
     },
     devServer: {
         inline: true,
