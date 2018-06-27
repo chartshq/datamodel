@@ -27,7 +27,8 @@ class Relation {
      * a field store with these fields in global space which can be used
      * by other functions for calculations and other operations on data
      *
-     * @param {Object | string} data - The input tabular data in csv or json format.
+     * @param {Object | string | Relation} data - The input tabular data in csv or json format or
+     * an existing Relation instance object.
      * @param {Array} schema - An array of data schema.
      * @param {string} [name] - The name of the DataTable instance, if not provided will assign a random name.
      * @param {Object} [options] - The optional options.
@@ -40,15 +41,12 @@ class Relation {
             this.colIdentifier = source.colIdentifier;
             this.rowDiffset = source.rowDiffset;
             this.fieldMap = source.fieldMap;
-            return this;
+        } else {
+            if (!data) {
+                throw new Error('Data not specified');
+            }
+            this._updateData(data, schema, name, options);
         }
-
-        if (!data) {
-            throw new Error('No data found.');
-        }
-
-        this._updateData(data, schema, name, options);
-        return this;
     }
 
     _updateData (data, schema, name, options) {
