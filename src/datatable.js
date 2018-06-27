@@ -944,7 +944,7 @@ class DataTable extends Relation {
      * @param {string} binnedFieldName - The name of the new field.
      * @return {DataTable} Returns the new DataTable instance.
      */
-    bin(measureName, config, binnedFieldName) {
+    createBin(measureName, config, binnedFieldName) {
         const clone = this.cloneAsChild();
         const namespaceFields = clone.getNameSpace().fields;
         const fieldMap = this.fieldMap;

@@ -754,13 +754,13 @@ describe('#Datatable', () => {
             { start: 6, end: 10, label: 'decent' }
         ];
 
-        let binnedDT = toBinDatatable.bin('marks', {
+        let binnedDT = toBinDatatable.createBin('marks', {
             buckets,
         }, 'rating1');
-        let binnedDTnum = toBinDatatable.bin('marks', {
+        let binnedDTnum = toBinDatatable.createBin('marks', {
             numOfBins: 4
         }, 'rating2');
-        let binnedDTSize = toBinDatatable.bin('marks', {
+        let binnedDTSize = toBinDatatable.createBin('marks', {
             binSize: 4,
         });
         expect(
