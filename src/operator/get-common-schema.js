@@ -6,7 +6,7 @@
  * @param {FieldStore} fs2 - The second FieldStore instance.
  * @return {Array} An array containing the common schema.
  */
-function getCommonSchema(fs1, fs2) {
+export function getCommonSchema(fs1, fs2) {
     const retArr = [];
     const fs1Arr = [];
     fs1.fields.forEach((field) => {
@@ -19,5 +19,3 @@ function getCommonSchema(fs1, fs2) {
     });
     return retArr;
 }
-
-export default getCommonSchema;

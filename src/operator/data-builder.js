@@ -1,5 +1,5 @@
-import rowDiffsetIterator from './row-diffset-iterator';
-import mergeSort from './merge-sort';
+import { rowDiffsetIterator } from './row-diffset-iterator';
+import { mergeSort } from './merge-sort';
 
 /**
  * Generates the sorting functions to sort the data of a DataTable instance
@@ -48,7 +48,7 @@ function getSortFn(dataType, sortType, index) {
  * @param {Object} options - The options required to create the type of the data.
  * @return {Object} Returns an object containing the multidimensional array and the relative schema.
  */
-function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, options = {}) {
+export function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, options = {}) {
     const retObj = {
         schema: [],
         data: [],
@@ -136,5 +136,3 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, opti
 
     return retObj;
 }
-
-export default dataBuilder;

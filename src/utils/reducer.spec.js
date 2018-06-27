@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import REDUCER from './reducer';
-import { defReducer, fnList } from '../operator/group-by-function';
+import { defReducer, fnList } from '../operator';
 
 describe('Checking Reducer Functionality', () => {
     context('validate Reducer Object', () => {

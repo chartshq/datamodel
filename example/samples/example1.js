@@ -55,7 +55,7 @@ d3.json('./data/cars.json', (data) => {
     ];
     const dataTable = new DataTable(data1, schema1, 'Yo');
     const next = dataTable.project(['profit', 'sales']).select(f => +f.profit > 10);
-    const child = next.calculatedMeasure({
+    const child = next.createMeasure({
         name: 'Efficiency'
     }, ['profit', 'sales'], (profit, sales) => profit / sales);
     console.log(child.getData().data);

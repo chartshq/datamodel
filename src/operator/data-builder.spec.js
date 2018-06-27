@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import dataBuilder from './data-builder';
+import { dataBuilder } from './data-builder';
 import createFields from '../create-fields';
 
 describe('Checking dataBuilder', () => {

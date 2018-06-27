@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import difference from './difference';
+import { difference } from './difference';
 import DataTable from '../index';
 
 const data1 = [
