@@ -777,9 +777,18 @@ class DataTable extends Relation {
             let len = fields.length;
             for (let i = 0; i < len; i++) {
                 let field = fields[i];
-                let fieldObj = fieldMap[field].def;
+                let fieldObj;
+                if (field === ROW_ID) {
+                    fieldObj = {
+                        name: field,
+                        type: FieldType.DIMENSION
+                    };
+                }
+                else {
+                    fieldObj = fieldMap[field] && Object.assign({}, fieldMap[field].def);
+                }
                 if (fieldObj) {
-                    schema.push(Object.assign(fieldMap[field].def));
+                    schema.push(Object.assign(fieldObj));
                 }
             }
             // format the data
