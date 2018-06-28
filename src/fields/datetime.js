@@ -1,4 +1,4 @@
-import { DimensionSubtype } from 'picasso-util';
+import { DimensionSubtype, getMinDiff } from 'picasso-util';
 import Dimension from './dimension';
 import { DateTimeFormatter } from '../utils';
 
@@ -20,6 +20,7 @@ class DateTime extends Dimension {
     constructor(name, data, schema) {
         super(name, data, schema);
         this.subtype = DimensionSubtype.TEMPORAL;
+        this.minDiff = getMinDiff(this.data);
     }
 
     /**
@@ -31,6 +32,9 @@ class DateTime extends Dimension {
         return this.subtype;
     }
 
+    getMinDiff () {
+        return this.minDiff;
+    }
     /**
     * A hook which is called for every entry(cell) of the column.
     *
