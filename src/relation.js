@@ -132,7 +132,7 @@ class Relation {
 
 
     _isEmpty () {
-        return !this.rowDiffset.length;
+        return !this.rowDiffset.length || !this.colIdentifier.length;
     }
 }
 

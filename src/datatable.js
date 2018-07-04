@@ -833,7 +833,7 @@ class DataTable extends Relation {
                 filteredTable = this.select((fields, rIdx) => occMap[rIdx], {}, false);
             } else {
                 let fieldMap = this.fieldMap;
-                let filteredSchema = schema.filter(d => d.name in fieldMap);
+                let filteredSchema = schema.filter(d => d.name in fieldMap && d.type === FieldType.DIMENSION);
                 filteredTable = this.select((fields) => {
                     let include = true;
                     filteredSchema.forEach((propField, idx) => {
@@ -859,34 +859,39 @@ class DataTable extends Relation {
      * @param {Object} payload - The interaction specific details.
      * @param {DataTable} source - The source DataTable instance.
      */
-    propagate(identifiers, payload, source) {
+    propagate(identifiers, payload, source, grouped = false) {
         let propTable = identifiers;
         if (!(propTable instanceof DataTable)) {
             propTable = this._assembleTableFromIdentifiers(identifiers);
         }
+
+        // create the filtered table
+        const filteredTable = this._filterPropagationTable(propTable);
         // function to propagate to target the DataTable instance.
-        const forwardPropagation = (targetDT, propagationData) => {
+        const forwardPropagation = (targetDT, propagationData, group) => {
             targetDT.handlePropagation({
                 payload,
                 data: propagationData,
             });
-            targetDT.propagate(propagationData, payload, this);
+            targetDT.propagate(propagationData, payload, this, group);
         };
         // propagate to children created by SELECT operation
-        selectIterator(this, (targetDT) => {
+        selectIterator(this, (targetDT, criteria) => {
             if (targetDT !== source) {
-                forwardPropagation(targetDT, propTable);
+                let selectedTable = propTable;
+                if (grouped) {
+                    selectedTable = !propTable._isEmpty() && propTable.select(criteria);
+                }
+                forwardPropagation(targetDT, selectedTable);
             }
         });
         // propagate to children created by PROJECT operation
         projectIterator(this, (targetDT) => {
             if (targetDT !== source) {
                 // pass al the props cause it won't make a difference
-                forwardPropagation(targetDT, propTable);
+                forwardPropagation(targetDT, propTable, grouped);
             }
         });
-        // create the filtered table
-        const filteredTable = this._filterPropagationTable(propTable);
         // propagate to children created by groupBy operation
         groupByIterator(this, (targetDT, conf) => {
             if (targetDT !== source) {
@@ -896,12 +901,12 @@ class DataTable extends Relation {
                 } = conf;
                 // group the filtered table based on groupBy string of target
                 const groupedPropTable = filteredTable.groupBy(groupByString.split(','), reducer, false);
-                forwardPropagation(targetDT, groupedPropTable);
+                forwardPropagation(targetDT, groupedPropTable, true);
             }
         });
         // propagate to parent if parent is not source
         if (this.parent && source !== this.parent) {
-            forwardPropagation(this.parent, propTable);
+            forwardPropagation(this.parent, propTable, grouped);
         }
     }
 
