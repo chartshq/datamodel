@@ -134,6 +134,19 @@ class Relation {
     _isEmpty () {
         return !this.rowDiffset.length;
     }
+
+    _updateFields(name) {
+        let newFields = [];
+        let collID = this.colIdentifier.split(',');
+        this.columnNameSpace.fields.forEach((field) => {
+            if (collID.indexOf(field.name)) {
+                newFields.push(field);
+            }
+        });
+
+        let newColumnNameSpace = fieldStore.createNameSpace(newFields, name);
+        this.newNameSpace = newColumnNameSpace;
+    }
 }
 
 export default Relation;

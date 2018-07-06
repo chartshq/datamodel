@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { FieldType } from 'picasso-util';
-import Field from './field';
+import PartialField from './partial-field';
 
 describe('Field Type', () => {
     const schema = {
@@ -16,7 +16,7 @@ describe('Field Type', () => {
     let field;
 
     beforeEach(() => {
-        field = new Field(schema.name, data, schema);
+        field = new PartialField(schema.name, data, schema);
     });
 
     it('should hold data and schema references', () => {
