@@ -25,8 +25,8 @@ export default class Field {
         if (this._ref.fieldType === 'dimension') {
             domain = [...new Set(data)];
         } else {
-            let minD = Math.min(data);
-            let maxD = Math.max(data);
+            let minD = Math.min.apply(null, data);
+            let maxD = Math.max.apply(null, data);
             domain = [minD, maxD];
         }
 

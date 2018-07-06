@@ -1139,17 +1139,19 @@ class DataTable extends Relation {
 
     _updateFields(name) {
         let newFields = [];
-        let collID = this.colIdentifier.split(',');
-        this.getNameSpace().fields.forEach((field) => {
-            if (collID.indexOf(field.name) !== -1) {
-                let newField = new Field(field, this.rowDiffset);
-                newFields.push(newField);
-            }
-        });
+        if (!this.fields) {
+            let collID = this.colIdentifier.split(',');
+            this.getNameSpace().fields.forEach((field) => {
+                if (collID.indexOf(field.name) !== -1) {
+                    let newField = new Field(field, this.rowDiffset);
+                    newFields.push(newField);
+                }
+            });
 
-        let newColumnNameSpace = fieldStore.createNameSpace(newFields, name);
-        this.newNameSpace = newColumnNameSpace;
-        return newColumnNameSpace.fields;
+            let newColumnNameSpace = fieldStore.createNameSpace(newFields, name);
+            this.fields = newColumnNameSpace.fields;
+        }
+        return this.fields;
     }
 
     getFieldData() {
