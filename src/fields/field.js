@@ -1,4 +1,4 @@
-import rowDiffsetIterator from '../operator/row-diffset-iterator'
+import { rowDiffsetIterator } from '../operator/row-diffset-iterator'
 ;
 
 export default class Field {
@@ -17,6 +17,7 @@ export default class Field {
 
     domain() {
         let domain = [];
+
         rowDiffsetIterator(this._rowDiff, (i) => {
             domain.push(this._ref.data[i]);
         });
@@ -48,5 +49,21 @@ export default class Field {
     }
     __rowDiffSet(rowDiffSet) {
         this._rowDiff = rowDiffSet;
+    }
+
+    get name() {
+        return this._ref.name;
+    }
+
+    set name(name) {
+        throw new Error('Not yet implemented!');
+    }
+
+    get schema() {
+        return this._ref.schema;
+    }
+
+    set schema(schema) {
+        throw new Error('Not yet implemented!');
     }
 }

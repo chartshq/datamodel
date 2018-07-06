@@ -16,6 +16,8 @@ import { createBuckets,
     selectIterator } from './operator';
 import Relation from './relation';
 import reducerStore from './utils/reducer';
+import Field from './fields/field';
+import fieldStore from './field-store';
 
 
 /**
@@ -224,17 +226,17 @@ class DataTable extends Relation {
     rename(schemaObj) {
         const cloneDataTable = this.cloneAsChild();
         const schemaArr = cloneDataTable.colIdentifier.split(',');
-        const fieldStore = this.getNameSpace().fields;
+        const _fieldStore = this.getNameSpace().fields;
 
         Object.entries(schemaObj).forEach(([key, value]) => {
             if (schemaArr.indexOf(key) !== -1 && typeof value === 'string') {
-                for (let i = 0; i <= fieldStore.length; i += 1) {
-                    if (fieldStore[i].name === key) {
-                        const renameField = fieldStore[i].clone(fieldStore[i].data);
+                for (let i = 0; i <= _fieldStore.length; i += 1) {
+                    if (_fieldStore[i].name === key) {
+                        const renameField = _fieldStore[i].clone(_fieldStore[i].data);
                         renameField.name = value;
                         renameField.schema.name = value;
                         schemaArr[schemaArr.indexOf(key)] = value;
-                        fieldStore.push(renameField);
+                        _fieldStore.push(renameField);
                         break;
                     }
                 }
@@ -1133,6 +1135,20 @@ class DataTable extends Relation {
             table._derivation.length = 0;
             table._derivation.push(...derivative);
         }
+    }
+
+    _updateFields(name) {
+        let newFields = [];
+        let collID = this.colIdentifier.split(',');
+        this.getNameSpace().fields.forEach((field) => {
+            if (collID.indexOf(field.name) !== -1) {
+                let newField = new Field(field, this.rowDiffset);
+                newFields.push(newField);
+            }
+        });
+
+        let newColumnNameSpace = fieldStore.createNameSpace(newFields, name);
+        this.newNameSpace = newColumnNameSpace;
     }
 }
 
