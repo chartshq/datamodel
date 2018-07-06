@@ -16,11 +16,20 @@ export default class Field {
     }
 
     domain() {
-        let domain = [];
-
+        let data = [];
+        let domain = null;
         rowDiffsetIterator(this._rowDiff, (i) => {
-            domain.push(this._ref.data[i]);
+            data.push(this._ref.data[i]);
         });
+
+        if (this._ref.fieldType === 'dimension') {
+            domain = [...new Set(data)];
+        } else {
+            let minD = Math.min(data);
+            let maxD = Math.max(data);
+            domain = [minD, maxD];
+        }
+
         return domain;
     }
 
