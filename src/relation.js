@@ -5,6 +5,7 @@ import { rowDiffsetIterator } from './operator';
 import defaultConfig from './default-config';
 import * as converter from './converter';
 import Value from './value';
+import Field from './fields/field';
 
 /**
  * Prepares the selection data.
@@ -140,7 +141,8 @@ class Relation {
         let collID = this.colIdentifier.split(',');
         this.columnNameSpace.fields.forEach((field) => {
             if (collID.indexOf(field.name)) {
-                newFields.push(field);
+                let newField = new Field(field, this.rowDiffset);
+                newFields.push(newField);
             }
         });
 

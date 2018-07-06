@@ -1,6 +1,10 @@
+import rowDiffsetIterator from '../operator/row-diffset-iterator'
+;
+
 export default class Field {
-    constructor(partialFeild) {
+    constructor(partialFeild, rowDiff) {
         this._ref = partialFeild;
+        this._rowDiff = rowDiff;
     }
 
     sanitize () {
@@ -12,7 +16,11 @@ export default class Field {
     }
 
     domain() {
-        throw new Error('Not yet implemented!');
+        let domain = [];
+        rowDiffsetIterator(this.rowDiffset, (i) => {
+            domain.push(this._ref.data[i]);
+        });
+        return domain;
     }
 
     parse () {
