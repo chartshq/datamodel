@@ -1149,6 +1149,11 @@ class DataTable extends Relation {
 
         let newColumnNameSpace = fieldStore.createNameSpace(newFields, name);
         this.newNameSpace = newColumnNameSpace;
+        return newColumnNameSpace.fields;
+    }
+
+    getFieldData() {
+        return this._updateFields();
     }
 }
 
