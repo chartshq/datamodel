@@ -4,7 +4,7 @@ import { extend2 } from '../utils';
   * The base class for every field type.
   * It provides some common functionalities.
   */
-class Field {
+class PartialField {
 
     /**
      * Sets basic setups to each Field instance.
@@ -25,7 +25,7 @@ class Field {
     /**
      * Sanitizes the field data.
      *
-     * @return {Field} - Returns the instance of the current context for chaining.
+     * @return {PartialField} - Returns the instance of the current context for chaining.
      */
     sanitize () {
         this.data = this.data.map(d => this.parsed(this.parse(d)));
@@ -66,7 +66,7 @@ class Field {
      * be expensive.
      *
      * @param {Array} data - The input data, if provided current data will not be cloned.
-     * @return {Field} Returns the cloned field instance.
+     * @return {PartialField} Returns the cloned field instance.
      */
     clone(data) {
         data = data || extend2([], this.data);
@@ -98,4 +98,4 @@ class Field {
     }
 }
 
-export default Field;
+export default PartialField;

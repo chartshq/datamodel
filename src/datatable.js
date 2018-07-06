@@ -1134,21 +1134,6 @@ class DataTable extends Relation {
             table._derivation.push(...derivative);
         }
     }
-
-    // create new domain for each field
-    __createFieldDomain() {
-        let fieldDomain = [];
-        this.getNameSpace().fields.forEach((field) => {
-            let domain = [];
-            rowDiffsetIterator(this.rowDiffset, (i) => {
-                domain.push(field.data[i]);
-            });
-            fieldDomain.push({
-                [field.name]: domain
-            });
-        });
-        return fieldDomain;
-    }
 }
 
 export default DataTable;

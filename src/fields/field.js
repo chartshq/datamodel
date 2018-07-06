@@ -17,7 +17,7 @@ export default class Field {
 
     domain() {
         let domain = [];
-        rowDiffsetIterator(this.rowDiffset, (i) => {
+        rowDiffsetIterator(this._rowDiff, (i) => {
             domain.push(this._ref.data[i]);
         });
         return domain;
