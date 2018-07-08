@@ -1,10 +1,11 @@
 import { SelectionMode } from 'picasso-util';
 import createFields from './create-fields';
-import fieldStore from './field-store';
+
 import { rowDiffsetIterator } from './operator';
 import defaultConfig from './default-config';
 import * as converter from './converter';
 import Value from './value';
+import fieldStore from './field-store';
 
 /**
  * Prepares the selection data.
@@ -134,6 +135,7 @@ class Relation {
     _isEmpty () {
         return !this.rowDiffset.length || !this.colIdentifier.length;
     }
+
 }
 
 export default Relation;
