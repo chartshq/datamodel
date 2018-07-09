@@ -130,27 +130,34 @@ d3.json('./data/cars.json', (data) => {
 // }, ['profit', 'sales'], (profit, sales) => profit / sales);
 // child.getData()
 
-const data1 = [
-    { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-    { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-    { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-    { profit: 15, sales: 25, first: 'White', second: 'walls' },
-];
-const schema1 = [
-    { name: 'profit', type: 'measure' },
-    { name: 'sales', type: 'measure' },
-    { name: 'first', type: 'dimension' },
-    { name: 'second', type: 'dimension' },
-];
-const dataTable = new DataTable(data1, schema1, 'Yo');
-const newDt = dataTable.createDimensions([{
-    name: 'Song'
+const toBinData = [{
+    marks: 1,
 }, {
-    name: 'InvertedSong'
-}], ['first', 'second'], (first, second) => [
-    `${first} ${second}`,
-    `${second} ${first}`
-]);
+    marks: 2,
+}, {
+    marks: 3,
+}, {
+    marks: 4,
+}, {
+    marks: 5,
+}, {
+    marks: 9,
+}];
+const toBinSchema = [{
+    name: 'marks',
+    type: 'measure'
+}];
+const toBinDatatable = new DataTable(toBinData, toBinSchema);
+const buckets = [
+    { end: 1, label: 'useless' },
+    { start: 1, end: 4, label: 'failure' },
+    { start: 4, end: 6, label: 'firstclass' },
+    { start: 6, end: 10, label: 'decent' }
+];
+
+let binnedDT = toBinDatatable.createBin('marks', {
+    buckets,
+}, 'rating1');
 
 });
 

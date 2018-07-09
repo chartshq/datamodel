@@ -1098,10 +1098,12 @@ class DataTable extends Relation {
             const label = getLabel(value, 0, startVals.length - 1);
             labelData.push(label);
         });
-        const nameSpaceEntry = new Dimension(binnedFieldName, labelData, {
+        const partialField = new Dimension(binnedFieldName, labelData, {
             name: binnedFieldName,
             type: FieldType.DIMENSION,
         });
+
+        const nameSpaceEntry = new Field(partialField, this.rowDiffset);
         // push this to the child DataTable instance field store
         namespaceFields.push(nameSpaceEntry);
         // update the field map of child DataTable instance
