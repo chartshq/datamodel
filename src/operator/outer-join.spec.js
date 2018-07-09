@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { fullOuterJoin, leftOuterJoin, rightOuterJoin } from './outer-join';
-import DataTable from '../datatable'
+import DataModel from '../datamodel'
 ;
 
 describe('Testing various Outer Join', () => {
@@ -65,14 +65,14 @@ describe('Testing various Outer Join', () => {
             type: 'dimension'
         },
     ];
-    const data23 = new DataTable(data1, schema1, 'TableA');
-    const data24 = new DataTable(data2, schema2, 'TableB');
+    const data23 = new DataModel(data1, schema1, 'ModelA');
+    const data24 = new DataModel(data2, schema2, 'ModelB');
 
     it('Should return left join', () => {
         let expectedResult = {
             schema: [
                 {
-                    name: 'TableA.id',
+                    name: 'ModelA.id',
                     type: 'dimention'
                 },
                 {
@@ -93,7 +93,7 @@ describe('Testing various Outer Join', () => {
                     type: 'dimension'
                 },
                 {
-                    name: 'TableB.id',
+                    name: 'ModelB.id',
                     type: 'dimention'
                 },
                 {
@@ -171,14 +171,14 @@ describe('Testing various Outer Join', () => {
                 3
             ]
         };
-        expect(leftOuterJoin(data23, data24, obj => obj.TableA.id === obj.TableB.id).getData())
+        expect(leftOuterJoin(data23, data24, obj => obj.ModelA.id === obj.ModelB.id).getData())
                         .to.deep.equal(expectedResult);
     });
     it('Should return right join', () => {
         let expectedResult = {
             schema: [
                 {
-                    name: 'TableB.id',
+                    name: 'ModelB.id',
                     type: 'dimention'
                 },
                 {
@@ -199,7 +199,7 @@ describe('Testing various Outer Join', () => {
                     type: 'dimension'
                 },
                 {
-                    name: 'TableA.id',
+                    name: 'ModelA.id',
                     type: 'dimention'
                 },
                 {
@@ -251,14 +251,14 @@ describe('Testing various Outer Join', () => {
                 1
             ]
         };
-        expect(rightOuterJoin(data23, data24, obj => obj.TableA.id === obj.TableB.id).getData())
+        expect(rightOuterJoin(data23, data24, obj => obj.ModelA.id === obj.ModelB.id).getData())
                         .to.deep.equal(expectedResult);
     });
     it('Should return full join', () => {
         let expectedResult = {
             schema: [
                 {
-                    name: 'TableA.id',
+                    name: 'ModelA.id',
                     type: 'dimention'
                 },
                 {
@@ -279,7 +279,7 @@ describe('Testing various Outer Join', () => {
                     type: 'dimension'
                 },
                 {
-                    name: 'TableB.id',
+                    name: 'ModelB.id',
                     type: 'dimention'
                 },
                 {
@@ -358,7 +358,7 @@ describe('Testing various Outer Join', () => {
             ]
         };
 
-        expect(fullOuterJoin(data23, data24, obj => obj.TableA.id === obj.TableB.id).getData())
+        expect(fullOuterJoin(data23, data24, obj => obj.ModelA.id === obj.ModelB.id).getData())
                         .to.deep.equal(expectedResult);
     });
 });

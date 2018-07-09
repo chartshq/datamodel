@@ -1,18 +1,18 @@
 import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
-import DataTable from '../index';
+import DataModel from '../index';
 import reducerStore from '../utils/reducer';
 
 /**
  * This function sanitize the user given field and return a common Array structure field
  * list
- * @param  {DataTable} dataTable the dataTable operating on
+ * @param  {DataModel} dataModel the dataModel operating on
  * @param  {Array} fieldArr  user input of field Array
  * @return {Array}           arrays of field name
  */
-function getFieldArr(dataTable, fieldArr) {
+function getFieldArr(dataModel, fieldArr) {
     const retArr = [];
-    const fieldStore = dataTable.getNameSpace();
+    const fieldStore = dataModel.getNameSpace();
     const dimensions = fieldStore.getDimension();
     Object.entries(dimensions).forEach(([key]) => {
         if (fieldArr && fieldArr.length) {
@@ -29,14 +29,14 @@ function getFieldArr(dataTable, fieldArr) {
 /**
  * This sanitize the reducer provide by the user and create a common type of object.
  * user can give function Also
- * @param  {DataTable} dataTable     dataTable to worked on
+ * @param  {DataModel} dataModel     dataModel to worked on
  * @param  {Object|function} [reducers={}] reducer provided by the users
  * @return {Object}               object containing reducer function for every measure
  */
-function getReducerObj(dataTable, reducers = {}) {
+function getReducerObj(dataModel, reducers = {}) {
     const retObj = {};
     const pReducers = reducers;
-    const fieldStore = dataTable.getNameSpace();
+    const fieldStore = dataModel.getNameSpace();
     const measures = fieldStore.getMeasure();
     let reducer = reducerStore.defaultReducer();
     if (typeof reducers === 'function') {
@@ -57,16 +57,16 @@ function getReducerObj(dataTable, reducers = {}) {
 /**
  * main function which perform the group-by operations which reduce the measures value is the
  * fields are common according to the reducer function provided
- * @param  {DataTable} dataTable the dataTable to worked
+ * @param  {DataModel} dataModel the dataModel to worked
  * @param  {Array} fieldArr  fields according to which the groupby should be worked
  * @param  {Object|Function} reducers  reducers function
- * @param {DataTable} existingDataTable Existing datatable instance
- * @return {DataTable} new dataTable with the group by
+ * @param {DataModel} existingDataModel Existing datamodel instance
+ * @return {DataModel} new dataModel with the group by
  */
-function groupBy(dataTable, fieldArr, reducers, existingDataTable) {
-    const sFieldArr = getFieldArr(dataTable, fieldArr);
-    const reducerObj = getReducerObj(dataTable, reducers);
-    const fieldStore = dataTable.getNameSpace();
+function groupBy(dataModel, fieldArr, reducers, existingDataModel) {
+    const sFieldArr = getFieldArr(dataModel, fieldArr);
+    const reducerObj = getReducerObj(dataModel, reducers);
+    const fieldStore = dataModel.getNameSpace();
     const fieldStoreObj = fieldStore.fieldsObj();
     const dbName = fieldStore.name;
     const dimensionArr = [];
@@ -74,7 +74,7 @@ function groupBy(dataTable, fieldArr, reducers, existingDataTable) {
     const schema = [];
     const hashMap = {};
     const data = [];
-    let newDataTable;
+    let newDataModel;
     // Prepare the schema
     Object.entries(fieldStoreObj).forEach(([key, value]) => {
         if (sFieldArr.indexOf(key) !== -1 || reducerObj[key]) {
@@ -88,7 +88,7 @@ function groupBy(dataTable, fieldArr, reducers, existingDataTable) {
     });
     // Prepare the data
     let rowCount = 0;
-    rowDiffsetIterator(dataTable.rowDiffset, (i) => {
+    rowDiffsetIterator(dataModel.rowDiffset, (i) => {
         let hash = '';
         dimensionArr.forEach((_) => {
             hash = `${hash}-${fieldStoreObj[_].data[i]}`;
@@ -116,14 +116,14 @@ function groupBy(dataTable, fieldArr, reducers, existingDataTable) {
             tuple[_] = reducerObj[_](row[_]);
         });
     });
-    if (existingDataTable) {
-        existingDataTable._updateData(data, schema, dbName);
-        newDataTable = existingDataTable;
+    if (existingDataModel) {
+        existingDataModel._updateData(data, schema, dbName);
+        newDataModel = existingDataModel;
     }
     else {
-        newDataTable = new DataTable(data, schema, dbName);
+        newDataModel = new DataModel(data, schema, dbName);
     }
-    return newDataTable;
+    return newDataModel;
 }
 
 export { groupBy, getFieldArr, getReducerObj };

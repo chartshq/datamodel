@@ -140,8 +140,8 @@ describe('DataModel', () => {
             formatter: {
                 name: val => val.toUpperCase(),
                 birthday: (val) => {
-                    const dt = new Date(val);
-                    return `${dt.getFullYear()}-${dt.getMonth() + 1}-${dt.getDay()}`;
+                    const dm = new Date(val);
+                    return `${dm.getFullYear()}-${dm.getMonth() + 1}-${dm.getDay()}`;
                 }
             }
         });
@@ -185,8 +185,8 @@ describe('DataModel', () => {
             formatter: {
                 name: val => val.toUpperCase(),
                 birthday: (val) => {
-                    const dt = new Date(val);
-                    return `${dt.getFullYear()}-${dt.getMonth() + 1}-${dt.getDay()}`;
+                    const dm = new Date(val);
+                    return `${dm.getFullYear()}-${dm.getMonth() + 1}-${dm.getDay()}`;
                 }
             }
         });
@@ -295,8 +295,8 @@ describe('DataModel', () => {
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
         ];
-        const dataTable = new DataTable(data, schema);
-        const projectedDataTable = (dataTable.project(['aaaa', 'a'])).select(fields =>
+        const dataModel = new DataModel(data, schema);
+        const projectedDataModel = (dataModel.project(['aaaa', 'a'])).select(fields =>
             fields.a.value <= 10 && fields.aaaa.value === 'demo');
         const expData = {
             schema: [
@@ -309,11 +309,11 @@ describe('DataModel', () => {
             ],
             uids: [2, 3]
         };
-        // check project is not applied on the same DataTable
-        expect(dataTable === projectedDataTable).to.be.false;
-        expect(projectedDataTable.rowDiffset).to.equal('2-3');
+        // check project is not applied on the same DataModel
+        expect(dataModel === projectedDataModel).to.be.false;
+        expect(projectedDataModel.rowDiffset).to.equal('2-3');
         // Check The return data
-        expect(projectedDataTable.getData()).to.deep.equal(expData);
+        expect(projectedDataModel.getData()).to.deep.equal(expData);
     });
     it('tests selection modes', () => {
         const data1 = [
@@ -328,12 +328,12 @@ describe('DataModel', () => {
             { name: 'city', type: 'dimension' },
             { name: 'state', type: 'dimension' },
         ];
-        const dataTable = new DataTable(data1, schema1, 'Yo');
-        const selected = dataTable.select(fields => fields.profit.value === 10).getData();
-        const rejected = dataTable.select(fields => fields.profit.value === 10, {
+        const dataModel = new DataModel(data1, schema1, 'Yo');
+        const selected = dataModel.select(fields => fields.profit.value === 10).getData();
+        const rejected = dataModel.select(fields => fields.profit.value === 10, {
             mode: 'inverse'
         }).getData();
-        const teenTitansUnite = dataTable.select(fields => fields.profit.value === 10, {
+        const teenTitansUnite = dataModel.select(fields => fields.profit.value === 10, {
             mode: 'all'
         });
         expect(selected).to.deep.equal({
@@ -387,11 +387,11 @@ describe('DataModel', () => {
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
         ];
-        const dataTable = new DataTable(data, schema);
-        const projectedDataTable = (dataTable.project(['aaaa', 'a'])).select(fields =>
+        const dataModel = new DataModel(data, schema);
+        const projectedDataModel = (dataModel.project(['aaaa', 'a'])).select(fields =>
                 fields.aaaa.value === 'demo');
             // Check if repetition select works
-        const projectedDataTable1 = projectedDataTable.select(fields =>
+        const projectedDataModel1 = projectedDataModel.select(fields =>
                 fields.a.value === 10);
         let expData = {
             schema: [
@@ -409,11 +409,11 @@ describe('DataModel', () => {
             ],
             uids: [1, 2, 4, 5, 6, 7, 9]
         };
-        // check project is not applied on the same DataTable
-        expect(dataTable === projectedDataTable).to.be.false;
-        expect(projectedDataTable.rowDiffset).to.equal('1-2,4-7,9');
+        // check project is not applied on the same DataModel
+        expect(dataModel === projectedDataModel).to.be.false;
+        expect(projectedDataModel.rowDiffset).to.equal('1-2,4-7,9');
         // Check The return data
-        expect(projectedDataTable.getData()).to.deep.equal(expData);
+        expect(projectedDataModel.getData()).to.deep.equal(expData);
 
         expData = {
             schema: [
@@ -428,9 +428,9 @@ describe('DataModel', () => {
             ],
             uids: [5, 6, 7, 9]
         };
-        expect(projectedDataTable1.rowDiffset).to.equal('5-7,9');
+        expect(projectedDataModel1.rowDiffset).to.equal('5-7,9');
         // Check The return data
-        expect(projectedDataTable1.getData()).to.deep.equal(expData);
+        expect(projectedDataModel1.getData()).to.deep.equal(expData);
     });
     it('Rename functionality', () => {
         const data = [
@@ -446,8 +446,8 @@ describe('DataModel', () => {
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
         ];
-        const dataTable = new DataTable(data, schema);
-        const renameDataTable = dataTable.rename({ aaa: 'aaaRename' });
+        const dataModel = new DataModel(data, schema);
+        const renameDataModel = dataModel.rename({ aaa: 'aaaRename' });
         const expData = {
             schema: [
                 { name: 'a', type: 'measure' },
@@ -464,7 +464,7 @@ describe('DataModel', () => {
             ],
             uids: [0, 1, 2, 3, 4, 5]
         };
-        expect(renameDataTable.getData()).to.deep.equal(expData);
+        expect(renameDataModel.getData()).to.deep.equal(expData);
     });
     it('sort configuration and functionality', () => {
         const data = [
@@ -479,7 +479,7 @@ describe('DataModel', () => {
             { name: 'a', type: 'measure' },
             { name: 'aaa', type: 'measure' },
         ];
-        const dataTable = new DataTable(data, schema);
+        const dataModel = new DataModel(data, schema);
         const expData = {
             schema: [
                 { name: 'a', type: 'measure' },
@@ -495,15 +495,15 @@ describe('DataModel', () => {
             ],
             uids: [2, 1, 3, 0, 5, 4]
         };
-        dataTable.sort([
+        dataModel.sort([
             ['aaa', 'desc'],
             ['a'],
         ]);
-        expect(dataTable.sortingDetails).to.deep.equal([
+        expect(dataModel.sortingDetails).to.deep.equal([
             ['aaa', 'desc'],
             ['a', 'asc'],
         ]);
-        expect(dataTable.getData()).to.deep.equal(expData);
+        expect(dataModel.getData()).to.deep.equal(expData);
     });
     it('sort for multi rows functionality', () => {
         const data = [
@@ -523,7 +523,7 @@ describe('DataModel', () => {
             { name: 'aa', type: 'measure' },
             { name: 'aaa', type: 'measure' },
         ];
-        const dataTable = new DataTable(data, schema);
+        const dataModel = new DataModel(data, schema);
         const expData = {
             schema: [
                 { name: 'a', type: 'measure' },
@@ -544,12 +544,12 @@ describe('DataModel', () => {
             ],
             uids: [2, 7, 3, 9, 4, 8, 1, 0, 6, 5]
         };
-        dataTable.sort([
+        dataModel.sort([
                 ['a'],
                 ['aa', 'desc'],
                 ['aaa'],
         ]);
-        expect(dataTable.getData()).to.deep.equal(expData);
+        expect(dataModel.getData()).to.deep.equal(expData);
     });
     it('sort for string data', () => {
         const data = [
@@ -567,7 +567,7 @@ describe('DataModel', () => {
             { name: 'Gender', type: 'dimension' },
             { name: 'Location', type: 'dimension' },
         ];
-        const dataTable = new DataTable(data, schema);
+        const dataModel = new DataModel(data, schema);
         const expData = {
             schema: [
                 { name: 'Name', type: 'dimension' },
@@ -586,10 +586,10 @@ describe('DataModel', () => {
             ],
             uids: [0, 2, 4, 5, 6, 1, 3]
         };
-        dataTable.sort([
+        dataModel.sort([
             ['Gender', 'desc'],
         ]);
-        expect(dataTable.getData()).to.deep.equal(expData);
+        expect(dataModel.getData()).to.deep.equal(expData);
     });
     it('join functionality', () => {
         const data1 = [
@@ -609,16 +609,16 @@ describe('DataModel', () => {
             { name: 'population', type: 'measure' },
             { name: 'city', type: 'dimension' },
         ];
-        const dataTable1 = new DataTable(data1, schema1, 'TableA');
-        const dataTable2 = new DataTable(data2, schema2, 'TableB');
+        const dataModel1 = new DataModel(data1, schema1, 'ModelA');
+        const dataModel2 = new DataModel(data2, schema2, 'ModelB');
 
-        expect((dataTable1.join(dataTable2)).getData()).to.deep.equal({
+        expect((dataModel1.join(dataModel2)).getData()).to.deep.equal({
             schema: [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
-                { name: 'TableA.city', type: 'dimension' },
+                { name: 'ModelA.city', type: 'dimension' },
                 { name: 'population', type: 'measure' },
-                { name: 'TableB.city', type: 'dimension' },
+                { name: 'ModelB.city', type: 'dimension' },
             ],
             data: [
                 [10, 20, 'a', 200, 'a'],
@@ -628,14 +628,14 @@ describe('DataModel', () => {
             ],
             uids: [0, 1, 2, 3]
         });
-        expect((dataTable1.join(dataTable2, obj => obj.TableA.city === obj.TableB.city))
+        expect((dataModel1.join(dataModel2, obj => obj.ModelA.city === obj.ModelB.city))
                         .getData()).to.deep.equal({
                             schema: [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
-                { name: 'TableA.city', type: 'dimension' },
+                { name: 'ModelA.city', type: 'dimension' },
                 { name: 'population', type: 'measure' },
-                { name: 'TableB.city', type: 'dimension' },
+                { name: 'ModelB.city', type: 'dimension' },
                             ],
                             data: [
                 [10, 20, 'a', 200, 'a'],
@@ -643,7 +643,7 @@ describe('DataModel', () => {
                             ],
                             uids: [0, 1]
                         });
-        expect((dataTable1.naturalJoin(dataTable2)).getData()).to.deep.equal({
+        expect((dataModel1.naturalJoin(dataModel2)).getData()).to.deep.equal({
             schema: [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
@@ -682,10 +682,10 @@ describe('DataModel', () => {
             { name: 'city', type: 'dimension' },
             { name: 'state', type: 'dimension' },
         ];
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA')).project(['city', 'state']);
-        const dataTable2 = (new DataTable(data2, schema2, 'TableB')).project(['city', 'state']);
+        const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
+        const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'state']);
 
-        expect(dataTable1.difference(dataTable2).getData()).to.deep.equal({
+        expect(dataModel1.difference(dataModel2).getData()).to.deep.equal({
             schema: [
                 { name: 'city', type: 'dimension' },
                 { name: 'state', type: 'dimension' },
@@ -696,7 +696,7 @@ describe('DataModel', () => {
             ],
             uids: [0, 1]
         });
-        expect(dataTable1.union(dataTable2).getData()).to.deep.equal({
+        expect(dataModel1.union(dataModel2).getData()).to.deep.equal({
             schema: [
                 { name: 'city', type: 'dimension' },
                 { name: 'state', type: 'dimension' },
@@ -725,8 +725,8 @@ describe('DataModel', () => {
             { name: 'city', type: 'dimension' },
             { name: 'state', type: 'dimension' },
         ];
-        const dataTable = new DataTable(data1, schema1, 'Yo');
-        const next = dataTable.project(['profit', 'sales']).select(f => +f.profit > 10);
+        const dataModel = new DataModel(data1, schema1, 'Yo');
+        const next = dataModel.project(['profit', 'sales']).select(f => +f.profit > 10);
         const child = next.createMeasure({
             name: 'Efficiency'
         }, ['profit', 'sales'], (profit, sales) => profit / sales);
@@ -741,7 +741,7 @@ describe('DataModel', () => {
                     name: 'Efficiency'
                 }, ['profit', 'sales'], (profit, sales) => profit / sales);
             }
-        ).to.throw('Efficiency field already exists in table.');
+        ).to.throw('Efficiency field already exists in model.');
     });
     it('tests generating new dimensions', () => {
         const data1 = [
@@ -756,8 +756,8 @@ describe('DataModel', () => {
             { name: 'first', type: 'dimension' },
             { name: 'second', type: 'dimension' },
         ];
-        const dataTable = new DataTable(data1, schema1, 'Yo');
-        const newDt = dataTable.createDimensions([{
+        const dataModel = new DataModel(data1, schema1, 'Yo');
+        const newDm = dataModel.createDimensions([{
             name: 'Song'
         }, {
             name: 'InvertedSong'
@@ -765,14 +765,14 @@ describe('DataModel', () => {
             `${first} ${second}`,
             `${second} ${first}`
         ]);
-        const songData = newDt.project(['Song']).getData().data;
-        const invSongData = newDt.project(['InvertedSong']).getData().data;
+        const songData = newDm.project(['Song']).getData().data;
+        const invSongData = newDm.project(['InvertedSong']).getData().data;
         expect(
             songData.length === 4 &&
             invSongData.length === 4
         ).to.be.true;
         // test removing dependents
-        const exDt = dataTable.createDimensions([{
+        const exDm = dataModel.createDimensions([{
             name: 'Song'
         }, {
             name: 'InvertedSong'
@@ -782,12 +782,12 @@ describe('DataModel', () => {
         ], {
             removeDependentDimensions: true
         });
-        const fieldMap = exDt.getFieldMap();
+        const fieldMap = exDm.getFieldMap();
         expect(
             !(fieldMap.first && fieldMap.second)
         ).to.be.true;
     });
-    it('tests datatable propagation', () => {
+    it('tests datamodel propagation', () => {
         const data1 = [
             { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
             { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
@@ -803,10 +803,10 @@ describe('DataModel', () => {
         let projetionFlag = false;
         let selectionFlag = false;
         let groupByFlag = false;
-        const dataTable = new DataTable(data1, schema1, 'Yo');
-        const projected = dataTable.project(['profit']);
-        const selected = dataTable.select(fields => fields.profit.valueOf() > 10);
-        const grouped = dataTable.groupBy(['first']);
+        const dataModel = new DataModel(data1, schema1, 'Yo');
+        const projected = dataModel.project(['profit']);
+        const selected = dataModel.select(fields => fields.profit.valueOf() > 10);
+        const grouped = dataModel.groupBy(['first']);
         // setup listeners
         projected.on('propagation', () => {
             projetionFlag = true;
@@ -822,7 +822,7 @@ describe('DataModel', () => {
             ['first', 'second'],
             ['Hey', 'Jude']
         ];
-        dataTable.propagate(identifiers, {
+        dataModel.propagate(identifiers, {
             action: 'reaction'
         });
         expect(
@@ -845,10 +845,10 @@ describe('DataModel', () => {
         let inProjetionFlag = false;
         let inSelectionFlag = false;
         let inGroupByFlag = false;
-        const dataTable = new DataTable(data1, schema1, 'Yo');
-        const projected = dataTable.project(['profit']);
-        const selected = dataTable.select(fields => fields.profit.value > 10);
-        const grouped = dataTable.groupBy(['sales']);
+        const dataModel = new DataModel(data1, schema1, 'Yo');
+        const projected = dataModel.project(['profit']);
+        const selected = dataModel.select(fields => fields.profit.value > 10);
+        const grouped = dataModel.groupBy(['sales']);
          // interpolated propagation handlers
         projected.on('propagation', () => {
             inProjetionFlag = true;
@@ -859,7 +859,7 @@ describe('DataModel', () => {
         grouped.on('propagation', () => {
             inGroupByFlag = true;
         });
-        dataTable.propagateInterpolatedValues({
+        dataModel.propagateInterpolatedValues({
             profit: [2, 12],
             sales: [18, 30]
         }, {
@@ -901,7 +901,7 @@ describe('DataModel', () => {
                 type: 'measure'
             }
         ];
-        const dataInstance = new DataTable(dataLicious, dSchema);
+        const dataInstance = new DataModel(dataLicious, dSchema);
         const almostPivoted = dataInstance.createDimensionFrom(
             ['Import_yo', 'Export_dude'],
             'type',
@@ -925,7 +925,7 @@ describe('DataModel', () => {
         ]);
         expect(data.length).to.equal(6);
     });
-    it('tests datatable binning', () => {
+    it('tests datamodel binning', () => {
         const toBinData = [{
             marks: 1,
         }, {
@@ -943,7 +943,7 @@ describe('DataModel', () => {
             name: 'marks',
             type: 'measure'
         }];
-        const toBinDatatable = new DataTable(toBinData, toBinSchema);
+        const toBinDatamodel = new DataModel(toBinData, toBinSchema);
         const buckets = [
             { end: 1, label: 'useless' },
             { start: 1, end: 4, label: 'failure' },
@@ -951,17 +951,17 @@ describe('DataModel', () => {
             { start: 6, end: 10, label: 'decent' }
         ];
 
-        let binnedDT = toBinDatatable.createBin('marks', {
+        let binnedDM = toBinDatamodel.createBin('marks', {
             buckets,
         }, 'rating1');
-        let binnedDTnum = toBinDatatable.createBin('marks', {
+        let binnedDMnum = toBinDatamodel.createBin('marks', {
             numOfBins: 4
         }, 'rating2');
-        let binnedDTSize = toBinDatatable.createBin('marks', {
+        let binnedDMSize = toBinDatamodel.createBin('marks', {
             binSize: 4,
         });
         expect(
-            binnedDT.getData().schema
+            binnedDM.getData().schema
         ).to.deep.equal([{
             name: 'marks',
             type: 'measure',
@@ -970,7 +970,7 @@ describe('DataModel', () => {
             type: 'dimension'
         }]);
         expect(
-            binnedDTnum.getData().schema
+            binnedDMnum.getData().schema
         ).to.deep.equal([{
             name: 'marks',
             type: 'measure',
@@ -979,7 +979,7 @@ describe('DataModel', () => {
             type: 'dimension'
         }]);
         expect(
-            binnedDTSize.getData().schema
+            binnedDMSize.getData().schema
         ).to.deep.equal([{
             name: 'marks',
             type: 'measure',
@@ -1014,39 +1014,39 @@ describe('DataModel', () => {
                 type: 'dimension'
             },
         ];
-        const dataTable = new DataTable(data1, schema1);
+        const dataModel = new DataModel(data1, schema1);
         it('Setting default Aggre fcn for profit', () => {
-            const grouped = dataTable.groupBy(['first']);
+            const grouped = dataModel.groupBy(['first']);
             const childData = grouped.getData().data;
             expect(childData[0][0]).to.equal(15);
         });
         it('Default Aggre fcn for sales should be sum', () => {
-            const grouped = dataTable.groupBy(['first']);
+            const grouped = dataModel.groupBy(['first']);
             const childData = grouped.getData().data;
             expect(childData[0][1]).to.equal(45);
         });
         it('Default Aggre fcn for sales should be min', () => {
-            DataTable.Reducers.defaultReducer('min');
-            const grouped = dataTable.groupBy(['first']);
+            DataModel.Reducers.defaultReducer('min');
+            const grouped = dataModel.groupBy(['first']);
             const childData = grouped.getData().data;
             expect(childData[0][1]).to.equal(20);
         });
         it('Default Aggre fcn for profit should be avg after setting default Reducer', () => {
-            DataTable.Reducers.defaultReducer('min');
-            const grouped = dataTable.groupBy(['first']);
+            DataModel.Reducers.defaultReducer('min');
+            const grouped = dataModel.groupBy(['first']);
             const childData = grouped.getData().data;
             expect(childData[0][1]).to.equal(20);
         });
         it('function provided in group by should overide default', () => {
-            DataTable.Reducers.defaultReducer('min');
-            const grouped = dataTable.groupBy(['first'], {
+            DataModel.Reducers.defaultReducer('min');
+            const grouped = dataModel.groupBy(['first'], {
                 sales: 'sum'
             });
             const childData = grouped.getData().data;
             expect(childData[0][1]).to.equal(45);
         });
         it('Should Register a global aggregation', () => {
-            DataTable.Reducers.register('mySum', (arr) => {
+            DataModel.Reducers.register('mySum', (arr) => {
                 const isNestedArray = arr[0] instanceof Array;
                 let sum = arr.reduce((carry, a) => {
                     if (isNestedArray) {
@@ -1056,15 +1056,15 @@ describe('DataModel', () => {
                 }, isNestedArray ? Array(...Array(arr[0].length)).map(() => 0) : 0);
                 return sum * 100;
             });
-            const grouped = dataTable.groupBy(['first'], {
+            const grouped = dataModel.groupBy(['first'], {
                 sales: 'mySum'
             });
             const childData = grouped.getData().data;
             expect(childData[0][1]).to.equal(4500);
         });
         it('Should reset default fnc', () => {
-            DataTable.Reducers.defaultReducer('sum');
-            expect(DataTable.Reducers.defaultReducer()).to.equal(DataTable.Reducers.resolve('sum'));
+            DataModel.Reducers.defaultReducer('sum');
+            expect(DataModel.Reducers.defaultReducer()).to.equal(DataModel.Reducers.resolve('sum'));
         });
     });
     context('Check for correct values in callback function', () => {
@@ -1077,12 +1077,12 @@ describe('DataModel', () => {
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
         ];
-        const dataTable = new DataTable(data, schema);
+        const dataModel = new DataModel(data, schema);
 
         let callback2 = function (a, aaa, ...arg) {
             return a + aaa + arg[0];
         };
-        const child = dataTable.createMeasure({
+        const child = dataModel.createMeasure({
             name: 'bbbb'
         }, ['a', 'aaa'], callback2);
 
@@ -1116,21 +1116,21 @@ describe('DataModel', () => {
                 type: 'dimension'
             },
         ];
-        const dataTable = new DataTable(data1, schema1);
+        const dataModel = new DataModel(data1, schema1);
         it('Should remove child on calling dispose', () => {
-            let dt2 = dataTable.select(fields => fields.profit.value < 150);
-            expect(dataTable.children.length).to.equal(1);
-            dt2.dispose();
-            expect(dataTable.children.length).to.equal(0);
+            let dm2 = dataModel.select(fields => fields.profit.value < 150);
+            expect(dataModel.children.length).to.equal(1);
+            dm2.dispose();
+            expect(dataModel.children.length).to.equal(0);
         });
 
         it('Adding parent should save criteria in parent', () => {
-            let dt2 = dataTable.select(fields => fields.profit.value < 150);
-            let dt3 = dt2.groupBy(['sales'], {
+            let dm2 = dataModel.select(fields => fields.profit.value < 150);
+            let dm3 = dm2.groupBy(['sales'], {
                 profit: null
             });
-            let dt4 = dt3.project(['sales']);
-            let data = dt4.getData();
+            let dm4 = dm3.project(['sales']);
+            let data = dm4.getData();
             let projFields = ['first'];
             let projectConfig = {};
             let normalizedprojFields = [];
@@ -1146,14 +1146,14 @@ describe('DataModel', () => {
                     criteria: null
                 }
             ];
-            dt3.dispose();
-            dt4.__addParent(dt2, criteriaQueue);
-            expect(dt2.children.length).to.equal(1);
-            expect(dt2.children[0].getData()).to.deep.equal(data);
-            expect(dt4.parent).to.equal(dt2);
+            dm3.dispose();
+            dm4.__addParent(dm2, criteriaQueue);
+            expect(dm2.children.length).to.equal(1);
+            expect(dm2.children[0].getData()).to.deep.equal(data);
+            expect(dm4.parent).to.equal(dm2);
         });
     });
-    context('Checking for immutability for datatable when existing dt is given', () => {
+    context('Checking for immutability for datamodel when existing dm is given', () => {
         const data1 = [
             { id: 1, profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
             { id: 2, profit: 20, sales: 25, first: 'Hey', second: 'Wood' },
@@ -1212,30 +1212,30 @@ describe('DataModel', () => {
                 type: 'dimension'
             },
         ];
-        const dataTable = new DataTable(data1, schema1);
-        const dataTable2 = new DataTable(data2, schema2);
-        dataTable2;
-        let dt2 = dataTable.select(fields => fields.profit.value < 150);
-        let dt3 = dataTable.groupBy(['sales'], {
+        const dataModel = new DataModel(data1, schema1);
+        const dataModel2 = new DataModel(data2, schema2);
+        dataModel2;
+        let dm2 = dataModel.select(fields => fields.profit.value < 150);
+        let dm3 = dataModel.groupBy(['sales'], {
             profit: null
         });
-        let dt4 = dataTable.select(fields => fields.profit.value < 150, {}, true, dt2);
-        let dt5 = dataTable.groupBy(['Year'], {
-        }, true, dt3);
-        let dt6 = dataTable.createMeasure({
+        let dm4 = dataModel.select(fields => fields.profit.value < 150, {}, true, dm2);
+        let dm5 = dataModel.groupBy(['Year'], {
+        }, true, dm3);
+        let dm6 = dataModel.createMeasure({
             name: 'Efficiency'
         }, ['profit', 'sales'], (profit, sales) => profit / sales);
-        let dt7 = dataTable.createMeasure({
+        let dm7 = dataModel.createMeasure({
             name: 'UnEfficiency'
-        }, ['sales', 'profit'], (sales, profit) => sales / profit, true, dt6);
-        it('datatable select instance should not change', () => {
-            expect(dt2).to.equal(dt4);
+        }, ['sales', 'profit'], (sales, profit) => sales / profit, true, dm6);
+        it('datamodel select instance should not change', () => {
+            expect(dm2).to.equal(dm4);
         });
-        it('datatable groupby instance should not change it namespace', () => {
-            expect(dt3.getNameSpace().name).to.equal(dt5.getNameSpace().name);
+        it('datamodel groupby instance should not change it namespace', () => {
+            expect(dm3.getNameSpace().name).to.equal(dm5.getNameSpace().name);
         });
-        it('datatable createdMeasure instance should not change', () => {
-            expect(dt6).to.equal(dt7);
+        it('datamodel createdMeasure instance should not change', () => {
+            expect(dm6).to.equal(dm7);
         });
     });
 });

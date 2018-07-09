@@ -2,7 +2,7 @@ import { rowDiffsetIterator } from './row-diffset-iterator';
 import { mergeSort } from './merge-sort';
 
 /**
- * Generates the sorting functions to sort the data of a DataTable instance
+ * Generates the sorting functions to sort the data of a DataModel instance
  * according to the input data type.
  *
  * @param {string} dataType - The data type e.g. 'measure', 'datetime' etc.
@@ -44,7 +44,7 @@ function getSortFn(dataType, sortType, index) {
  * @param {string} rowDiffset - A string consisting of which rows to be included eg. '0-2,4,6';
  * @param {string} colIdentifier - A string consisting of the details of which column
  * to be included eg 'date,sales,profit';
- * @param {Object} sortingDetails - An object containing the sorting details of the DataTable instance.
+ * @param {Object} sortingDetails - An object containing the sorting details of the DataModel instance.
  * @param {Object} options - The options required to create the type of the data.
  * @return {Object} Returns an object containing the multidimensional array and the relative schema.
  */

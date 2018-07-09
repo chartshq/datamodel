@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { crossProduct } from './cross-product';
-import DataTable from '../index';
+import DataModel from '../index';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a' },
@@ -25,16 +25,16 @@ const schema2 = [
 
 describe('Checking crossProduct', () => {
     it('default crossProduct', () => {
-        const dataTable1 = new DataTable(data1, schema1, 'TableA');
-        const dataTable2 = new DataTable(data2, schema2, 'TableB');
-        const crossDataTable = crossProduct(dataTable1, dataTable2);
-        expect(crossDataTable.getData()).to.deep.equal({
+        const dataModel1 = new DataModel(data1, schema1, 'ModelA');
+        const dataModel2 = new DataModel(data2, schema2, 'ModelB');
+        const crossDataModel = crossProduct(dataModel1, dataModel2);
+        expect(crossDataModel.getData()).to.deep.equal({
             schema: [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
-                { name: 'TableA.city', type: 'dimension' },
+                { name: 'ModelA.city', type: 'dimension' },
                 { name: 'population', type: 'measure' },
-                { name: 'TableB.city', type: 'dimension' },
+                { name: 'ModelB.city', type: 'dimension' },
             ],
             data: [
                 [10, 20, 'a', 200, 'a'],
@@ -46,11 +46,11 @@ describe('Checking crossProduct', () => {
         });
     });
     it('crossProduct with filterFn', () => {
-        const dataTable1 = new DataTable(data1, schema1, 'TableA');
-        const dataTable2 = new DataTable(data2, schema2, 'TableB');
-        const crossDataTable = crossProduct(dataTable1, dataTable2, obj => obj.TableA.city === obj.TableB.city, true);
+        const dataModel1 = new DataModel(data1, schema1, 'ModelA');
+        const dataModel2 = new DataModel(data2, schema2, 'ModelB');
+        const crossDataModel = crossProduct(dataModel1, dataModel2, obj => obj.ModelA.city === obj.ModelB.city, true);
 
-        expect(crossDataTable.getData()).to.deep.equal({
+        expect(crossDataModel.getData()).to.deep.equal({
             schema: [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
