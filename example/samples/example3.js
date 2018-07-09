@@ -65,67 +65,92 @@ d3.json('./data/cars.json', (data) => {
 //     // dt3.dispose()
 //     // dt4.dispose()
 
+// const data1 = [
+//     { id: 1, profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+//     { id: 2, profit: 20, sales: 25, first: 'Hey', second: 'Wood' },
+//     { id: 3, profit: 10, sales: 20, first: 'White', second: 'the sun' },
+//     { id: 4, profit: 15, sales: 25, first: 'White', second: 'walls' },
+// ];
+// const data2 = [
+//     { id: 1, netprofit: 10, netsales: 200, _first: 'Hello', _second: 'Jude' },
+//     { id: 4, netprofit: 200, netsales: 250, _first: 'Bollo', _second: 'Wood' },
+
+// ];
+
+// const schema1 = [
+//     {
+//         name: 'id',
+//         type: 'dimension'
+//     },
+//     {
+//         name: 'profit',
+//         type: 'measure',
+//         defAggFn: 'avg'
+//     },
+//     {
+//         name: 'sales',
+//         type: 'measure'
+//     },
+//     {
+//         name: 'first',
+//         type: 'dimension'
+//     },
+//     {
+//         name: 'second',
+//         type: 'dimension'
+//     },
+// ];
+// const schema2 = [
+//     {
+//         name: 'id',
+//         type: 'dimension'
+//     },
+//     {
+//         name: 'netprofit',
+//         type: 'measure',
+//         defAggFn: 'avg'
+//     },
+//     {
+//         name: 'netsales',
+//         type: 'measure'
+//     },
+//     {
+//         name: '_first',
+//         type: 'dimension'
+//     },
+//     {
+//         name: '_second',
+//         type: 'dimension'
+//     },
+// ];
+// const data23 = new DataTable(data1, schema1,'TableA');
+
+// const child = data23.createMeasure({
+//     name: 'Efficiency'
+// }, ['profit', 'sales'], (profit, sales) => profit / sales);
+// child.getData()
+
 const data1 = [
-    { id: 1, profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-    { id: 2, profit: 20, sales: 25, first: 'Hey', second: 'Wood' },
-    { id: 3, profit: 10, sales: 20, first: 'White', second: 'the sun' },
-    { id: 4, profit: 15, sales: 25, first: 'White', second: 'walls' },
+    { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+    { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+    { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+    { profit: 15, sales: 25, first: 'White', second: 'walls' },
 ];
-const data2 = [
-    { id: 1, netprofit: 10, netsales: 200, _first: 'Hello', _second: 'Jude' },
-    { id: 4, netprofit: 200, netsales: 250, _first: 'Bollo', _second: 'Wood' },
-
-];
-
 const schema1 = [
-    {
-        name: 'id',
-        type: 'dimension'
-    },
-    {
-        name: 'profit',
-        type: 'measure',
-        defAggFn: 'avg'
-    },
-    {
-        name: 'sales',
-        type: 'measure'
-    },
-    {
-        name: 'first',
-        type: 'dimension'
-    },
-    {
-        name: 'second',
-        type: 'dimension'
-    },
+    { name: 'profit', type: 'measure' },
+    { name: 'sales', type: 'measure' },
+    { name: 'first', type: 'dimension' },
+    { name: 'second', type: 'dimension' },
 ];
-const schema2 = [
-    {
-        name: 'id',
-        type: 'dimension'
-    },
-    {
-        name: 'netprofit',
-        type: 'measure',
-        defAggFn: 'avg'
-    },
-    {
-        name: 'netsales',
-        type: 'measure'
-    },
-    {
-        name: '_first',
-        type: 'dimension'
-    },
-    {
-        name: '_second',
-        type: 'dimension'
-    },
-];
-const data23 = new DataTable(data1, schema1,'TableA');
+const dataTable = new DataTable(data1, schema1, 'Yo');
+const newDt = dataTable.createDimensions([{
+    name: 'Song'
+}, {
+    name: 'InvertedSong'
+}], ['first', 'second'], (first, second) => [
+    `${first} ${second}`,
+    `${second} ${first}`
+]);
 
-const child = data23.createMeasure({
-    name: 'Efficiency'
-}, ['profit', 'sales'], (profit, sales) => profit / sales);
 });
+

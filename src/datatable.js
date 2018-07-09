@@ -144,7 +144,7 @@ class DataTable extends Relation {
 
         const dataGenerated = dataBuilder.call(
             this,
-            this._getPartialNameSpace().fields,
+            this.getNameSpace().fields,
             this.rowDiffset,
             this.colIdentifier,
             this.sortingDetails,
@@ -685,10 +685,12 @@ class DataTable extends Relation {
             const { name } = dimObj;
             const dimensionData = computedValues.map(dataArray => dataArray[dIdx]);
             // create a field to store this field
-            const nameSpaceEntry = new Dimension(name, dimensionData, {
+            const partialField = new Dimension(name, dimensionData, {
                 name,
                 type: FieldType.DIMENSION,
             });
+
+            const nameSpaceEntry = new Field(partialField, this.rowDiffset);
             // push this to the child DataTable instance field store
             namespaceFields.push(nameSpaceEntry);
             // update the field map of child DataTable instance
