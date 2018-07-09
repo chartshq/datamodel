@@ -1,12 +1,12 @@
-import Field from './field';
+import PartialField from './partial-field';
 import { uniqueValues } from '../utils';
 
 /**
  * Represents dimension field type.
  *
- * @extends Field
+ * @extends PartialField
  */
-class Dimension extends Field {
+class Dimension extends PartialField {
 
     /**
      * Returns the domain for the dimension field.

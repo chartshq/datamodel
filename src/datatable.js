@@ -16,6 +16,8 @@ import { createBuckets,
     selectIterator } from './operator';
 import Relation from './relation';
 import reducerStore from './utils/reducer';
+import Field from './fields/field';
+import fieldStore from './field-store';
 
 
 /**
@@ -224,17 +226,17 @@ class DataTable extends Relation {
     rename(schemaObj) {
         const cloneDataTable = this.cloneAsChild();
         const schemaArr = cloneDataTable.colIdentifier.split(',');
-        const fieldStore = this.getNameSpace().fields;
+        const _fieldStore = this.getNameSpace().fields;
 
         Object.entries(schemaObj).forEach(([key, value]) => {
             if (schemaArr.indexOf(key) !== -1 && typeof value === 'string') {
-                for (let i = 0; i <= fieldStore.length; i += 1) {
-                    if (fieldStore[i].name === key) {
-                        const renameField = fieldStore[i].clone(fieldStore[i].data);
+                for (let i = 0; i <= _fieldStore.length; i += 1) {
+                    if (_fieldStore[i].name === key) {
+                        const renameField = _fieldStore[i].clone(_fieldStore[i].data);
                         renameField.name = value;
                         renameField.schema.name = value;
                         schemaArr[schemaArr.indexOf(key)] = value;
-                        fieldStore.push(renameField);
+                        _fieldStore.push(renameField);
                         break;
                     }
                 }
@@ -769,13 +771,28 @@ class DataTable extends Relation {
      * @return {DataTable} Returns a DataTable assembled from identifiers.
      */
     _assembleTableFromIdentifiers(identifiers) {
-        let schema;
+        let schema = [];
         let data;
+        let fieldMap = this.fieldMap;
         if (identifiers.length) {
-            schema = identifiers[0].map(val => ({
-                name: val,
-                type: FieldType.DIMENSION,
-            }));
+            let fields = identifiers[0];
+            let len = fields.length;
+            for (let i = 0; i < len; i++) {
+                let field = fields[i];
+                let fieldObj;
+                if (field === ROW_ID) {
+                    fieldObj = {
+                        name: field,
+                        type: FieldType.DIMENSION
+                    };
+                }
+                else {
+                    fieldObj = fieldMap[field] && Object.assign({}, fieldMap[field].def);
+                }
+                if (fieldObj) {
+                    schema.push(Object.assign(fieldObj));
+                }
+            }
             // format the data
             // @TODO: no documentation on how CSV_ARR data format works.
             data = [];
@@ -818,7 +835,7 @@ class DataTable extends Relation {
                 filteredTable = this.select((fields, rIdx) => occMap[rIdx], {}, false);
             } else {
                 let fieldMap = this.fieldMap;
-                let filteredSchema = schema.filter(d => d.name in fieldMap);
+                let filteredSchema = schema.filter(d => d.name in fieldMap && d.type === FieldType.DIMENSION);
                 filteredTable = this.select((fields) => {
                     let include = true;
                     filteredSchema.forEach((propField, idx) => {
@@ -844,34 +861,39 @@ class DataTable extends Relation {
      * @param {Object} payload - The interaction specific details.
      * @param {DataTable} source - The source DataTable instance.
      */
-    propagate(identifiers, payload, source) {
+    propagate(identifiers, payload, source, grouped = false) {
         let propTable = identifiers;
         if (!(propTable instanceof DataTable)) {
             propTable = this._assembleTableFromIdentifiers(identifiers);
         }
+
+        // create the filtered table
+        const filteredTable = this._filterPropagationTable(propTable);
         // function to propagate to target the DataTable instance.
-        const forwardPropagation = (targetDT, propagationData) => {
+        const forwardPropagation = (targetDT, propagationData, group) => {
             targetDT.handlePropagation({
                 payload,
                 data: propagationData,
             });
-            targetDT.propagate(propagationData, payload, this);
+            targetDT.propagate(propagationData, payload, this, group);
         };
         // propagate to children created by SELECT operation
-        selectIterator(this, (targetDT) => {
+        selectIterator(this, (targetDT, criteria) => {
             if (targetDT !== source) {
-                forwardPropagation(targetDT, propTable);
+                let selectedTable = propTable;
+                if (grouped) {
+                    selectedTable = !propTable._isEmpty() && propTable.select(criteria);
+                }
+                forwardPropagation(targetDT, selectedTable);
             }
         });
         // propagate to children created by PROJECT operation
         projectIterator(this, (targetDT) => {
             if (targetDT !== source) {
                 // pass al the props cause it won't make a difference
-                forwardPropagation(targetDT, propTable);
+                forwardPropagation(targetDT, propTable, grouped);
             }
         });
-        // create the filtered table
-        const filteredTable = this._filterPropagationTable(propTable);
         // propagate to children created by groupBy operation
         groupByIterator(this, (targetDT, conf) => {
             if (targetDT !== source) {
@@ -881,12 +903,12 @@ class DataTable extends Relation {
                 } = conf;
                 // group the filtered table based on groupBy string of target
                 const groupedPropTable = filteredTable.groupBy(groupByString.split(','), reducer, false);
-                forwardPropagation(targetDT, groupedPropTable);
+                forwardPropagation(targetDT, groupedPropTable, true);
             }
         });
         // propagate to parent if parent is not source
         if (this.parent && source !== this.parent) {
-            forwardPropagation(this.parent, propTable);
+            forwardPropagation(this.parent, propTable, grouped);
         }
     }
 
@@ -1133,6 +1155,27 @@ class DataTable extends Relation {
             table._derivation.length = 0;
             table._derivation.push(...derivative);
         }
+    }
+
+    _updateFields(name) {
+        let newFields = [];
+        if (!this.fields) {
+            let collID = this.colIdentifier.split(',');
+            this.getNameSpace().fields.forEach((field) => {
+                if (collID.indexOf(field.name) !== -1) {
+                    let newField = new Field(field, this.rowDiffset);
+                    newFields.push(newField);
+                }
+            });
+
+            let newColumnNameSpace = fieldStore.createNameSpace(newFields, name);
+            this.fields = newColumnNameSpace.fields;
+        }
+        return this.fields;
+    }
+
+    getFieldData() {
+        return this._updateFields();
     }
 }
 

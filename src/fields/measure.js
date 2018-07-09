@@ -1,12 +1,12 @@
-import Field from './field';
+import PartialField from './partial-field';
 import { generateMeasureDomain } from '../utils';
 
 /**
  * Represents measure field type.
  *
- * @extends Field
+ * @extends PartialField
  */
-class Measure extends Field {
+class Measure extends PartialField {
 
     /**
      * Creates new Measure field instance.

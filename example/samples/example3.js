@@ -80,7 +80,7 @@ const data2 = [
 const schema1 = [
     {
         name: 'id',
-        type: 'dimention'
+        type: 'dimension'
     },
     {
         name: 'profit',
@@ -103,7 +103,7 @@ const schema1 = [
 const schema2 = [
     {
         name: 'id',
-        type: 'dimention'
+        type: 'dimension'
     },
     {
         name: 'netprofit',

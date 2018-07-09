@@ -1,4 +1,4 @@
-import { FieldType } from 'picasso-util';
+import { FieldType, getUniqueId } from 'picasso-util';
 
 const fieldStore = {
     data: {},
@@ -13,7 +13,7 @@ const fieldStore = {
      * @return {Object}          the data as a object which is added
      */
     createNameSpace(fieldArr, name) {
-        const dataId = name || `rand-${(new Date()).getTime()}`;
+        const dataId = name || getUniqueId();
         this.data[dataId] = {
             name: dataId,
             fields: fieldArr,
