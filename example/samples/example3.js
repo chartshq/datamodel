@@ -131,36 +131,25 @@ d3.json('./data/cars.json', (data) => {
 // child.getData()
 
 const data1 = [
-    { a: 10, aaa: 20, aaaa: 'd' },
-    { a: 15, aaa: 25, aaaa: 'demo' },
-    { a: 9, aaa: 35, aaaa: 'demo' },
-    { a: 7, aaa: 15, aaaa: 'demo' },
-    { a: 35, aaa: 5, aaaa: 'demo' },
-    { a: 10, aaa: 10, aaaa: 'demoo' },
+    { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+    { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+    { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+    { profit: 15, sales: 25, first: 'White', second: 'walls' },
 ];
-const schema2 = [
-    { name: 'a', type: 'measure' },
-    { name: 'aaa', type: 'measure' },
-    { name: 'aaaa', type: 'dimension' },
+const schema1 = [
+    { name: 'profit', type: 'measure' },
+    { name: 'sales', type: 'measure' },
+    { name: 'first', type: 'dimension' },
+    { name: 'second', type: 'dimension' },
 ];
-
-const dataTable = new DataTable(data1, schema2);
-const renameDataTable = dataTable.rename({ aaa: 'aaaRename' });
-const expData = {
-    schema: [
-        { name: 'a', type: 'measure' },
-        { name: 'aaaRename', type: 'measure' },
-        { name: 'aaaa', type: 'dimension' },
-    ],
-    data: [
-        [10, 20, 'd'],
-        [15, 25, 'demo'],
-        [9, 35, 'demo'],
-        [7, 15, 'demo'],
-        [35, 5, 'demo'],
-        [10, 10, 'demoo'],
-    ],
-    uids: [0, 1, 2, 3, 4, 5]
-};
+const dataTable = new DataTable(data1, schema1, 'Yo');
+const newDt = dataTable.calculateVariable([{
+    name: 'Song'
+}, {
+    name: 'InvertedSong'
+}], ['first', 'second', (first, second) => [
+    `${first} ${second}`,
+    `${second} ${first}`
+]]);
 });
 

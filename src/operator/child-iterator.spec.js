@@ -20,9 +20,9 @@ describe('Testing Child Iterator', () => {
     let createdCallBack = (profit, sales) => profit / sales;
     let hasSameChild = false;
     let hasSameFunction = false;
-    const child = dt.createMeasure({
+    const child = dt.calculateVariable({
         name: 'Efficiency'
-    }, ['profit', 'sales'], createdCallBack);
+    }, ['profit', 'sales', createdCallBack]);
 
     let callback = function(table, params) {
         if (dt.children.find(childElm => childElm === table)) {

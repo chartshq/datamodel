@@ -1,7 +1,7 @@
 /* eslint-disable default-case */
 import { FieldType, ProjectionMode, SelectionMode } from 'picasso-util';
 import { DT_DERIVATIVES, PROPAGATION, ROW_ID } from './constants';
-import { Dimension, Measure } from './fields';
+import { Categorical, Measure } from './fields';
 import { createBuckets,
     crossProduct,
     dataBuilder,
@@ -440,7 +440,7 @@ class DataTable extends Relation {
 
         calculatedMeasureIterator(this, (table, params) => {
             table[key] = value;
-            this.createMeasure(...[...params, false, table]);
+            this.__createMeasure(...[...params, false, table]);
         });
 
         groupByIterator(this, (table, params) => {
@@ -542,6 +542,32 @@ class DataTable extends Relation {
     }
 
     /**
+     *
+     * @param {Object} varConfig :{
+     *  name: 'new-var',
+     *  type: 'measure | dimension',
+     *  subype: 'temporal | ...',
+     *  all the variable what schema gets
+     *  }}
+     *  @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dt) => {}]
+     * @param {Object} config : { saveChild : true | false , removeDependentDimensions : true|false}
+     */
+
+    calculateVariable(varConfig, paramConfig, config = {}, existingDataTable) {
+        // if array than create dimension else createMeasure
+        if (varConfig instanceof Array) {
+            return this.__createDimensions(varConfig,
+                paramConfig.slice(0, paramConfig.length - 1),
+                paramConfig[paramConfig.length - 1], config);
+        }
+
+        return this.__createMeasure(varConfig,
+                paramConfig.slice(0, paramConfig.length - 1),
+                paramConfig[paramConfig.length - 1],
+                config.saveChild, existingDataTable);
+    }
+
+    /**
      * Creates a calculated measure from the current DataTable instance.
      *
      * @public
@@ -553,9 +579,13 @@ class DataTable extends Relation {
      * @param {DataTable} [existingDataTable] - An optional DataTable instance.
      * @return {DataTable} - Returns a new DataTable instance.
      */
-    createMeasure(config, fields, callback, saveChild = true, existingDataTable) {
+    __createMeasure(config, fields, callback, saveChild = true, existingDataTable) {
         const {
             name,
+            unit,
+            scale,
+            numberformat,
+            defAggFn,
         } = config;
         let clone;
         let existingChild = this.children.find(childElm => childElm._derivation
@@ -603,6 +633,10 @@ class DataTable extends Relation {
         const partialField = new Measure(name, computedValues, {
             name,
             type: FieldType.MEASURE,
+            unit,
+            scale,
+            numberformat,
+            defAggFn
         });
 
         const nameSpaceEntry = new Field(partialField, this.rowDiffset);
@@ -651,7 +685,7 @@ class DataTable extends Relation {
      * dimensions should be removed.
      * @return {DataTable} Returns the new DataTable instance.
      */
-    createDimensions(dimArray, dependents, callback, config = {}) {
+    __createDimensions(dimArray, dependents, callback, config = {}) {
         // get the fields present
         const fieldMap = this.getFieldMap();
         // validate that the supplied fields are present
@@ -684,7 +718,7 @@ class DataTable extends Relation {
             const { name } = dimObj;
             const dimensionData = computedValues.map(dataArray => dataArray[dIdx]);
             // create a field to store this field
-            const partialField = new Dimension(name, dimensionData, {
+            const partialField = new Categorical(name, dimensionData, {
                 name,
                 type: FieldType.DIMENSION,
             });
@@ -1097,7 +1131,7 @@ class DataTable extends Relation {
             const label = getLabel(value, 0, startVals.length - 1);
             labelData.push(label);
         });
-        const partialField = new Dimension(binnedFieldName, labelData, {
+        const partialField = new Categorical(binnedFieldName, labelData, {
             name: binnedFieldName,
             type: FieldType.DIMENSION,
         });

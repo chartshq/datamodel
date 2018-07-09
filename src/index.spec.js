@@ -727,9 +727,9 @@ describe('Datatable', () => {
         ];
         const dataTable = new DataTable(data1, schema1, 'Yo');
         const next = dataTable.project(['profit', 'sales']).select(f => +f.profit > 10);
-        const child = next.createMeasure({
+        const child = next.calculateVariable({
             name: 'Efficiency'
-        }, ['profit', 'sales'], (profit, sales) => profit / sales);
+        }, ['profit', 'sales', (profit, sales) => profit / sales]);
         const childData = child.getData().data;
         const efficiency = childData[0][childData[0].length - 1];
         expect(
@@ -737,9 +737,9 @@ describe('Datatable', () => {
         ).to.equal(0.6);
         expect(
             () => {
-                child.createMeasure({
+                child.calculateVariable({
                     name: 'Efficiency'
-                }, ['profit', 'sales'], (profit, sales) => profit / sales);
+                }, ['profit', 'sales', (profit, sales) => profit / sales]);
             }
         ).to.throw('Efficiency field already exists in table.');
     });
@@ -757,14 +757,14 @@ describe('Datatable', () => {
             { name: 'second', type: 'dimension' },
         ];
         const dataTable = new DataTable(data1, schema1, 'Yo');
-        const newDt = dataTable.createDimensions([{
+        const newDt = dataTable.calculateVariable([{
             name: 'Song'
         }, {
             name: 'InvertedSong'
-        }], ['first', 'second'], (first, second) => [
+        }], ['first', 'second', (first, second) => [
             `${first} ${second}`,
             `${second} ${first}`
-        ]);
+        ]]);
         const songData = newDt.project(['Song']).getData().data;
         const invSongData = newDt.project(['InvertedSong']).getData().data;
         expect(
@@ -772,14 +772,14 @@ describe('Datatable', () => {
             invSongData.length === 4
         ).to.be.true;
         // test removing dependents
-        const exDt = dataTable.createDimensions([{
+        const exDt = dataTable.calculateVariable([{
             name: 'Song'
         }, {
             name: 'InvertedSong'
-        }], ['first', 'second'], (first, second) => [
+        }], ['first', 'second', (first, second) => [
             `${first} ${second}`,
             `${second} ${first}`
-        ], {
+        ]], {
             removeDependentDimensions: true
         });
         const fieldMap = exDt.getFieldMap();
@@ -1082,9 +1082,9 @@ describe('Datatable', () => {
         let callback2 = function (a, aaa, ...arg) {
             return a + aaa + arg[0];
         };
-        const child = dataTable.createMeasure({
+        const child = dataTable.calculateVariable({
             name: 'bbbb'
-        }, ['a', 'aaa'], callback2);
+        }, ['a', 'aaa', callback2]);
 
         const childData = child.getData().data;
         const efficiency = childData[1][childData[1].length - 1];
@@ -1222,12 +1222,12 @@ describe('Datatable', () => {
         let dt4 = dataTable.select(fields => fields.profit.value < 150, {}, true, dt2);
         let dt5 = dataTable.groupBy(['Year'], {
         }, true, dt3);
-        let dt6 = dataTable.createMeasure({
+        let dt6 = dataTable.calculateVariable({
             name: 'Efficiency'
-        }, ['profit', 'sales'], (profit, sales) => profit / sales);
-        let dt7 = dataTable.createMeasure({
+        }, ['profit', 'sales', (profit, sales) => profit / sales]);
+        let dt7 = dataTable.calculateVariable({
             name: 'UnEfficiency'
-        }, ['sales', 'profit'], (sales, profit) => sales / profit, true, dt6);
+        }, ['sales', 'profit', (sales, profit) => sales / profit], { saveChild: true }, dt6);
         it('datatable select instance should not change', () => {
             expect(dt2).to.equal(dt4);
         });
