@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { FieldType } from 'picasso-util';
 import PartialField from './partial-field';
 
-describe('Field Type', () => {
+describe('Partial Field Type', () => {
     const schema = {
         name: 'Miles_per_Gallon',
         type: FieldType.MEASURE,

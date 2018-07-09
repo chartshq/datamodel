@@ -124,16 +124,21 @@ const schema2 = [
     },
 ];
 const data23 = new DataTable(data1, schema1,'TableA');
-const data24 = new DataTable(data2, schema2,'TableB');
-const data23c = new DataTable(data1, schema1,'TableA');
-let composedFn = DataTable.Operators.compose(
-    DataTable.Operators.rowFilter(fields => fields.profit.value <= 15),
-    DataTable.Operators.columnFilter(['profit', 'sales'])
-);
 
-let normalDt = data23.select(fields => fields.profit.value <= 15);
-normalDt = normalDt.project(['profit', 'sales']);
+const child = data23.createMeasure({
+    name: 'Efficiency'
+}, ['profit', 'sales'], (profit, sales) => profit / sales);
 
-let composedDt = composedFn(data23c);
-composedDt
+// const data24 = new DataTable(data2, schema2,'TableB');
+// const data23c = new DataTable(data1, schema1,'TableA');
+// let composedFn = DataTable.Operators.compose(
+//     DataTable.Operators.rowFilter(fields => fields.profit.value <= 15),
+//     DataTable.Operators.columnFilter(['profit', 'sales'])
+// );
+
+// let normalDt = data23.select(fields => fields.profit.value <= 15);
+// normalDt = normalDt.project(['profit', 'sales']);
+
+// let composedDt = composedFn(data23c);
+// composedDt
 });

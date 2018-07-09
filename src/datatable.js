@@ -323,12 +323,12 @@ class DataTable extends Relation {
      * @return {DataTable} Returns the new DataTable instance after operation.
      */
     project(projField, config = {}, saveChild = true) {
-        const allFields = Object.keys(this.fieldMap);
+        const allFields = Object.keys(this.getFieldMap());
         const { mode } = config;
         let normalizedProjField = projField.reduce((acc, field) => {
             if (field.constructor.name === 'RegExp') {
                 acc.push(...allFields.filter(fieldName => fieldName.search(field) !== -1));
-            } else if (field in this.fieldMap) {
+            } else if (field in this.getFieldMap()) {
                 // If the field is string and it really exists
                 acc.push(field);
             }
@@ -773,7 +773,7 @@ class DataTable extends Relation {
     _assembleTableFromIdentifiers(identifiers) {
         let schema = [];
         let data;
-        let fieldMap = this.fieldMap;
+        let fieldMap = this.getFieldMap();
         if (identifiers.length) {
             let fields = identifiers[0];
             let len = fields.length;
@@ -834,7 +834,7 @@ class DataTable extends Relation {
                 });
                 filteredTable = this.select((fields, rIdx) => occMap[rIdx], {}, false);
             } else {
-                let fieldMap = this.fieldMap;
+                let fieldMap = this.getFieldMap();
                 let filteredSchema = schema.filter(d => d.name in fieldMap && d.type === FieldType.DIMENSION);
                 filteredTable = this.select((fields) => {
                     let include = true;
@@ -1042,7 +1042,7 @@ class DataTable extends Relation {
     createBin(measureName, config, binnedFieldName) {
         const clone = this.cloneAsChild();
         const namespaceFields = clone.getNameSpace().fields;
-        const fieldMap = this.fieldMap;
+        const fieldMap = this.getFieldMap();
         binnedFieldName = binnedFieldName || `${measureName}_binned`;
         if (fieldMap[binnedFieldName]) {
             throw new Error(`Field ${measureName} already exists.`);
@@ -1051,7 +1051,7 @@ class DataTable extends Relation {
             throw new Error(`Field ${measureName} does not exist.`);
         }
         // get the data for field to be binned
-        const fieldIndex = this.fieldMap[measureName].index;
+        const fieldIndex = this.getFieldMap()[measureName].index;
         const fieldData = this.getNameSpace().fields[fieldIndex].data;
         // get the buckets
         const buckets = config.buckets || createBuckets(fieldData, config);

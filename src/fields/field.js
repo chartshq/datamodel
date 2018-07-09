@@ -38,8 +38,8 @@ export default class Field {
     }
 
 
-    clone(data) {
-        return this._ref.clone(data);
+    clone(datas) {
+        return this._ref.clone(datas);
     }
 
     fieldName() {
@@ -73,6 +73,14 @@ export default class Field {
     }
 
     set schema(schema) {
+        throw new Error('Not yet implemented!');
+    }
+
+    get data() {
+        return this._ref.data;
+    }
+
+    set data(schema) {
         throw new Error('Not yet implemented!');
     }
 }
