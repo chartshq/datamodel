@@ -23,6 +23,7 @@ function defaultFilterFn() { return true; }
 export function crossProduct(dataTable1, dataTable2, filterFn, replaceCommonSchema = false, jointype = JOINS.CROSS) {
     const schema = [];
     const data = [];
+    debugger;
     const applicableFilterFn = filterFn || defaultFilterFn;
     const dataTable1FieldStore = dataTable1.getNameSpace();
     const dataTable2FieldStore = dataTable2.getNameSpace();

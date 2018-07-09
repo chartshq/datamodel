@@ -81,12 +81,19 @@ class DataTable extends Relation {
      * @return {Object} - Returns the columnNameSpace.
      */
     getNameSpace() {
+        if (!this.columnNameSpace) {
+            this._updateFields();
+        }
+        return this.columnNameSpace;
+    }
+
+    _getPartialNameSpace() {
         let child = this;
         let nameSpace;
-        if (this.columnNameSpace) { return this.columnNameSpace; }
+        if (this.partialColumnNameSpace) { return this.partialColumnNameSpace; }
         while (child.parent) {
-            if (child.parent.columnNameSpace) {
-                nameSpace = child.parent.columnNameSpace;
+            if (child.parent.partialColumnNameSpace) {
+                nameSpace = child.parent.partialColumnNameSpace;
                 break;
             }
             child = child.parent;
@@ -137,7 +144,7 @@ class DataTable extends Relation {
 
         const dataGenerated = dataBuilder.call(
             this,
-            this.getNameSpace().fields,
+            this._getPartialNameSpace().fields,
             this.rowDiffset,
             this.colIdentifier,
             this.sortingDetails,
@@ -205,7 +212,7 @@ class DataTable extends Relation {
     getDataWithUids() {
         return dataBuilder.call(
             this,
-            this.getNameSpace().fields,
+            this._getPartialNameSpace().fields,
             this.rowDiffset,
             this.colIdentifier,
             this.sortingDetails,
@@ -222,11 +229,12 @@ class DataTable extends Relation {
      * @param {Object} schemaObj - The object having the name of the field to rename
      * as key and the new name as the value.
      * @return {DataTable} Returns a new DataTable instance with the renamed columns.
+     * @note : change partialNamaspace() and also update current fields
      */
     rename(schemaObj) {
         const cloneDataTable = this.cloneAsChild();
         const schemaArr = cloneDataTable.colIdentifier.split(',');
-        const _fieldStore = this.getNameSpace().fields;
+        const _fieldStore = this._getPartialNameSpace().fields;
 
         Object.entries(schemaObj).forEach(([key, value]) => {
             if (schemaArr.indexOf(key) !== -1 && typeof value === 'string') {
@@ -243,7 +251,7 @@ class DataTable extends Relation {
             }
         });
         cloneDataTable.colIdentifier = schemaArr.join();
-
+        this._updateFields();
         return cloneDataTable;
     }
 
@@ -497,6 +505,13 @@ class DataTable extends Relation {
      * @return {Object} - Returns the field definitions.
      */
     getFieldMap() {
+        this.fieldMap = this.getFieldData().reduce((acc, fieldDef, i) => {
+            acc[fieldDef.name] = {
+                index: i,
+                def: { name: fieldDef._ref.name, type: fieldDef._ref.fieldType }
+            };
+            return acc;
+        }, {});
         return this.fieldMap;
     }
 
@@ -585,10 +600,13 @@ class DataTable extends Relation {
             computedValues[i] = computedValue;
         });
         // create a field to store this field
-        const nameSpaceEntry = new Measure(name, computedValues, {
+        // @todo give other schema also
+        const partialField = new Measure(name, computedValues, {
             name,
             type: FieldType.MEASURE,
         });
+
+        const nameSpaceEntry = new Field(partialField, this.rowDiffset);
         // push this to the child DataTable instance field store
         let index = namespaceFields.findIndex(d => d.name === name);
         if (index !== -1 && existingChild) {
@@ -1157,19 +1175,19 @@ class DataTable extends Relation {
         }
     }
 
-    _updateFields(name) {
+    _updateFields() {
         let newFields = [];
         if (!this.fields) {
             let collID = this.colIdentifier.split(',');
-            this.getNameSpace().fields.forEach((field) => {
+            this._getPartialNameSpace().fields.forEach((field) => {
                 if (collID.indexOf(field.name) !== -1) {
                     let newField = new Field(field, this.rowDiffset);
                     newFields.push(newField);
                 }
             });
 
-            let newColumnNameSpace = fieldStore.createNameSpace(newFields, name);
-            this.fields = newColumnNameSpace.fields;
+            this.columnNameSpace = fieldStore.createNameSpace(newFields, this._getPartialNameSpace().name);
+            this.fields = this.columnNameSpace.fields;
         }
         return this.fields;
     }

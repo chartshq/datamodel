@@ -83,4 +83,48 @@ export default class Field {
     set data(schema) {
         throw new Error('Not yet implemented!');
     }
+
+    subType() {
+        return this._ref.subtype();
+    }
+
+    getMinDiff () {
+        return this._ref.minDiff();
+    }
+
+    /**
+     * Getter for unit value of the field.
+     *
+     * @return {string} Returns unit of the field.
+     */
+    unit() {
+        return this._ref.unit();
+    }
+
+    /**
+     * Getter for scale value of the field.
+     *
+     * @return {string} Returns scale of the field.
+     */
+    scale() {
+        return this._ref.scale();
+    }
+
+    /**
+     * Getter for number format value of the field.
+     *
+     * @return {string} Returns number format of the field.
+     */
+    numberformat() {
+        return this._ref.numberformat();
+    }
+
+    /**
+     * Getter for aggregation function of the field.
+     *
+     * @return {Function} Returns aggregation function of the field.
+     */
+    defAggFn() {
+        return this._ref.defAggFn();
+    }
 }
