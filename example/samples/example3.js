@@ -130,34 +130,37 @@ d3.json('./data/cars.json', (data) => {
 // }, ['profit', 'sales'], (profit, sales) => profit / sales);
 // child.getData()
 
-const toBinData = [{
-    marks: 1,
-}, {
-    marks: 2,
-}, {
-    marks: 3,
-}, {
-    marks: 4,
-}, {
-    marks: 5,
-}, {
-    marks: 9,
-}];
-const toBinSchema = [{
-    name: 'marks',
-    type: 'measure'
-}];
-const toBinDatatable = new DataTable(toBinData, toBinSchema);
-const buckets = [
-    { end: 1, label: 'useless' },
-    { start: 1, end: 4, label: 'failure' },
-    { start: 4, end: 6, label: 'firstclass' },
-    { start: 6, end: 10, label: 'decent' }
+const data1 = [
+    { a: 10, aaa: 20, aaaa: 'd' },
+    { a: 15, aaa: 25, aaaa: 'demo' },
+    { a: 9, aaa: 35, aaaa: 'demo' },
+    { a: 7, aaa: 15, aaaa: 'demo' },
+    { a: 35, aaa: 5, aaaa: 'demo' },
+    { a: 10, aaa: 10, aaaa: 'demoo' },
+];
+const schema2 = [
+    { name: 'a', type: 'measure' },
+    { name: 'aaa', type: 'measure' },
+    { name: 'aaaa', type: 'dimension' },
 ];
 
-let binnedDT = toBinDatatable.createBin('marks', {
-    buckets,
-}, 'rating1');
-
+const dataTable = new DataTable(data1, schema2);
+const renameDataTable = dataTable.rename({ aaa: 'aaaRename' });
+const expData = {
+    schema: [
+        { name: 'a', type: 'measure' },
+        { name: 'aaaRename', type: 'measure' },
+        { name: 'aaaa', type: 'dimension' },
+    ],
+    data: [
+        [10, 20, 'd'],
+        [15, 25, 'demo'],
+        [9, 35, 'demo'],
+        [7, 15, 'demo'],
+        [35, 5, 'demo'],
+        [10, 10, 'demoo'],
+    ],
+    uids: [0, 1, 2, 3, 4, 5]
+};
 });
 

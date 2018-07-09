@@ -89,16 +89,15 @@ class DataTable extends Relation {
 
     _getPartialNameSpace() {
         let child = this;
-        let nameSpace;
         if (this.partialColumnNameSpace) { return this.partialColumnNameSpace; }
-        while (child.parent) {
-            if (child.parent.partialColumnNameSpace) {
-                nameSpace = child.parent.partialColumnNameSpace;
-                break;
-            }
-            child = child.parent;
+
+        if (!child.parent.columnNameSpace) {
+            this.partialColumnNameSpace = child.parent.getNameSpace();
         }
-        return nameSpace;
+        else {
+            this.partialColumnNameSpace = child.parent.columnNameSpace;
+        }
+        return this.partialColumnNameSpace;
     }
 
     /**
@@ -234,7 +233,7 @@ class DataTable extends Relation {
     rename(schemaObj) {
         const cloneDataTable = this.cloneAsChild();
         const schemaArr = cloneDataTable.colIdentifier.split(',');
-        const _fieldStore = this._getPartialNameSpace().fields;
+        const _fieldStore = this.getNameSpace().fields;
 
         Object.entries(schemaObj).forEach(([key, value]) => {
             if (schemaArr.indexOf(key) !== -1 && typeof value === 'string') {
@@ -381,11 +380,11 @@ class DataTable extends Relation {
         if (config.mode === SelectionMode.ALL) {
             // Do a normal selection
             const firstClone = this.cloneAsChild();
-            rowDiffset = firstClone._selectHelper(firstClone.getNameSpace().fields, selectFn, {});
+            rowDiffset = firstClone._selectHelper(firstClone._getPartialNameSpace().fields, selectFn, {});
             firstClone.rowDiffset = rowDiffset;
             // Do an inverse selection
             const rejectClone = this.cloneAsChild();
-            rowDiffset = rejectClone._selectHelper(rejectClone.getNameSpace().fields, selectFn, {
+            rowDiffset = rejectClone._selectHelper(rejectClone._getPartialNameSpace().fields, selectFn, {
                 mode: SelectionMode.INVERSE,
             });
             rejectClone.rowDiffset = rowDiffset;
@@ -402,13 +401,13 @@ class DataTable extends Relation {
         }
         if (child) {
             newDataTable = existingDataTable;
-            rowDiffset = this._selectHelper(this.getNameSpace().fields, selectFn, config);
+            rowDiffset = this._selectHelper(this._getPartialNameSpace().fields, selectFn, config);
             existingDataTable.mutate('rowDiffset', rowDiffset);
             child._derivation[0].criteria = selectFn;
         }
         else {
             cloneDataTable = this.cloneAsChild(saveChild);
-            rowDiffset = cloneDataTable._selectHelper(cloneDataTable.getNameSpace().fields, selectFn, config);
+            rowDiffset = cloneDataTable._selectHelper(cloneDataTable._getPartialNameSpace().fields, selectFn, config);
             cloneDataTable.rowDiffset = rowDiffset;
             newDataTable = cloneDataTable;
         }
@@ -1149,7 +1148,8 @@ class DataTable extends Relation {
      * @param { Queue } criteriaQueue Queue contains in-between operation meta-data
      */
     __addParent(parent, criteriaQueue = []) {
-        this.columnNameSpace = this.columnNameSpace === undefined ? this.parent.getNameSpace() : this.columnNameSpace;
+        this.partialColumnNameSpace = this.partialColumnNameSpace === undefined ?
+                                        this.parent.getNameSpace() : this.partialColumnNameSpace;
         this.__persistDerivation(this, DT_DERIVATIVES.COMPOSE, null, criteriaQueue);
         this.parent = parent;
         parent.children.push(this);
