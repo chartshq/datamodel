@@ -2,9 +2,9 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import DataTable from './index';
+import DataModel from './index';
 
-describe('Datatable', () => {
+describe('DataModel', () => {
     it('should clone successfully', () => {
         const data = [
             { a: 10, aaa: 20, aaaa: 'd' },
@@ -15,15 +15,15 @@ describe('Datatable', () => {
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
         ];
-        const dataTable = new DataTable(data, schema);
+        const dataModel = new DataModel(data, schema);
 
         let cloneRelation;
 
-        dataTable.colIdentifier = '1-20';
-        dataTable.rowDiffset = 'a, aaa, aaaa';
-        cloneRelation = dataTable.clone();
-        expect(cloneRelation instanceof DataTable).to.be.true;
-        // Check clone dataTable have all the required attribute
+        dataModel.colIdentifier = '1-20';
+        dataModel.rowDiffset = 'a, aaa, aaaa';
+        cloneRelation = dataModel.clone();
+        expect(cloneRelation instanceof DataModel).to.be.true;
+        // Check clone datamodel have all the required attribute
         expect(cloneRelation.colIdentifier).to.equal('1-20');
         expect(cloneRelation.rowDiffset).to.equal('a, aaa, aaaa');
     });
@@ -59,9 +59,9 @@ describe('Datatable', () => {
                 roll: 33
             }
         ];
-        const dataTable = new DataTable(data, schema);
+        const dataModel = new DataModel(data, schema);
 
-        let generatedData = dataTable.getData({
+        let generatedData = dataModel.getData({
             order: 'row'
         });
         let expected = {
@@ -99,7 +99,7 @@ describe('Datatable', () => {
         };
         expect(generatedData).to.deep.equal(expected);
 
-        generatedData = dataTable.getData({
+        generatedData = dataModel.getData({
             order: 'column'
         });
         expected = {
@@ -135,7 +135,7 @@ describe('Datatable', () => {
         };
         expect(generatedData).to.deep.equal(expected);
 
-        generatedData = dataTable.getData({
+        generatedData = dataModel.getData({
             order: 'row',
             formatter: {
                 name: val => val.toUpperCase(),
@@ -180,7 +180,7 @@ describe('Datatable', () => {
         };
         expect(generatedData).to.deep.equal(expected);
 
-        generatedData = dataTable.getData({
+        generatedData = dataModel.getData({
             order: 'column',
             formatter: {
                 name: val => val.toUpperCase(),
@@ -234,8 +234,8 @@ describe('Datatable', () => {
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
         ];
-        const dataTable = new DataTable(data, schema);
-        const projectedDataTable = dataTable.project(['aaaa', 'a']);
+        const dataModel = new DataModel(data, schema);
+        const projectedDataModel = dataModel.project(['aaaa', 'a']);
         const expData = {
             schema: [
                 { name: 'aaaa', type: 'dimension' },
@@ -247,10 +247,10 @@ describe('Datatable', () => {
             ],
             uids: [0, 1]
         };
-        // check project is not applied on the same DataTable
-        expect(dataTable === projectedDataTable).to.be.false;
+        // check project is not applied on the same DataModel
+        expect(dataModel === projectedDataModel).to.be.false;
         // Check The return data
-        expect(projectedDataTable.getData()).to.deep.equal(expData);
+        expect(projectedDataModel.getData()).to.deep.equal(expData);
     });
     it('tests inverted projection', () => {
         const yodata = [
@@ -262,8 +262,8 @@ describe('Datatable', () => {
             { name: 'aaa', type: 'measure' },
             { name: 'aaaa', type: 'dimension' },
         ];
-        const yodataTable = new DataTable(yodata, yoschema);
-        const invProjectedDataTable = yodataTable.project(['aaaa', 'a'], {
+        const yodataModel = new DataModel(yodata, yoschema);
+        const invProjectedDataModel = yodataModel.project(['aaaa', 'a'], {
             mode: 'exclude'
         });
         const expected = {
@@ -279,7 +279,7 @@ describe('Datatable', () => {
             ],
             uids: [0, 1]
         };
-        expect(expected).to.deep.equal(invProjectedDataTable.getData());
+        expect(expected).to.deep.equal(invProjectedDataModel.getData());
     });
     it('Selection functionality', () => {
         const data = [

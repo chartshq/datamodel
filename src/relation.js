@@ -30,12 +30,12 @@ class Relation {
      * @param {Object | string | Relation} data - The input tabular data in csv or json format or
      * an existing Relation instance object.
      * @param {Array} schema - An array of data schema.
-     * @param {string} [name] - The name of the DataTable instance, if not provided will assign a random name.
+     * @param {string} [name] - The name of the DataModel instance, if not provided will assign a random name.
      * @param {Object} [options] - The optional options.
      */
     constructor(data, schema, name, options) {
         if (data instanceof Relation) {
-            // parent datatable was passed as part of source
+            // parent datamodel was passed as part of source
             const source = data;
             // Copy the required property
             this.colIdentifier = source.colIdentifier;
@@ -77,10 +77,10 @@ class Relation {
     }
 
     /**
-     * Sets the projection to the DataTable instance only the projection string/
+     * Sets the projection to the DataModel instance only the projection string
      *
      * @param {string} projString - The projection to be applied.
-     * @return {DataTable} Returns the current DataTable instance.
+     * @return {DataModel} Returns the current DataModel instance.
      */
     _projectHelper(projString) {
         let presentField = Object.keys(this.fieldMap);
@@ -97,7 +97,7 @@ class Relation {
     }
 
     /**
-     * Sets the selection to the current DataTable instance.
+     * Sets the selection to the current DataModel instance.
      *
      * @param {Array} fields - The fields array.
      * @param {Function} selectFn - The filter function.

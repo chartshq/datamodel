@@ -1,17 +1,21 @@
 {
-  "name": "datatable",
-  "description": "A data model which has been built on the concept of relational algebra",
-  "homepage": "https://bitbucket.org/fusioncharts/datatable",
+  "name": "datamodel",
+  "description": "A model which has been built on the concept of relational algebra",
+  "homepage": "https://bitbucket.org/fusioncharts/datamodel",
   "version": "1.0.0-beta.1",
   "license": "ISC",
   "main": "src/index.js",
   "author": "FusionCharts Technologies <support@fusioncharts.com> (https://fusioncharts.com)",
   "keywords": [
-    "datatable"
+    "datamodel",
+    "data",
+    "relational",
+    "algebra",
+    "model"
   ],
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/fusioncharts/datatable.git"
+    "url": "https://bitbucket.org/fusioncharts/datamodel.git"
   },
   "contributors": [
     {

@@ -1,5 +1,5 @@
-const libraryName = 'DataTable';
-const outFile = 'datatable.js';
+const libraryName = 'DataModel';
+const outFile = 'datamodel.js';
 
 module.exports = {
     entry: './src/index.js',
