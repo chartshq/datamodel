@@ -143,13 +143,21 @@ const schema1 = [
     { name: 'second', type: 'dimension' },
 ];
 const dataTable = new DataTable(data1, schema1, 'Yo');
-const newDt = dataTable.calculateVariable([{
-    name: 'Song'
-}, {
-    name: 'InvertedSong'
-}], ['first', 'second', (first, second) => [
-    `${first} ${second}`,
+// const newDt = dataTable.calculateVariable({
+//     name: 'Song',
+//     type:'dimension'
+// }, ['first', 'second', (first, second) => 
+//     `${first} ${second}`
+// ]);
+
+dataTable.calculateVariable({
+    name: 'Song',
+    type:'dimension'
+}, ['first', 'second', (first, second) =>
     `${second} ${first}`
-]]);
+], {
+    removeDependentDimensions: true
+});
+
 });
 

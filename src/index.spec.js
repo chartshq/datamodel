@@ -757,29 +757,24 @@ describe('Datatable', () => {
             { name: 'second', type: 'dimension' },
         ];
         const dataTable = new DataTable(data1, schema1, 'Yo');
-        const newDt = dataTable.calculateVariable([{
-            name: 'Song'
-        }, {
-            name: 'InvertedSong'
-        }], ['first', 'second', (first, second) => [
-            `${first} ${second}`,
-            `${second} ${first}`
-        ]]);
-        const songData = newDt.project(['Song']).getData().data;
-        const invSongData = newDt.project(['InvertedSong']).getData().data;
+        const newDt = dataTable.calculateVariable({
+            name: 'Song',
+            type: 'dimension'
+        }, ['first', 'second', (first, second) =>
+            `${first} ${second}`
+        ]);
+        const songData = newDt.project(['Song']);
         expect(
-            songData.length === 4 &&
-            invSongData.length === 4
-        ).to.be.true;
+            songData.getData().data[0][0]
+        ).to.equal('Hey Jude');
+
         // test removing dependents
-        const exDt = dataTable.calculateVariable([{
-            name: 'Song'
-        }, {
-            name: 'InvertedSong'
-        }], ['first', 'second', (first, second) => [
-            `${first} ${second}`,
+        const exDt = dataTable.calculateVariable({
+            name: 'Song',
+            type: 'dimension'
+        }, ['first', 'second', (first, second) =>
             `${second} ${first}`
-        ]], {
+        ], {
             removeDependentDimensions: true
         });
         const fieldMap = exDt.getFieldMap();

@@ -1,7 +1,7 @@
 /* eslint-disable default-case */
-import { FieldType, ProjectionMode, SelectionMode } from 'picasso-util';
+import { FieldType, ProjectionMode, SelectionMode, DimensionSubtype } from 'picasso-util';
 import { DT_DERIVATIVES, PROPAGATION, ROW_ID } from './constants';
-import { Categorical, Measure } from './fields';
+import { Categorical, Measure, DateTime } from './fields';
 import { createBuckets,
     crossProduct,
     dataBuilder,
@@ -555,7 +555,7 @@ class DataTable extends Relation {
 
     calculateVariable(varConfig, paramConfig, config = {}, existingDataTable) {
         // if array than create dimension else createMeasure
-        if (varConfig instanceof Array) {
+        if (varConfig.type === FieldType.DIMENSION) {
             return this.__createDimensions(varConfig,
                 paramConfig.slice(0, paramConfig.length - 1),
                 paramConfig[paramConfig.length - 1], config);
@@ -685,7 +685,7 @@ class DataTable extends Relation {
      * dimensions should be removed.
      * @return {DataTable} Returns the new DataTable instance.
      */
-    __createDimensions(dimArray, dependents, callback, config = {}) {
+    __createDimensions(dimObj, dependents, callback, config = {}) {
         // get the fields present
         const fieldMap = this.getFieldMap();
         // validate that the supplied fields are present
@@ -714,30 +714,38 @@ class DataTable extends Relation {
             computedValues[i] = computedValue;
         });
         // create new fields
-        dimArray.forEach((dimObj, dIdx) => {
-            const { name } = dimObj;
-            const dimensionData = computedValues.map(dataArray => dataArray[dIdx]);
+        const { name } = dimObj;
+        const dimensionData = computedValues;
             // create a field to store this field
-            const partialField = new Categorical(name, dimensionData, {
+        let partialField;
+        if (dimObj.subtype === DimensionSubtype.TEMPORAL) {
+            partialField = new DateTime(name, dimensionData, {
                 name,
                 type: FieldType.DIMENSION,
             });
+        }
+        else {
+            partialField = new Categorical(name, dimensionData, {
+                name,
+                type: FieldType.DIMENSION,
+            });
+        }
 
-            const nameSpaceEntry = new Field(partialField, this.rowDiffset);
+        const nameSpaceEntry = new Field(partialField, this.rowDiffset);
             // push this to the child DataTable instance field store
-            namespaceFields.push(nameSpaceEntry);
+        namespaceFields.push(nameSpaceEntry);
             // update the field map of child DataTable instance
-            const childFieldMap = clone.getFieldMap();
-            childFieldMap[name] = {
-                index: namespaceFields.length - 1,
-                def: {
-                    name,
-                    type: FieldType.DIMENSION,
-                },
-            };
+        const childFieldMap = clone.getFieldMap();
+        childFieldMap[name] = {
+            index: namespaceFields.length - 1,
+            def: {
+                name,
+                type: FieldType.DIMENSION,
+            },
+        };
             // update the column identifier
-            clone.colIdentifier += `,${name}`;
-        });
+        clone.colIdentifier += `,${name}`;
+
         if (config.removeDependentDimensions) {
             return clone.project(dependents, {
                 mode: ProjectionMode.EXCLUDE,
