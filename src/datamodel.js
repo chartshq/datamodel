@@ -552,9 +552,7 @@ class DataModel extends Relation {
      *  @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dt) => {}]
      * @param {Object} config : { saveChild : true | false , removeDependentDimensions : true|false}
      */
-
     calculateVariable(varConfig, paramConfig, config = {}, existingDataTable) {
-        // if array than create dimension else createMeasure
         if (varConfig.type === FieldType.DIMENSION) {
             return this.__createDimensions(varConfig,
                 paramConfig.slice(0, paramConfig.length - 1),
@@ -752,76 +750,6 @@ class DataModel extends Relation {
             });
         }
         return clone;
-    }
-
-    /**
-     * Creates a dimension by converting existing dimensions.
-     *
-     * @public
-     * @param {Array.<string>} sourceFields - The names of the source fields.
-     * @param {string} category - The name of the new category.
-     * @param {string} valueName - The name of the measure.
-     * @param {Function} callback - The callback used to calculate new names of source fields.
-     * @return {DataModel} Returns a new DataModel instance.
-     * @TODO: Remove method as no one uses it or if aware what it does
-     */
-    createDimensionFrom(sourceFields, category, valueName, callback) {
-        const fieldMap = this.getFieldMap();
-        const newNames = sourceFields.map(callback);
-        // create a data model with all the fields except sourceFields
-        const excluded = this.project(sourceFields, {
-            mode: ProjectionMode.EXCLUDE,
-        });
-        // get the new field indices
-        const fieldIndices = sourceFields.map(name => fieldMap[name].index);
-        const projectedFields = excluded.getNameSpace().fields;
-        const existingFields = this.getNameSpace().fields;
-        const oldNames = excluded.colIdentifier.split(',');
-        const newData = [];
-        rowDiffsetIterator(excluded.rowDiffset, (i) => {
-            const temp = {};
-            oldNames.forEach((name, nIdx) => {
-                temp[name] = projectedFields[nIdx].data[i];
-            });
-            // add the new fields
-            const newTuples = fieldIndices.map((fieldsIndex, idx) => {
-                const addedTuple = {};
-                addedTuple[category] = newNames[idx];
-                addedTuple[valueName] = existingFields[fieldsIndex].data[i];
-                return addedTuple;
-            });
-            const newDataTuples = newTuples.map((tuple) => {
-                const finalTuple = {};
-                Object.entries(temp).forEach((entry) => {
-                    finalTuple[entry[0]] = entry[1];
-                });
-                Object.entries(tuple).forEach((secEntry) => {
-                    finalTuple[secEntry[0]] = secEntry[1];
-                });
-                return finalTuple;
-            });
-            newData.push(...newDataTuples);
-        });
-        // create a new data model with this data
-        const schema = Object.keys(newData[0]).map((fieldName) => {
-            if (fieldMap[fieldName]) {
-                return {
-                    name: fieldName,
-                    type: fieldMap[fieldName].def.type
-                };
-            }
-            if (fieldName === category) {
-                return {
-                    name: fieldName,
-                    type: FieldType.DIMENSION,
-                };
-            }
-            return {
-                name: fieldName,
-                type: FieldType.MEASURE,
-            };
-        });
-        return new DataModel(newData, schema);
     }
 
     /**
