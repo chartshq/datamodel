@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import DataTable from '../datatable'
+import DataModel from '../datamodel'
 ;
 import { naturalJoin } from './natural-join';
 
@@ -65,8 +65,8 @@ describe('Testing various Natural Join', () => {
             type: 'dimension'
         },
     ];
-    const data23 = new DataTable(data1, schema1, 'TableA');
-    const data24 = new DataTable(data2, schema2, 'TableB');
+    const data23 = new DataModel(data1, schema1, 'ModelA');
+    const data24 = new DataModel(data2, schema2, 'ModelB');
 
 
     it('Should return natural join', () => {
@@ -140,7 +140,7 @@ describe('Testing various Natural Join', () => {
                 1
             ]
         };
-        expect(naturalJoin(data23, data24, obj => obj.TableA.id === obj.TableB.id).getData())
+        expect(naturalJoin(data23, data24, obj => obj.ModelA.id === obj.ModelB.id).getData())
                         .to.deep.equal(expectedResult);
     });
 });

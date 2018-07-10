@@ -1,10 +1,10 @@
 /* global describe, it */
 /* eslint-disable no-unused-expressions,no-unused-vars */
 import { expect } from 'chai';
-import DataTable from '../datatable';
+import DataModel from '../datamodel';
 import { compose, columnFilter, rowFilter, groupby, bin } from './compose';
 
-describe('Testing compose functionlity', () => {
+describe('Testing compose functionality', () => {
     const data1 = [
         { id: 1, profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
         { id: 2, profit: 20, sales: 25, first: 'Hey', second: 'Wood' },
@@ -65,44 +65,44 @@ describe('Testing compose functionlity', () => {
     ];
 
     it('Should returm same data when composed with only one function', () => {
-        const dataTable = new DataTable(data1, schema1);
-        const dataTable2 = new DataTable(data1, schema1);
+        const dataModel = new DataModel(data1, schema1);
+        const dataModel2 = new DataModel(data1, schema1);
         let composedFn = compose(
             rowFilter(fields => fields.profit.value <= 15),
 
         );
-        let normalDt = dataTable.select(fields => fields.profit.value <= 15);
-        let composedDt = composedFn(dataTable2);
-        expect(normalDt.getData()).to.deep.equal(composedDt.getData());
+        let normalDm = dataModel.select(fields => fields.profit.value <= 15);
+        let composedDm = composedFn(dataModel2);
+        expect(normalDm.getData()).to.deep.equal(composedDm.getData());
     });
     it('Should returm same data when composed with select and project function', () => {
-        const dataTable = new DataTable(data1, schema1);
-        const dataTable2 = new DataTable(data1, schema1);
+        const dataModel = new DataModel(data1, schema1);
+        const dataModel2 = new DataModel(data1, schema1);
         let composedFn = compose(
             rowFilter(fields => fields.profit.value <= 15),
             columnFilter(['profit', 'sales'])
         );
 
-        let normalDt = dataTable.select(fields => fields.profit.value <= 15);
-        normalDt = normalDt.project(['profit', 'sales']);
-        let composedDt = composedFn(dataTable2);
-        expect(normalDt.getData()).to.deep.equal(composedDt.getData());
+        let normalDm = dataModel.select(fields => fields.profit.value <= 15);
+        normalDm = normalDm.project(['profit', 'sales']);
+        let composedDm = composedFn(dataModel2);
+        expect(normalDm.getData()).to.deep.equal(composedDm.getData());
     });
     it('Should returm same data when composed with select and project and groupby function', () => {
-        const dataTable = new DataTable(data1, schema1);
-        const dataTable2 = new DataTable(data1, schema1);
+        const dataModel = new DataModel(data1, schema1);
+        const dataModel2 = new DataModel(data1, schema1);
         let composedFn = compose(
             rowFilter(fields => fields.profit.value <= 15),
             columnFilter(['profit', 'sales']),
             groupby(['profit'])
         );
 
-        let normalDt = dataTable.select(fields => fields.profit.value <= 15);
-        normalDt = normalDt.project(['profit', 'sales']);
-        normalDt = normalDt.groupBy(['profit']);
-        let composedDt = composedFn(dataTable2);
+        let normalDm = dataModel.select(fields => fields.profit.value <= 15);
+        normalDm = normalDm.project(['profit', 'sales']);
+        normalDm = normalDm.groupBy(['profit']);
+        let composedDm = composedFn(dataModel2);
         // debugger;
-        expect(normalDt.getData()).to.deep.equal(composedDt.getData());
+        expect(normalDm.getData()).to.deep.equal(composedDm.getData());
     });
     it('Should compose bin', () => {
         const toBinData = [{
@@ -122,8 +122,8 @@ describe('Testing compose functionlity', () => {
             name: 'marks',
             type: 'measure'
         }];
-        const toBinDatatable = new DataTable(toBinData, toBinSchema);
-        const toBinDatatable2 = new DataTable(toBinData, toBinSchema);
+        const toBinDataModel = new DataModel(toBinData, toBinSchema);
+        const toBinDataModel2 = new DataModel(toBinData, toBinSchema);
         const buckets = [
             { end: 1, label: 'useless' },
             { start: 1, end: 4, label: 'failure' },
@@ -131,7 +131,7 @@ describe('Testing compose functionlity', () => {
             { start: 6, end: 10, label: 'decent' }
         ];
 
-        let binnedDT = toBinDatatable.createBin('marks', {
+        let binnedDM = toBinDataModel.createBin('marks', {
             buckets,
         }, 'rating1');
 
@@ -142,8 +142,8 @@ describe('Testing compose functionlity', () => {
 
         );
 
-        let composedDt = composedFn(toBinDatatable2);
-        expect(binnedDT.getData()).to.deep.equal(composedDt.getData());
+        let composedDm = composedFn(toBinDataModel2);
+        expect(binnedDM.getData()).to.deep.equal(composedDm.getData());
     });
     it('Should compose bin and select', () => {
         const toBinData = [{
@@ -163,8 +163,8 @@ describe('Testing compose functionlity', () => {
             name: 'marks',
             type: 'measure'
         }];
-        const toBinDatatable = new DataTable(toBinData, toBinSchema);
-        const toBinDatatable2 = new DataTable(toBinData, toBinSchema);
+        const toBinDataModel = new DataModel(toBinData, toBinSchema);
+        const toBinDataModel2 = new DataModel(toBinData, toBinSchema);
         const buckets = [
             { end: 1, label: 'useless' },
             { start: 1, end: 4, label: 'failure' },
@@ -172,17 +172,17 @@ describe('Testing compose functionlity', () => {
             { start: 6, end: 10, label: 'decent' }
         ];
 
-        let binnedDT = toBinDatatable.createBin('marks', {
+        let binnedDM = toBinDataModel.createBin('marks', {
             buckets,
         }, 'rating1');
-        let selectedBin = binnedDT.select(fields => fields.rating1.value === 'failure');
+        let selectedBin = binnedDM.select(fields => fields.rating1.value === 'failure');
         let composedFn = compose(
            bin('marks', {
                buckets,
            }, 'rating1'),
            rowFilter(fields => fields.rating1.value === 'failure')
         );
-        let composedDt = composedFn(toBinDatatable2);
-        expect(selectedBin.getData()).to.deep.equal(composedDt.getData());
+        let composedDm = composedFn(toBinDataModel2);
+        expect(selectedBin.getData()).to.deep.equal(composedDm.getData());
     });
 });

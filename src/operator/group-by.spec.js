@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { getFieldArr, getReducerObj, groupBy } from './group-by';
-import DataTable from '../index';
+import DataModel from '../index';
 import { defReducer, fnList } from './group-by-function';
 
 const data1 = [
@@ -21,40 +21,40 @@ const schema1 = [
 
 describe('groupBy tests', () => {
     it('getFieldArr basic', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA'));
-        expect(getFieldArr(dataTable1, ['city', 'state'])).to.deep.equal(['city', 'state']);
+        const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
+        expect(getFieldArr(dataModel1, ['city', 'state'])).to.deep.equal(['city', 'state']);
     });
     it('getFieldArr if no fields provided', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA'));
-        expect(getFieldArr(dataTable1)).to.deep.equal(['city', 'state']);
+        const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
+        expect(getFieldArr(dataModel1)).to.deep.equal(['city', 'state']);
     });
     it('getFieldArr if wrong fields provided', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA'));
-        expect(getFieldArr(dataTable1, ['city', 'state', 'abc', 'profit'])).to
+        const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
+        expect(getFieldArr(dataModel1, ['city', 'state', 'abc', 'profit'])).to
                         .deep.equal(['city', 'state']);
     });
     it('getReducerObj basic', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA'));
-        expect(getReducerObj(dataTable1)).to.deep.equal({
+        const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
+        expect(getReducerObj(dataModel1)).to.deep.equal({
             profit: defReducer,
             sales: defReducer,
         });
     });
     it('getReducerObj spl case no function provide', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA'));
-        expect(getReducerObj(dataTable1, {})).to.deep.equal({
+        const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
+        expect(getReducerObj(dataModel1, {})).to.deep.equal({
             profit: defReducer,
             sales: defReducer,
         });
     });
     it('getReducerObj when function is provided', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA'));
+        const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
         /**
          * sample function
          * @return {number} 0
          */
         function abc() { return 0; }
-        expect(getReducerObj(dataTable1, {
+        expect(getReducerObj(dataModel1, {
             profit: 'sum',
             sales: abc,
         })).to.deep.equal({
@@ -63,7 +63,7 @@ describe('groupBy tests', () => {
         });
     });
     it('groupby functionality', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA'));
+        const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
         const reqData = {
             schema: [
                 { name: 'city', type: 'dimension' },
@@ -76,7 +76,7 @@ describe('groupBy tests', () => {
             ],
             uids: [0, 1]
         };
-        const compData = groupBy(dataTable1, ['city']).getData();
+        const compData = groupBy(dataModel1, ['city']).getData();
         expect(compData).to.deep.equal(reqData);
     });
 });

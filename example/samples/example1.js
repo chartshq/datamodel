@@ -1,7 +1,7 @@
 /* eslint-disable */
 
-const DataTable = window.DataTable.default;
-let dt;
+const DataModel = window.DataModel.default;
+let dm;
 
 d3.json('./data/cars.json', (data) => {
     const jsonData = data,
@@ -36,11 +36,11 @@ d3.json('./data/cars.json', (data) => {
             name: 'Origin',
             type: 'dimension'
         }];
-    dt = new DataTable(jsonData, schema);
-    dts = dt.select((data) => {
+    dm = new DataModel(jsonData, schema);
+    dms = dm.select((data) => {
         return data.Acceleration.value >= 15;
     });
-    console.log(dts.getData());
+    console.log(dms.getData());
     const data1 = [
         { profit: 10, sales: 20, city: 'a', state: 'aa' },
         { profit: 15, sales: 25, city: 'b', state: 'bb' },
@@ -53,21 +53,21 @@ d3.json('./data/cars.json', (data) => {
         { name: 'city', type: 'dimension' },
         { name: 'state', type: 'dimension' },
     ];
-    const dataTable = new DataTable(data1, schema1, 'Yo');
-    const next = dataTable.project(['profit', 'sales']).select(f => +f.profit > 10);
+    const dataModel = new DataModel(data1, schema1, 'Yo');
+    const next = dataModel.project(['profit', 'sales']).select(f => +f.profit > 10);
     const child = next.createMeasure({
         name: 'Efficiency'
     }, ['profit', 'sales'], (profit, sales) => profit / sales);
     console.log(child.getData().data);
     // test selection
     console.log('Testing selection')
-    const selected = dataTable.select((fields) => {
+    const selected = dataModel.select((fields) => {
         return fields.profit.value === 10;
     });
     console.log(selected.getData())
 
     console.log('Testing rejection');
-    const rejected = dataTable.select((fields) => {
+    const rejected = dataModel.select((fields) => {
         return fields.profit.value === 10;
     }, {
         mode: 'inverse'
@@ -75,7 +75,7 @@ d3.json('./data/cars.json', (data) => {
     console.log(rejected.getData());
 
     console.log('Testing all mode');
-    const teenTitansUnite = dataTable.select((fields) => {
+    const teenTitansUnite = dataModel.select((fields) => {
         return fields.profit.value === 10;
     }, {
         mode: 'all'
@@ -86,9 +86,9 @@ d3.json('./data/cars.json', (data) => {
     console.log(teenTitansUnite[1].getData());
 
     console.log('Test projection')
-    const project = dataTable.project(['profit', 'sales']);
+    const project = dataModel.project(['profit', 'sales']);
     console.log(project.getData().data);
-    const reject = dataTable.project(['profit', 'sales'], {
+    const reject = dataModel.project(['profit', 'sales'], {
         mode: 'exclude'
     });
     console.log(reject.getData().data);
@@ -102,12 +102,12 @@ d3.json('./data/cars.json', (data) => {
         { name: 'aaa', type: 'measure' },
         { name: 'aaaa', type: 'dimension' },
     ];
-    const yodataTable = new DataTable(yodata, yoschema);
-    const yoprojectedDataTable = yodataTable.project(['aaaa', 'a']);
-    const invProjectedDataTable = yodataTable.project(['aaaa', 'a'], {
+    const yodataModel = new DataModel(yodata, yoschema);
+    const yoprojectedDataModel = yodataModel.project(['aaaa', 'a']);
+    const invProjectedDataModel = yodataModel.project(['aaaa', 'a'], {
         mode: 'exclude'
     });
-    console.log(invProjectedDataTable.getData())
+    console.log(invProjectedDataModel.getData())
 
     const dataLicious = [
         {
@@ -140,11 +140,11 @@ d3.json('./data/cars.json', (data) => {
             type: 'measure'
         }
     ];
-    const dataInstance = new DataTable(dataLicious, d_schema);
+    const dataInstance = new DataModel(dataLicious, d_schema);
     const almostPivoted = dataInstance.createDimensionFrom(['Import_yo', 'Export_dude'], 'type', 'values', values => values.split('_')[0]);
     console.log(almostPivoted.getData())
 
-    // testing binning in datatable
+    // testing binning in datamodel
     const toBinData = [{
         marks: 1,
     }, {
@@ -166,25 +166,25 @@ d3.json('./data/cars.json', (data) => {
         name: 'marks',
         type: 'measure'
     }];
-    const toBinDatatable = new DataTable(toBinData, toBinSchema);
+    const toBinDataModel = new DataModel(toBinData, toBinSchema);
     const buckets = [
         { end: 1, label: 'useless'},
         { start: 1, end: 4, label: 'failure'},
         { start: 4, end: 6, label: 'firstclass'},
         { start: 6, end: 10, label: 'decent'}
     ];
-    let binnedDT = toBinDatatable.createBin('marks', {
+    let binnedDM = toBinDataModel.createBin('marks', {
         buckets,
     }, 'rating1');
-    console.log(binnedDT.getData());
-    let binnedDTnum = toBinDatatable.createBin('marks', {
+    console.log(binnedDM.getData());
+    let binnedDMnum = toBinDataModel.createBin('marks', {
         numOfBins: 4
     }, 'rating2');
-    console.log(binnedDTnum.getData());
-    let binnedDTSize = toBinDatatable.createBin('marks', {
+    console.log(binnedDMnum.getData());
+    let binnedDMSize = toBinDataModel.createBin('marks', {
         binSize: 4,
     }, 'rating3');
-    console.log(binnedDTSize.getData());
+    console.log(binnedDMSize.getData());
 });
 
 function load (url) {
@@ -208,5 +208,5 @@ function load (url) {
 
 // load('../../js/cars.csv')
 //     .then((res) => {
-//         dt = new DataTable(res.split('\n').map(line => line.split(',')), {}, 'mytable', { dataFormat: 'CSVArr' });
+//         dm = new DataModel(res.split('\n').map(line => line.split(',')), {}, 'myDataModel', { dataFormat: 'CSVArr' });
 //     });

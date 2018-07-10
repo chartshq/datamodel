@@ -1,4 +1,4 @@
-const DataTable = window.DataTable.default;
+const DataModel = window.DataModel.default;
 
 const schema = [
     {
@@ -50,8 +50,8 @@ const data = [
     }
 ];
 
-const dt = new DataTable(data, schema);
-const dataGenerated = dt.getData({
+const dm = new DataModel(data, schema);
+const dataGenerated = dm.getData({
     order: 'column',
     formatter: {
         birthday: val => new Date(val),

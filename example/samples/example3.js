@@ -1,7 +1,7 @@
 /* eslint-disable */
 
-const DataTable = window.DataTable.default;
-let dt;
+const DataModel = window.DataModel.default;
+let dm;
 d3.json('./data/cars.json', (data) => {
     const jsonData = data,
         schema = [{
@@ -38,32 +38,32 @@ d3.json('./data/cars.json', (data) => {
         }];
 
     
-//     dt = new DataTable(jsonData, schema)
-//     DataTable.Reducers.defaultReducer('min');
-//     let dt = 
-//     const grouped = dt.groupBy(['Year']);
-//     grouped = dt.groupBy(['Year'],{
+//     dm = new DataModel(jsonData, schema)
+//     DataModel.Reducers.defaultReducer('min');
+//     let dm = 
+//     const grouped = dm.groupBy(['Year']);
+//     grouped = dm.groupBy(['Year'],{
 //     },true,grouped);
-//     //dt2 = dt.select(fields => fields.Horsepower.value < 150)
-//     //dt33 = dt.select(fields => fields.Horsepower.value < 75,{},true,dt2)
+//     //dm2 = dm.select(fields => fields.Horsepower.value < 150)
+//     //dm33 = dm.select(fields => fields.Horsepower.value < 75,{},true,dm2)
 
-//    // dt2 = dt.project(['Name','Year','Origin','Cylinders']);
+//    // dm2 = dm.project(['Name','Year','Origin','Cylinders']);
 
 
-//     // dt3 = dt.project(['Displacement','Acceleration'])
+//     // dm3 = dm.project(['Displacement','Acceleration'])
 
-//     // dt4 = dt.calculatedMeasure({
+//     // dm4 = dm.calculatedMeasure({
 //     //     name: 'Efficiency'
 //     // }, ['Displacement', 'Acceleration'], (Displacement, Acceleration) => Displacement / Acceleration);
 
-//     // dt4 = dt.calculatedMeasure({
+//     // dm4 = dm.calculatedMeasure({
 //     //     name: 'UNEfficiency'
-//     // }, ['Acceleration', 'Displacement'], (Acceleration, Displacement) => Acceleration / Displacement,true,dt4);
+//     // }, ['Acceleration', 'Displacement'], (Acceleration, Displacement) => Acceleration / Displacement,true,dm4);
 
-//     // dt1.dispose()
-//      dt2.dispose()
-//     // dt3.dispose()
-//     // dt4.dispose()
+//     // dm1.dispose()
+//      dm2.dispose()
+//     // dm3.dispose()
+//     // dm4.dispose()
 
 // const data1 = [
 //     { id: 1, profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
@@ -142,22 +142,17 @@ const schema1 = [
     { name: 'first', type: 'dimension' },
     { name: 'second', type: 'dimension' },
 ];
-const dataTable = new DataTable(data1, schema1, 'Yo');
-// const newDt = dataTable.calculateVariable({
-//     name: 'Song',
-//     type:'dimension'
-// }, ['first', 'second', (first, second) => 
-//     `${first} ${second}`
-// ]);
+const data23 = new DataModel(data1, schema1,'ModelA');
+const data24 = new DataModel(data2, schema2,'ModelB');
+const data23c = new DataModel(data1, schema1,'ModelA');
+let composedFn = DataModel.Operators.compose(
+    DataModel.Operators.rowFilter(fields => fields.profit.value <= 15),
+    DataModel.Operators.columnFilter(['profit', 'sales'])
+);
 
-dataTable.calculateVariable({
-    name: 'Song',
-    type:'dimension'
-}, ['first', 'second', (first, second) =>
-    `${second} ${first}`
-], {
-    removeDependentDimensions: true
+let normalDm = data23.select(fields => fields.profit.value <= 15);
+normalDm = normalDm.project(['profit', 'sales']);
+
+let composedDm = composedFn(data23c);
+composedDm
 });
-
-});
-

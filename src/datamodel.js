@@ -1,6 +1,7 @@
 /* eslint-disable default-case */
+
 import { FieldType, ProjectionMode, SelectionMode, DimensionSubtype } from 'picasso-util';
-import { DT_DERIVATIVES, PROPAGATION, ROW_ID } from './constants';
+import { DM_DERIVATIVES, PROPAGATION, ROW_ID } from './constants';
 import { Categorical, Measure, DateTime } from './fields';
 import { createBuckets,
     crossProduct,
@@ -21,14 +22,14 @@ import fieldStore from './field-store';
 
 
 /**
- * The data model which has been built on the concept of relational algebra.
+ * A model which has been built on the concept of relational algebra.
  *
  * @extends Relation
  */
-class DataTable extends Relation {
+class DataModel extends Relation {
 
     /**
-     * Creates a new DataTable instance.
+     * Creates a new DataModel instance.
      *
      * @param {Array} args - The arguments which is passed directly to the parent class.
      */
@@ -37,7 +38,7 @@ class DataTable extends Relation {
         // The callback to call on propagation
         // new Implementation
         this.children = []; // contains all immediate children
-        this._derivation = []; // specify rules by which this data table is created
+        this._derivation = []; // specify rules by which this data model is created
         this._onPropagation = [];
         this.sortingDetails = {
             column: [],
@@ -46,36 +47,36 @@ class DataTable extends Relation {
     }
 
     /**
-     * Creates a clone from the current DataTable instance.
+     * Creates a clone from the current DataModel instance.
      *
      * @public
-     * @return {DataTable} - Returns the newly cloned DataTable instance.
+     * @return {DataModel} - Returns the newly cloned DataModel instance.
      */
     clone() {
-        return new DataTable(this);
+        return new DataModel(this);
     }
 
     /**
-     * Creates a clone  from the current DataTable instance with
+     * Creates a clone  from the current DataModel instance with
      * child parent relationship.
      *
      * @public
      * @param {boolean} [saveChild=true] - Whether the cloned instance would be recorded
      * in the parent instance.
-     * @return {DataTable} - Returns the newly cloned DataTable instance.
+     * @return {DataModel} - Returns the newly cloned DataModel instance.
      */
     cloneAsChild(saveChild = true) {
-        const retDataTable = this.clone();
+        const retDataModel = this.clone();
         if (saveChild) {
-            this.children.push(retDataTable);
+            this.children.push(retDataModel);
         }
-        retDataTable.parent = this;
-        return retDataTable;
+        retDataModel.parent = this;
+        return retDataModel;
     }
 
     /**
-     * Returns the columnNameSpace for the current DataTable instance.
-     * If the columnNameSpace is not found, it looks to its parent DataTable.
+     * Returns the columnNameSpace for the current DataModel instance.
+     * If the columnNameSpace is not found, it looks to its parent DataModel.
      *
      * @public
      * @return {Object} - Returns the columnNameSpace.
@@ -131,8 +132,8 @@ class DataTable extends Relation {
      *  }
      * }
      *
-     *  const dt = new DataTable(data, schema);
-     *  const dataFormatted = dt.getData(options);
+     *  const dm = new DataModel(data, schema);
+     *  const dataFormatted = dm.getData(options);
      */
     getData(options) {
         const defOptions = {
@@ -222,17 +223,16 @@ class DataTable extends Relation {
     }
 
     /**
-     * Performs the rename operation to the column names of the DataTable instance.
+     * Performs the rename operation to the column names of the DataModel instance.
      *
      * @public
      * @param {Object} schemaObj - The object having the name of the field to rename
      * as key and the new name as the value.
-     * @return {DataTable} Returns a new DataTable instance with the renamed columns.
-     * @note : change partialNamaspace() and also update current fields
+     * @return {DataModel} Returns a new DataModel instance with the renamed columns.
      */
     rename(schemaObj) {
-        const cloneDataTable = this.cloneAsChild();
-        const schemaArr = cloneDataTable.colIdentifier.split(',');
+        const cloneDataModel = this.cloneAsChild();
+        const schemaArr = cloneDataModel.colIdentifier.split(',');
         const _fieldStore = this.getNameSpace().fields;
 
         Object.entries(schemaObj).forEach(([key, value]) => {
@@ -249,33 +249,33 @@ class DataTable extends Relation {
                 }
             }
         });
-        cloneDataTable.colIdentifier = schemaArr.join();
+        cloneDataModel.colIdentifier = schemaArr.join();
         this._updateFields();
-        return cloneDataTable;
+        return cloneDataModel;
     }
 
     /**
      * this reflect the cross-product of the relational algebra or can be called as theta join.
-     * It take another DataTable instance and create new DataTable with the cross-product data and
+     * It take another DataModel instance and create new DataModel with the cross-product data and
      * filter the data according to the filter function provided.
-     * Say there are two dataTable tableA with 4 column 5 rows and tableB with 3 column 6 row
-     * so the new DataTable tableA X tableB will have 7(4 + 3) rows and 30(5 * 6) columns (if no
+     * Say there are two dataModel modelA with 4 column 5 rows and modelB with 3 column 6 row
+     * so the new DataModel modelA X modelB will have 7(4 + 3) rows and 30(5 * 6) columns (if no
      * filter function is provided).
      *
      * @todo Make this API user-friendly.
      *
      * @public
-     * @param  {DataTable} joinWith The DataTable to be joined with this DataTable
+     * @param  {DataModel} joinWith The DataModel to be joined with this DataModel
      * @param  {Function} filterFn Function that will filter the result of the crossProduct
-     * DataTable
-     * @return {DataTable}          the new DataTable created by joining
+     * DataModel
+     * @return {DataModel}          the new DataModel created by joining
      */
     join(joinWith, filterFn) {
         return crossProduct(this, joinWith, filterFn);
     }
 
     /**
-     * This can join two DataTable to form a new DataTable which meet the requirement of
+     * This can join two DataModel to form a new DataModel which meet the requirement of
      * natural join.
      * it's not possible to pass a filter function as the filter function is decided according to
      * the definition of natural join
@@ -283,8 +283,8 @@ class DataTable extends Relation {
      * @todo Make this API user-friendly.
      *
      * @public
-     * @param  {DataTable} joinWith the DataTable with whom this DataTable will be joined
-     * @return {DataTable}          The new joined DataTable
+     * @param  {DataModel} joinWith the DataModel with whom this DataModel will be joined
+     * @return {DataModel}          The new joined DataModel
      */
     naturalJoin(joinWith) {
         return crossProduct(this, joinWith, naturalJoinFilter(this, joinWith), true);
@@ -293,13 +293,13 @@ class DataTable extends Relation {
     /**
      * Performs union operation of the relational algebra.
      * It can be termed as vertical joining of all the unique tuples
-     * from both the DataTable instances. The requirement is both
-     * the DataTable instances should have same column name and order.
+     * from both the DataModel instances. The requirement is both
+     * the DataModel instances should have same column name and order.
      *
      * @public
-     * @param {DataTable} unionWith - Another DataTable instance to which union
+     * @param {DataModel} unionWith - Another DataModel instance to which union
      * operation is performed.
-     * @return {DataTable} Returns the new DataTable instance after operation.
+     * @return {DataModel} Returns the new DataModel instance after operation.
      */
     union(unionWith) {
         return union(this, unionWith);
@@ -308,26 +308,26 @@ class DataTable extends Relation {
     /**
      * Performs difference operation of the relational algebra.
      * It can be termed as vertical joining of all the tuples
-     * those are not in the second DataTable. The requirement
-     * is both the DataTable instances should have same column name and order.
+     * those are not in the second DataModel. The requirement
+     * is both the DataModel instances should have same column name and order.
      *
      * @public
-     * @param {DataTable} differenceWith - Another DataTable instance to which difference
+     * @param {DataModel} differenceWith - Another DataModel instance to which difference
      * operation is performed.
-     * @return {DataTable} Returns the new DataTable instance after operation.
+     * @return {DataModel} Returns the new DataModel instance after operation.
      */
     difference(differenceWith) {
         return difference(this, differenceWith);
     }
 
     /**
-     * Performs projection operation on the current DataTable instance.
+     * Performs projection operation on the current DataModel instance.
      *
      * @public
      * @param {Array.<string | Regexp>} projField - An array of column names in string or regular expression.
      * @param {Object} [config={}] - An optional config.
      * @param {boolean} [saveChild=true] - It is used while cloning.
-     * @return {DataTable} Returns the new DataTable instance after operation.
+     * @return {DataModel} Returns the new DataModel instance after operation.
      */
     project(projField, config = {}, saveChild = true) {
         const allFields = Object.keys(this.getFieldMap());
@@ -346,34 +346,34 @@ class DataTable extends Relation {
             const rejectionSet = allFields.filter(fieldName => normalizedProjField.indexOf(fieldName) === -1);
             normalizedProjField = rejectionSet;
         }
-        let cloneDataTable;
-        cloneDataTable = this.cloneAsChild(saveChild);
-        cloneDataTable._projectHelper(normalizedProjField.join(','));
+        let cloneDataModel;
+        cloneDataModel = this.cloneAsChild(saveChild);
+        cloneDataModel._projectHelper(normalizedProjField.join(','));
         if (saveChild) {
-            this.__persistDerivation(cloneDataTable, DT_DERIVATIVES.PROJECT,
+            this.__persistDerivation(cloneDataModel, DM_DERIVATIVES.PROJECT,
                 { projField, config, projString: normalizedProjField.join(',') }, null);
         }
 
-        return cloneDataTable;
+        return cloneDataModel;
     }
 
     /**
      * Performs selection operation of the relational algebra.
-     * If an existing DataTable instance is passed in the last argument,
-     * then it mutates the that DataTable instead of cloning a new one.
+     * If an existing DataModel instance is passed in the last argument,
+     * then it mutates the that DataModel instead of cloning a new one.
      *
      * @public
      * @param {Function} selectFn - The function which will be looped through all the data
-     * if it return true the row will be there in the DataTable.
+     * if it return true the row will be there in the DataModel.
      * @param {Object} [config={}] - The mode configuration.
      * @param {string} config.mode - The mode of the selection.
      * @param {string} [saveChild=true] - It is used while cloning.
-     * @param {DataTable} [existingDataTable] - An optional existing DataTable instance.
-     * @return {DataTable} Returns the new DataTable instance after operation.
+     * @param {DataModel} [existingDataModel] - An optional existing DataModel instance.
+     * @return {DataModel} Returns the new DataModel instance after operation.
      */
-    select(selectFn, config = {}, saveChild = true, existingDataTable) {
-        let cloneDataTable;
-        let newDataTable;
+    select(selectFn, config = {}, saveChild = true, existingDataModel) {
+        let cloneDataModel;
+        let newDataModel;
         let rowDiffset;
 
         // handle ALL selection mode
@@ -393,49 +393,49 @@ class DataTable extends Relation {
         }
         let child;
 
-        if (existingDataTable instanceof DataTable) {
+        if (existingDataModel instanceof DataModel) {
             child = this.children.find(childElm => childElm._derivation
                              && childElm._derivation.length === 1
-                             && childElm._derivation[0].op === DT_DERIVATIVES.SELECT
-                             && childElm === existingDataTable);
+                             && childElm._derivation[0].op === DM_DERIVATIVES.SELECT
+                             && childElm === existingDataModel);
         }
         if (child) {
-            newDataTable = existingDataTable;
+            newDataModel = existingDataModel;
             rowDiffset = this._selectHelper(this._getPartialNameSpace().fields, selectFn, config);
-            existingDataTable.mutate('rowDiffset', rowDiffset);
+            existingDataModel.mutate('rowDiffset', rowDiffset);
             child._derivation[0].criteria = selectFn;
         }
         else {
-            cloneDataTable = this.cloneAsChild(saveChild);
-            rowDiffset = cloneDataTable._selectHelper(cloneDataTable._getPartialNameSpace().fields, selectFn, config);
-            cloneDataTable.rowDiffset = rowDiffset;
-            newDataTable = cloneDataTable;
+            cloneDataModel = this.cloneAsChild(saveChild);
+            rowDiffset = cloneDataModel._selectHelper(cloneDataModel._getPartialNameSpace().fields, selectFn, config);
+            cloneDataModel.rowDiffset = rowDiffset;
+            newDataModel = cloneDataModel;
         }
 
-        // Store reference to child table and selector function
+        // Store reference to child model and selector function
         if (saveChild && !child) {
-            this.__persistDerivation(newDataTable, DT_DERIVATIVES.SELECT, { config }, selectFn);
+            this.__persistDerivation(newDataModel, DM_DERIVATIVES.SELECT, { config }, selectFn);
         }
 
-        return newDataTable;
+        return newDataModel;
     }
 
     /**
-     * Mutates a property of the current DataTable instance with a new value.
+     * Mutates a property of the current DataModel instance with a new value.
      *
      * @public
      * @param {string} key - The property name to be changed.
      * @param {string} value - The new value of the property.
-     * @return {DataTable} Returns the current DataTable instance itself.
+     * @return {DataModel} Returns the current DataModel instance itself.
      */
     mutate(key, value) {
         this[key] = value;
-        selectIterator(this, (table, fn) => {
-            this.select(fn, {}, false, table);
+        selectIterator(this, (model, fn) => {
+            this.select(fn, {}, false, model);
         });
 
-        projectIterator(this, (table) => {
-            table.mutate(key, value);
+        projectIterator(this, (model) => {
+            model.mutate(key, value);
         });
 
         calculatedMeasureIterator(this, (table, params) => {
@@ -443,14 +443,14 @@ class DataTable extends Relation {
             this.__createMeasure(...[...params, false, table]);
         });
 
-        groupByIterator(this, (table, params) => {
-            this.groupBy(...[params.groupByString.split(','), params.reducer], false, table);
+        groupByIterator(this, (model, params) => {
+            this.groupBy(...[params.groupByString.split(','), params.reducer], false, model);
         });
         return this;
     }
 
     /**
-     * Performs group-by operation on the current DataTable instance according to
+     * Performs group-by operation on the current DataModel instance according to
      * the fields and reducers provided.
      * The fields can be skipped in that case all field will be taken into consideration.
      * The reducer can also be given, If nothing is provided sum will be the default reducer.
@@ -459,18 +459,18 @@ class DataTable extends Relation {
      * @param {Array} fieldsArr - An array containing the name of the columns.
      * @param {Object | Function | string} [reducers={}] - The reducer function.
      * @param {string} [saveChild=true] - Whether the child to save  or not.
-     * @param {DataTable} [existingDataTable] - An optional existing DataTable instance.
-     * @return {DataTable} Returns the new DataTable instance after operation.
+     * @param {DataModel} [existingDataModel] - An optional existing DataModel instance.
+     * @return {DataModel} Returns the new DataModel instance after operation.
      */
-    groupBy(fieldsArr, reducers = {}, saveChild = true, existingDataTable) {
+    groupBy(fieldsArr, reducers = {}, saveChild = true, existingDataModel) {
         const groupByString = `${fieldsArr.join()}`;
         let present = false;
-        if (existingDataTable instanceof DataTable) {
+        if (existingDataModel instanceof DataModel) {
             let child = this.children.find(childElm => childElm._derivation
                                             && childElm._derivation.length === 1
-                                            && childElm._derivation[0].op === DT_DERIVATIVES.GROUPBY
+                                            && childElm._derivation[0].op === DM_DERIVATIVES.GROUPBY
                                             && childElm._derivation[0].meta.groupByString === groupByString
-                                            && childElm === existingDataTable);
+                                            && childElm === existingDataModel);
             if (child) {
                 present = true;
                 child._derivation[0].meta.fieldsArr = fieldsArr;
@@ -481,20 +481,20 @@ class DataTable extends Relation {
         }
         let params = [this, fieldsArr, reducers];
         if (present) {
-            params.push(existingDataTable);
+            params.push(existingDataModel);
         }
-        const newDatatable = groupBy(...params);
+        const newDataModel = groupBy(...params);
         if (saveChild && !present) {
-            this.children.push(newDatatable);
-            this.__persistDerivation(newDatatable, DT_DERIVATIVES.GROUPBY,
+            this.children.push(newDataModel);
+            this.__persistDerivation(newDataModel, DM_DERIVATIVES.GROUPBY,
                 { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() }, reducers);
         }
         if (present) {
-            existingDataTable.mutate('rowDiffset', existingDataTable.rowDiffset);
+            existingDataModel.mutate('rowDiffset', existingDataModel.rowDiffset);
         }
 
-        newDatatable.parent = this;
-        return newDatatable;
+        newDataModel.parent = this;
+        return newDataModel;
     }
 
     /**
@@ -520,14 +520,14 @@ class DataTable extends Relation {
      * you have to pass the array of array [['columnName', 'sortType(asc|desc)']] and the
      * function getData will give the data accordingly
      *
-     * Please note no new DataTable will be created from this call, as this function overwrite the
+     * Please note no new DataModel will be created from this call, as this function overwrite the
      * previous sorting config
      *
-     * @todo Fix whether a new DataTable instance is returned or not.
+     * @todo Fix whether a new DataModel instance is returned or not.
      *
      * @public
      * @param  {Array} sortList The array of all the column that need to be sorted
-     * @return {DataTable}            it's own instance
+     * @return {DataModel}            it's own instance
      */
     sort(sortList) {
         sortList.forEach((row) => {
@@ -576,10 +576,10 @@ class DataTable extends Relation {
      * @param {Array<string>} fields - An array of fields to take as input.
      * @param {Function} callback - A callback supplied to calculate the property.
      * @param {boolean} [saveChild=true] - Whether the child to save  or not.
-     * @param {DataTable} [existingDataTable] - An optional DataTable instance.
-     * @return {DataTable} - Returns a new DataTable instance.
+     * @param {DataModel} [existingDataModel] - An optional DataModel instance.
+     * @return {DataModel} - Returns a new DataModel instance.
      */
-    __createMeasure(config, fields, callback, saveChild = true, existingDataTable) {
+    __createMeasure(config, fields, callback, saveChild = true, existingDataModel) {
         const {
             name,
             unit,
@@ -590,13 +590,13 @@ class DataTable extends Relation {
         let clone;
         let existingChild = this.children.find(childElm => childElm._derivation
                                                 && childElm._derivation.length === 1
-                                                && childElm._derivation[0].op === DT_DERIVATIVES.CAL_MEASURE
-                                                && childElm === existingDataTable);
+                                                && childElm._derivation[0].op === DM_DERIVATIVES.CAL_MEASURE
+                                                && childElm === existingDataModel);
 
         // Get the fields present
         const fieldMap = this.getFieldMap();
         if (fieldMap[name] && !existingChild) {
-            throw new Error(`${name} field already exists in table.`);
+            throw new Error(`${name} field already exists in model.`);
         }
         // Validate that the supplied fields are present
         // and measures
@@ -611,7 +611,7 @@ class DataTable extends Relation {
             return fieldSpec.index;
         });
         if (existingChild) {
-            clone = existingDataTable;
+            clone = existingDataModel;
         }
         else {
             clone = this.cloneAsChild(saveChild);
@@ -645,14 +645,14 @@ class DataTable extends Relation {
         if (index !== -1 && existingChild) {
             namespaceFields[index] = nameSpaceEntry;
             existingChild.params = [config, fields, callback];
-            existingDataTable.mutate('rowDiffset', existingDataTable.rowDiffset);
+            existingDataModel.mutate('rowDiffset', existingDataModel.rowDiffset);
         }
         else {
             namespaceFields.push(nameSpaceEntry);
             // update the column identifier
             clone.colIdentifier += `,${name}`;
         }
-        // update the field map of child DataTable instance
+        // update the field map of child DataModel instance
         const childFieldMap = clone.getFieldMap();
         childFieldMap[name] = {
             index: namespaceFields.length - 1,
@@ -662,12 +662,12 @@ class DataTable extends Relation {
             },
         };
         if (existingChild) {
-            existingDataTable._derivation[0].meta.config = config;
-            existingDataTable._derivation[0].meta.fields = fields;
-            existingDataTable._derivation[0].criteria = callback;
+            existingDataModel._derivation[0].meta.config = config;
+            existingDataModel._derivation[0].meta.fields = fields;
+            existingDataModel._derivation[0].criteria = callback;
         }
         if (saveChild && !existingChild) {
-            this.__persistDerivation(clone, DT_DERIVATIVES.CAL_MEASURE, { config, fields }, callback);
+            this.__persistDerivation(clone, DM_DERIVATIVES.CAL_MEASURE, { config, fields }, callback);
         }
 
         return clone;
@@ -683,7 +683,7 @@ class DataTable extends Relation {
      * @param {Object} config - An object wth configuration options.
      * @param {string} config.removeDependentDimensions - The flag to indicate whether dependent
      * dimensions should be removed.
-     * @return {DataTable} Returns the new DataTable instance.
+     * @return {DataModel} Returns the new DataModel instance.
      */
     __createDimensions(dimObj, dependents, callback, config = {}) {
         // get the fields present
@@ -762,13 +762,13 @@ class DataTable extends Relation {
      * @param {string} category - The name of the new category.
      * @param {string} valueName - The name of the measure.
      * @param {Function} callback - The callback used to calculate new names of source fields.
-     * @return {DataTable} Returns a new DataTable instance.
+     * @return {DataModel} Returns a new DataModel instance.
      * @TODO: Remove method as no one uses it or if aware what it does
      */
     createDimensionFrom(sourceFields, category, valueName, callback) {
         const fieldMap = this.getFieldMap();
         const newNames = sourceFields.map(callback);
-        // create a data table with all the fields except sourceFields
+        // create a data model with all the fields except sourceFields
         const excluded = this.project(sourceFields, {
             mode: ProjectionMode.EXCLUDE,
         });
@@ -802,7 +802,7 @@ class DataTable extends Relation {
             });
             newData.push(...newDataTuples);
         });
-        // create a new data table with this data
+        // create a new data model with this data
         const schema = Object.keys(newData[0]).map((fieldName) => {
             if (fieldMap[fieldName]) {
                 return {
@@ -821,17 +821,17 @@ class DataTable extends Relation {
                 type: FieldType.MEASURE,
             };
         });
-        return new DataTable(newData, schema);
+        return new DataModel(newData, schema);
     }
 
     /**
-     * Assembles a Datatable instance from the propagated identifiers.
+     * Assembles a DataModel instance from the propagated identifiers.
      *
      * @private
      * @param {Array} identifiers - An array of dimensions that were interacted upon.
-     * @return {DataTable} Returns a DataTable assembled from identifiers.
+     * @return {DataModel} Returns a DataModel assembled from identifiers.
      */
-    _assembleTableFromIdentifiers(identifiers) {
+    _assembleModelFromIdentifiers(identifiers) {
         let schema = [];
         let data;
         let fieldMap = this.getFieldMap();
@@ -871,21 +871,21 @@ class DataTable extends Relation {
             data = [];
             schema = [];
         }
-        return new DataTable(data, schema);
+        return new DataModel(data, schema);
     }
 
     /**
-     * Filters the current DataTable instance and only return those fields
-     * that appear in the propagation table or only those ROW_ID's
-     * that appear in the prop table.
+     * Filters the current DataModel instance and only return those fields
+     * that appear in the propagation model or only those ROW_ID's
+     * that appear in the prop model.
      *
      * @private
-     * @param {DataTable} propTable - The propagation datatable instance.
-     * @return {DataTable} Returns the filtered propagation table.
+     * @param {DataModel} propModel - The propagation datamodel instance.
+     * @return {DataModel} Returns the filtered propagation model.
      */
-    _filterPropagationTable(propTable) {
-        const { data, schema } = propTable.getData();
-        let filteredTable;
+    _filterPropagationModel(propModel) {
+        const { data, schema } = propModel.getData();
+        let filteredModel;
         if (schema.length) {
             if (schema[0].name === ROW_ID) {
                 // iterate over data and create occurence map
@@ -893,11 +893,11 @@ class DataTable extends Relation {
                 data.forEach((val) => {
                     occMap[val[0]] = true;
                 });
-                filteredTable = this.select((fields, rIdx) => occMap[rIdx], {}, false);
+                filteredModel = this.select((fields, rIdx) => occMap[rIdx], {}, false);
             } else {
                 let fieldMap = this.getFieldMap();
                 let filteredSchema = schema.filter(d => d.name in fieldMap && d.type === FieldType.DIMENSION);
-                filteredTable = this.select((fields) => {
+                filteredModel = this.select((fields) => {
                     let include = true;
                     filteredSchema.forEach((propField, idx) => {
                         let index = data.findIndex(d => d[idx] === fields[propField.name].valueOf());
@@ -908,68 +908,68 @@ class DataTable extends Relation {
             }
         }
         else {
-            filteredTable = propTable;
+            filteredModel = propModel;
         }
 
-        return filteredTable;
+        return filteredModel;
     }
 
     /**
-     * Propagates changes across all the connected DataTable instances.
+     * Propagates changes across all the connected DataModel instances.
      *
      * @public
      * @param {Array} identifiers - A list of identifiers that were interacted with.
      * @param {Object} payload - The interaction specific details.
-     * @param {DataTable} source - The source DataTable instance.
+     * @param {DataModel} source - The source DataModel instance.
      */
     propagate(identifiers, payload, source, grouped = false) {
-        let propTable = identifiers;
-        if (!(propTable instanceof DataTable)) {
-            propTable = this._assembleTableFromIdentifiers(identifiers);
+        let propModel = identifiers;
+        if (!(propModel instanceof DataModel)) {
+            propModel = this._assembleModelFromIdentifiers(identifiers);
         }
 
-        // create the filtered table
-        const filteredTable = this._filterPropagationTable(propTable);
-        // function to propagate to target the DataTable instance.
-        const forwardPropagation = (targetDT, propagationData, group) => {
-            targetDT.handlePropagation({
+        // create the filtered model
+        const filteredModel = this._filterPropagationModel(propModel);
+        // function to propagate to target the DataModel instance.
+        const forwardPropagation = (targetDM, propagationData, group) => {
+            targetDM.handlePropagation({
                 payload,
                 data: propagationData,
             });
-            targetDT.propagate(propagationData, payload, this, group);
+            targetDM.propagate(propagationData, payload, this, group);
         };
         // propagate to children created by SELECT operation
-        selectIterator(this, (targetDT, criteria) => {
-            if (targetDT !== source) {
-                let selectedTable = propTable;
+        selectIterator(this, (targetDM, criteria) => {
+            if (targetDM !== source) {
+                let selectedModel = propModel;
                 if (grouped) {
-                    selectedTable = !propTable._isEmpty() && propTable.select(criteria);
+                    selectedModel = !propModel._isEmpty() && propModel.select(criteria);
                 }
-                forwardPropagation(targetDT, selectedTable);
+                forwardPropagation(targetDM, selectedModel);
             }
         });
         // propagate to children created by PROJECT operation
-        projectIterator(this, (targetDT) => {
-            if (targetDT !== source) {
+        projectIterator(this, (targetDM) => {
+            if (targetDM !== source) {
                 // pass al the props cause it won't make a difference
-                forwardPropagation(targetDT, propTable, grouped);
+                forwardPropagation(targetDM, propModel, grouped);
             }
         });
         // propagate to children created by groupBy operation
-        groupByIterator(this, (targetDT, conf) => {
-            if (targetDT !== source) {
+        groupByIterator(this, (targetDM, conf) => {
+            if (targetDM !== source) {
                 const {
                     reducer,
                     groupByString,
                 } = conf;
-                // group the filtered table based on groupBy string of target
-                const groupedPropTable = filteredTable.groupBy(groupByString.split(','), reducer, false);
-                forwardPropagation(targetDT, groupedPropTable, true);
+                // group the filtered model based on groupBy string of target
+                const groupedPropModel = filteredModel.groupBy(groupByString.split(','), reducer, false);
+                forwardPropagation(targetDM, groupedPropModel, true);
             }
         });
         // propagate to parent if parent is not source
         if (this.parent && source !== this.parent) {
-            forwardPropagation(this.parent, propTable, grouped);
+            forwardPropagation(this.parent, propModel, grouped);
         }
     }
 
@@ -984,14 +984,14 @@ class DataTable extends Relation {
      * @private
      * @param {Object} rangeObj Object with field names and corresponding selected ranges.
      * @param {Object} payload Object with insertion related fields.
-     * @memberof DataTable
+     * @memberof DataModel
      */
     propagateInterpolatedValues(rangeObj, payload, fromSource) {
         const source = fromSource || this;
-        let propTable = rangeObj;
-        if (!(propTable instanceof DataTable)) {
+        let propModel = rangeObj;
+        if (!(propModel instanceof DataModel)) {
             const measures = Object.keys(rangeObj);
-            propTable = this.select((fields) => {
+            propModel = this.select((fields) => {
                 let include = true;
                 measures.forEach((fieldName) => {
                     const domain = rangeObj[fieldName];
@@ -1001,39 +1001,39 @@ class DataTable extends Relation {
                 return include;
             }, {}, false);
         }
-        const forward = (dataTable, propagationTable, isParent) => {
-            dataTable.handlePropagation({
+        const forward = (dataModel, propagationModel, isParent) => {
+            dataModel.handlePropagation({
                 payload,
-                data: propagationTable,
+                data: propagationModel,
             });
-            dataTable.propagateInterpolatedValues(isParent ?
-                rangeObj : propagationTable, payload, this);
+            dataModel.propagateInterpolatedValues(isParent ?
+                rangeObj : propagationModel, payload, this);
         };
         // propagate to children created by SELECT operation
-        selectIterator(this, (targetDT, fn) => {
-            if (targetDT !== source) {
-                let selectTable;
-                selectTable = propTable.select(fn, {}, false);
-                forward(targetDT, selectTable);
+        selectIterator(this, (targetDM, fn) => {
+            if (targetDM !== source) {
+                let selectModel;
+                selectModel = propModel.select(fn, {}, false);
+                forward(targetDM, selectModel);
             }
         });
         // propagate to children created by PROJECT operation
-        projectIterator(this, (targetDT, projString) => {
-            if (targetDT !== source) {
-                let projectTable;
-                projectTable = propTable.project(projString.split(','), {}, false);
-                forward(targetDT, projectTable);
+        projectIterator(this, (targetDM, projString) => {
+            if (targetDM !== source) {
+                let projectModel;
+                projectModel = propModel.project(projString.split(','), {}, false);
+                forward(targetDM, projectModel);
             }
         });
         // propagate to children created by GROUPBY operation
-        groupByIterator(this, (targetDT) => {
-            if (targetDT !== source) {
-                forward(targetDT, propTable);
+        groupByIterator(this, (targetDM) => {
+            if (targetDM !== source) {
+                forward(targetDM, propModel);
             }
         });
         // propagate to parent if parent is not source
         if (this.parent && source !== this.parent) {
-            forward(this.parent, propTable, true);
+            forward(this.parent, propModel, true);
         }
     }
 
@@ -1043,7 +1043,7 @@ class DataTable extends Relation {
      * @public
      * @param {string} eventName - The name of the event.
      * @param {Function} callback - The callback to invoke.
-     * @return {DataTable} Returns this current DataTable instance itself.
+     * @return {DataModel} Returns this current DataModel instance itself.
      */
     on(eventName, callback) {
         switch (eventName) {
@@ -1059,7 +1059,7 @@ class DataTable extends Relation {
      *
      * @public
      * @param {string} eventName - The name of the event to unsubscribe.
-     * @return {DataTable} Returns the current DataTable instance itself.
+     * @return {DataModel} Returns the current DataModel instance itself.
      */
     unsubscribe(eventName) {
         switch (eventName) {
@@ -1079,8 +1079,8 @@ class DataTable extends Relation {
      *
      * @private
      * @param {Object} payload The interaction payload.
-     * @param {DataTable} identifiers The propagated DataTable.
-     * @memberof DataTable
+     * @param {DataModel} identifiers The propagated DataModel.
+     * @memberof DataModel
      */
     handlePropagation(payload, identifiers) {
         let propListeners = this._onPropagation;
@@ -1098,7 +1098,7 @@ class DataTable extends Relation {
      * @param {number} config.binSize - The size of a bin.
      * @param {number} config.numOfBins - The number of bins to create.
      * @param {string} binnedFieldName - The name of the new field.
-     * @return {DataTable} Returns the new DataTable instance.
+     * @return {DataModel} Returns the new DataModel instance.
      */
     createBin(measureName, config, binnedFieldName) {
         const clone = this.cloneAsChild();
@@ -1147,7 +1147,7 @@ class DataTable extends Relation {
         const nameSpaceEntry = new Field(partialField, this.rowDiffset);
         // push this to the child DataTable instance field store
         namespaceFields.push(nameSpaceEntry);
-        // update the field map of child DataTable instance
+        // update the field map of child DataModel instance
         const childFieldMap = clone.getFieldMap();
         childFieldMap[binnedFieldName] = {
             index: namespaceFields.length - 1,
@@ -1159,7 +1159,7 @@ class DataTable extends Relation {
         // update the column identifier
         clone.colIdentifier += `,${binnedFieldName}`;
 
-        this.__persistDerivation(clone, DT_DERIVATIVES.BIN, { measureName, config, binnedFieldName }, null);
+        this.__persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binnedFieldName }, null);
 
         return clone;
     }
@@ -1177,7 +1177,7 @@ class DataTable extends Relation {
     }
     /**
      *
-     * @param {DataTable} child : Delegates the parent to remove this child
+     * @param {DataModel} child : Delegates the parent to remove this child
      */
     __removeChild(child) {
         // remove from child list
@@ -1186,38 +1186,38 @@ class DataTable extends Relation {
     }
     /**
      *
-     * @param { DataTable } parent datatable instance which will act as its parent of this.
+     * @param { DataModel } parent datamodel instance which will act as its parent of this.
      * @param { Queue } criteriaQueue Queue contains in-between operation meta-data
      */
     __addParent(parent, criteriaQueue = []) {
         this.partialColumnNameSpace = this.partialColumnNameSpace === undefined ?
                                         this.parent.getNameSpace() : this.partialColumnNameSpace;
-        this.__persistDerivation(this, DT_DERIVATIVES.COMPOSE, null, criteriaQueue);
+        this.__persistDerivation(this, DM_DERIVATIVES.COMPOSE, null, criteriaQueue);
         this.parent = parent;
         parent.children.push(this);
     }
 
     /**
      *
-     * @param {DataTable} table :Child table derived from operation
+     * @param {DataModel} model :Child model derived from operation
      * @param {String} operation : Type of operation used
      * @param {Object} config : Contains metaData used in this operation
      * @param {Function} criteriaFn : Function which having used to do the derivation
      */
-    __persistDerivation(table, operation, config = {}, criteriaFn) {
+    __persistDerivation(model, operation, config = {}, criteriaFn) {
         let derivative;
-        if (operation !== DT_DERIVATIVES.COMPOSE) {
+        if (operation !== DM_DERIVATIVES.COMPOSE) {
             derivative = {
                 op: operation,
                 meta: config,
                 criteria: criteriaFn
             };
-            table._derivation.push(derivative);
+            model._derivation.push(derivative);
         }
         else {
             derivative = [...criteriaFn];
-            table._derivation.length = 0;
-            table._derivation.push(...derivative);
+            model._derivation.length = 0;
+            model._derivation.push(...derivative);
         }
     }
 
@@ -1243,4 +1243,4 @@ class DataTable extends Relation {
     }
 }
 
-export default DataTable;
+export default DataModel;
