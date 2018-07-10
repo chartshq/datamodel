@@ -1237,5 +1237,14 @@ describe('Datatable', () => {
         it('datatable createdMeasure instance should not change', () => {
             expect(dt6).to.equal(dt7);
         });
+
+        it('Should throw error if no data specified', () => {
+            expect(
+                () => {
+                    let k = new DataTable(null);
+                    k;
+                }
+            ).to.throw('Data not specified');
+        });
     });
 });

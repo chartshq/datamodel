@@ -47,4 +47,10 @@ describe('DateTime Field Type', () => {
             expect(mockedParseFn).not.throw(Error);
         });
     });
+
+    it('Should correctly calculate Min diff between dates array', () => {
+        field = new DateTime(schema.name, data, schema);
+        let diff = field.getMinDiff();
+        expect(diff).to.equal(86400000);
+    });
 });

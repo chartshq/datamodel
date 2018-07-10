@@ -33,8 +33,8 @@ export default class Field {
         return domain;
     }
 
-    parse () {
-        return this._ref.parse();
+    parse (val) {
+        return this._ref.parse(val);
     }
 
 
@@ -53,43 +53,37 @@ export default class Field {
     description() {
         return this._ref.description();
     }
-    __columnIDs(collids) {
-        this._collID = collids;
-    }
-    __rowDiffSet(rowDiffSet) {
-        this._rowDiff = rowDiffSet;
-    }
 
     get name() {
         return this._ref.name;
     }
 
-    set name(name) {
-        throw new Error('Not yet implemented!');
-    }
+    // set name(name) {
+    //     this._ref.name = name;
+    // }
 
     get schema() {
         return this._ref.schema;
     }
 
-    set schema(schema) {
-        throw new Error('Not yet implemented!');
-    }
+    // set schema(schema) {
+    //     this._ref.schema = schema;
+    // }
 
     get data() {
         return this._ref.data;
     }
 
-    set data(schema) {
-        throw new Error('Not yet implemented!');
-    }
+    // set data(schema) {
+    //     throw new Error('Not yet implemented!');
+    // }
 
     subType() {
         return this._ref.subtype();
     }
 
     getMinDiff () {
-        return this._ref.minDiff();
+        return this._ref.getMinDiff();
     }
 
     /**

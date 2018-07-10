@@ -211,7 +211,7 @@ class DataTable extends Relation {
     getDataWithUids() {
         return dataBuilder.call(
             this,
-            this._getPartialNameSpace().fields,
+            this.getNameSpace().fields,
             this.rowDiffset,
             this.colIdentifier,
             this.sortingDetails,
