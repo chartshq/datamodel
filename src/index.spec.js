@@ -757,13 +757,13 @@ describe('DataModel', () => {
             { name: 'second', type: 'dimension' },
         ];
         const dataModel = new DataModel(data1, schema1, 'Yo');
-        const newDt = dataModel.calculateVariable({
+        const newDm = dataModel.calculateVariable({
             name: 'Song',
             type: 'dimension'
         }, ['first', 'second', (first, second) =>
             `${first} ${second}`
         ]);
-        const songData = newDt.project(['Song']);
+        const songData = newDm.project(['Song']);
         expect(
             songData.getData().data[0][0]
         ).to.equal('Hey Jude');
@@ -1167,7 +1167,7 @@ describe('DataModel', () => {
         let dm7 = dataModel.calculateVariable({
             name: 'UnEfficiency'
         }, ['sales', 'profit', (sales, profit) => sales / profit], { saveChild: true }, dm6);
-        it('datatable select instance should not change', () => {
+        it('datamodel select instance should not change', () => {
             expect(dm2).to.equal(dm4);
         });
         it('datamodel groupby instance should not change it namespace', () => {
