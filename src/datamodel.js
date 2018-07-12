@@ -75,30 +75,30 @@ class DataModel extends Relation {
     }
 
     /**
-     * Returns the columnNameSpace for the current DataModel instance.
-     * If the columnNameSpace is not found, it looks to its parent DataModel.
+     * Returns the nameSpace for the current DataModel instance.
+     * If the nameSpace is not found, it looks to its parent DataModel.
      *
      * @public
-     * @return {Object} - Returns the columnNameSpace.
+     * @return {Object} - Returns the nameSpace.
      */
-    getNameSpace() {
-        if (!this.columnNameSpace) {
+    getFieldSpace() {
+        if (!this.fieldSpace) {
             this._updateFields();
         }
-        return this.columnNameSpace;
+        return this.fieldSpace;
     }
 
-    _getPartialNameSpace() {
+    getNameSpace() {
         let child = this;
-        if (this.partialColumnNameSpace) { return this.partialColumnNameSpace; }
+        if (this.nameSpace) { return this.nameSpace; }
 
-        if (!child.parent.columnNameSpace) {
-            this.partialColumnNameSpace = child.parent.getNameSpace();
+        if (!child.parent.fieldSpace) {
+            this.nameSpace = child.parent.getFieldSpace();
         }
         else {
-            this.partialColumnNameSpace = child.parent.columnNameSpace;
+            this.nameSpace = child.parent.fieldSpace;
         }
-        return this.partialColumnNameSpace;
+        return this.nameSpace;
     }
 
     /**
@@ -108,7 +108,7 @@ class DataModel extends Relation {
      * @return {Array} Returns an array of field schema.
      */
     getSchema() {
-        return this.getNameSpace().fields.map(d => d.schema);
+        return this.getFieldSpace().fields.map(d => d.schema);
     }
 
     /**
@@ -144,7 +144,7 @@ class DataModel extends Relation {
 
         const dataGenerated = dataBuilder.call(
             this,
-            this.getNameSpace().fields,
+            this.getFieldSpace().fields,
             this.rowDiffset,
             this.colIdentifier,
             this.sortingDetails,
@@ -212,7 +212,7 @@ class DataModel extends Relation {
     getDataWithUids() {
         return dataBuilder.call(
             this,
-            this.getNameSpace().fields,
+            this.getFieldSpace().fields,
             this.rowDiffset,
             this.colIdentifier,
             this.sortingDetails,
@@ -233,7 +233,7 @@ class DataModel extends Relation {
     rename(schemaObj) {
         const cloneDataModel = this.cloneAsChild();
         const schemaArr = cloneDataModel.colIdentifier.split(',');
-        const _fieldStore = this.getNameSpace().fields;
+        const _fieldStore = this.getFieldSpace().fields;
 
         Object.entries(schemaObj).forEach(([key, value]) => {
             if (schemaArr.indexOf(key) !== -1 && typeof value === 'string') {
@@ -380,11 +380,11 @@ class DataModel extends Relation {
         if (config.mode === SelectionMode.ALL) {
             // Do a normal selection
             const firstClone = this.cloneAsChild();
-            rowDiffset = firstClone._selectHelper(firstClone._getPartialNameSpace().fields, selectFn, {});
+            rowDiffset = firstClone._selectHelper(firstClone.getNameSpace().fields, selectFn, {});
             firstClone.rowDiffset = rowDiffset;
             // Do an inverse selection
             const rejectClone = this.cloneAsChild();
-            rowDiffset = rejectClone._selectHelper(rejectClone._getPartialNameSpace().fields, selectFn, {
+            rowDiffset = rejectClone._selectHelper(rejectClone.getNameSpace().fields, selectFn, {
                 mode: SelectionMode.INVERSE,
             });
             rejectClone.rowDiffset = rowDiffset;
@@ -401,13 +401,13 @@ class DataModel extends Relation {
         }
         if (child) {
             newDataModel = existingDataModel;
-            rowDiffset = this._selectHelper(this._getPartialNameSpace().fields, selectFn, config);
+            rowDiffset = this._selectHelper(this.getNameSpace().fields, selectFn, config);
             existingDataModel.mutate('rowDiffset', rowDiffset);
             child._derivation[0].criteria = selectFn;
         }
         else {
             cloneDataModel = this.cloneAsChild(saveChild);
-            rowDiffset = cloneDataModel._selectHelper(cloneDataModel._getPartialNameSpace().fields, selectFn, config);
+            rowDiffset = cloneDataModel._selectHelper(cloneDataModel.getNameSpace().fields, selectFn, config);
             cloneDataModel.rowDiffset = rowDiffset;
             newDataModel = cloneDataModel;
         }
@@ -614,7 +614,7 @@ class DataModel extends Relation {
         else {
             clone = this.cloneAsChild(saveChild);
         }
-        const namespaceFields = clone.getNameSpace().fields;
+        const namespaceFields = clone.getFieldSpace().fields;
         const suppliedFields = fieldIndices.map(idx => namespaceFields[idx]);
         // array of computed data values
         const computedValues = [];
@@ -699,7 +699,7 @@ class DataModel extends Relation {
             return fieldSpec.index;
         });
         const clone = this.cloneAsChild();
-        const namespaceFields = clone.getNameSpace().fields;
+        const namespaceFields = clone.getFieldSpace().fields;
         const suppliedFields = depIndices.map(idx => namespaceFields[idx]);
         // array of computed data values
         const computedValues = [];
@@ -1030,7 +1030,7 @@ class DataModel extends Relation {
      */
     createBin(measureName, config, binnedFieldName) {
         const clone = this.cloneAsChild();
-        const namespaceFields = clone.getNameSpace().fields;
+        const namespaceFields = clone.getFieldSpace().fields;
         const fieldMap = this.getFieldMap();
         binnedFieldName = binnedFieldName || `${measureName}_binned`;
         if (fieldMap[binnedFieldName]) {
@@ -1041,7 +1041,7 @@ class DataModel extends Relation {
         }
         // get the data for field to be binned
         const fieldIndex = this.getFieldMap()[measureName].index;
-        const fieldData = this.getNameSpace().fields[fieldIndex].data;
+        const fieldData = this.getFieldSpace().fields[fieldIndex].data;
         // get the buckets
         const buckets = config.buckets || createBuckets(fieldData, config);
         const startVals = buckets.map(item => item.start || 0);
@@ -1118,8 +1118,8 @@ class DataModel extends Relation {
      * @param { Queue } criteriaQueue Queue contains in-between operation meta-data
      */
     __addParent(parent, criteriaQueue = []) {
-        this.partialColumnNameSpace = this.partialColumnNameSpace === undefined ?
-                                        this.parent.getNameSpace() : this.partialColumnNameSpace;
+        this.nameSpace = this.nameSpace === undefined ?
+                                        this.parent.getFieldSpace() : this.nameSpace;
         this.__persistDerivation(this, DM_DERIVATIVES.COMPOSE, null, criteriaQueue);
         this.parent = parent;
         parent.children.push(this);
@@ -1153,15 +1153,15 @@ class DataModel extends Relation {
         let newFields = [];
         if (!this.fields) {
             let collID = this.colIdentifier.split(',');
-            this._getPartialNameSpace().fields.forEach((field) => {
+            this.getNameSpace().fields.forEach((field) => {
                 if (collID.indexOf(field.name) !== -1) {
                     let newField = new Field(field, this.rowDiffset);
                     newFields.push(newField);
                 }
             });
 
-            this.columnNameSpace = fieldStore.createNameSpace(newFields, this._getPartialNameSpace().name);
-            this.fields = this.columnNameSpace.fields;
+            this.fieldSpace = fieldStore.createNameSpace(newFields, this.getNameSpace().name);
+            this.fields = this.fieldSpace.fields;
         }
         return this.fields;
     }

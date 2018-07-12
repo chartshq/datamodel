@@ -1171,7 +1171,7 @@ describe('DataModel', () => {
             expect(dm2).to.equal(dm4);
         });
         it('datamodel groupby instance should not change it namespace', () => {
-            expect(dm3.getNameSpace().name).to.equal(dm5.getNameSpace().name);
+            expect(dm3.getFieldSpace().name).to.equal(dm5.getFieldSpace().name);
         });
         it('datamodel createdMeasure instance should not change', () => {
             expect(dm6).to.equal(dm7);
