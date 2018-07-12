@@ -549,10 +549,10 @@ class DataModel extends Relation {
      *  subype: 'temporal | ...',
      *  all the variable what schema gets
      *  }}
-     *  @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dt) => {}]
+     *  @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dm) => {}]
      * @param {Object} config : { saveChild : true | false , removeDependentDimensions : true|false}
      */
-    calculateVariable(varConfig, paramConfig, config = {}, existingDataTable) {
+    calculateVariable(varConfig, paramConfig, config = {}, existingDataModel) {
         if (varConfig.type === FieldType.DIMENSION) {
             return this.__createDimensions(varConfig,
                 paramConfig.slice(0, paramConfig.length - 1),
@@ -562,11 +562,11 @@ class DataModel extends Relation {
         return this.__createMeasure(varConfig,
                 paramConfig.slice(0, paramConfig.length - 1),
                 paramConfig[paramConfig.length - 1],
-                config.saveChild, existingDataTable);
+                config.saveChild, existingDataModel);
     }
 
     /**
-     * Creates a calculated measure from the current DataTable instance.
+     * Creates a calculated measure from the current DataModel instance.
      *
      * @public
      * @param {Object} config - The config.
@@ -638,7 +638,7 @@ class DataModel extends Relation {
         });
 
         const nameSpaceEntry = new Field(partialField, this.rowDiffset);
-        // push this to the child DataTable instance field store
+        // push this to the child DataModel instance field store
         let index = namespaceFields.findIndex(d => d.name === name);
         if (index !== -1 && existingChild) {
             namespaceFields[index] = nameSpaceEntry;
@@ -730,9 +730,9 @@ class DataModel extends Relation {
         }
 
         const nameSpaceEntry = new Field(partialField, this.rowDiffset);
-            // push this to the child DataTable instance field store
+            // push this to the child DataModel instance field store
         namespaceFields.push(nameSpaceEntry);
-            // update the field map of child DataTable instance
+            // update the field map of child DataModel instance
         const childFieldMap = clone.getFieldMap();
         childFieldMap[name] = {
             index: namespaceFields.length - 1,
@@ -1073,7 +1073,7 @@ class DataModel extends Relation {
         });
 
         const nameSpaceEntry = new Field(partialField, this.rowDiffset);
-        // push this to the child DataTable instance field store
+        // push this to the child DataModel instance field store
         namespaceFields.push(nameSpaceEntry);
         // update the field map of child DataModel instance
         const childFieldMap = clone.getFieldMap();
