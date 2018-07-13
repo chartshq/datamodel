@@ -42,6 +42,7 @@ class Relation {
             this.colIdentifier = source.colIdentifier;
             this.rowDiffset = source.rowDiffset;
             this.fieldMap = source.fieldMap;
+            this._nameSpace = source.getNameSpace();
         } else {
             if (!data) {
                 throw new Error('Data not specified');

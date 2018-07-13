@@ -44,6 +44,7 @@ class DataModel extends Relation {
             column: [],
             type: [],
         };
+        this._updateFields();
     }
 
     /**
@@ -82,9 +83,6 @@ class DataModel extends Relation {
      * @return {Object} - Returns the nameSpace.
      */
     getFieldSpace() {
-        if (!this.fieldSpace) {
-            this._updateFields();
-        }
         return this.fieldSpace;
     }
 
