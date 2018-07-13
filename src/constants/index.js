@@ -4,14 +4,14 @@
 export const PROPAGATION = 'propagation';
 
 /**
- * The name of the unique row id column in DataTable.
+ * The name of the unique row id column in DataModel.
  */
 export const ROW_ID = '__id__';
 
 /**
- * The enums for operation names performed on DataTable.
+ * The enums for operation names performed on DataModel.
  */
-export const DT_DERIVATIVES = {
+export const DM_DERIVATIVES = {
     SELECT: 'select',
     PROJECT: 'project',
     GROUPBY: 'group',

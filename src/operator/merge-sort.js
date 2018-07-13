@@ -76,7 +76,7 @@ function sort(arr, lo, hi, sortFn) {
 
 /**
  * The implementation of merge sort.
- * It is used in DataTable for stable sorting as it is not sure
+ * It is used in DataModel for stable sorting as it is not sure
  * what the sorting algorithm used by browsers is stable or not.
  *
  * @param {Array} arr - The target array which needs to be sorted.

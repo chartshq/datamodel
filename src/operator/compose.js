@@ -1,22 +1,22 @@
 export function compose(...operations) {
-    return function(dt) {
-        let currentDT = dt;
+    return function(dm) {
+        let currentDM = dm;
         let frstChild;
         const derivations = [];
         operations.forEach((operation) => {
-            currentDT = operation(currentDT);
-            derivations.push(...currentDT._derivation);
+            currentDM = operation(currentDM);
+            derivations.push(...currentDM._derivation);
             if (!frstChild) {
-                frstChild = currentDT;
+                frstChild = currentDM;
             }
         });
 
-        currentDT.__addParent(dt, derivations);
+        currentDM.__addParent(dm, derivations);
         if (derivations.length > 1) {
             frstChild.dispose();
         }
 
-        return currentDT;
+        return currentDM;
     };
 }
 
@@ -27,29 +27,29 @@ export function compose(...operations) {
  * select,project,bin,groupby
  */
 export function bin(...args) {
-    function action(dt) {
-        return dt.createBin(...args);
+    function action(dm) {
+        return dm.createBin(...args);
     }
     return action;
 }
 
 export function rowFilter(...args) {
-    function action(dt) {
-        return dt.select(...args);
+    function action(dm) {
+        return dm.select(...args);
     }
     return action;
 }
 
 export function columnFilter(...args) {
-    function action(dt) {
-        return dt.project(...args);
+    function action(dm) {
+        return dm.project(...args);
     }
     return action;
 }
 
 export function groupby(...args) {
-    function action(dt) {
-        return dt.groupBy(...args);
+    function action(dm) {
+        return dm.groupBy(...args);
     }
     return action;
 }

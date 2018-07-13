@@ -1,10 +1,11 @@
 import { SelectionMode } from 'picasso-util';
 import createFields from './create-fields';
-import fieldStore from './field-store';
+
 import { rowDiffsetIterator } from './operator';
 import defaultConfig from './default-config';
 import * as converter from './converter';
 import Value from './value';
+import fieldStore from './field-store';
 
 /**
  * Prepares the selection data.
@@ -30,17 +31,18 @@ class Relation {
      * @param {Object | string | Relation} data - The input tabular data in csv or json format or
      * an existing Relation instance object.
      * @param {Array} schema - An array of data schema.
-     * @param {string} [name] - The name of the DataTable instance, if not provided will assign a random name.
+     * @param {string} [name] - The name of the DataModel instance, if not provided will assign a random name.
      * @param {Object} [options] - The optional options.
      */
     constructor(data, schema, name, options) {
         if (data instanceof Relation) {
-            // parent datatable was passed as part of source
+            // parent datamodel was passed as part of source
             const source = data;
             // Copy the required property
             this.colIdentifier = source.colIdentifier;
             this.rowDiffset = source.rowDiffset;
             this.fieldMap = source.fieldMap;
+            this._nameSpace = source.getNameSpace();
         } else {
             if (!data) {
                 throw new Error('Data not specified');
@@ -62,14 +64,14 @@ class Relation {
 
         // This will create a new fieldStore with the fields
         const nameSpace = fieldStore.createNameSpace(fieldArr, name);
-        this.columnNameSpace = nameSpace;
-        this.fieldMap = schema.reduce((acc, fieldDef, i) => {
-            acc[fieldDef.name] = {
-                index: i,
-                def: fieldDef
-            };
-            return acc;
-        }, {});
+        this._nameSpace = nameSpace;
+        // this.fieldMap = schema.reduce((acc, fieldDef, i) => {
+        //     acc[fieldDef.name] = {
+        //         index: i,
+        //         def: fieldDef
+        //     };
+        //     return acc;
+        // }, {});
         // If data is provided create the default colIdentifier and rowDiffset
         this.rowDiffset = `0-${formattedData[0] ? (formattedData[0].length - 1) : 0}`;
         this.colIdentifier = (schema.map(_ => _.name)).join();
@@ -77,10 +79,10 @@ class Relation {
     }
 
     /**
-     * Sets the projection to the DataTable instance only the projection string/
+     * Sets the projection to the DataModel instance only the projection string
      *
      * @param {string} projString - The projection to be applied.
-     * @return {DataTable} Returns the current DataTable instance.
+     * @return {DataModel} Returns the current DataModel instance.
      */
     _projectHelper(projString) {
         let presentField = Object.keys(this.fieldMap);
@@ -97,7 +99,7 @@ class Relation {
     }
 
     /**
-     * Sets the selection to the current DataTable instance.
+     * Sets the selection to the current DataModel instance.
      *
      * @param {Array} fields - The fields array.
      * @param {Function} selectFn - The filter function.
@@ -132,8 +134,9 @@ class Relation {
 
 
     _isEmpty () {
-        return !this.rowDiffset.length;
+        return !this.rowDiffset.length || !this.colIdentifier.length;
     }
+
 }
 
 export default Relation;

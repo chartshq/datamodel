@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { calculatedMeasureIterator } from './child-iterator';
-import DataTable from '../index';
+import DataModel from '../index';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a' },
@@ -16,16 +16,16 @@ const schema1 = [
 ];
 
 describe('Testing Child Iterator', () => {
-    let dt = new DataTable(data1, schema1);
+    let dm = new DataModel(data1, schema1);
     let createdCallBack = (profit, sales) => profit / sales;
     let hasSameChild = false;
     let hasSameFunction = false;
-    const child = dt.createMeasure({
+    const child = dm.calculateVariable({
         name: 'Efficiency'
-    }, ['profit', 'sales'], createdCallBack);
+    }, ['profit', 'sales', createdCallBack]);
 
-    let callback = function(table, params) {
-        if (dt.children.find(childElm => childElm === table)) {
+    let callback = function(model, params) {
+        if (dm.children.find(childElm => childElm === model)) {
             hasSameChild = true;
         }
         if (params.callback === createdCallBack) {
@@ -33,7 +33,7 @@ describe('Testing Child Iterator', () => {
         }
     };
     it('Should return expected child and its callback', () => {
-        calculatedMeasureIterator(dt, callback);
+        calculatedMeasureIterator(dm, callback);
         expect(hasSameChild).to.equal(true);
         expect(hasSameFunction).to.equal(true);
     });

@@ -1,101 +1,124 @@
-import { extend2 } from '../utils';
+import { rowDiffsetIterator } from '../operator/row-diffset-iterator'
+;
 
- /**
-  * The base class for every field type.
-  * It provides some common functionalities.
-  */
-class Field {
-
-    /**
-     * Sets basic setups to each Field instance.
-     *
-     * @param {string} name - The name or identifier of the field.
-     * @param {Array} data - The data array.
-     * @param {Object} schema - The schema of the data type.
-     */
-    constructor(name, data, schema) {
-        this.name = name;
-        this.data = data || [];
-        this.schema = schema;
-        this.fieldDescription = schema.description;
-        this.fieldType = schema.type;
-        this.sanitize();
+export default class Field {
+    constructor(partialFeild, rowDiff) {
+        this._ref = partialFeild;
+        this._rowDiff = rowDiff;
     }
 
-    /**
-     * Sanitizes the field data.
-     *
-     * @return {Field} - Returns the instance of the current context for chaining.
-     */
     sanitize () {
-        this.data = this.data.map(d => this.parsed(this.parse(d)));
-        return this;
+        return this._ref.sanitize();
     }
 
-    /**
-     * The post parsing hook for field instance.
-     *
-     * @param {*} val - The value to be parsed.
-     * @return {*} Returns the parsed value.
-     */
     parsed (val) {
-        return val;
+        return this._ref.parsed(val);
     }
 
-    /**
-     * Generates and returns the domain for the field.
-     *
-     * @abstract
-     */
     domain() {
-        throw new Error('Not yet implemented!');
+        let data = [];
+        let domain = null;
+        rowDiffsetIterator(this._rowDiff, (i) => {
+            data.push(this._ref.data[i]);
+        });
+
+        if (this._ref.fieldType === 'dimension') {
+            domain = [...new Set(data)];
+        } else {
+            let minD = Math.min.apply(null, data);
+            let maxD = Math.max.apply(null, data);
+            domain = [minD, maxD];
+        }
+
+        return domain;
     }
 
-    /**
-     * Parse the input value before using.
-     *
-     * @abstract
-     */
-    parse () {
-        throw new Error('Not yet implemented!');
+    parse (val) {
+        return this._ref.parse(val);
     }
 
-    /**
-     * Creates brand new copy of current field instance. To avoid optimization issue
-     * pass the required data otherwise current data would be copied which might
-     * be expensive.
-     *
-     * @param {Array} data - The input data, if provided current data will not be cloned.
-     * @return {Field} Returns the cloned field instance.
-     */
-    clone(data) {
-        data = data || extend2([], this.data);
-        const schema = extend2({}, this.schema);
-        // Here call the constructor to create an instance of
-        // the current field class type e.g. Measure, Dimension etc.
-        return new this.constructor(this.name, data, schema);
+
+    clone(datas) {
+        return this._ref.clone(datas);
     }
 
-    /**
-     * @return {string} Name of the field
-     */
     fieldName() {
-        return this.name;
+        return this._ref.fieldName();
     }
 
-     /**
-     * @return {string} Type of the field
-     */
     type() {
-        return this.fieldType;
+        return this._ref.type();
+    }
+
+    description() {
+        return this._ref.description();
+    }
+
+    get name() {
+        return this._ref.name;
+    }
+
+    // set name(name) {
+    //     this._ref.name = name;
+    // }
+
+    get schema() {
+        return this._ref.schema;
+    }
+
+    // set schema(schema) {
+    //     this._ref.schema = schema;
+    // }
+
+    get data() {
+        return this._ref.data;
+    }
+
+    // set data(schema) {
+    //     throw new Error('Not yet implemented!');
+    // }
+
+    subType() {
+        return this._ref.subtype();
+    }
+
+    getMinDiff () {
+        return this._ref.getMinDiff();
     }
 
     /**
-     * @return {description} Name of the field
+     * Getter for unit value of the field.
+     *
+     * @return {string} Returns unit of the field.
      */
-    description() {
-        return this.fieldDescription;
+    unit() {
+        return this._ref.unit();
+    }
+
+    /**
+     * Getter for scale value of the field.
+     *
+     * @return {string} Returns scale of the field.
+     */
+    scale() {
+        return this._ref.scale();
+    }
+
+    /**
+     * Getter for number format value of the field.
+     *
+     * @return {string} Returns number format of the field.
+     */
+    numberformat() {
+        return this._ref.numberformat();
+    }
+
+    /**
+     * Getter for aggregation function of the field.
+     *
+     * @return {Function} Returns aggregation function of the field.
+     */
+    defAggFn() {
+        return this._ref.defAggFn();
     }
 }
-
-export default Field;

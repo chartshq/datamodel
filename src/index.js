@@ -1,10 +1,10 @@
 import { DataFormat, DimensionSubtype, FieldType, ProjectionMode, SelectionMode } from 'picasso-util';
-import DataTable from './datatable';
+import DataModel from './datamodel';
 import * as Operators from './operator';
 
-DataTable.Operators = Operators;
+DataModel.Operators = Operators;
 
-export default DataTable;
+export default DataModel;
 
 export const TYPES = {
     DataFormat,

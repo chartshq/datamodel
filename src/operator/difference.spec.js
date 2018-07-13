@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { difference } from './difference';
-import DataTable from '../index';
+import DataModel from '../index';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a', state: 'aa' },
@@ -32,10 +32,10 @@ const schema2 = [
 
 describe('Checking difference', () => {
     it('Basic difference test cases', () => {
-        const dataTable1 = (new DataTable(data1, schema1, 'TableA')).project(['city', 'state']);
-        const dataTable2 = (new DataTable(data2, schema2, 'TableB')).project(['city', 'state']);
-        const differenceDataTable = difference(dataTable1, dataTable2);
-        expect(differenceDataTable.getData()).to.deep.equal({
+        const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
+        const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'state']);
+        const differenceDataModel = difference(dataModel1, dataModel2);
+        expect(differenceDataModel.getData()).to.deep.equal({
             schema: [
                 { name: 'city', type: 'dimension' },
                 { name: 'state', type: 'dimension' },
