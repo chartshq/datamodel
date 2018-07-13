@@ -88,17 +88,31 @@ class DataModel extends Relation {
         return this.fieldSpace;
     }
 
+    // getNameSpace() {
+    //     let child = this;
+    //     if (this.nameSpace) { return this.nameSpace; }
+
+    //     if (!child.parent.fieldSpace) {
+    //         this.nameSpace = child.parent.getFieldSpace();
+    //     }
+    //     else {
+    //         this.nameSpace = child.parent.fieldSpace;
+    //     }
+    //     return this.nameSpace;
+    // }
+
     getNameSpace() {
         let child = this;
+        let nameSpace;
         if (this.nameSpace) { return this.nameSpace; }
-
-        if (!child.parent.fieldSpace) {
-            this.nameSpace = child.parent.getFieldSpace();
+        while (child.parent) {
+            if (child.parent.nameSpace) {
+                nameSpace = child.parent.nameSpace;
+                break;
+            }
+            child = child.parent;
         }
-        else {
-            this.nameSpace = child.parent.fieldSpace;
-        }
-        return this.nameSpace;
+        return nameSpace;
     }
 
     /**
@@ -144,7 +158,7 @@ class DataModel extends Relation {
 
         const dataGenerated = dataBuilder.call(
             this,
-            this.getFieldSpace().fields,
+            this.getNameSpace().fields,
             this.rowDiffset,
             this.colIdentifier,
             this.sortingDetails,
@@ -212,7 +226,7 @@ class DataModel extends Relation {
     getDataWithUids() {
         return dataBuilder.call(
             this,
-            this.getFieldSpace().fields,
+            this.getNameSpace().fields,
             this.rowDiffset,
             this.colIdentifier,
             this.sortingDetails,
@@ -233,7 +247,7 @@ class DataModel extends Relation {
     rename(schemaObj) {
         const cloneDataModel = this.cloneAsChild();
         const schemaArr = cloneDataModel.colIdentifier.split(',');
-        const _fieldStore = this.getFieldSpace().fields;
+        const _fieldStore = this.getNameSpace().fields;
 
         Object.entries(schemaObj).forEach(([key, value]) => {
             if (schemaArr.indexOf(key) !== -1 && typeof value === 'string') {
@@ -614,7 +628,7 @@ class DataModel extends Relation {
         else {
             clone = this.cloneAsChild(saveChild);
         }
-        const namespaceFields = clone.getFieldSpace().fields;
+        const namespaceFields = clone.getNameSpace().fields;
         const suppliedFields = fieldIndices.map(idx => namespaceFields[idx]);
         // array of computed data values
         const computedValues = [];
@@ -637,16 +651,16 @@ class DataModel extends Relation {
             defAggFn
         });
 
-        const nameSpaceEntry = new Field(partialField, this.rowDiffset);
+        // const nameSpaceEntry = new Field(partialField, this.rowDiffset);
         // push this to the child DataModel instance field store
         let index = namespaceFields.findIndex(d => d.name === name);
         if (index !== -1 && existingChild) {
-            namespaceFields[index] = nameSpaceEntry;
+            namespaceFields[index] = partialField;
             existingChild.params = [config, fields, callback];
             existingDataModel.mutate('rowDiffset', existingDataModel.rowDiffset);
         }
         else {
-            namespaceFields.push(nameSpaceEntry);
+            namespaceFields.push(partialField);
             // update the column identifier
             clone.colIdentifier += `,${name}`;
         }
@@ -699,7 +713,7 @@ class DataModel extends Relation {
             return fieldSpec.index;
         });
         const clone = this.cloneAsChild();
-        const namespaceFields = clone.getFieldSpace().fields;
+        const namespaceFields = clone.getNameSpace().fields;
         const suppliedFields = depIndices.map(idx => namespaceFields[idx]);
         // array of computed data values
         const computedValues = [];
@@ -729,9 +743,9 @@ class DataModel extends Relation {
             });
         }
 
-        const nameSpaceEntry = new Field(partialField, this.rowDiffset);
+        // const nameSpaceEntry = new Field(partialField, this.rowDiffset);
             // push this to the child DataModel instance field store
-        namespaceFields.push(nameSpaceEntry);
+        namespaceFields.push(partialField);
             // update the field map of child DataModel instance
         const childFieldMap = clone.getFieldMap();
         childFieldMap[name] = {
@@ -1030,7 +1044,7 @@ class DataModel extends Relation {
      */
     createBin(measureName, config, binnedFieldName) {
         const clone = this.cloneAsChild();
-        const namespaceFields = clone.getFieldSpace().fields;
+        const namespaceFields = clone.getNameSpace().fields;
         const fieldMap = this.getFieldMap();
         binnedFieldName = binnedFieldName || `${measureName}_binned`;
         if (fieldMap[binnedFieldName]) {
@@ -1041,7 +1055,7 @@ class DataModel extends Relation {
         }
         // get the data for field to be binned
         const fieldIndex = this.getFieldMap()[measureName].index;
-        const fieldData = this.getFieldSpace().fields[fieldIndex].data;
+        const fieldData = this.getNameSpace().fields[fieldIndex].data;
         // get the buckets
         const buckets = config.buckets || createBuckets(fieldData, config);
         const startVals = buckets.map(item => item.start || 0);
@@ -1072,9 +1086,9 @@ class DataModel extends Relation {
             type: FieldType.DIMENSION,
         });
 
-        const nameSpaceEntry = new Field(partialField, this.rowDiffset);
+       // const nameSpaceEntry = new Field(partialField, this.rowDiffset);
         // push this to the child DataModel instance field store
-        namespaceFields.push(nameSpaceEntry);
+        namespaceFields.push(partialField);
         // update the field map of child DataModel instance
         const childFieldMap = clone.getFieldMap();
         childFieldMap[binnedFieldName] = {
@@ -1119,7 +1133,7 @@ class DataModel extends Relation {
      */
     __addParent(parent, criteriaQueue = []) {
         this.nameSpace = this.nameSpace === undefined ?
-                                        this.parent.getFieldSpace() : this.nameSpace;
+                                        this.parent.getNameSpace() : this.nameSpace;
         this.__persistDerivation(this, DM_DERIVATIVES.COMPOSE, null, criteriaQueue);
         this.parent = parent;
         parent.children.push(this);
@@ -1151,18 +1165,18 @@ class DataModel extends Relation {
 
     _updateFields() {
         let newFields = [];
-        if (!this.fields) {
-            let collID = this.colIdentifier.split(',');
-            this.getNameSpace().fields.forEach((field) => {
-                if (collID.indexOf(field.name) !== -1) {
-                    let newField = new Field(field, this.rowDiffset);
-                    newFields.push(newField);
-                }
-            });
 
-            this.fieldSpace = fieldStore.createNameSpace(newFields, this.getNameSpace().name);
-            this.fields = this.fieldSpace.fields;
-        }
+        let collID = this.colIdentifier.split(',');
+        this.getNameSpace().fields.forEach((field) => {
+            if (collID.indexOf(field.name) !== -1) {
+                let newField = new Field(field, this.rowDiffset);
+                newFields.push(newField);
+            }
+        });
+
+        this.fieldSpace = fieldStore.createNameSpace(newFields, this.getNameSpace().name);
+        this.fields = this.fieldSpace.fields;
+
         return this.fields;
     }
 
