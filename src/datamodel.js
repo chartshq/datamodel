@@ -88,26 +88,13 @@ class DataModel extends Relation {
         return this.fieldSpace;
     }
 
-    // getNameSpace() {
-    //     let child = this;
-    //     if (this.nameSpace) { return this.nameSpace; }
-
-    //     if (!child.parent.fieldSpace) {
-    //         this.nameSpace = child.parent.getFieldSpace();
-    //     }
-    //     else {
-    //         this.nameSpace = child.parent.fieldSpace;
-    //     }
-    //     return this.nameSpace;
-    // }
-
     getNameSpace() {
         let child = this;
         let nameSpace;
-        if (this.nameSpace) { return this.nameSpace; }
+        if (this._nameSpace) { return this._nameSpace; }
         while (child.parent) {
-            if (child.parent.nameSpace) {
-                nameSpace = child.parent.nameSpace;
+            if (child.parent._nameSpace) {
+                nameSpace = child.parent._nameSpace;
                 break;
             }
             child = child.parent;
@@ -1132,8 +1119,8 @@ class DataModel extends Relation {
      * @param { Queue } criteriaQueue Queue contains in-between operation meta-data
      */
     __addParent(parent, criteriaQueue = []) {
-        this.nameSpace = this.nameSpace === undefined ?
-                                        this.parent.getNameSpace() : this.nameSpace;
+        this._nameSpace = this._nameSpace === undefined ?
+                                        this.parent.getNameSpace() : this._nameSpace;
         this.__persistDerivation(this, DM_DERIVATIVES.COMPOSE, null, criteriaQueue);
         this.parent = parent;
         parent.children.push(this);

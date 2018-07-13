@@ -63,7 +63,7 @@ class Relation {
 
         // This will create a new fieldStore with the fields
         const nameSpace = fieldStore.createNameSpace(fieldArr, name);
-        this.nameSpace = nameSpace;
+        this._nameSpace = nameSpace;
         // this.fieldMap = schema.reduce((acc, fieldDef, i) => {
         //     acc[fieldDef.name] = {
         //         index: i,
