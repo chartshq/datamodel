@@ -18,8 +18,9 @@ describe('Categorical Field Type', () => {
     beforeEach(() => {
         field = new Categorical(schema.name, data, schema);
     });
-
-    it('should implement getter methods', () => {
-        expect(field.subType()).to.equal(schema.subtype);
+    describe('#subType()', () => {
+        it('should implement getter methods', () => {
+            expect(field.subType()).to.equal(schema.subtype);
+        });
     });
 });

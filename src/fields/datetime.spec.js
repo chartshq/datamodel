@@ -20,11 +20,13 @@ describe('DateTime Field Type', () => {
         field = new DateTime(schema.name, data, schema);
     });
 
-    it('should implement getter methods', () => {
-        expect(field.subType()).to.equal(schema.subtype);
+    describe('#subType()', () => {
+        it('should implement getter methods', () => {
+            expect(field.subType()).to.equal(schema.subtype);
+        });
     });
 
-    describe('#prototype.parse()', () => {
+    describe('#parse()', () => {
         it('should return parsed timestamp', () => {
             const dateStr = '2017-03-01';
 
@@ -48,9 +50,11 @@ describe('DateTime Field Type', () => {
         });
     });
 
-    it('Should correctly calculate Min diff between dates array', () => {
-        field = new DateTime(schema.name, data, schema);
-        let diff = field.getMinDiff();
-        expect(diff).to.equal(86400000);
+    describe('#getMinDiff()', () => {
+        it('Should correctly calculate Min diff between dates array', () => {
+            field = new DateTime(schema.name, data, schema);
+            let diff = field.getMinDiff();
+            expect(diff).to.equal(86400000);
+        });
     });
 });

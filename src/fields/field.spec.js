@@ -24,9 +24,8 @@ describe('Field Type', () => {
         let partialfield = new PartialField(schema.name, data, schema);
         field2 = new Field(partialfield, null);
     });
-
-    it('hello should hold data and schema references', () => {
-        // expect(field2.data).to.deep.equal(data);
+    it('should hold data and schema references', () => {
+        expect(field2.data).to.deep.equal(data);
         expect(field2.schema).to.deep.equal(schema);
     });
 
@@ -36,7 +35,7 @@ describe('Field Type', () => {
         expect(field2.description()).to.equal(schema.description);
     });
 
-    describe('#prototype.clone()', () => {
+    describe('#clone()', () => {
         it('should clone current instance with new data', () => {
             const newData = [];
             const cloned = field2.clone(newData);
@@ -61,7 +60,7 @@ describe('Field Type', () => {
         });
     });
 
-    describe('New Measure Field Type', () => {
+    describe('New Measure Field', () => {
         const schema3 = {
             name: 'Miles_per_Gallon',
             type: FieldType.MEASURE,
@@ -88,7 +87,7 @@ describe('Field Type', () => {
         });
 
 
-        describe('#prototype.domain()', () => {
+        describe('#domain()', () => {
             it('should return measure domain', () => {
                 const domain = field3.domain();
 
@@ -96,7 +95,7 @@ describe('Field Type', () => {
             });
         });
 
-        describe('#prototype.parse()', () => {
+        describe('#parse()', () => {
             it('should return number for parsable field value', () => {
                 expect(field3.parse('123')).to.equal(123);
             });
@@ -107,7 +106,7 @@ describe('Field Type', () => {
             });
         });
 
-        describe('New Dimension Field Test', () => {
+        describe('New Dimension Field', () => {
             const schema2 = {
                 name: 'Country',
                 type: FieldType.DIMENSION
