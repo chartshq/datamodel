@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import DataModel from './index';
 
 describe('DataModel', () => {
-    describe('#clone', () => {
+    describe('#clone()', () => {
         it('should clone successfully', () => {
             const data = [
                 { a: 10, aaa: 20, aaaa: 'd' },
@@ -30,7 +30,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#getData', () => {
+    describe('#getData()', () => {
         it('should retrieves the data correctly', () => {
             const schema = [
                 { name: 'name', type: 'dimension' },
@@ -126,7 +126,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#project', () => {
+    describe('#project(params)', () => {
         it('should project the fields correctly', () => {
             const data = [
                 { a: 10, aaa: 20, aaaa: 'd' },
@@ -186,7 +186,7 @@ describe('DataModel', () => {
     });
 
 
-    describe('#select', () => {
+    describe('#select(params)', () => {
         it('should perform selection', () => {
             const data = [
                 { a: 10, aaa: 20, aaaa: 'd' },
@@ -297,10 +297,10 @@ describe('DataModel', () => {
             ];
             const dataModel = new DataModel(data, schema);
             const projectedDataModel = (dataModel.project(['aaaa', 'a'])).select(fields =>
-                    fields.aaaa.value === 'demo');
-                // Check if repetition select works
+                fields.aaaa.value === 'demo');
+            // Check if repetition select works
             const projectedDataModel1 = projectedDataModel.select(fields =>
-                    fields.a.value === 10);
+                fields.a.value === 10);
             let expData = {
                 schema: [
                     { name: 'aaaa', type: 'dimension' },
@@ -342,7 +342,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#rename', () => {
+    describe('#rename()', () => {
         it('should perform rename properly', () => {
             const data = [
                 { a: 10, aaa: 20, aaaa: 'd' },
@@ -380,7 +380,7 @@ describe('DataModel', () => {
     });
 
 
-    describe('#sort', () => {
+    describe('#sort()', () => {
         it('should perform sorting properly', () => {
             const data = [
                 { a: 10, aaa: 20 },
@@ -461,9 +461,9 @@ describe('DataModel', () => {
                 uids: [2, 7, 3, 9, 4, 8, 1, 0, 6, 5]
             };
             dataModel.sort([
-                    ['a'],
-                    ['aa', 'desc'],
-                    ['aaa'],
+                ['a'],
+                ['aa', 'desc'],
+                ['aaa'],
             ]);
             expect(dataModel.getData()).to.deep.equal(expData);
         });
@@ -510,7 +510,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#join', () => {
+    describe('#join()', () => {
         it('should perform join properly', () => {
             const data1 = [
                 { profit: 10, sales: 20, city: 'a' },
@@ -551,15 +551,15 @@ describe('DataModel', () => {
             expect((dataModel1.join(dataModel2, obj => obj.ModelA.city === obj.ModelB.city))
                             .getData()).to.deep.equal({
                                 schema: [
-                    { name: 'profit', type: 'measure' },
-                    { name: 'sales', type: 'measure' },
-                    { name: 'ModelA.city', type: 'dimension' },
-                    { name: 'population', type: 'measure' },
-                    { name: 'ModelB.city', type: 'dimension' },
+                                    { name: 'profit', type: 'measure' },
+                                    { name: 'sales', type: 'measure' },
+                                    { name: 'ModelA.city', type: 'dimension' },
+                                    { name: 'population', type: 'measure' },
+                                    { name: 'ModelB.city', type: 'dimension' },
                                 ],
                                 data: [
-                    [10, 20, 'a', 200, 'a'],
-                    [15, 25, 'b', 250, 'b'],
+                                    [10, 20, 'a', 200, 'a'],
+                                    [15, 25, 'b', 250, 'b'],
                                 ],
                                 uids: [0, 1]
                             });
@@ -579,7 +579,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#difference & #union', () => {
+    describe('#difference() & #union()', () => {
         it('should perform the difference and union properly', () => {
             const data1 = [
                 { profit: 10, sales: 20, city: 'a', state: 'aa' },
@@ -637,8 +637,8 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#caclulatedVariable', () => {
-        it('should create a calcualted measure', () => {
+    describe('#caclulatedVariable()', () => {
+        it('should create a calculated measure', () => {
             const data1 = [
                 { profit: 10, sales: 20, city: 'a', state: 'aa' },
                 { profit: 15, sales: 25, city: 'b', state: 'bb' },
@@ -735,7 +735,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#propagate', () => {
+    describe('#propagate()', () => {
         it('should propagate variables through out the dag', () => {
             const data1 = [
                 { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
@@ -822,7 +822,7 @@ describe('DataModel', () => {
     });
 
 
-    describe('#bin', () => {
+    describe('#bin()', () => {
         it('should bin the data', () => {
             const toBinData = [
                 { marks: 1, },
@@ -993,40 +993,44 @@ describe('DataModel', () => {
             },
         ];
         const dataModel = new DataModel(data1, schema1);
-        it('Should remove child on calling dispose', () => {
-            let dm2 = dataModel.select(fields => fields.profit.value < 150);
-            expect(dataModel.children.length).to.equal(1);
-            dm2.dispose();
-            expect(dataModel.children.length).to.equal(0);
+        describe('#dispose()', () => {
+            it('Should remove child on calling dispose', () => {
+                let dm2 = dataModel.select(fields => fields.profit.value < 150);
+                expect(dataModel.children.length).to.equal(1);
+                dm2.dispose();
+                expect(dataModel.children.length).to.equal(0);
+            });
         });
 
-        it('Adding parent should save criteria in parent', () => {
-            let dm2 = dataModel.select(fields => fields.profit.value < 150);
-            let dm3 = dm2.groupBy(['sales'], {
-                profit: null
+        describe('#__addParent()', () => {
+            it('Adding parent should save criteria in parent', () => {
+                let dm2 = dataModel.select(fields => fields.profit.value < 150);
+                let dm3 = dm2.groupBy(['sales'], {
+                    profit: null
+                });
+                let dm4 = dm3.project(['sales']);
+                let data = dm4.getData();
+                let projFields = ['first'];
+                let projectConfig = {};
+                let normalizedprojFields = [];
+                let criteriaQueue = [
+                    {
+                        op: 'select',
+                        meta: '',
+                        criteria: fields => fields.profit.value < 150
+                    },
+                    {
+                        op: 'project',
+                        meta: { projFields, projectConfig, normalizedprojFields },
+                        criteria: null
+                    }
+                ];
+                dm3.dispose();
+                dm4.__addParent(dm2, criteriaQueue);
+                expect(dm2.children.length).to.equal(1);
+                expect(dm2.children[0].getData()).to.deep.equal(data);
+                expect(dm4.parent).to.equal(dm2);
             });
-            let dm4 = dm3.project(['sales']);
-            let data = dm4.getData();
-            let projFields = ['first'];
-            let projectConfig = {};
-            let normalizedprojFields = [];
-            let criteriaQueue = [
-                {
-                    op: 'select',
-                    meta: '',
-                    criteria: fields => fields.profit.value < 150
-                },
-                {
-                    op: 'project',
-                    meta: { projFields, projectConfig, normalizedprojFields },
-                    criteria: null
-                }
-            ];
-            dm3.dispose();
-            dm4.__addParent(dm2, criteriaQueue);
-            expect(dm2.children.length).to.equal(1);
-            expect(dm2.children[0].getData()).to.deep.equal(data);
-            expect(dm4.parent).to.equal(dm2);
         });
     });
 

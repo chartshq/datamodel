@@ -18,13 +18,13 @@ describe('Value', () => {
         expect(value.field).to.equal(fieldName);
     });
 
-    describe('#prototype.toString()', () => {
+    describe('#toString()', () => {
         it('should return human readable string of the field value', () => {
             expect(value.toString()).to.equal(String(fieldValue));
         });
     });
 
-    describe('#prototype.valueOf()', () => {
+    describe('#valueOf()', () => {
         it('should return the field value', () => {
             expect(value.valueOf()).to.equal(fieldValue);
         });
