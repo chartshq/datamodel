@@ -42,8 +42,14 @@ class DateTime extends Dimension {
     * @return {number} Returns the total timestamps in millisecond.
     */
     parse(val) {
-        this._dtf = this._dtf || new DateTimeFormatter(this.schema.format || '');
-        return this._dtf.getNativeDate(val).getTime();
+        if (this.schema.format) {
+            this._dtf = this._dtf || new DateTimeFormatter(this.schema.format);
+            return this._dtf.getNativeDate(val).getTime();
+        }
+
+        // If format is not present then it means the value is such that the it could be directly passed to date
+        // constructor
+        return +new Date(val);
     }
 }
 
