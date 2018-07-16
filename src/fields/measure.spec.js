@@ -22,21 +22,38 @@ describe('Measure Field Type', () => {
         field = new Measure(schema.name, data, schema);
     });
 
-    it('should implement getter methods', () => {
-        expect(field.unit()).to.equal(schema.unit);
-        expect(field.scale()).to.equal(schema.scale);
-        expect(field.numberformat()).to.equal(schema.numberformat);
-        expect(field.defAggFn()).to.equal(schema.defAggFn);
+    describe('#unit()', () => {
+        it('should implement unit getter methods', () => {
+            expect(field.unit()).to.equal(schema.unit);
+        });
     });
 
-    describe('#prototype.domain()', () => {
+    describe('#scale()', () => {
+        it('should implement scale getter methods', () => {
+            expect(field.scale()).to.equal(schema.scale);
+        });
+    });
+
+    describe('#numberformat()', () => {
+        it('should implement numberformat getter methods', () => {
+            expect(field.numberformat()).to.equal(schema.numberformat);
+        });
+    });
+
+    describe('#defAggFn()', () => {
+        it('should implement defAggFn getter methods', () => {
+            expect(field.defAggFn()).to.equal(schema.defAggFn);
+        });
+    });
+
+    describe('#domain()', () => {
         it('should return measure domain', () => {
             const domain = field.domain();
             expect(domain).to.deep.equal([1, 78]);
         });
     });
 
-    describe('#prototype.parse()', () => {
+    describe('#parse()', () => {
         it('should return number for parsable field value', () => {
             expect(field.parse('123')).to.equal(123);
         });

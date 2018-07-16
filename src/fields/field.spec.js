@@ -24,15 +24,29 @@ describe('Field Type', () => {
         let partialfield = new PartialField(schema.name, data, schema);
         field2 = new Field(partialfield, null);
     });
-    it('should hold data and schema references', () => {
-        expect(field2.data).to.deep.equal(data);
-        expect(field2.schema).to.deep.equal(schema);
+    describe('#data , #schema', () => {
+        it('should hold data and schema references', () => {
+            expect(field2.data).to.deep.equal(data);
+            expect(field2.schema).to.deep.equal(schema);
+        });
     });
 
-    it('should implement getter methods', () => {
-        expect(field2.fieldName()).to.equal(schema.name);
-        expect(field2.type()).to.equal(schema.type);
-        expect(field2.description()).to.equal(schema.description);
+    describe('#fieldName()', () => {
+        it('should implement fieldName getter methods', () => {
+            expect(field2.fieldName()).to.equal(schema.name);
+        });
+    });
+
+    describe('#type()', () => {
+        it('should implement type getter methods', () => {
+            expect(field2.type()).to.equal(schema.type);
+        });
+    });
+
+    describe('#description()', () => {
+        it('should implement description getter methods', () => {
+            expect(field2.description()).to.equal(schema.description);
+        });
     });
 
     describe('#clone()', () => {
@@ -79,11 +93,28 @@ describe('Field Type', () => {
             field3 = new Field(partialField, '0-3');
         });
 
-        it('should implement getter methods', () => {
-            expect(field3.unit()).to.equal(schema3.unit);
-            expect(field3.scale()).to.equal(schema3.scale);
-            expect(field3.numberformat()).to.equal(schema3.numberformat);
-            expect(field3.defAggFn()).to.equal(schema3.defAggFn);
+        describe('#unit()', () => {
+            it('should implement unit getter methods', () => {
+                expect(field3.unit()).to.equal(schema3.unit);
+            });
+        });
+
+        describe('#scale()', () => {
+            it('should implement scale getter methods', () => {
+                expect(field3.scale()).to.equal(schema3.scale);
+            });
+        });
+
+        describe('#numberformat()', () => {
+            it('should implement numberformat getter methods', () => {
+                expect(field3.numberformat()).to.equal(schema3.numberformat);
+            });
+        });
+
+        describe('#defAggFn()', () => {
+            it('should implement defAggFn getter methods', () => {
+                expect(field3.defAggFn()).to.equal(schema3.defAggFn);
+            });
         });
 
 
@@ -119,7 +150,7 @@ describe('Field Type', () => {
                 field = new Field(partialField, '0-5');
             });
 
-            describe('#prototype.domain()', () => {
+            describe('#domain()', () => {
                 it('should return dimension domain', () => {
                     const domain = field.domain();
                     expect(domain.sort()).to.deep.equal(['India', 'USA', 'Japan', 'China'].sort());
@@ -127,18 +158,20 @@ describe('Field Type', () => {
             });
         });
 
-        it('Should correctly calculate Min diff between dates array', () => {
-            const schema2 = {
-                name: 'Date',
-                type: 'dimension',
-                subtype: DimensionSubtype.TEMPORAL,
-                format: '%Y-%m-%d'
-            };
-            const data2 = ['2017-03-01', '2017-03-02', '2017-03-03'];
-            let partialField = new DateTime(schema2.name, data2, schema2);
-            let field = new Field(partialField, null);
-            let diff = field.getMinDiff();
-            expect(diff).to.equal(86400000);
+        describe('#getMinDiff()', () => {
+            it('Should correctly calculate Min diff between dates array', () => {
+                const schema2 = {
+                    name: 'Date',
+                    type: 'dimension',
+                    subtype: DimensionSubtype.TEMPORAL,
+                    format: '%Y-%m-%d'
+                };
+                const data2 = ['2017-03-01', '2017-03-02', '2017-03-03'];
+                let partialField = new DateTime(schema2.name, data2, schema2);
+                let field = new Field(partialField, null);
+                let diff = field.getMinDiff();
+                expect(diff).to.equal(86400000);
+            });
         });
     });
 });

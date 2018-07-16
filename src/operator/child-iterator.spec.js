@@ -32,9 +32,11 @@ describe('Testing Child Iterator', () => {
             hasSameFunction = true;
         }
     };
-    it('Should return expected child and its callback', () => {
-        calculatedMeasureIterator(dm, callback);
-        expect(hasSameChild).to.equal(true);
-        expect(hasSameFunction).to.equal(true);
+    describe('#calculatedMeasureIterator()', () => {
+        it('Should return expected child and its callback', () => {
+            calculatedMeasureIterator(dm, callback);
+            expect(hasSameChild).to.equal(true);
+            expect(hasSameFunction).to.equal(true);
+        });
     });
 });

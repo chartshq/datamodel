@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import FlatJSON from './flat-json';
 
 describe('FlatJSON Converter', () => {
-    describe('#CSVArr()', () => {
+    describe('#FlatJSON()', () => {
         it('should parse the JSON data', () => {
             const data = [
                 {
