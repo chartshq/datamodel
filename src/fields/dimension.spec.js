@@ -17,14 +17,14 @@ describe('Dimension Field Type', () => {
         field = new Dimension(schema.name, data, schema);
     });
 
-    describe('#domain()', () => {
+    describe('#domain', () => {
         it('should return dimension domain', () => {
             const domain = field.domain();
             expect(domain.sort()).to.deep.equal(['India', 'USA', 'Japan', 'China'].sort());
         });
     });
 
-    describe('#parse()', () => {
+    describe('#parse', () => {
         it('should return parsed string value', () => {
             expect(field.parse('India')).to.equal('India');
             expect(field.parse(123)).to.equal('123');

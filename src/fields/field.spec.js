@@ -31,25 +31,25 @@ describe('Field Type', () => {
         });
     });
 
-    describe('#fieldName()', () => {
+    describe('#fieldName', () => {
         it('should implement fieldName getter methods', () => {
             expect(field2.fieldName()).to.equal(schema.name);
         });
     });
 
-    describe('#type()', () => {
+    describe('#type', () => {
         it('should implement type getter methods', () => {
             expect(field2.type()).to.equal(schema.type);
         });
     });
 
-    describe('#description()', () => {
+    describe('#description', () => {
         it('should implement description getter methods', () => {
             expect(field2.description()).to.equal(schema.description);
         });
     });
 
-    describe('#clone()', () => {
+    describe('#clone', () => {
         it('should clone current instance with new data', () => {
             const newData = [];
             const cloned = field2.clone(newData);
@@ -93,32 +93,32 @@ describe('Field Type', () => {
             field3 = new Field(partialField, '0-3');
         });
 
-        describe('#unit()', () => {
+        describe('#unit', () => {
             it('should implement unit getter methods', () => {
                 expect(field3.unit()).to.equal(schema3.unit);
             });
         });
 
-        describe('#scale()', () => {
+        describe('#scale', () => {
             it('should implement scale getter methods', () => {
                 expect(field3.scale()).to.equal(schema3.scale);
             });
         });
 
-        describe('#numberformat()', () => {
+        describe('#numberformat', () => {
             it('should implement numberformat getter methods', () => {
                 expect(field3.numberformat()).to.equal(schema3.numberformat);
             });
         });
 
-        describe('#defAggFn()', () => {
+        describe('#defAggFn', () => {
             it('should implement defAggFn getter methods', () => {
                 expect(field3.defAggFn()).to.equal(schema3.defAggFn);
             });
         });
 
 
-        describe('#domain()', () => {
+        describe('#domain', () => {
             it('should return measure domain', () => {
                 const domain = field3.domain();
 
@@ -126,7 +126,7 @@ describe('Field Type', () => {
             });
         });
 
-        describe('#parse()', () => {
+        describe('#parse', () => {
             it('should return number for parsable field value', () => {
                 expect(field3.parse('123')).to.equal(123);
             });
@@ -151,7 +151,7 @@ describe('Field Type', () => {
             field = new Field(partialField, '0-5');
         });
 
-        describe('#domain()', () => {
+        describe('#domain', () => {
             it('should return dimension domain', () => {
                 const domain = field.domain();
                 expect(domain.sort()).to.deep.equal(['India', 'USA', 'Japan', 'China'].sort());
@@ -159,7 +159,7 @@ describe('Field Type', () => {
         });
     });
 
-    describe('#getMinDiff()', () => {
+    describe('#getMinDiff', () => {
         it('Should correctly calculate Min diff between dates array', () => {
             const schema2 = {
                 name: 'Date',

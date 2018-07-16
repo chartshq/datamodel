@@ -63,7 +63,7 @@ describe('Testing compose functionality', () => {
             type: 'dimension'
         },
     ];
-    describe('#compose()', () => {
+    describe('#compose', () => {
         it('should returm same data when composed with only one function', () => {
             const dataModel = new DataModel(data1, schema1);
             const dataModel2 = new DataModel(data1, schema1);

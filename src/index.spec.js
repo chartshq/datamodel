@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import DataModel from './index';
 
 describe('DataModel', () => {
-    describe('#clone()', () => {
+    describe('#clone', () => {
         it('should clone successfully', () => {
             const data = [
                 { a: 10, aaa: 20, aaaa: 'd' },
@@ -30,7 +30,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#getData()', () => {
+    describe('#getData', () => {
         it('should retrieves the data correctly', () => {
             const schema = [
                 { name: 'name', type: 'dimension' },
@@ -342,7 +342,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#rename()', () => {
+    describe('#rename', () => {
         it('should perform rename properly', () => {
             const data = [
                 { a: 10, aaa: 20, aaaa: 'd' },
@@ -380,7 +380,7 @@ describe('DataModel', () => {
     });
 
 
-    describe('#sort()', () => {
+    describe('#sort', () => {
         it('should perform sorting properly', () => {
             const data = [
                 { a: 10, aaa: 20 },
@@ -510,7 +510,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#join()', () => {
+    describe('#join', () => {
         it('should perform join properly', () => {
             const data1 = [
                 { profit: 10, sales: 20, city: 'a' },
@@ -579,7 +579,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#difference() & #union()', () => {
+    describe('#difference & #union', () => {
         it('should perform the difference and union properly', () => {
             const data1 = [
                 { profit: 10, sales: 20, city: 'a', state: 'aa' },
@@ -637,7 +637,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#caclulatedVariable()', () => {
+    describe('#caclulatedVariable', () => {
         it('should create a calculated measure', () => {
             const data1 = [
                 { profit: 10, sales: 20, city: 'a', state: 'aa' },
@@ -735,7 +735,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#propagate()', () => {
+    describe('#propagate', () => {
         it('should propagate variables through out the dag', () => {
             const data1 = [
                 { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
@@ -822,7 +822,7 @@ describe('DataModel', () => {
     });
 
 
-    describe('#bin()', () => {
+    describe('#bin', () => {
         it('should bin the data', () => {
             const toBinData = [
                 { marks: 1, },
@@ -993,7 +993,7 @@ describe('DataModel', () => {
             },
         ];
         const dataModel = new DataModel(data1, schema1);
-        describe('#dispose()', () => {
+        describe('#dispose', () => {
             it('Should remove child on calling dispose', () => {
                 let dm2 = dataModel.select(fields => fields.profit.value < 150);
                 expect(dataModel.children.length).to.equal(1);
@@ -1002,7 +1002,7 @@ describe('DataModel', () => {
             });
         });
 
-        describe('#__addParent()', () => {
+        describe('#__addParent', () => {
             it('Adding parent should save criteria in parent', () => {
                 let dm2 = dataModel.select(fields => fields.profit.value < 150);
                 let dm3 = dm2.groupBy(['sales'], {
@@ -1109,17 +1109,17 @@ describe('DataModel', () => {
         let dm7 = dataModel.calculateVariable({
             name: 'UnEfficiency'
         }, ['sales', 'profit', (sales, profit) => sales / profit], { saveChild: true }, dm6);
-        it('datamodel select instance should not change', () => {
+        it('select should not change datamodel instance ', () => {
             expect(dm2).to.equal(dm4);
         });
-        it('datamodel groupby instance should not change it namespace', () => {
+        it('should not change namespace by groupby operation', () => {
             expect(dm3.getNameSpace().name).to.equal(dm5.getNameSpace().name);
         });
-        it('datamodel createdMeasure instance should not change', () => {
+        it('should not change datamodel instance calculateVariable operation', () => {
             expect(dm6).to.equal(dm7);
         });
 
-        it('Should throw error if no data specified', () => {
+        it('should throw error if no data specified', () => {
             expect(
                 () => {
                     let k = new DataModel(null);

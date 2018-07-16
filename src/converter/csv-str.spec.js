@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import CSVStr from './csv-str';
 
 describe('CSVStr Converter', () => {
-    describe('#CSVArr()', () => {
+    describe('#CSVArr', () => {
         it('should parse the CSV string data with header names', () => {
             const data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9';
             const option = {

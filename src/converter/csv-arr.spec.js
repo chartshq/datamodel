@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import CSVArr from './csv-arr';
 
 describe('CSVArr Converter', () => {
-    describe('#CSVArr()', () => {
+    describe('#CSVArr', () => {
         it('should parse the CSV array data with header names', () => {
             const data = [
             ['a', 'b', 'c'],

@@ -25,25 +25,25 @@ describe('Partial Field Type', () => {
             expect(field.schema).to.deep.equal(schema);
         });
     });
-    describe('#fieldName()', () => {
+    describe('#fieldName', () => {
         it('should implement fieldName getter methods', () => {
             expect(field.fieldName()).to.equal(schema.name);
         });
     });
 
-    describe('#type()', () => {
+    describe('#type', () => {
         it('should implement type getter methods', () => {
             expect(field.type()).to.equal(schema.type);
         });
     });
 
-    describe('#description()', () => {
+    describe('#description', () => {
         it('should implement description getter methods', () => {
             expect(field.description()).to.equal(schema.description);
         });
     });
 
-    describe('#clone()', () => {
+    describe('#clone', () => {
         it('should clone current instance with new data', () => {
             const newData = [];
             const cloned = field.clone(newData);
