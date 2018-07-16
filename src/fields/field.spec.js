@@ -136,42 +136,42 @@ describe('Field Type', () => {
                 expect(field3.parse(NaN)).to.null;
             });
         });
+    });
 
-        describe('New Dimension Field', () => {
-            const schema2 = {
-                name: 'Country',
-                type: FieldType.DIMENSION
-            };
-            const data2 = ['India', 'USA', 'Japan', 'China', 'India', 'Japan'];
-            let field;
+    describe('New Dimension Field', () => {
+        const schema2 = {
+            name: 'Country',
+            type: FieldType.DIMENSION
+        };
+        const data2 = ['India', 'USA', 'Japan', 'China', 'India', 'Japan'];
+        let field;
 
-            beforeEach(() => {
-                let partialField = new Dimension(schema2.name, data2, schema2);
-                field = new Field(partialField, '0-5');
-            });
-
-            describe('#domain()', () => {
-                it('should return dimension domain', () => {
-                    const domain = field.domain();
-                    expect(domain.sort()).to.deep.equal(['India', 'USA', 'Japan', 'China'].sort());
-                });
-            });
+        beforeEach(() => {
+            let partialField = new Dimension(schema2.name, data2, schema2);
+            field = new Field(partialField, '0-5');
         });
 
-        describe('#getMinDiff()', () => {
-            it('Should correctly calculate Min diff between dates array', () => {
-                const schema2 = {
-                    name: 'Date',
-                    type: 'dimension',
-                    subtype: DimensionSubtype.TEMPORAL,
-                    format: '%Y-%m-%d'
-                };
-                const data2 = ['2017-03-01', '2017-03-02', '2017-03-03'];
-                let partialField = new DateTime(schema2.name, data2, schema2);
-                let field = new Field(partialField, null);
-                let diff = field.getMinDiff();
-                expect(diff).to.equal(86400000);
+        describe('#domain()', () => {
+            it('should return dimension domain', () => {
+                const domain = field.domain();
+                expect(domain.sort()).to.deep.equal(['India', 'USA', 'Japan', 'China'].sort());
             });
+        });
+    });
+
+    describe('#getMinDiff()', () => {
+        it('Should correctly calculate Min diff between dates array', () => {
+            const schema2 = {
+                name: 'Date',
+                type: 'dimension',
+                subtype: DimensionSubtype.TEMPORAL,
+                format: '%Y-%m-%d'
+            };
+            const data2 = ['2017-03-01', '2017-03-02', '2017-03-03'];
+            let partialField = new DateTime(schema2.name, data2, schema2);
+            let field = new Field(partialField, null);
+            let diff = field.getMinDiff();
+            expect(diff).to.equal(86400000);
         });
     });
 });
