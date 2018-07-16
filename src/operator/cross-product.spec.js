@@ -24,8 +24,8 @@ const schema2 = [
 ];
 
 describe('CrossProduct Functionality', () => {
-    describe('#crossProduct()', () => {
-        it('default crossProduct', () => {
+    describe('#crossProduct', () => {
+        it('should perform crossProduct on two datamodels', () => {
             const dataModel1 = new DataModel(data1, schema1, 'ModelA');
             const dataModel2 = new DataModel(data2, schema2, 'ModelB');
             const crossDataModel = crossProduct(dataModel1, dataModel2);
@@ -46,7 +46,7 @@ describe('CrossProduct Functionality', () => {
                 uids: [0, 1, 2, 3]
             });
         });
-        it('crossProduct with filterFn', () => {
+        it('should perform crossProduct on two datamodels with given filterFn', () => {
             const dataModel1 = new DataModel(data1, schema1, 'ModelA');
             const dataModel2 = new DataModel(data2, schema2, 'ModelB');
             const crossDataModel = crossProduct(dataModel1, dataModel2,
