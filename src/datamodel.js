@@ -118,6 +118,7 @@ class DataModel extends Relation {
      * @param {Object} [options] - Define how the data need to be returned.
      * @param {Object} [options.order='row'] - Define the order of the data: row or column.
      * @param {Object} [options.formatter=null] - An object map containing field specific formatter function.
+     * @param {Object} [options.withUid=false] - Whether the data uids will be included or not.
      * @return {Array} Returns a multidimensional array of the data.
      * @example
      *
@@ -138,6 +139,7 @@ class DataModel extends Relation {
         const defOptions = {
             order: 'row',
             formatter: null,
+            withUid: false
         };
         options = Object.assign({}, defOptions, options);
 
@@ -148,7 +150,8 @@ class DataModel extends Relation {
             this.colIdentifier,
             this.sortingDetails,
             {
-                columnWise: options.order === 'column'
+                columnWise: options.order === 'column',
+                addUid: !!options.withUid
             }
         );
 
@@ -199,26 +202,6 @@ class DataModel extends Relation {
         }
 
         return dataGenerated;
-    }
-
-
-    /**
-     * Returns the data with the uids.
-     *
-     * @public
-     * @return {Array} Returns a multidimensional array of the data.
-     */
-    getDataWithUids() {
-        return dataBuilder.call(
-            this,
-            this.getNameSpace().fields,
-            this.rowDiffset,
-            this.colIdentifier,
-            this.sortingDetails,
-            {
-                addUid: true
-            }
-        );
     }
 
     /**

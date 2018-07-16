@@ -1,24 +1,56 @@
-/* eslint-disable */
-
 const DataModel = window.DataModel.default;
-let dm;
-d3.json('./data/cars.json', (data) => {
 
-    
-        const data1 = [
-            { a: 10, aaa: 20, aaaa: 'd' },
-            { a: 15, aaa: 25, aaaa: 'demo' },
-        ];
-        const schema = [
-            { name: 'a', type: 'measure' },
-            { name: 'aaa', type: 'measure' },
-            { name: 'aaaa', type: 'dimension' },
-        ];
-        const dataModel = new DataModel(data1, schema);
+const schema = [
+    {
+        name: 'name',
+        type: 'dimension'
+    },
+    {
+        name: 'birthday',
+        type: 'dimension',
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
+    },
+    {
+        name: 'roll',
+        type: 'measure'
+    }
+];
 
-        let cloneRelation
+const data = [
+    {
+        name: 'Rousan',
+        birthday: '1995-07-05',
+        roll: 12
+    },
+    {
+        name: 'Sumant',
+        birthday: '1996-08-04',
+        roll: 89
+    },
+    {
+        name: 'Ajay',
+        birthday: '1994-01-03',
+        roll: 33
+    },
+    {
+        name: 'Sushant',
+        birthday: '1994-01-03',
+        roll: 33
+    },
+    {
+        name: 'Samim',
+        birthday: '1994-01-03',
+        roll: 33
+    },
+    {
+        name: 'Akash',
+        birthday: '1994-01-03',
+        roll: 33
+    }
+];
 
-        dataModel.colIdentifier = '1-20';
-        dataModel.rowDiffset = 'a, aaa, aaaa';
-        cloneRelation = dataModel.clone();
-});
+const dm = new DataModel(data, schema);
+
+window.data = dm;
+console.log(dm.getData());
