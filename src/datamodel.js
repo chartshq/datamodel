@@ -1159,7 +1159,7 @@ class DataModel extends Relation {
             }
         });
 
-        this.fieldSpace = fieldStore.createNameSpace(newFields, this.getNameSpace().name);
+        this.fieldSpace = fieldStore.createNameSpace(newFields);
         this.fields = this.fieldSpace.fields;
 
         return this.fields;
