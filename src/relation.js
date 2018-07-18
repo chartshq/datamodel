@@ -1,5 +1,5 @@
 import { SelectionMode, ProjectionMode } from 'picasso-util';
-import { persistDerivation, updateFields, selectHelper } from './helper';
+import { persistDerivation, updateFields, selectHelper, normalizedMutationTarget } from './helper';
 import {
     crossProduct,
     difference,
@@ -202,21 +202,13 @@ class Relation {
             return [selectClone, rejectClone];
         }
 
-        let child;
-        if (config.mutationTarget instanceof Relation) {
-            child = this._children.find(childElm =>
-                childElm._derivation
-                && childElm._derivation.length === 1
-                && childElm._derivation[0].op === DM_DERIVATIVES.SELECT
-                && childElm === config.mutationTarget
-            );
-        }
+        let target = normalizedMutationTarget(this, config.mutationTarget, DM_DERIVATIVES.SELECT);
 
-        if (child) {
+        if (target) {
             rowDiffset = selectHelper(this._rowDiffset, this.getPartialFieldspace().fields, selectFn, config);
             config.mutationTarget.__mutate('rowDiffset', rowDiffset);
-            child._derivation[0].criteria = selectFn;
-            respDM = child;
+            target._derivation[0].criteria = selectFn;
+            respDM = target;
         } else {
             clonedDM = this.clone(config.saveChild);
             rowDiffset = selectHelper(clonedDM._rowDiffset, clonedDM.getPartialFieldspace().fields, selectFn, config);
@@ -225,7 +217,7 @@ class Relation {
         }
 
         // Store reference to child model and selector function
-        if (config.saveChild && !child) {
+        if (config.saveChild && !target) {
             persistDerivation(respDM, DM_DERIVATIVES.SELECT, { config }, selectFn);
         }
 

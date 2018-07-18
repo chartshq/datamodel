@@ -52,7 +52,6 @@ export const selectHelper = (rowDiffset, fields, selectFn, config) => {
     const newRowDiffSet = [];
     let lastInsertedValue = -1;
     let { mode } = config;
-    // newRowDiffSet last index
     let li;
     let checker = index => selectFn(prepareSelectionData(fields, index), index);
     if (mode === SelectionMode.INVERSE) {
@@ -144,4 +143,17 @@ export const filterPropagationModel = (model, propModel) => {
     }
 
     return filteredModel;
+};
+
+export const normalizedMutationTarget = (dm, mutationTarget, op) => {
+    let target = null;
+    if (mutationTarget instanceof dm.constructor) {
+        target = this._children.find(childElm =>
+            childElm._derivation
+            && childElm._derivation.length === 1
+            && childElm._derivation[0].op === op
+            && childElm === mutationTarget);
+    }
+
+    return target;
 };
