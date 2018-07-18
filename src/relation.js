@@ -1,5 +1,5 @@
 import { SelectionMode, ProjectionMode } from 'picasso-util';
-import { persistDerivation, updateFields, selectHelper, normalizedMutationTarget } from './helper';
+import { persistDerivation, updateFields, cloneWithSelect } from './helper';
 import {
     crossProduct,
     difference,
@@ -64,24 +64,24 @@ class Relation {
      * @public
      * @return {Array} Returns an array of field schema.
      */
-    getSchema () {
+    getSchema() {
         return this.getFieldspace().fields.map(d => d.schema);
     }
 
-    getFieldspace () {
+    getFieldspace() {
         return this._fieldspace;
     }
 
-    calculateFieldspace () {
+    calculateFieldspace() {
         this._fieldspace = updateFields([this._rowDiffset, this._colIdentifier], this.getPartialFieldspace());
         return this;
     }
 
-    getPartialFieldspace () {
+    getPartialFieldspace() {
         return this._partialFieldspace;
     }
 
-    _updateData (data, schema, name, options) {
+    _updateData(data, schema, name, options) {
         options = Object.assign(Object.assign({}, defaultConfig), options);
         const converterFn = converter[options.dataFormat];
 
@@ -117,7 +117,7 @@ class Relation {
      * DataModel
      * @return {DataModel}          the new DataModel created by joining
      */
-    join (joinWith, filterFn) {
+    join(joinWith, filterFn) {
         return crossProduct(this, joinWith, filterFn);
     }
 
@@ -133,7 +133,7 @@ class Relation {
      * @param  {DataModel} joinWith the DataModel with whom this DataModel will be joined
      * @return {DataModel}          The new joined DataModel
      */
-    naturalJoin (joinWith) {
+    naturalJoin(joinWith) {
         return crossProduct(this, joinWith, naturalJoinFilter(this, joinWith), true);
     }
 
@@ -148,7 +148,7 @@ class Relation {
      * operation is performed.
      * @return {DataModel} Returns the new DataModel instance after operation.
      */
-    union (unionWith) {
+    union(unionWith) {
         return union(this, unionWith);
     }
 
@@ -163,65 +163,55 @@ class Relation {
      * operation is performed.
      * @return {DataModel} Returns the new DataModel instance after operation.
      */
-    difference (differenceWith) {
+    difference(differenceWith) {
         return difference(this, differenceWith);
     }
 
     /**
      * Performs selection operation of the relational algebra.
-     * If an existing DataModel instance is passed in the last argument,
-     * then it mutates the that DataModel instead of cloning a new one.
      *
      * @public
      * @param {Function} selectFn - The function which will be looped through all the data
      * if it return true the row will be there in the DataModel.
-     * @param {Object} [config={}] - The mode configuration.
-     * @param {string} config.mode - The mode of the selection.
+     * @param {Object} [config] - The mode configuration.
+     * @param {string} [config.mode=SelectionMode.SELECTION] - The mode of the selection.
      * @param {string} [saveChild=true] - It is used while cloning.
-     * @param {DataModel} [existingDataModel] - An optional existing DataModel instance.
-     * @return {DataModel} Returns the new DataModel instance after operation.
+     * @return {DataModel} Returns the new DataModel instance(s) after operation.
      */
-    select (selectFn, config = { saveChild: true, mutationTarget: null }) {
-        let clonedDM;
-        let respDM;
-        let rowDiffset;
-        let selectClone;
-        let rejectClone;
+    select(selectFn, config) {
+        const defConfig = {
+            mode: SelectionMode.SELECTION,
+            saveChild: true
+        };
+        config = Object.assign({}, defConfig, config);
+
+        const cloneConfig = { saveChild: config.saveChild };
+        let oDm;
 
         if (config.mode === SelectionMode.ALL) {
-            selectClone = this.clone();
-            rowDiffset = selectHelper(selectClone._rowDiffset, selectClone.getPartialFieldspace().fields, selectFn, {});
-            selectClone._rowDiffset = rowDiffset;
-
-            rejectClone = this.clone();
-            rowDiffset = selectHelper(rejectClone._rowDiffset, rejectClone.getPartialFieldspace().fields, selectFn, {
-                mode: SelectionMode.INVERSE,
-            });
-            rejectClone._rowDiffset = rowDiffset;
-            // Return an array with both selections
-            return [selectClone, rejectClone];
-        }
-
-        let target = normalizedMutationTarget(this, config.mutationTarget, DM_DERIVATIVES.SELECT);
-
-        if (target) {
-            rowDiffset = selectHelper(this._rowDiffset, this.getPartialFieldspace().fields, selectFn, config);
-            config.mutationTarget.__mutate('rowDiffset', rowDiffset);
-            target._derivation[0].criteria = selectFn;
-            respDM = target;
+            const selectDm = cloneWithSelect(
+                this,
+                selectFn,
+                { mode: SelectionMode.SELECTION },
+                cloneConfig
+            );
+            const rejectDm = cloneWithSelect(
+                this,
+                selectFn,
+                { mode: SelectionMode.INVERSE },
+                cloneConfig
+            );
+            oDm = [selectDm, rejectDm];
         } else {
-            clonedDM = this.clone(config.saveChild);
-            rowDiffset = selectHelper(clonedDM._rowDiffset, clonedDM.getPartialFieldspace().fields, selectFn, config);
-            clonedDM._rowDiffset = rowDiffset;
-            respDM = clonedDM;
+            oDm = cloneWithSelect(
+                this,
+                selectFn,
+                config,
+                cloneConfig
+            );
         }
 
-        // Store reference to child model and selector function
-        if (config.saveChild && !target) {
-            persistDerivation(respDM, DM_DERIVATIVES.SELECT, { config }, selectFn);
-        }
-
-        return respDM;
+        return oDm;
     }
 
     /**
@@ -235,7 +225,7 @@ class Relation {
      */
 
 
-    _isEmpty () {
+    _isEmpty() {
         return !this.rowDiffset.length || !this.colIdentifier.length;
     }
 
@@ -247,7 +237,7 @@ class Relation {
      * in the parent instance.
      * @return {DataModel} - Returns the newly cloned DataModel instance.
      */
-    clone (saveChild = true) {
+    clone(saveChild = true) {
         const retDataModel = new this.constructor(this);
         if (saveChild) {
             this._children.push(retDataModel);
@@ -264,7 +254,7 @@ class Relation {
      * @param {boolean} [saveChild=true] - It is used while cloning.
      * @return {DataModel} Returns the new DataModel instance after operation.
      */
-    project (projField, config = { saveChild: true }) {
+    project(projField, config = { saveChild: true }) {
         const fieldConfig = this.getFieldsConfig();
         const allFields = Object.keys(fieldConfig);
         const { mode } = config;
@@ -310,11 +300,11 @@ class Relation {
      * @public
      * @return {Object} - Returns the field definitions.
      */
-    getFieldsConfig () {
+    getFieldsConfig() {
         return this._fieldConfig;
     }
 
-    calculateFieldsConfig () {
+    calculateFieldsConfig() {
         this._fieldConfig = this._fieldspace.fields.reduce((acc, fieldDef, i) => {
             acc[fieldDef.name] = {
                 index: i,
@@ -334,7 +324,7 @@ class Relation {
      * @param {string} value - The new value of the property.
      * @return {DataModel} Returns the current DataModel instance itself.
      */
-    __mutate (key, value) {
+    __mutate(key, value) {
         const nKey = `_${key}`;
         this[nKey] = value;
         selectIterator(this, (model, fn) => {

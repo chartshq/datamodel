@@ -157,3 +157,20 @@ export const normalizedMutationTarget = (dm, mutationTarget, op) => {
 
     return target;
 };
+
+export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) => {
+    const cloned = sourceDm.clone(cloneConfig.saveChild);
+    const rowDiffset = selectHelper(
+        cloned._rowDiffset,
+        cloned.getPartialFieldspace().fields,
+        selectFn,
+        selectConfig
+    );
+    cloned._rowDiffset = rowDiffset;
+    // Store reference to child model and selector function
+    if (cloneConfig.saveChild) {
+        persistDerivation(cloned, DM_DERIVATIVES.SELECT, { config: selectConfig }, selectFn);
+    }
+
+    return cloned;
+};
