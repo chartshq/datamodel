@@ -1,11 +1,8 @@
 /* eslint-disable default-case */
 
-import { FieldType } from 'picasso-util';
 import { persistDerivation, assembleModelFromIdentifiers, filterPropagationModel } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
-import { Categorical } from './fields';
 import {
-    createBuckets,
     dataBuilder,
     rowDiffsetIterator,
     groupBy,
@@ -149,12 +146,12 @@ class DataModel extends Relation {
         const groupByString = `${fieldsArr.join()}`;
         let present = false;
         if (config.mutationTarget instanceof DataModel) {
-            let child = this._children.find(childElm => 
+            let child = this._children.find(childElm =>
                 childElm._derivation
                 && childElm._derivation.length === 1
                 && childElm._derivation[0].op === DM_DERIVATIVES.GROUPBY
                 && childElm._derivation[0].meta.groupByString === groupByString
-                && childElm === config.mutationTarget 
+                && childElm === config.mutationTarget
             );
 
             if (child) {
@@ -181,7 +178,7 @@ class DataModel extends Relation {
             );
         }
         if (present) {
-            existingDataModel.__mutate('rowDiffset', existingDataModel._rowDiffset);
+            config.mutationTarget.__mutate('rowDiffset', config.mutationTarget._rowDiffset);
         }
 
         newDataModel._parent = this;
@@ -256,7 +253,7 @@ class DataModel extends Relation {
                 childElm._derivation
                 && childElm._derivation.length === 1
                 && childElm._derivation[0].op === DM_DERIVATIVES.CAL_VAR
-                && childElm === config.mutationTarget 
+                && childElm === config.mutationTarget
             );
         }
 

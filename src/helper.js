@@ -1,6 +1,5 @@
-import { FieldType, ProjectionMode, SelectionMode, DimensionSubtype } from 'picasso-util';
+import { FieldType, SelectionMode } from 'picasso-util';
 import Field from './fields/field';
-import { Categorical, Measure, DateTime } from './fields';
 import fieldStore from './field-store';
 import Value from './value';
 import { rowDiffsetIterator } from './operator';
