@@ -1,25 +1,21 @@
 /* eslint-disable default-case */
 
-import { FieldType, ProjectionMode, SelectionMode, DimensionSubtype } from 'picasso-util';
-import { DM_DERIVATIVES, PROPAGATION, ROW_ID } from './constants';
-import { Categorical, Measure, DateTime } from './fields';
-import { createBuckets,
-    crossProduct,
+import { FieldType } from 'picasso-util';
+import { persistDerivation, assembleModelFromIdentifiers, filterPropagationModel } from './helper';
+import { DM_DERIVATIVES, PROPAGATION } from './constants';
+import { Categorical } from './fields';
+import {
+    createBuckets,
     dataBuilder,
-    difference,
-    naturalJoinFilter,
     rowDiffsetIterator,
-    union,
     groupBy,
-    calculatedMeasureIterator,
     groupByIterator,
     projectIterator,
-    selectIterator } from './operator';
+    selectIterator
+} from './operator';
 import Relation from './relation';
 import reducerStore from './utils/reducer';
-import Field from './fields/field';
-import fieldStore from './field-store';
-
+import createFields from './field-creator';
 
 /**
  * A model which has been built on the concept of relational algebra.
@@ -33,81 +29,18 @@ class DataModel extends Relation {
      *
      * @param {Array} args - The arguments which is passed directly to the parent class.
      */
-    constructor(...args) {
+    constructor (...args) {
         super(...args);
-        // The callback to call on propagation
-        // new Implementation
-        this.children = []; // contains all immediate children
-        this._derivation = []; // specify rules by which this data model is created
+
         this._onPropagation = [];
-        this.sortingDetails = {
+        this._sortingDetails = {
             column: [],
-            type: [],
+            type: []
         };
-        this._updateFields();
     }
 
-    /**
-     * Creates a clone from the current DataModel instance.
-     *
-     * @public
-     * @return {DataModel} - Returns the newly cloned DataModel instance.
-     */
-    clone() {
-        return new DataModel(this);
-    }
-
-    /**
-     * Creates a clone  from the current DataModel instance with
-     * child parent relationship.
-     *
-     * @public
-     * @param {boolean} [saveChild=true] - Whether the cloned instance would be recorded
-     * in the parent instance.
-     * @return {DataModel} - Returns the newly cloned DataModel instance.
-     */
-    cloneAsChild(saveChild = true) {
-        const retDataModel = this.clone();
-        if (saveChild) {
-            this.children.push(retDataModel);
-        }
-        retDataModel.parent = this;
-        return retDataModel;
-    }
-
-    /**
-     * Returns the nameSpace for the current DataModel instance.
-     * If the nameSpace is not found, it looks to its parent DataModel.
-     *
-     * @public
-     * @return {Object} - Returns the nameSpace.
-     */
-    getFieldSpace() {
-        return this.fieldSpace;
-    }
-
-    getNameSpace() {
-        let child = this;
-        let nameSpace;
-        if (this._nameSpace) { return this._nameSpace; }
-        while (child.parent) {
-            if (child.parent._nameSpace) {
-                nameSpace = child.parent._nameSpace;
-                break;
-            }
-            child = child.parent;
-        }
-        return nameSpace;
-    }
-
-    /**
-     * Returns the schema details for all fields.
-     *
-     * @public
-     * @return {Array} Returns an array of field schema.
-     */
-    getSchema() {
-        return this.getFieldSpace().fields.map(d => d.schema);
+    static get Reducers () {
+        return reducerStore;
     }
 
     /**
@@ -134,7 +67,7 @@ class DataModel extends Relation {
      *  const dm = new DataModel(data, schema);
      *  const dataFormatted = dm.getData(options);
      */
-    getData(options) {
+    getData (options) {
         const defOptions = {
             order: 'row',
             formatter: null,
@@ -143,13 +76,11 @@ class DataModel extends Relation {
 
         const dataGenerated = dataBuilder.call(
             this,
-            this.getNameSpace().fields,
-            this.rowDiffset,
-            this.colIdentifier,
-            this.sortingDetails,
-            {
-                columnWise: options.order === 'column'
-            }
+            this.getPartialFieldspace().fields,
+            this._rowDiffset,
+            this._colIdentifier,
+            this._sortingDetails,
+            { columnWise: options.order === 'column' }
         );
 
         if (!options.formatter) {
@@ -201,253 +132,6 @@ class DataModel extends Relation {
         return dataGenerated;
     }
 
-
-    /**
-     * Returns the data with the uids.
-     *
-     * @public
-     * @return {Array} Returns a multidimensional array of the data.
-     */
-    getDataWithUids() {
-        return dataBuilder.call(
-            this,
-            this.getNameSpace().fields,
-            this.rowDiffset,
-            this.colIdentifier,
-            this.sortingDetails,
-            {
-                addUid: true
-            }
-        );
-    }
-
-    /**
-     * Performs the rename operation to the column names of the DataModel instance.
-     *
-     * @public
-     * @param {Object} schemaObj - The object having the name of the field to rename
-     * as key and the new name as the value.
-     * @return {DataModel} Returns a new DataModel instance with the renamed columns.
-     */
-    rename(schemaObj) {
-        const cloneDataModel = this.cloneAsChild();
-        const schemaArr = cloneDataModel.colIdentifier.split(',');
-        const _fieldStore = this.getNameSpace().fields;
-
-        Object.entries(schemaObj).forEach(([key, value]) => {
-            if (schemaArr.indexOf(key) !== -1 && typeof value === 'string') {
-                for (let i = 0; i <= _fieldStore.length; i += 1) {
-                    if (_fieldStore[i].name === key) {
-                        const renameField = _fieldStore[i].clone(_fieldStore[i].data);
-                        renameField.name = value;
-                        renameField.schema.name = value;
-                        schemaArr[schemaArr.indexOf(key)] = value;
-                        _fieldStore.push(renameField);
-                        break;
-                    }
-                }
-            }
-        });
-        cloneDataModel.colIdentifier = schemaArr.join();
-        this._updateFields();
-        return cloneDataModel;
-    }
-
-    /**
-     * this reflect the cross-product of the relational algebra or can be called as theta join.
-     * It take another DataModel instance and create new DataModel with the cross-product data and
-     * filter the data according to the filter function provided.
-     * Say there are two dataModel modelA with 4 column 5 rows and modelB with 3 column 6 row
-     * so the new DataModel modelA X modelB will have 7(4 + 3) rows and 30(5 * 6) columns (if no
-     * filter function is provided).
-     *
-     * @todo Make this API user-friendly.
-     *
-     * @public
-     * @param  {DataModel} joinWith The DataModel to be joined with this DataModel
-     * @param  {Function} filterFn Function that will filter the result of the crossProduct
-     * DataModel
-     * @return {DataModel}          the new DataModel created by joining
-     */
-    join(joinWith, filterFn) {
-        return crossProduct(this, joinWith, filterFn);
-    }
-
-    /**
-     * This can join two DataModel to form a new DataModel which meet the requirement of
-     * natural join.
-     * it's not possible to pass a filter function as the filter function is decided according to
-     * the definition of natural join
-     *
-     * @todo Make this API user-friendly.
-     *
-     * @public
-     * @param  {DataModel} joinWith the DataModel with whom this DataModel will be joined
-     * @return {DataModel}          The new joined DataModel
-     */
-    naturalJoin(joinWith) {
-        return crossProduct(this, joinWith, naturalJoinFilter(this, joinWith), true);
-    }
-
-    /**
-     * Performs union operation of the relational algebra.
-     * It can be termed as vertical joining of all the unique tuples
-     * from both the DataModel instances. The requirement is both
-     * the DataModel instances should have same column name and order.
-     *
-     * @public
-     * @param {DataModel} unionWith - Another DataModel instance to which union
-     * operation is performed.
-     * @return {DataModel} Returns the new DataModel instance after operation.
-     */
-    union(unionWith) {
-        return union(this, unionWith);
-    }
-
-    /**
-     * Performs difference operation of the relational algebra.
-     * It can be termed as vertical joining of all the tuples
-     * those are not in the second DataModel. The requirement
-     * is both the DataModel instances should have same column name and order.
-     *
-     * @public
-     * @param {DataModel} differenceWith - Another DataModel instance to which difference
-     * operation is performed.
-     * @return {DataModel} Returns the new DataModel instance after operation.
-     */
-    difference(differenceWith) {
-        return difference(this, differenceWith);
-    }
-
-    /**
-     * Performs projection operation on the current DataModel instance.
-     *
-     * @public
-     * @param {Array.<string | Regexp>} projField - An array of column names in string or regular expression.
-     * @param {Object} [config={}] - An optional config.
-     * @param {boolean} [saveChild=true] - It is used while cloning.
-     * @return {DataModel} Returns the new DataModel instance after operation.
-     */
-    project(projField, config = {}, saveChild = true) {
-        const allFields = Object.keys(this.getFieldMap());
-        const { mode } = config;
-        let normalizedProjField = projField.reduce((acc, field) => {
-            if (field.constructor.name === 'RegExp') {
-                acc.push(...allFields.filter(fieldName => fieldName.search(field) !== -1));
-            } else if (field in this.getFieldMap()) {
-                // If the field is string and it really exists
-                acc.push(field);
-            }
-            return acc;
-        }, []);
-        normalizedProjField = Array.from(new Set(normalizedProjField)).map(field => field.trim());
-        if (mode === ProjectionMode.EXCLUDE) {
-            const rejectionSet = allFields.filter(fieldName => normalizedProjField.indexOf(fieldName) === -1);
-            normalizedProjField = rejectionSet;
-        }
-        let cloneDataModel;
-        cloneDataModel = this.cloneAsChild(saveChild);
-        cloneDataModel._projectHelper(normalizedProjField.join(','));
-        if (saveChild) {
-            this.__persistDerivation(cloneDataModel, DM_DERIVATIVES.PROJECT,
-                { projField, config, projString: normalizedProjField.join(',') }, null);
-        }
-
-        return cloneDataModel;
-    }
-
-    /**
-     * Performs selection operation of the relational algebra.
-     * If an existing DataModel instance is passed in the last argument,
-     * then it mutates the that DataModel instead of cloning a new one.
-     *
-     * @public
-     * @param {Function} selectFn - The function which will be looped through all the data
-     * if it return true the row will be there in the DataModel.
-     * @param {Object} [config={}] - The mode configuration.
-     * @param {string} config.mode - The mode of the selection.
-     * @param {string} [saveChild=true] - It is used while cloning.
-     * @param {DataModel} [existingDataModel] - An optional existing DataModel instance.
-     * @return {DataModel} Returns the new DataModel instance after operation.
-     */
-    select(selectFn, config = {}, saveChild = true, existingDataModel) {
-        let cloneDataModel;
-        let newDataModel;
-        let rowDiffset;
-
-        // handle ALL selection mode
-        if (config.mode === SelectionMode.ALL) {
-            // Do a normal selection
-            const firstClone = this.cloneAsChild();
-            rowDiffset = firstClone._selectHelper(firstClone.getNameSpace().fields, selectFn, {});
-            firstClone.rowDiffset = rowDiffset;
-            // Do an inverse selection
-            const rejectClone = this.cloneAsChild();
-            rowDiffset = rejectClone._selectHelper(rejectClone.getNameSpace().fields, selectFn, {
-                mode: SelectionMode.INVERSE,
-            });
-            rejectClone.rowDiffset = rowDiffset;
-            // Return an array with both selections
-            return [firstClone, rejectClone];
-        }
-        let child;
-
-        if (existingDataModel instanceof DataModel) {
-            child = this.children.find(childElm => childElm._derivation
-                             && childElm._derivation.length === 1
-                             && childElm._derivation[0].op === DM_DERIVATIVES.SELECT
-                             && childElm === existingDataModel);
-        }
-        if (child) {
-            newDataModel = existingDataModel;
-            rowDiffset = this._selectHelper(this.getNameSpace().fields, selectFn, config);
-            existingDataModel.mutate('rowDiffset', rowDiffset);
-            child._derivation[0].criteria = selectFn;
-        }
-        else {
-            cloneDataModel = this.cloneAsChild(saveChild);
-            rowDiffset = cloneDataModel._selectHelper(cloneDataModel.getNameSpace().fields, selectFn, config);
-            cloneDataModel.rowDiffset = rowDiffset;
-            newDataModel = cloneDataModel;
-        }
-
-        // Store reference to child model and selector function
-        if (saveChild && !child) {
-            this.__persistDerivation(newDataModel, DM_DERIVATIVES.SELECT, { config }, selectFn);
-        }
-
-        return newDataModel;
-    }
-
-    /**
-     * Mutates a property of the current DataModel instance with a new value.
-     *
-     * @public
-     * @param {string} key - The property name to be changed.
-     * @param {string} value - The new value of the property.
-     * @return {DataModel} Returns the current DataModel instance itself.
-     */
-    mutate(key, value) {
-        this[key] = value;
-        selectIterator(this, (model, fn) => {
-            this.select(fn, {}, false, model);
-        });
-
-        projectIterator(this, (model) => {
-            model.mutate(key, value);
-        });
-
-        calculatedMeasureIterator(this, (table, params) => {
-            table[key] = value;
-            this.__createMeasure(...[...params, false, table]);
-        });
-
-        groupByIterator(this, (model, params) => {
-            this.groupBy(...[params.groupByString.split(','), params.reducer], false, model);
-        });
-        return this;
-    }
-
     /**
      * Performs group-by operation on the current DataModel instance according to
      * the fields and reducers provided.
@@ -461,15 +145,18 @@ class DataModel extends Relation {
      * @param {DataModel} [existingDataModel] - An optional existing DataModel instance.
      * @return {DataModel} Returns the new DataModel instance after operation.
      */
-    groupBy(fieldsArr, reducers = {}, saveChild = true, existingDataModel) {
+    groupBy (fieldsArr, reducers = {}, config = { saveChild: true, mutationTarget: null }) {
         const groupByString = `${fieldsArr.join()}`;
         let present = false;
-        if (existingDataModel instanceof DataModel) {
-            let child = this.children.find(childElm => childElm._derivation
-                                            && childElm._derivation.length === 1
-                                            && childElm._derivation[0].op === DM_DERIVATIVES.GROUPBY
-                                            && childElm._derivation[0].meta.groupByString === groupByString
-                                            && childElm === existingDataModel);
+        if (config.mutationTarget instanceof DataModel) {
+            let child = this._children.find(childElm => 
+                childElm._derivation
+                && childElm._derivation.length === 1
+                && childElm._derivation[0].op === DM_DERIVATIVES.GROUPBY
+                && childElm._derivation[0].meta.groupByString === groupByString
+                && childElm === config.mutationTarget 
+            );
+
             if (child) {
                 present = true;
                 child._derivation[0].meta.fieldsArr = fieldsArr;
@@ -478,39 +165,27 @@ class DataModel extends Relation {
                 child._derivation[0].criteria = reducers;
             }
         }
+
         let params = [this, fieldsArr, reducers];
         if (present) {
-            params.push(existingDataModel);
+            params.push(config.mutationTarget);
         }
         const newDataModel = groupBy(...params);
-        if (saveChild && !present) {
-            this.children.push(newDataModel);
-            this.__persistDerivation(newDataModel, DM_DERIVATIVES.GROUPBY,
-                { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() }, reducers);
+        if (config.saveChild && !present) {
+            this._children.push(newDataModel);
+            persistDerivation(
+                newDataModel,
+                DM_DERIVATIVES.GROUPBY,
+                { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() },
+                reducers
+            );
         }
         if (present) {
-            existingDataModel.mutate('rowDiffset', existingDataModel.rowDiffset);
+            existingDataModel.__mutate('rowDiffset', existingDataModel._rowDiffset);
         }
 
-        newDataModel.parent = this;
+        newDataModel._parent = this;
         return newDataModel;
-    }
-
-    /**
-     * Returns index and field details in an object where key is the field name.
-     *
-     * @public
-     * @return {Object} - Returns the field definitions.
-     */
-    getFieldMap() {
-        this.fieldMap = this.getFieldData().reduce((acc, fieldDef, i) => {
-            acc[fieldDef.name] = {
-                index: i,
-                def: { name: fieldDef._ref.name, type: fieldDef._ref.fieldType }
-            };
-            return acc;
-        }, {});
-        return this.fieldMap;
     }
 
     /**
@@ -528,16 +203,23 @@ class DataModel extends Relation {
      * @param  {Array} sortList The array of all the column that need to be sorted
      * @return {DataModel}            it's own instance
      */
-    sort(sortList) {
+    sort (sortList) {
         sortList.forEach((row) => {
             const currRow = row;
             currRow[1] = row[1] === 'desc' ? 'desc' : 'asc';
         });
-        this.sortingDetails = sortList;
+        this._sortingDetails = sortList;
         const struct = this.getData();
         // append header
         const header = struct.schema.map(field => field.name);
         return new this.constructor([header].concat(struct.data), struct.schema, null, { dataFormat: 'CSVArr' });
+    }
+
+    addField (field) {
+        this._colIdentifier += `,${field.fieldName()}`;
+        this._partialFieldspace.fields.push(field);
+        this.calculateFieldspace().calculateFieldsConfig();
+        return this;
     }
 
     /**
@@ -551,254 +233,58 @@ class DataModel extends Relation {
      *  @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dm) => {}]
      * @param {Object} config : { saveChild : true | false , removeDependentDimensions : true|false}
      */
-    calculateVariable(varConfig, paramConfig, config = {}, existingDataModel) {
-        if (varConfig.type === FieldType.DIMENSION) {
-            return this.__createDimensions(varConfig,
-                paramConfig.slice(0, paramConfig.length - 1),
-                paramConfig[paramConfig.length - 1], config);
+    calculateVariable (schema, dependency, config = { saveChild: true, mutationTarget: null }) {
+        const fieldsConfig = this.getFieldsConfig();
+        const depVars = dependency.slice(0, dependency.length - 1);
+        const retrieveFn = dependency[dependency.length - 1];
+
+        if (fieldsConfig[schema.name]) {
+            throw new Error(`${schema.name} field already exists in model.`);
         }
+        const depFieldIndices = depVars.map((field) => {
+            const fieldSpec = fieldsConfig[field];
+            if (!fieldSpec) {
+                // @todo dont throw error here, use warning in production mode
+                throw new Error(`${field} is not a valid column name.`);
+            }
+            return fieldSpec.index;
+        });
 
-        return this.__createMeasure(varConfig,
-                paramConfig.slice(0, paramConfig.length - 1),
-                paramConfig[paramConfig.length - 1],
-                config.saveChild, existingDataModel);
-    }
-
-    /**
-     * Creates a calculated measure from the current DataModel instance.
-     *
-     * @public
-     * @param {Object} config - The config.
-     * @param {string} config.name - The name of the field.
-     * @param {Array<string>} fields - An array of fields to take as input.
-     * @param {Function} callback - A callback supplied to calculate the property.
-     * @param {boolean} [saveChild=true] - Whether the child to save  or not.
-     * @param {DataModel} [existingDataModel] - An optional DataModel instance.
-     * @return {DataModel} - Returns a new DataModel instance.
-     */
-    __createMeasure(config, fields, callback, saveChild = true, existingDataModel) {
-        const {
-            name,
-            unit,
-            scale,
-            numberformat,
-            defAggFn,
-        } = config;
         let clone;
-        let existingChild = this.children.find(childElm => childElm._derivation
-                                                && childElm._derivation.length === 1
-                                                && childElm._derivation[0].op === DM_DERIVATIVES.CAL_MEASURE
-                                                && childElm === existingDataModel);
+        if (config.mutationTarget instanceof Relation) {
+            clone = this._children.find(childElm =>
+                childElm._derivation
+                && childElm._derivation.length === 1
+                && childElm._derivation[0].op === DM_DERIVATIVES.CAL_VAR
+                && childElm === config.mutationTarget 
+            );
+        }
 
-        // Get the fields present
-        const fieldMap = this.getFieldMap();
-        if (fieldMap[name] && !existingChild) {
-            throw new Error(`${name} field already exists in model.`);
+        if (!clone) {
+            clone = this.clone();
         }
-        // Validate that the supplied fields are present
-        // and measures
-        const fieldIndices = fields.map((field) => {
-            const fieldSpec = fieldMap[field];
-            if (!fieldSpec) {
-                throw new Error(`${field} is not a valid column name.`);
-            }
-            // if (fieldSpec.def.type !== FieldType.MEASURE) {
-            //     throw new Error(`${field} is not a ${FieldType.MEASURE}.`);
-            // }
-            return fieldSpec.index;
-        });
-        if (existingChild) {
-            clone = existingDataModel;
-        }
-        else {
-            clone = this.cloneAsChild(saveChild);
-        }
-        const namespaceFields = clone.getNameSpace().fields;
-        const suppliedFields = fieldIndices.map(idx => namespaceFields[idx]);
-        // array of computed data values
+        const fs = clone.getFieldspace().fields;
+        const suppliedFields = depFieldIndices.map(idx => fs[idx]);
+
         const computedValues = [];
-        // iterate over data based on row diffset
-        rowDiffsetIterator(clone.rowDiffset, (i) => {
-            // get the data corresponding to supplied fields
+        rowDiffsetIterator(clone._rowDiffset, (i) => {
             const fieldsData = suppliedFields.map(field => field.data[i]);
-            // get the computed value based on user supplied callback
-            const computedValue = callback(...fieldsData, i, namespaceFields);
-            computedValues[i] = computedValue;
+            computedValues[i] = retrieveFn(...fieldsData, i, fs);
         });
-        // create a field to store this field
-        // @todo give other schema also
-        const partialField = new Measure(name, computedValues, {
-            name,
-            type: FieldType.MEASURE,
-            unit,
-            scale,
-            numberformat,
-            defAggFn
-        });
+        const [field] = createFields([computedValues], [schema], [schema.name]);
+        clone.addField(field);
 
-        // const nameSpaceEntry = new Field(partialField, this.rowDiffset);
-        // push this to the child DataModel instance field store
-        let index = namespaceFields.findIndex(d => d.name === name);
-        if (index !== -1 && existingChild) {
-            namespaceFields[index] = partialField;
-            existingChild.params = [config, fields, callback];
-            existingDataModel.mutate('rowDiffset', existingDataModel.rowDiffset);
+        if (config.mutationTarget) {
+            config.mutationTarget._derivation[0].meta.config = schema;
+            config.mutationTarget._derivation[0].meta.fields = depVars;
+            config.mutationTarget._derivation[0].criteria = retrieveFn;
         }
-        else {
-            namespaceFields.push(partialField);
-            // update the column identifier
-            clone.colIdentifier += `,${name}`;
-        }
-        // update the field map of child DataModel instance
-        const childFieldMap = clone.getFieldMap();
-        childFieldMap[name] = {
-            index: namespaceFields.length - 1,
-            def: {
-                name,
-                type: FieldType.MEASURE,
-            },
-        };
-        if (existingChild) {
-            existingDataModel._derivation[0].meta.config = config;
-            existingDataModel._derivation[0].meta.fields = fields;
-            existingDataModel._derivation[0].criteria = callback;
-        }
-        if (saveChild && !existingChild) {
-            this.__persistDerivation(clone, DM_DERIVATIVES.CAL_MEASURE, { config, fields }, callback);
+
+        if (config.saveChild) {
+            persistDerivation(clone, DM_DERIVATIVES.CAL_VAR, { config: schema, fields: depVars }, retrieveFn);
         }
 
         return clone;
-    }
-
-    /**
-     * Generates new dimensions from existing dimensions by using the supplied callback.
-     *
-     * @public
-     * @param {Array<Object>} dimArray - An array of objects with the names of new dimensions to create.
-     * @param {Array<string>} dependents - An array of the dimensions to use to create new dimensions.
-     * @param {Function} callback - The callback to execute to create new dimensions.
-     * @param {Object} config - An object wth configuration options.
-     * @param {string} config.removeDependentDimensions - The flag to indicate whether dependent
-     * dimensions should be removed.
-     * @return {DataModel} Returns the new DataModel instance.
-     */
-    __createDimensions(dimObj, dependents, callback, config = {}) {
-        // get the fields present
-        const fieldMap = this.getFieldMap();
-        // validate that the supplied fields are present
-        // and measures
-        const depIndices = dependents.map((field) => {
-            const fieldSpec = fieldMap[field];
-            if (!fieldSpec) {
-                throw new Error(`${field} is not a valid column name.`);
-            }
-            // if (fieldSpec.def.type !== FieldType.DIMENSION) {
-            //     throw new Error(`${field} is not a ${FieldType.DIMENSION}.`);
-            // }
-            return fieldSpec.index;
-        });
-        const clone = this.cloneAsChild();
-        const namespaceFields = clone.getNameSpace().fields;
-        const suppliedFields = depIndices.map(idx => namespaceFields[idx]);
-        // array of computed data values
-        const computedValues = [];
-        // iterate over data based on row diffset
-        rowDiffsetIterator(clone.rowDiffset, (i) => {
-            // get the data corresponding to supplied fields
-            const fieldsData = suppliedFields.map(field => field.data[i]);
-            // get the computed value based on user supplied callback
-            const computedValue = callback(...fieldsData);
-            computedValues[i] = computedValue;
-        });
-        // create new fields
-        const { name } = dimObj;
-        const dimensionData = computedValues;
-            // create a field to store this field
-        let partialField;
-        if (dimObj.subtype === DimensionSubtype.TEMPORAL) {
-            partialField = new DateTime(name, dimensionData, {
-                name,
-                type: FieldType.DIMENSION,
-            });
-        }
-        else {
-            partialField = new Categorical(name, dimensionData, {
-                name,
-                type: FieldType.DIMENSION,
-            });
-        }
-
-        // const nameSpaceEntry = new Field(partialField, this.rowDiffset);
-            // push this to the child DataModel instance field store
-        namespaceFields.push(partialField);
-            // update the field map of child DataModel instance
-        const childFieldMap = clone.getFieldMap();
-        childFieldMap[name] = {
-            index: namespaceFields.length - 1,
-            def: {
-                name,
-                type: FieldType.DIMENSION,
-            },
-        };
-            // update the column identifier
-        clone.colIdentifier += `,${name}`;
-
-        if (config.removeDependentDimensions) {
-            return clone.project(dependents, {
-                mode: ProjectionMode.EXCLUDE,
-            });
-        }
-        return clone;
-    }
-
-    /**
-     * Assembles a DataModel instance from the propagated identifiers.
-     *
-     * @private
-     * @param {Array} identifiers - An array of dimensions that were interacted upon.
-     * @return {DataModel} Returns a DataModel assembled from identifiers.
-     */
-    _assembleModelFromIdentifiers(identifiers) {
-        let schema = [];
-        let data;
-        let fieldMap = this.getFieldMap();
-        if (identifiers.length) {
-            let fields = identifiers[0];
-            let len = fields.length;
-            for (let i = 0; i < len; i++) {
-                let field = fields[i];
-                let fieldObj;
-                if (field === ROW_ID) {
-                    fieldObj = {
-                        name: field,
-                        type: FieldType.DIMENSION
-                    };
-                }
-                else {
-                    fieldObj = fieldMap[field] && Object.assign({}, fieldMap[field].def);
-                }
-                if (fieldObj) {
-                    schema.push(Object.assign(fieldObj));
-                }
-            }
-            // format the data
-            // @TODO: no documentation on how CSV_ARR data format works.
-            data = [];
-            const header = identifiers[0];
-            for (let i = 1; i < identifiers.length; i += 1) {
-                const vals = identifiers[i];
-                const temp = {};
-                vals.forEach((fieldVal, cIdx) => {
-                    temp[header[cIdx]] = fieldVal;
-                });
-                data.push(temp);
-            }
-        }
-        else {
-            data = [];
-            schema = [];
-        }
-        return new DataModel(data, schema);
     }
 
     /**
@@ -810,36 +296,6 @@ class DataModel extends Relation {
      * @param {DataModel} propModel - The propagation datamodel instance.
      * @return {DataModel} Returns the filtered propagation model.
      */
-    _filterPropagationModel(propModel) {
-        const { data, schema } = propModel.getData();
-        let filteredModel;
-        if (schema.length) {
-            if (schema[0].name === ROW_ID) {
-                // iterate over data and create occurence map
-                const occMap = {};
-                data.forEach((val) => {
-                    occMap[val[0]] = true;
-                });
-                filteredModel = this.select((fields, rIdx) => occMap[rIdx], {}, false);
-            } else {
-                let fieldMap = this.getFieldMap();
-                let filteredSchema = schema.filter(d => d.name in fieldMap && d.type === FieldType.DIMENSION);
-                filteredModel = this.select((fields) => {
-                    let include = true;
-                    filteredSchema.forEach((propField, idx) => {
-                        let index = data.findIndex(d => d[idx] === fields[propField.name].valueOf());
-                        include = include && index !== -1;
-                    });
-                    return include;
-                }, {}, false);
-            }
-        }
-        else {
-            filteredModel = propModel;
-        }
-
-        return filteredModel;
-    }
 
     /**
      * Propagates changes across all the connected DataModel instances.
@@ -849,14 +305,14 @@ class DataModel extends Relation {
      * @param {Object} payload - The interaction specific details.
      * @param {DataModel} source - The source DataModel instance.
      */
-    propagate(identifiers, payload, source, grouped = false) {
+    propagate (identifiers, payload, source, grouped = false) {
         let propModel = identifiers;
         if (!(propModel instanceof DataModel)) {
-            propModel = this._assembleModelFromIdentifiers(identifiers);
+            propModel = assembleModelFromIdentifiers(this, identifiers);
         }
 
         // create the filtered model
-        const filteredModel = this._filterPropagationModel(propModel);
+        const filteredModel = filterPropagationModel(this, propModel);
         // function to propagate to target the DataModel instance.
         const forwardPropagation = (targetDM, propagationData, group) => {
             targetDM.handlePropagation({
@@ -913,7 +369,7 @@ class DataModel extends Relation {
      * @param {Object} payload Object with insertion related fields.
      * @memberof DataModel
      */
-    propagateInterpolatedValues(rangeObj, payload, fromSource) {
+    propagateInterpolatedValues (rangeObj, payload, fromSource) {
         const source = fromSource || this;
         let propModel = rangeObj;
         if (!(propModel instanceof DataModel)) {
@@ -972,7 +428,7 @@ class DataModel extends Relation {
      * @param {Function} callback - The callback to invoke.
      * @return {DataModel} Returns this current DataModel instance itself.
      */
-    on(eventName, callback) {
+    on (eventName, callback) {
         switch (eventName) {
         case PROPAGATION:
             this._onPropagation.push(callback);
@@ -1027,147 +483,55 @@ class DataModel extends Relation {
      * @param {string} binnedFieldName - The name of the new field.
      * @return {DataModel} Returns the new DataModel instance.
      */
-    createBin(measureName, config, binnedFieldName) {
-        const clone = this.cloneAsChild();
-        const namespaceFields = clone.getNameSpace().fields;
-        const fieldMap = this.getFieldMap();
-        binnedFieldName = binnedFieldName || `${measureName}_binned`;
-        if (fieldMap[binnedFieldName]) {
-            throw new Error(`Field ${measureName} already exists.`);
-        }
-        if (!fieldMap[measureName]) {
-            throw new Error(`Field ${measureName} does not exist.`);
-        }
-        // get the data for field to be binned
-        const fieldIndex = this.getFieldMap()[measureName].index;
-        const fieldData = this.getNameSpace().fields[fieldIndex].data;
-        // get the buckets
-        const buckets = config.buckets || createBuckets(fieldData, config);
-        const startVals = buckets.map(item => item.start || 0);
-        startVals.push(buckets[buckets.length - 1].end);
-        const getLabel = (value, start, end) => {
-            if (end - start === 1) {
-                return buckets[start].label;
-            }
-            const midIdx = start + Math.ceil((end - start) / 2);
-            const midVal = startVals[midIdx];
-            if (value === midVal) {
-                return buckets[midIdx].label;
-            }
-            if (value > midVal) {
-                return getLabel(value, midIdx, end);
-            }
-            return getLabel(value, start, midIdx);
-        };
-        const labelData = [];
-        // iterate over field data and assign label
-        rowDiffsetIterator(this.rowDiffset, (i) => {
-            const value = fieldData[i];
-            const label = getLabel(value, 0, startVals.length - 1);
-            labelData.push(label);
-        });
-        const partialField = new Categorical(binnedFieldName, labelData, {
-            name: binnedFieldName,
-            type: FieldType.DIMENSION,
-        });
+    // bin(measureName, config, binnedFieldName) {
+    //     const clone = this.clone();
+    //     const namespaceFields = clone.getPartialFieldspace().fields;
+    //     const fieldMap = this._fieldConfig;
+    //     binnedFieldName = binnedFieldName || `${measureName}_binned`;
+    //     if (fieldMap[binnedFieldName]) {
+    //         throw new Error(`Field ${measureName} already exists.`);
+    //     }
+    //     if (!fieldMap[measureName]) {
+    //         throw new Error(`Field ${measureName} does not exist.`);
+    //     }
+    //     // get the data for field to be binned
+    //     const fieldIndex = fieldMap[measureName].index;
+    //     const fieldData = this.getPartialFieldspace().fields[fieldIndex].data;
+    //     // get the buckets
+    //     const buckets = config.buckets || createBuckets(fieldData, config);
+    //     const startVals = buckets.map(item => item.start || 0);
+    //     startVals.push(buckets[buckets.length - 1].end);
+    //     const getLabel = (value, start, end) => {
+    //         if (end - start === 1) {
+    //             return buckets[start].label;
+    //         }
+    //         const midIdx = start + Math.ceil((end - start) / 2);
+    //         const midVal = startVals[midIdx];
+    //         if (value === midVal) {
+    //             return buckets[midIdx].label;
+    //         }
+    //         if (value > midVal) {
+    //             return getLabel(value, midIdx, end);
+    //         }
+    //         return getLabel(value, start, midIdx);
+    //     };
+    //     const labelData = [];
+    //     // iterate over field data and assign label
+    //     rowDiffsetIterator(this._rowDiffset, (i) => {
+    //         const value = fieldData[i];
+    //         const label = getLabel(value, 0, startVals.length - 1);
+    //         labelData.push(label);
+    //     });
+    //     const binnedField = new Categorical(binnedFieldName, labelData, {
+    //         name: binnedFieldName,
+    //         type: FieldType.DIMENSION,
+    //     });
 
-       // const nameSpaceEntry = new Field(partialField, this.rowDiffset);
-        // push this to the child DataModel instance field store
-        namespaceFields.push(partialField);
-        // update the field map of child DataModel instance
-        const childFieldMap = clone.getFieldMap();
-        childFieldMap[binnedFieldName] = {
-            index: namespaceFields.length - 1,
-            def: {
-                name: binnedFieldName,
-                type: FieldType.DIMENSION,
-            },
-        };
-        // update the column identifier
-        clone.colIdentifier += `,${binnedFieldName}`;
+    //     this.addField(binnedField);
+    //     persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binnedFieldName }, null);
 
-        this.__persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binnedFieldName }, null);
-
-        return clone;
-    }
-
-    static get Reducers() {
-        return reducerStore;
-    }
-
-    /**
-     * break the link between its parent and itself
-     */
-    dispose() {
-        this.parent.__removeChild(this);
-        this.parent = null;
-    }
-    /**
-     *
-     * @param {DataModel} child : Delegates the parent to remove this child
-     */
-    __removeChild(child) {
-        // remove from child list
-        let idx = this.children.findIndex(sibling => sibling === child);
-        idx !== -1 ? this.children.splice(idx, 1) : true;
-    }
-    /**
-     *
-     * @param { DataModel } parent datamodel instance which will act as its parent of this.
-     * @param { Queue } criteriaQueue Queue contains in-between operation meta-data
-     */
-    __addParent(parent, criteriaQueue = []) {
-        this._nameSpace = this._nameSpace === undefined ?
-                                        this.parent.getNameSpace() : this._nameSpace;
-        this.__persistDerivation(this, DM_DERIVATIVES.COMPOSE, null, criteriaQueue);
-        this.parent = parent;
-        parent.children.push(this);
-    }
-
-    /**
-     *
-     * @param {DataModel} model :Child model derived from operation
-     * @param {String} operation : Type of operation used
-     * @param {Object} config : Contains metaData used in this operation
-     * @param {Function} criteriaFn : Function which having used to do the derivation
-     */
-    __persistDerivation(model, operation, config = {}, criteriaFn) {
-        let derivative;
-        if (operation !== DM_DERIVATIVES.COMPOSE) {
-            derivative = {
-                op: operation,
-                meta: config,
-                criteria: criteriaFn
-            };
-            model._derivation.push(derivative);
-        }
-        else {
-            derivative = [...criteriaFn];
-            model._derivation.length = 0;
-            model._derivation.push(...derivative);
-        }
-    }
-
-    _updateFields() {
-        let newFields = [];
-
-        let collID = this.colIdentifier.split(',');
-        this.getNameSpace().fields.forEach((field) => {
-            if (collID.indexOf(field.name) !== -1) {
-                let newField = new Field(field, this.rowDiffset);
-                newFields.push(newField);
-            }
-        });
-
-        this.fieldSpace = fieldStore.createNameSpace(newFields, this.getNameSpace().name);
-        this.fields = this.fieldSpace.fields;
-
-        return this.fields;
-    }
-
-    getFieldData() {
-        return this._updateFields();
-    }
+    //     return clone;
+    // }
 }
 
 export default DataModel;

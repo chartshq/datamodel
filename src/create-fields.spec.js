@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { Measure, Categorical, DateTime } from './fields';
-import createFields from './create-fields';
+import createFields from './field-creator';
 
 describe('Creating Field', () => {
     describe('#createFields', () => {

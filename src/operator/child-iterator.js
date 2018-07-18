@@ -9,7 +9,7 @@ import { DM_DERIVATIVES } from '../constants';
  * @param {DM_DERIVATIVES} operation
  */
 function childIterator(datamodel, callback, operation) {
-    const children = datamodel.children;
+    const children = datamodel._children;
     children.forEach((child) => {
         if (child._derivation
             && child._derivation.length === 1) {

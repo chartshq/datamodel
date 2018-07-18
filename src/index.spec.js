@@ -19,14 +19,11 @@ describe('DataModel', () => {
             const dataModel = new DataModel(data, schema);
 
             let cloneRelation;
-
-            dataModel.colIdentifier = '1-20';
-            dataModel.rowDiffset = 'a, aaa, aaaa';
             cloneRelation = dataModel.clone();
             expect(cloneRelation instanceof DataModel).to.be.true;
             // Check clone datamodel have all the required attribute
-            expect(cloneRelation.colIdentifier).to.equal('1-20');
-            expect(cloneRelation.rowDiffset).to.equal('a, aaa, aaaa');
+            expect(cloneRelation._colIdentifier).to.equal(dataModel._colIdentifier);
+            expect(cloneRelation._rowDiffset).to.equal(dataModel._rowDiffset);
         });
     });
 
@@ -126,7 +123,7 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#project(params)', () => {
+    describe('#project', () => {
         it('should project the fields correctly', () => {
             const data = [
                 { a: 10, aaa: 20, aaaa: 'd' },
@@ -186,7 +183,7 @@ describe('DataModel', () => {
     });
 
 
-    describe('#select(params)', () => {
+    describe('#select', () => {
         it('should perform selection', () => {
             const data = [
                 { a: 10, aaa: 20, aaaa: 'd' },
@@ -217,7 +214,7 @@ describe('DataModel', () => {
             };
             // check project is not applied on the same DataModel
             expect(dataModel === projectedDataModel).to.be.false;
-            expect(projectedDataModel.rowDiffset).to.equal('2-3');
+            expect(projectedDataModel._rowDiffset).to.equal('2-3');
             // Check The return data
             expect(projectedDataModel.getData()).to.deep.equal(expData);
         });
@@ -319,7 +316,7 @@ describe('DataModel', () => {
             };
             // check project is not applied on the same DataModel
             expect(dataModel === projectedDataModel).to.be.false;
-            expect(projectedDataModel.rowDiffset).to.equal('1-2,4-7,9');
+            expect(projectedDataModel._rowDiffset).to.equal('1-2,4-7,9');
             // Check The return data
             expect(projectedDataModel.getData()).to.deep.equal(expData);
 
@@ -336,49 +333,11 @@ describe('DataModel', () => {
                 ],
                 uids: [5, 6, 7, 9]
             };
-            expect(projectedDataModel1.rowDiffset).to.equal('5-7,9');
+            expect(projectedDataModel1._rowDiffset).to.equal('5-7,9');
             // Check The return data
             expect(projectedDataModel1.getData()).to.deep.equal(expData);
         });
     });
-
-    describe('#rename', () => {
-        it('should perform rename properly', () => {
-            const data = [
-                { a: 10, aaa: 20, aaaa: 'd' },
-                { a: 15, aaa: 25, aaaa: 'demo' },
-                { a: 9, aaa: 35, aaaa: 'demo' },
-                { a: 7, aaa: 15, aaaa: 'demo' },
-                { a: 35, aaa: 5, aaaa: 'demo' },
-                { a: 10, aaa: 10, aaaa: 'demoo' },
-            ];
-            const schema = [
-                { name: 'a', type: 'measure' },
-                { name: 'aaa', type: 'measure' },
-                { name: 'aaaa', type: 'dimension' },
-            ];
-            const dataModel = new DataModel(data, schema);
-            const renameDataModel = dataModel.rename({ aaa: 'aaaRename' });
-            const expData = {
-                schema: [
-                    { name: 'a', type: 'measure' },
-                    { name: 'aaaRename', type: 'measure' },
-                    { name: 'aaaa', type: 'dimension' },
-                ],
-                data: [
-                    [10, 20, 'd'],
-                    [15, 25, 'demo'],
-                    [9, 35, 'demo'],
-                    [7, 15, 'demo'],
-                    [35, 5, 'demo'],
-                    [10, 10, 'demoo'],
-                ],
-                uids: [0, 1, 2, 3, 4, 5]
-            };
-            expect(renameDataModel.getData()).to.deep.equal(expData);
-        });
-    });
-
 
     describe('#sort', () => {
         it('should perform sorting properly', () => {
@@ -414,7 +373,7 @@ describe('DataModel', () => {
                 ['aaa', 'desc'],
                 ['a'],
             ]);
-            expect(dataModel.sortingDetails).to.deep.equal([
+            expect(dataModel._sortingDetails).to.deep.equal([
                 ['aaa', 'desc'],
                 ['a', 'asc'],
             ]);
@@ -652,15 +611,19 @@ describe('DataModel', () => {
                 { name: 'state', type: 'dimension' },
             ];
             const dataModel = new DataModel(data1, schema1, 'Yo');
+
             const next = dataModel.project(['profit', 'sales']).select(f => +f.profit > 10);
             const child = next.calculateVariable({
-                name: 'Efficiency'
+                name: 'Efficiency',
+                type: 'measure'
             }, ['profit', 'sales', (profit, sales) => profit / sales]);
+
             const childData = child.getData().data;
             const efficiency = childData[0][childData[0].length - 1];
             expect(
                 efficiency
             ).to.equal(0.6);
+
             expect(
                 () => {
                     child.calculateVariable({
@@ -694,20 +657,6 @@ describe('DataModel', () => {
             expect(
                 songData.getData().data[0][0]
             ).to.equal('Hey Jude');
-
-            // test removing dependents
-            const exDm = dataModel.calculateVariable({
-                name: 'Song',
-                type: 'dimension'
-            }, ['first', 'second', (first, second) =>
-                `${second} ${first}`
-            ], {
-                removeDependentDimensions: true
-            });
-            const fieldMap = exDm.getFieldMap();
-            expect(
-                !(fieldMap.first && fieldMap.second)
-            ).to.be.true;
         });
 
         it('should return correct value from the callback funciton', () => {
@@ -726,7 +675,8 @@ describe('DataModel', () => {
                 return a + aaa + arg[0];
             };
             const child = dataModel.calculateVariable({
-                name: 'bbbb'
+                name: 'bbbb',
+                type: 'measure'
             }, ['a', 'aaa', callback2]);
 
             const childData = child.getData().data;
@@ -822,65 +772,65 @@ describe('DataModel', () => {
     });
 
 
-    describe('#bin', () => {
-        it('should bin the data', () => {
-            const toBinData = [
-                { marks: 1, },
-                { marks: 2, },
-                { marks: 3, },
-                { marks: 4, },
-                { marks: 5, },
-                { marks: 9, }];
-            const toBinSchema = [{
-                name: 'marks',
-                type: 'measure'
-            }];
-            const toBinDatamodel = new DataModel(toBinData, toBinSchema);
-            const buckets = [
-                { end: 1, label: 'useless' },
-                { start: 1, end: 4, label: 'failure' },
-                { start: 4, end: 6, label: 'firstclass' },
-                { start: 6, end: 10, label: 'decent' }
-            ];
+    // describe('#bin', () => {
+    //     it('should bin the data', () => {
+    //         const toBinData = [
+    //             { marks: 1, },
+    //             { marks: 2, },
+    //             { marks: 3, },
+    //             { marks: 4, },
+    //             { marks: 5, },
+    //             { marks: 9, }];
+    //         const toBinSchema = [{
+    //             name: 'marks',
+    //             type: 'measure'
+    //         }];
+    //         const toBinDatamodel = new DataModel(toBinData, toBinSchema);
+    //         const buckets = [
+    //             { end: 1, label: 'useless' },
+    //             { start: 1, end: 4, label: 'failure' },
+    //             { start: 4, end: 6, label: 'firstclass' },
+    //             { start: 6, end: 10, label: 'decent' }
+    //         ];
 
-            let binnedDM = toBinDatamodel.createBin('marks', {
-                buckets,
-            }, 'rating1');
-            let binnedDMnum = toBinDatamodel.createBin('marks', {
-                numOfBins: 4
-            }, 'rating2');
-            let binnedDMSize = toBinDatamodel.createBin('marks', {
-                binSize: 4,
-            });
-            expect(
-                binnedDM.getData().schema
-            ).to.deep.equal([{
-                name: 'marks',
-                type: 'measure',
-            }, {
-                name: 'rating1',
-                type: 'dimension'
-            }]);
-            expect(
-                binnedDMnum.getData().schema
-            ).to.deep.equal([{
-                name: 'marks',
-                type: 'measure',
-            }, {
-                name: 'rating2',
-                type: 'dimension'
-            }]);
-            expect(
-                binnedDMSize.getData().schema
-            ).to.deep.equal([{
-                name: 'marks',
-                type: 'measure',
-            }, {
-                name: 'marks_binned',
-                type: 'dimension'
-            }]);
-        });
-    });
+    //         let binnedDM = toBinDatamodel.bin('marks', {
+    //             buckets,
+    //         }, 'rating1');
+    //         let binnedDMnum = toBinDatamodel.bin('marks', {
+    //             numOfBins: 4
+    //         }, 'rating2');
+    //         let binnedDMSize = toBinDatamodel.bin('marks', {
+    //             binSize: 4,
+    //         });
+    //         expect(
+    //             binnedDM.getData().schema
+    //         ).to.deep.equal([{
+    //             name: 'marks',
+    //             type: 'measure',
+    //         }, {
+    //             name: 'rating1',
+    //             type: 'dimension'
+    //         }]);
+    //         expect(
+    //             binnedDMnum.getData().schema
+    //         ).to.deep.equal([{
+    //             name: 'marks',
+    //             type: 'measure',
+    //         }, {
+    //             name: 'rating2',
+    //             type: 'dimension'
+    //         }]);
+    //         expect(
+    //             binnedDMSize.getData().schema
+    //         ).to.deep.equal([{
+    //             name: 'marks',
+    //             type: 'measure',
+    //         }, {
+    //             name: 'marks_binned',
+    //             type: 'dimension'
+    //         }]);
+    //     });
+    // });
 
     context('Aggregation function context', () => {
         const data1 = [
@@ -996,13 +946,13 @@ describe('DataModel', () => {
         describe('#dispose', () => {
             it('Should remove child on calling dispose', () => {
                 let dm2 = dataModel.select(fields => fields.profit.value < 150);
-                expect(dataModel.children.length).to.equal(1);
+                expect(dataModel._children.length).to.equal(1);
                 dm2.dispose();
-                expect(dataModel.children.length).to.equal(0);
+                expect(dataModel._children.length).to.equal(0);
             });
         });
 
-        describe('#__addParent', () => {
+        describe('#addParent', () => {
             it('Adding parent should save criteria in parent', () => {
                 let dm2 = dataModel.select(fields => fields.profit.value < 150);
                 let dm3 = dm2.groupBy(['sales'], {
@@ -1026,10 +976,10 @@ describe('DataModel', () => {
                     }
                 ];
                 dm3.dispose();
-                dm4.__addParent(dm2, criteriaQueue);
-                expect(dm2.children.length).to.equal(1);
-                expect(dm2.children[0].getData()).to.deep.equal(data);
-                expect(dm4.parent).to.equal(dm2);
+                dm4.addParent(dm2, criteriaQueue);
+                expect(dm2._children.length).to.equal(1);
+                expect(dm2._children[0].getData()).to.deep.equal(data);
+                expect(dm4._parent).to.equal(dm2);
             });
         });
     });
@@ -1095,25 +1045,25 @@ describe('DataModel', () => {
         ];
         const dataModel = new DataModel(data1, schema1);
         const dataModel2 = new DataModel(data2, schema2);
-        dataModel2;
         let dm2 = dataModel.select(fields => fields.profit.value < 150);
         let dm3 = dataModel.groupBy(['sales'], {
             profit: null
         });
-        let dm4 = dataModel.select(fields => fields.profit.value < 150, {}, true, dm2);
+        let dm4 = dataModel.select(fields => fields.profit.value < 150, { saveChild: true, mutationTarget: dm2 });
         let dm5 = dataModel.groupBy(['Year'], {
-        }, true, dm3);
+        }, { saveChild: true, mutationTarget: dm3 });
         let dm6 = dataModel.calculateVariable({
             name: 'Efficiency'
         }, ['profit', 'sales', (profit, sales) => profit / sales]);
         let dm7 = dataModel.calculateVariable({
             name: 'UnEfficiency'
-        }, ['sales', 'profit', (sales, profit) => sales / profit], { saveChild: true }, dm6);
+        }, ['sales', 'profit', (sales, profit) => sales / profit], { saveChild: true, mutationTarget: dm6 });
+
         it('select should not change datamodel instance ', () => {
             expect(dm2).to.equal(dm4);
         });
         it('should not change namespace by groupby operation', () => {
-            expect(dm3.getNameSpace().name).to.equal(dm5.getNameSpace().name);
+            expect(dm3.getPartialFieldspace().name).to.equal(dm5.getPartialFieldspace().name);
         });
         it('should not change datamodel instance calculateVariable operation', () => {
             expect(dm6).to.equal(dm7);

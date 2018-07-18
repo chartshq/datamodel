@@ -11,7 +11,7 @@ export function compose(...operations) {
             }
         });
 
-        currentDM.__addParent(dm, derivations);
+        currentDM.addParent(dm, derivations);
         if (derivations.length > 1) {
             frstChild.dispose();
         }

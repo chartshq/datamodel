@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { dataBuilder } from './data-builder';
-import createFields from '../create-fields';
+import createFields from '../field-creator';
 
 describe('Checking dataBuilder', () => {
     describe('#dataBuilder', () => {
