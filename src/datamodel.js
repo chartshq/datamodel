@@ -3,16 +3,15 @@
 import { FieldType } from 'picasso-util';
 import { persistDerivation, assembleModelFromIdentifiers, filterPropagationModel } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
-import { Categorical } from './fields';
 import {
-    createBuckets,
     dataBuilder,
     rowDiffsetIterator,
     groupBy,
     groupByIterator,
     projectIterator,
-    selectIterator
+    selectIterator,
 } from './operator';
+import { createBinnedFieldData } from './operator/bucket-creator';
 import Relation from './relation';
 import reducerStore from './utils/reducer';
 import createFields from './field-creator';
@@ -149,12 +148,12 @@ class DataModel extends Relation {
         const groupByString = `${fieldsArr.join()}`;
         let present = false;
         if (config.mutationTarget instanceof DataModel) {
-            let child = this._children.find(childElm => 
+            let child = this._children.find(childElm =>
                 childElm._derivation
                 && childElm._derivation.length === 1
                 && childElm._derivation[0].op === DM_DERIVATIVES.GROUPBY
                 && childElm._derivation[0].meta.groupByString === groupByString
-                && childElm === config.mutationTarget 
+                && childElm === config.mutationTarget
             );
 
             if (child) {
@@ -256,7 +255,7 @@ class DataModel extends Relation {
                 childElm._derivation
                 && childElm._derivation.length === 1
                 && childElm._derivation[0].op === DM_DERIVATIVES.CAL_VAR
-                && childElm === config.mutationTarget 
+                && childElm === config.mutationTarget
             );
         }
 
@@ -532,6 +531,30 @@ class DataModel extends Relation {
 
     //     return clone;
     // }
+
+    /**
+     @param {String} measureName : name of measure which will be used to create bin
+     @param {Object} config : bucketObj : {} || binSize : number || noOfBins : number || binFieldName : string
+     @param {Function | FunctionName} reducer : binning reducer
+     */
+    bin(measureName, config = { }, reducer) {
+        const clone = this.clone();
+        const binFieldName = config.name || `${measureName}_binned`;
+        if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[measureName]) {
+            throw new Error(`Field ${measureName} already exists.`);
+        }
+        const field = this._partialFieldspace.fields.find(currfield => currfield.name === measureName);
+        const reducerFunc = reducerStore.resolve(reducer || field.defAggFn()) || reducerStore.defaultReducer();
+        const data = createBinnedFieldData(field.data, this._rowDiffset, reducerFunc, config);
+        const binField = createFields([data], [
+            {
+                name: binFieldName,
+                type: FieldType.MEASURE
+            }], [binFieldName])[0];
+        clone.addField(binField);
+        persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binFieldName }, null);
+        return clone;
+    }
 }
 
 export default DataModel;
