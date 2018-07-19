@@ -1,5 +1,6 @@
 /* eslint-disable default-case */
 
+import { FieldType } from 'picasso-util';
 import { persistDerivation, assembleModelFromIdentifiers, filterPropagationModel } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {
@@ -8,8 +9,9 @@ import {
     groupBy,
     groupByIterator,
     projectIterator,
-    selectIterator
+    selectIterator,
 } from './operator';
+import { createBinnedFieldData } from './operator/bucket-creator';
 import Relation from './relation';
 import reducerStore from './utils/reducer';
 import createFields from './field-creator';
@@ -420,67 +422,28 @@ class DataModel extends Relation {
     }
 
     /**
-     * Creates a bin based on provided buckets or based on
-     * calculated buckets created from configuration.
-     *
-     * @public
-     * @param {string} measureName - The name of the measure to bin.
-     * @param {Object} config - The binning configuration.
-     * @param {Array} config.buckets - The array of buckets.
-     * @param {number} config.binSize - The size of a bin.
-     * @param {number} config.numOfBins - The number of bins to create.
-     * @param {string} binnedFieldName - The name of the new field.
-     * @return {DataModel} Returns the new DataModel instance.
+     @param {String} measureName : name of measure which will be used to create bin
+     @param {Object} config : bucketObj : {} || binSize : number || noOfBins : number || binFieldName : string
+     @param {Function | FunctionName} reducer : binning reducer
      */
-    // bin(measureName, config, binnedFieldName) {
-    //     const clone = this.clone();
-    //     const namespaceFields = clone.getPartialFieldspace().fields;
-    //     const fieldMap = this._fieldConfig;
-    //     binnedFieldName = binnedFieldName || `${measureName}_binned`;
-    //     if (fieldMap[binnedFieldName]) {
-    //         throw new Error(`Field ${measureName} already exists.`);
-    //     }
-    //     if (!fieldMap[measureName]) {
-    //         throw new Error(`Field ${measureName} does not exist.`);
-    //     }
-    //     // get the data for field to be binned
-    //     const fieldIndex = fieldMap[measureName].index;
-    //     const fieldData = this.getPartialFieldspace().fields[fieldIndex].data;
-    //     // get the buckets
-    //     const buckets = config.buckets || createBuckets(fieldData, config);
-    //     const startVals = buckets.map(item => item.start || 0);
-    //     startVals.push(buckets[buckets.length - 1].end);
-    //     const getLabel = (value, start, end) => {
-    //         if (end - start === 1) {
-    //             return buckets[start].label;
-    //         }
-    //         const midIdx = start + Math.ceil((end - start) / 2);
-    //         const midVal = startVals[midIdx];
-    //         if (value === midVal) {
-    //             return buckets[midIdx].label;
-    //         }
-    //         if (value > midVal) {
-    //             return getLabel(value, midIdx, end);
-    //         }
-    //         return getLabel(value, start, midIdx);
-    //     };
-    //     const labelData = [];
-    //     // iterate over field data and assign label
-    //     rowDiffsetIterator(this._rowDiffset, (i) => {
-    //         const value = fieldData[i];
-    //         const label = getLabel(value, 0, startVals.length - 1);
-    //         labelData.push(label);
-    //     });
-    //     const binnedField = new Categorical(binnedFieldName, labelData, {
-    //         name: binnedFieldName,
-    //         type: FieldType.DIMENSION,
-    //     });
-
-    //     this.addField(binnedField);
-    //     persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binnedFieldName }, null);
-
-    //     return clone;
-    // }
+    bin(measureName, config = { }, reducer) {
+        const clone = this.clone();
+        const binFieldName = config.name || `${measureName}_binned`;
+        if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[measureName]) {
+            throw new Error(`Field ${measureName} already exists.`);
+        }
+        const field = this._partialFieldspace.fields.find(currfield => currfield.name === measureName);
+        const reducerFunc = reducerStore.resolve(reducer || field.defAggFn()) || reducerStore.defaultReducer();
+        const data = createBinnedFieldData(field.data, this._rowDiffset, reducerFunc, config);
+        const binField = createFields([data], [
+            {
+                name: binFieldName,
+                type: FieldType.DIMENSION
+            }], [binFieldName])[0];
+        clone.addField(binField);
+        persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binFieldName }, null);
+        return clone;
+    }
 }
 
 export default DataModel;
