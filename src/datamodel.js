@@ -187,7 +187,7 @@ class DataModel extends Relation {
         const struct = this.getData();
         // append header
         const header = struct.schema.map(field => field.name);
-        return new this.constructor([header].concat(struct.data), struct.schema, null, { dataFormat: 'CSVArr' });
+        return new this.constructor([header].concat(struct.data), struct.schema, null, { dataFormat: 'DSVArr' });
     }
 
     addField (field) {

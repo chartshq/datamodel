@@ -208,5 +208,5 @@ function load (url) {
 
 // load('../../js/cars.csv')
 //     .then((res) => {
-//         dm = new DataModel(res.split('\n').map(line => line.split(',')), {}, 'myDataModel', { dataFormat: 'CSVArr' });
+//         dm = new DataModel(res.split('\n').map(line => line.split(',')), {}, 'myDataModel', { dataFormat: 'DSVArr' });
 //     });

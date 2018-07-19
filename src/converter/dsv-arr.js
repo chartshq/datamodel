@@ -1,13 +1,11 @@
 import { columnMajor } from '../utils';
 
 /**
- * Parses and converts data formatted in CSV array to a manageable internal format.
+ * Parses and converts data formatted in DSV array to a manageable internal format.
  *
- * @todo Need to return empty array instead of undefined when header is not given.
- *
- * @param {Array.<Array>} arr - A 2D array containing of the CSV data.
+ * @param {Array.<Array>} arr - A 2D array containing of the DSV data.
  * @param {Object} options - Option to control the behaviour of the parsing.
- * @param {boolean} [options.firstRowHeader=true] - Whether the first row of the csv data is header or not.
+ * @param {boolean} [options.firstRowHeader=true] - Whether the first row of the dsv data is header or not.
  * @return {Array} Returns an array of headers and column major data.
  * @example
  *
@@ -19,7 +17,7 @@ import { columnMajor } from '../utils';
  *    [7, 8, 9]
  * ];
  */
-function CSVArr(arr, options) {
+function DSVArr(arr, options) {
     const defaultOption = {
         firstRowHeader: true,
     };
@@ -42,4 +40,4 @@ function CSVArr(arr, options) {
     return [header, columns];
 }
 
-export default CSVArr;
+export default DSVArr;

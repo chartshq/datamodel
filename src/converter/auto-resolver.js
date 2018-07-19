@@ -1,6 +1,6 @@
 import FlatJSON from './flat-json';
-import CSVArr from './csv-arr';
-import CSVStr from './csv-str';
+import DSVArr from './dsv-arr';
+import DSVStr from './dsv-str';
 import { isArray, isObject, isString } from '../utils';
 
 /**
@@ -14,9 +14,9 @@ function Auto(data, options) {
     let converter;
 
     if (isString(data)) {
-        converter = CSVStr;
+        converter = DSVStr;
     } else if (isArray(data) && isArray(data[0])) {
-        converter = CSVArr;
+        converter = DSVArr;
     } else if (isArray(data) && (data.length === 0 || isObject(data[0]))) {
         converter = FlatJSON;
     } else {

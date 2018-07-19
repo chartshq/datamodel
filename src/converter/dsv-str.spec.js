@@ -2,59 +2,59 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import CSVStr from './csv-str';
+import DSVStr from './dsv-str';
 
-describe('CSVStr Converter', () => {
-    describe('#CSVStr', () => {
-        it('should parse the CSV string data with header names', () => {
+describe('DSVStr Converter', () => {
+    describe('#DSVStr', () => {
+        it('should parse the DSV string data with header names', () => {
             const data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9';
             const option = {
                 firstRowHeader: true,
                 fieldSeparator: ','
             };
 
-            const parsedData = CSVStr(data, option);
+            const parsedData = DSVStr(data, option);
             const expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
 
             expect(parsedData).to.deep.equal(expected);
         });
 
-        it('should parse the CSV string data without header names', () => {
+        it('should parse the DSV string data without header names', () => {
             const data = '1,2,3\n4,5,6\n7,8,9';
             const option = {
                 firstRowHeader: false,
                 fieldSeparator: ','
             };
 
-            const parsedData = CSVStr(data, option);
+            const parsedData = DSVStr(data, option);
             const expected = [[], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
 
             expect(parsedData).to.deep.equal(expected);
         });
 
-        it('should parse the CSV string data with custom options', () => {
+        it('should parse the DSV string data with custom options', () => {
             const data = 'a|b|c\n1|2|3\n4|5|6\n7|8|9';
             const option = {
                 firstRowHeader: true,
                 fieldSeparator: '|'
             };
 
-            const parsedData = CSVStr(data, option);
+            const parsedData = DSVStr(data, option);
             const expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
 
             expect(parsedData).to.deep.equal(expected);
         });
 
-        it('should parse the CSV string data with default options', () => {
+        it('should parse the DSV string data with default options', () => {
             // With header names
             let data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9';
-            let parsedData = CSVStr(data);
+            let parsedData = DSVStr(data);
             let expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
             expect(parsedData).to.deep.equal(expected);
 
             // Without header names
             data = '1,2,3\n4,5,6\n7,8,9';
-            parsedData = CSVStr(data);
+            parsedData = DSVStr(data);
             expected = [['1', '2', '3'], [['4', '7'], ['5', '8'], ['6', '9']]];
             expect(parsedData).to.deep.equal(expected);
         });
