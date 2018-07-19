@@ -34,7 +34,7 @@ describe('CSVArr Converter', () => {
             };
 
             const parsedData = CSVArr(data, option);
-            const expected = [undefined, [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
+            const expected = [[], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
 
             expect(parsedData).to.deep.equal(expected);
         });

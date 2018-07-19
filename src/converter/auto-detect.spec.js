@@ -52,7 +52,7 @@ describe('AutoDetect Converter', () => {
                 [7, 8, 9]
             ];
             parsedData = AutoDetect(data, { firstRowHeader: false });
-            expected = [undefined, [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
+            expected = [[], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
             expect(parsedData).to.deep.equal(expected);
         });
 
