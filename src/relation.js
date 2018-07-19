@@ -23,7 +23,7 @@ class Relation {
      * a field store with these fields in global space which can be used
      * by other functions for calculations and other operations on data
      *
-     * @param {Object | string | Relation} data - The input tabular data in csv or json format or
+     * @param {Object | string | Relation} data - The input tabular data in dsv or json format or
      * an existing Relation instance object.
      * @param {Array} schema - An array of data schema.
      * @param {string} [name] - The name of the DataModel instance, if not provided will assign a random name.

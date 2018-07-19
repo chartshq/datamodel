@@ -1,15 +1,15 @@
 import { dsvFormat as d3Dsv } from 'd3-dsv';
-import CSVArr from './csv-arr';
+import DSVArr from './dsv-arr';
 
 /**
- * Parses and converts data formatted in CSV (or any DSV) string to a manageable internal format.
+ * Parses and converts data formatted in DSV string to a manageable internal format.
  *
  * @todo Support to be given for https://tools.ietf.org/html/rfc4180.
  * @todo Sample implementation https://github.com/knrz/CSV.js/.
  *
- * @param {string} str - The input CSV (or any DSV) string.
+ * @param {string} str - The input DSV string.
  * @param {Object} options - Option to control the behaviour of the parsing.
- * @param {boolean} [options.firstRowHeader=true] - Whether the first row of the csv string data is header or not.
+ * @param {boolean} [options.firstRowHeader=true] - Whether the first row of the dsv string data is header or not.
  * @param {string} [options.fieldSeparator=","] - The separator of two consecutive field.
  * @return {Array} Returns an array of headers and column major data.
  * @example
@@ -22,7 +22,7 @@ import CSVArr from './csv-arr';
  * 7,8,9
  * `
  */
-function CSVStr(str, options) {
+function DSVStr(str, options) {
     const defaultOption = {
         firstRowHeader: true,
         fieldSeparator: ','
@@ -30,7 +30,7 @@ function CSVStr(str, options) {
     options = Object.assign({}, defaultOption, options);
 
     const dsv = d3Dsv(options.fieldSeparator);
-    return CSVArr(dsv.parseRows(str), options);
+    return DSVArr(dsv.parseRows(str), options);
 }
 
-export default CSVStr;
+export default DSVStr;

@@ -35,7 +35,7 @@ describe('Auto Converter', () => {
             expect(parsedData).to.deep.equal(expected);
         });
 
-        it('should detect the CSV array data', () => {
+        it('should detect the DSV array data', () => {
             let data = [
                 ['a', 'b', 'c'],
                 [1, 2, 3],
@@ -56,7 +56,7 @@ describe('Auto Converter', () => {
             expect(parsedData).to.deep.equal(expected);
         });
 
-        it('should detect the CSV string data', () => {
+        it('should detect the DSV string data', () => {
             let data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9';
             let parsedData = Auto(data);
             let expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
