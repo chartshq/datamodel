@@ -2,8 +2,8 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
+import { FilteringMode } from 'picasso-util';
 import DataModel from './index';
-import { FilteringMode } from '../../picasso-util/src/enums';
 
 describe('DataModel', () => {
     describe('#clone', () => {
