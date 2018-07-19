@@ -1,5 +1,5 @@
 export { createBinnedFieldData } from './bucket-creator';
-export { selectIterator, calculatedMeasureIterator, projectIterator, groupByIterator } from './child-iterator';
+export { selectIterator, calculatedVariableIterator, projectIterator, groupByIterator } from './child-iterator';
 export { compose, bin, rowFilter, columnFilter, groupby } from './compose';
 export { crossProduct } from './cross-product';
 export { dataBuilder } from './data-builder';
