@@ -105,84 +105,63 @@ describe('Testing compose functionality', () => {
             expect(normalDm.getData()).to.deep.equal(composedDm.getData());
         });
         it('should compose bin', () => {
-            const toBinData = [{
-                marks: 1,
-            }, {
-                marks: 2,
-            }, {
-                marks: 3,
-            }, {
-                marks: 4,
-            }, {
-                marks: 5,
-            }, {
-                marks: 9,
-            }];
-            const toBinSchema = [{
-                name: 'marks',
-                type: 'measure'
-            }];
-            const toBinDataModel = new DataModel(toBinData, toBinSchema);
-            const toBinDataModel2 = new DataModel(toBinData, toBinSchema);
-            const buckets = [
-            { end: 1, label: 'useless' },
-            { start: 1, end: 4, label: 'failure' },
-            { start: 4, end: 6, label: 'firstclass' },
-            { start: 6, end: 10, label: 'decent' }
+            const data = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' }
             ];
-
-            let binnedDM = toBinDataModel.createBin('marks', {
-                buckets,
-            }, 'rating1');
+            const schema = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, 'Yo');
+            const bins = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
 
             let composedFn = compose(
-           bin('marks', {
-               buckets,
-           }, 'rating1'),
+            bin('profit', { binSize: 5, name: 'sumField' }));
 
-        );
-
-            let composedDm = composedFn(toBinDataModel2);
-            expect(binnedDM.getData()).to.deep.equal(composedDm.getData());
+            let composedDm = composedFn(dataModel);
+            expect(bins.getData()).to.deep.equal(composedDm.getData());
         });
         it('should compose bin and select', () => {
-            const toBinData = [{
-                marks: 1,
-            }, {
-                marks: 2,
-            }, {
-                marks: 3,
-            }, {
-                marks: 4,
-            }, {
-                marks: 5,
-            }, {
-                marks: 9,
-            }];
-            const toBinSchema = [{
-                name: 'marks',
-                type: 'measure'
-            }];
-            const toBinDataModel = new DataModel(toBinData, toBinSchema);
-            const toBinDataModel2 = new DataModel(toBinData, toBinSchema);
-            const buckets = [
-            { end: 1, label: 'useless' },
-            { start: 1, end: 4, label: 'failure' },
-            { start: 4, end: 6, label: 'firstclass' },
-            { start: 6, end: 10, label: 'decent' }
+            const data = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' }
             ];
+            const schema = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, 'Yo');
 
-            let binnedDM = toBinDataModel.createBin('marks', {
-                buckets,
-            }, 'rating1');
-            let selectedBin = binnedDM.select(fields => fields.rating1.value === 'failure');
+            const dataModel2 = new DataModel(data1, schema1, 'Yo');
+            const bins = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
+
+            let selectedBin = bins.select(fields => fields.profit.value <= 15);
             let composedFn = compose(
-           bin('marks', {
-               buckets,
-           }, 'rating1'),
-           rowFilter(fields => fields.rating1.value === 'failure')
+           bin('profit', { binSize: 5, name: 'sumField' }),
+           rowFilter(fields => fields.profit.value <= 15)
         );
-            let composedDm = composedFn(toBinDataModel2);
+            let composedDm = composedFn(dataModel2);
             expect(selectedBin.getData()).to.deep.equal(composedDm.getData());
         });
     });

@@ -37,6 +37,7 @@
     }
   ],
   "dependencies": {
+    "d3-dsv": "^1.0.8",
     "picasso-util": "git+ssh://git@bitbucket.org/fusioncharts/picasso-util.git#develop"
   },
   "devDependencies": {

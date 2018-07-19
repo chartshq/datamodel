@@ -20,12 +20,12 @@ import { columnMajor } from '../utils';
  * ];
  */
 function CSVArr(arr, options) {
-    let header;
-
     const defaultOption = {
         firstRowHeader: true,
     };
-    options = Object.assign(Object.assign({}, defaultOption), options || {});
+    options = Object.assign({}, defaultOption, options);
+
+    let header;
     const columns = [];
     const push = columnMajor(columns);
 
@@ -33,6 +33,8 @@ function CSVArr(arr, options) {
         // If header present then mutate the array.
         // Do in-place mutation to save space.
         header = arr.splice(0, 1)[0];
+    } else {
+        header = [];
     }
 
     arr.forEach(field => push(...field));

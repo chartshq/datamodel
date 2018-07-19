@@ -1,16 +1,16 @@
-import { columnMajor } from '../utils';
+import { dsvFormat as d3Dsv } from 'd3-dsv';
+import CSVArr from './csv-arr';
 
 /**
- * Parses and converts data formatted in CSV string to a manageable internal format.
+ * Parses and converts data formatted in CSV (or any DSV) string to a manageable internal format.
  *
  * @todo Support to be given for https://tools.ietf.org/html/rfc4180.
  * @todo Sample implementation https://github.com/knrz/CSV.js/.
  *
- * @param {string} str - The input CSV string.
+ * @param {string} str - The input CSV (or any DSV) string.
  * @param {Object} options - Option to control the behaviour of the parsing.
  * @param {boolean} [options.firstRowHeader=true] - Whether the first row of the csv string data is header or not.
  * @param {string} [options.fieldSeparator=","] - The separator of two consecutive field.
- * @param {string} [options.lineSeparator="\n"] - The separator of two consecutive line.
  * @return {Array} Returns an array of headers and column major data.
  * @example
  *
@@ -23,30 +23,14 @@ import { columnMajor } from '../utils';
  * `
  */
 function CSVStr(str, options) {
-    let header = [];
-
     const defaultOption = {
         firstRowHeader: true,
-        fieldSeparator: ',',
-        lineSeparator: '\n'
+        fieldSeparator: ','
     };
-    options = Object.assign(Object.assign({}, defaultOption), options || {});
-    const columns = [];
-    const push = columnMajor(columns);
-    const arr = str.split(options.lineSeparator);
+    options = Object.assign({}, defaultOption, options);
 
-    if (options.firstRowHeader) {
-        // If header present then mutate the array.
-        // Do in-place mutation to save space.
-        header = arr.splice(0, 1)[0].split(options.fieldSeparator);
-    }
-
-    arr.forEach((line) => {
-        const field = line.split(options.fieldSeparator);
-        push(...field);
-    });
-
-    return [header, columns];
+    const dsv = d3Dsv(options.fieldSeparator);
+    return CSVArr(dsv.parseRows(str), options);
 }
 
 export default CSVStr;

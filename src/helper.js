@@ -1,4 +1,4 @@
-import { FieldType, SelectionMode } from 'picasso-util';
+import { FieldType, FilteringMode } from 'picasso-util';
 import Field from './fields/field';
 import fieldStore from './field-store';
 import Value from './value';
@@ -54,7 +54,7 @@ export const selectHelper = (rowDiffset, fields, selectFn, config) => {
     let { mode } = config;
     let li;
     let checker = index => selectFn(prepareSelectionData(fields, index), index);
-    if (mode === SelectionMode.INVERSE) {
+    if (mode === FilteringMode.INVERSE) {
         checker = index => !selectFn(prepareSelectionData(fields, index));
     }
     rowDiffsetIterator(rowDiffset, (i) => {
@@ -124,7 +124,9 @@ export const filterPropagationModel = (model, propModel) => {
             data.forEach((val) => {
                 occMap[val[0]] = true;
             });
-            filteredModel = model.select((fields, rIdx) => occMap[rIdx], {}, false);
+            filteredModel = model.select((fields, rIdx) => occMap[rIdx], {
+                saveChild: false
+            });
         } else {
             let fieldMap = model.getFieldsConfig();
             let filteredSchema = schema.filter(d => d.name in fieldMap && d.type === FieldType.DIMENSION);
@@ -135,7 +137,9 @@ export const filterPropagationModel = (model, propModel) => {
                     include = include && index !== -1;
                 });
                 return include;
-            }, {}, false);
+            }, {
+                saveChild: false
+            });
         }
     }
     else {
@@ -145,15 +149,40 @@ export const filterPropagationModel = (model, propModel) => {
     return filteredModel;
 };
 
-export const normalizedMutationTarget = (dm, mutationTarget, op) => {
-    let target = null;
-    if (mutationTarget instanceof dm.constructor) {
-        target = this._children.find(childElm =>
-            childElm._derivation
-            && childElm._derivation.length === 1
-            && childElm._derivation[0].op === op
-            && childElm === mutationTarget);
+export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) => {
+    const cloned = sourceDm.clone(cloneConfig.saveChild);
+    const rowDiffset = selectHelper(
+        cloned._rowDiffset,
+        cloned.getPartialFieldspace().fields,
+        selectFn,
+        selectConfig
+    );
+    cloned._rowDiffset = rowDiffset;
+    // Store reference to child model and selector function
+    if (cloneConfig.saveChild) {
+        persistDerivation(cloned, DM_DERIVATIVES.SELECT, { config: selectConfig }, selectFn);
     }
 
-    return target;
+    return cloned;
+};
+
+export const cloneWithProject = (sourceDm, projField, config, allFields) => {
+    const cloned = sourceDm.clone(config.saveChild);
+    let projectionSet = projField;
+    if (config.mode === FilteringMode.INVERSE) {
+        projectionSet = allFields.filter(fieldName => projField.indexOf(fieldName) === -1);
+    }
+    cloned._colIdentifier = projectionSet.join(',');
+    cloned.calculateFieldspace().calculateFieldsConfig();
+    // Store reference to child model and projection fields
+    if (config.saveChild) {
+        persistDerivation(
+            cloned,
+            DM_DERIVATIVES.PROJECT,
+            { projField, config, actualProjField: projectionSet },
+            null
+        );
+    }
+
+    return cloned;
 };

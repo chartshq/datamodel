@@ -5,13 +5,12 @@ import { expect } from 'chai';
 import CSVStr from './csv-str';
 
 describe('CSVStr Converter', () => {
-    describe('#CSVArr', () => {
+    describe('#CSVStr', () => {
         it('should parse the CSV string data with header names', () => {
             const data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9';
             const option = {
                 firstRowHeader: true,
-                fieldSeparator: ',',
-                lineSeparator: '\n'
+                fieldSeparator: ','
             };
 
             const parsedData = CSVStr(data, option);
@@ -24,8 +23,7 @@ describe('CSVStr Converter', () => {
             const data = '1,2,3\n4,5,6\n7,8,9';
             const option = {
                 firstRowHeader: false,
-                fieldSeparator: ',',
-                lineSeparator: '\n'
+                fieldSeparator: ','
             };
 
             const parsedData = CSVStr(data, option);
@@ -35,11 +33,10 @@ describe('CSVStr Converter', () => {
         });
 
         it('should parse the CSV string data with custom options', () => {
-            const data = 'a.b.c 1.2.3 4.5.6 7.8.9';
+            const data = 'a|b|c\n1|2|3\n4|5|6\n7|8|9';
             const option = {
                 firstRowHeader: true,
-                fieldSeparator: '.',
-                lineSeparator: ' '
+                fieldSeparator: '|'
             };
 
             const parsedData = CSVStr(data, option);
@@ -49,13 +46,13 @@ describe('CSVStr Converter', () => {
         });
 
         it('should parse the CSV string data with default options', () => {
-        // With header names
+            // With header names
             let data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9';
             let parsedData = CSVStr(data);
             let expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
             expect(parsedData).to.deep.equal(expected);
 
-        // Without header names
+            // Without header names
             data = '1,2,3\n4,5,6\n7,8,9';
             parsedData = CSVStr(data);
             expected = [['1', '2', '3'], [['4', '7'], ['5', '8'], ['6', '9']]];
