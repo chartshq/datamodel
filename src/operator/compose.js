@@ -28,7 +28,7 @@ export function compose(...operations) {
  */
 export function bin(...args) {
     function action(dm) {
-        return dm.createBin(...args);
+        return dm.bin(...args);
     }
     return action;
 }

@@ -3,6 +3,7 @@
 
 import { expect } from 'chai';
 import DataModel from './index';
+import { FilteringMode } from '../../picasso-util/src/enums';
 
 describe('DataModel', () => {
     describe('#clone', () => {
@@ -163,7 +164,7 @@ describe('DataModel', () => {
             ];
             const yodataModel = new DataModel(yodata, yoschema);
             const invProjectedDataModel = yodataModel.project(['aaaa', 'a'], {
-                mode: 'exclude'
+                mode: FilteringMode.INVERSE
             });
             const expected = {
                 data: [
@@ -179,6 +180,54 @@ describe('DataModel', () => {
                 uids: [0, 1]
             };
             expect(expected).to.deep.equal(invProjectedDataModel.getData());
+        });
+
+        it('should project fields when filtering mode is all', () => {
+            const yodata = [
+                { a: 10, aaa: 20, aaaa: 'd' },
+                { a: 15, aaa: 25, aaaa: 'demo' },
+            ];
+            const yoschema = [
+                { name: 'a', type: 'measure' },
+                { name: 'aaa', type: 'measure' },
+                { name: 'aaaa', type: 'dimension' },
+            ];
+            const yodataModel = new DataModel(yodata, yoschema);
+            const dataModels = yodataModel.project(['aaaa'], {
+                mode: FilteringMode.ALL
+            });
+            const projectedModel = {
+                data: [
+                    ['d'],
+                    ['demo']
+                ],
+                schema: [
+                    {
+                        name: 'aaaa',
+                        type: 'dimension'
+                    }
+                ],
+                uids: [0, 1]
+            };
+            const rejectionModel = {
+                data: [
+                    [10, 20],
+                    [15, 25]
+                ],
+                schema: [
+                    {
+                        name: 'a',
+                        type: 'measure'
+                    },
+                    {
+                        name: 'aaa',
+                        type: 'measure'
+                    }
+                ],
+                uids: [0, 1]
+            };
+            expect(projectedModel).to.deep.equal(dataModels[0].getData());
+            expect(rejectionModel).to.deep.equal(dataModels[1].getData());
         });
     });
 
@@ -699,6 +748,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
+
             let projetionFlag = false;
             let selectionFlag = false;
             let groupByFlag = false;
@@ -772,65 +822,114 @@ describe('DataModel', () => {
     });
 
 
-    // describe('#bin', () => {
-    //     it('should bin the data', () => {
-    //         const toBinData = [
-    //             { marks: 1, },
-    //             { marks: 2, },
-    //             { marks: 3, },
-    //             { marks: 4, },
-    //             { marks: 5, },
-    //             { marks: 9, }];
-    //         const toBinSchema = [{
-    //             name: 'marks',
-    //             type: 'measure'
-    //         }];
-    //         const toBinDatamodel = new DataModel(toBinData, toBinSchema);
-    //         const buckets = [
-    //             { end: 1, label: 'useless' },
-    //             { start: 1, end: 4, label: 'failure' },
-    //             { start: 4, end: 6, label: 'firstclass' },
-    //             { start: 6, end: 10, label: 'decent' }
-    //         ];
+    describe('#bin', () => {
+        it('should bin the data when buckets are given', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, 'Yo');
 
-    //         let binnedDM = toBinDatamodel.bin('marks', {
-    //             buckets,
-    //         }, 'rating1');
-    //         let binnedDMnum = toBinDatamodel.bin('marks', {
-    //             numOfBins: 4
-    //         }, 'rating2');
-    //         let binnedDMSize = toBinDatamodel.bin('marks', {
-    //             binSize: 4,
-    //         });
-    //         expect(
-    //             binnedDM.getData().schema
-    //         ).to.deep.equal([{
-    //             name: 'marks',
-    //             type: 'measure',
-    //         }, {
-    //             name: 'rating1',
-    //             type: 'dimension'
-    //         }]);
-    //         expect(
-    //             binnedDMnum.getData().schema
-    //         ).to.deep.equal([{
-    //             name: 'marks',
-    //             type: 'measure',
-    //         }, {
-    //             name: 'rating2',
-    //             type: 'dimension'
-    //         }]);
-    //         expect(
-    //             binnedDMSize.getData().schema
-    //         ).to.deep.equal([{
-    //             name: 'marks',
-    //             type: 'measure',
-    //         }, {
-    //             name: 'marks_binned',
-    //             type: 'dimension'
-    //         }]);
-    //     });
-    // });
+            const buckets = {
+                start: 0,
+                end: [5, 11, 16, 20, 30]
+            };
+            const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
+            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+            let expectedData = ['20', '45', '45', '45', '20', '36', '42', '36', '42'];
+            expect(fieldData).to.deep.equal(expectedData);
+        });
+        it('should bin data when num of bins given', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, 'Yo');
+            const bin = dataModel.bin('profit', { numOfBins: 2, name: 'sumField' });
+            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+            let expData = ['65', '65', '65', '65', '65', '99', '99', '99', '99', '99'];
+            expect(fieldData).to.deep.equal(expData);
+        });
+        it('should bin data when binSize is given', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, 'Yo');
+            const bin = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
+            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+            let expData = ['65', '65', '65', '65', '65', '99', '99', '99', '99', '99'];
+            expect(expData).to.deep.equal(fieldData);
+        });
+        // it('should return correct bins when binned after a selct operation', () => {
+        //     const data1 = [
+        //         { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+        //         { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+        //         { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+        //         { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+        //         { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+        //         { profit: 18, sales: 25, first: 'White', second: 'walls' },
+        //         { profit: 21, sales: 25, first: 'White', second: 'walls' },
+        //         { profit: 18, sales: 25, first: 'White', second: 'walls' },
+        //         { profit: 21, sales: 25, first: 'White', second: 'walls' },
+        //         { profit: 21, sales: 25, first: 'White', second: 'walls' }
+        //     ];
+        //     const schema1 = [
+        //         { name: 'profit', type: 'measure' },
+        //         { name: 'sales', type: 'measure' },
+        //         { name: 'first', type: 'dimension' },
+        //         { name: 'second', type: 'dimension' },
+        //     ];
+        //     const dataModel = new DataModel(data1, schema1, 'Yo');
+
+        //     const dm2 = dataModel.select(feild => feild.sales.value === 25);
+        //     const bin = dm2.bin('profit', { binSize: 3, name: 'sumField' }, x => x[0]);
+        //     let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+        //     let profitData = bin.getFieldspace().fields.find(field => field.name === 'profit').data;
+        //     expect(fieldData).to.deep.equal(profitData);
+        // });
+    });
 
     context('Aggregation function context', () => {
         const data1 = [
@@ -981,72 +1080,6 @@ describe('DataModel', () => {
                 expect(dm2._children[0].getData()).to.deep.equal(data);
                 expect(dm4._parent).to.equal(dm2);
             });
-        });
-    });
-
-    context('Checking for immutability for datamodel when existing dm is given', () => {
-        const data1 = [
-            { id: 1, profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-            { id: 2, profit: 20, sales: 25, first: 'Hey', second: 'Wood' },
-            { id: 3, profit: 10, sales: 20, first: 'White', second: 'the sun' },
-            { id: 4, profit: 15, sales: 25, first: 'White', second: 'walls' },
-        ];
-
-        const schema1 = [
-            {
-                name: 'id',
-                type: 'dimention'
-            },
-            {
-                name: 'profit',
-                type: 'measure',
-                defAggFn: 'avg'
-            },
-            {
-                name: 'sales',
-                type: 'measure'
-            },
-            {
-                name: 'first',
-                type: 'dimension'
-            },
-            {
-                name: 'second',
-                type: 'dimension'
-            },
-        ];
-        const dataModel = new DataModel(data1, schema1);
-        let dm2 = dataModel.select(fields => fields.profit.value < 150);
-        let dm3 = dataModel.groupBy(['sales'], {
-            profit: null
-        });
-        let dm4 = dataModel.select(fields => fields.profit.value < 150, { saveChild: true, mutationTarget: dm2 });
-        let dm5 = dataModel.groupBy(['Year'], {
-        }, { saveChild: true, mutationTarget: dm3 });
-        let dm6 = dataModel.calculateVariable({
-            name: 'Efficiency'
-        }, ['profit', 'sales', (profit, sales) => profit / sales]);
-        let dm7 = dataModel.calculateVariable({
-            name: 'UnEfficiency'
-        }, ['sales', 'profit', (sales, profit) => sales / profit], { saveChild: true, mutationTarget: dm6 });
-
-        it('select should not change datamodel instance ', () => {
-            expect(dm2).to.equal(dm4);
-        });
-        it('should not change namespace by groupby operation', () => {
-            expect(dm3.getPartialFieldspace().name).to.equal(dm5.getPartialFieldspace().name);
-        });
-        it('should not change datamodel instance calculateVariable operation', () => {
-            expect(dm6).to.equal(dm7);
-        });
-
-        it('should throw error if no data specified', () => {
-            expect(
-                () => {
-                    let k = new DataModel(null);
-                    k;
-                }
-            ).to.throw('Data not specified');
         });
     });
 });

@@ -1,5 +1,6 @@
 /* eslint-disable default-case */
 
+import { FieldType } from 'picasso-util';
 import { persistDerivation, assembleModelFromIdentifiers, filterPropagationModel } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {
@@ -8,8 +9,9 @@ import {
     groupBy,
     groupByIterator,
     projectIterator,
-    selectIterator
+    selectIterator,
 } from './operator';
+import { createBinnedFieldData } from './operator/bucket-creator';
 import Relation from './relation';
 import reducerStore from './utils/reducer';
 import createFields from './field-creator';
@@ -142,33 +144,12 @@ class DataModel extends Relation {
      * @param {DataModel} [existingDataModel] - An optional existing DataModel instance.
      * @return {DataModel} Returns the new DataModel instance after operation.
      */
-    groupBy (fieldsArr, reducers = {}, config = { saveChild: true, mutationTarget: null }) {
+    groupBy (fieldsArr, reducers = {}, config = { saveChild: true }) {
         const groupByString = `${fieldsArr.join()}`;
-        let present = false;
-        if (config.mutationTarget instanceof DataModel) {
-            let child = this._children.find(childElm =>
-                childElm._derivation
-                && childElm._derivation.length === 1
-                && childElm._derivation[0].op === DM_DERIVATIVES.GROUPBY
-                && childElm._derivation[0].meta.groupByString === groupByString
-                && childElm === config.mutationTarget
-            );
-
-            if (child) {
-                present = true;
-                child._derivation[0].meta.fieldsArr = fieldsArr;
-                child._derivation[0].meta.groupByString = groupByString;
-                child._derivation[0].meta.defaultReducer = reducerStore.defaultReducer();
-                child._derivation[0].criteria = reducers;
-            }
-        }
-
         let params = [this, fieldsArr, reducers];
-        if (present) {
-            params.push(config.mutationTarget);
-        }
         const newDataModel = groupBy(...params);
-        if (config.saveChild && !present) {
+
+        if (config.saveChild) {
             this._children.push(newDataModel);
             persistDerivation(
                 newDataModel,
@@ -176,9 +157,6 @@ class DataModel extends Relation {
                 { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() },
                 reducers
             );
-        }
-        if (present) {
-            config.mutationTarget.__mutate('rowDiffset', config.mutationTarget._rowDiffset);
         }
 
         newDataModel._parent = this;
@@ -230,7 +208,7 @@ class DataModel extends Relation {
      *  @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dm) => {}]
      * @param {Object} config : { saveChild : true | false , removeDependentDimensions : true|false}
      */
-    calculateVariable (schema, dependency, config = { saveChild: true, mutationTarget: null }) {
+    calculateVariable (schema, dependency, config = { saveChild: true }) {
         const fieldsConfig = this.getFieldsConfig();
         const depVars = dependency.slice(0, dependency.length - 1);
         const retrieveFn = dependency[dependency.length - 1];
@@ -247,19 +225,8 @@ class DataModel extends Relation {
             return fieldSpec.index;
         });
 
-        let clone;
-        if (config.mutationTarget instanceof Relation) {
-            clone = this._children.find(childElm =>
-                childElm._derivation
-                && childElm._derivation.length === 1
-                && childElm._derivation[0].op === DM_DERIVATIVES.CAL_VAR
-                && childElm === config.mutationTarget
-            );
-        }
+        let clone = this.clone();
 
-        if (!clone) {
-            clone = this.clone();
-        }
         const fs = clone.getFieldspace().fields;
         const suppliedFields = depFieldIndices.map(idx => fs[idx]);
 
@@ -271,28 +238,12 @@ class DataModel extends Relation {
         const [field] = createFields([computedValues], [schema], [schema.name]);
         clone.addField(field);
 
-        if (config.mutationTarget) {
-            config.mutationTarget._derivation[0].meta.config = schema;
-            config.mutationTarget._derivation[0].meta.fields = depVars;
-            config.mutationTarget._derivation[0].criteria = retrieveFn;
-        }
-
         if (config.saveChild) {
             persistDerivation(clone, DM_DERIVATIVES.CAL_VAR, { config: schema, fields: depVars }, retrieveFn);
         }
 
         return clone;
     }
-
-    /**
-     * Filters the current DataModel instance and only return those fields
-     * that appear in the propagation model or only those ROW_ID's
-     * that appear in the prop model.
-     *
-     * @private
-     * @param {DataModel} propModel - The propagation datamodel instance.
-     * @return {DataModel} Returns the filtered propagation model.
-     */
 
     /**
      * Propagates changes across all the connected DataModel instances.
@@ -393,15 +344,18 @@ class DataModel extends Relation {
         selectIterator(this, (targetDM, fn) => {
             if (targetDM !== source) {
                 let selectModel;
-                selectModel = propModel.select(fn, {}, false);
+                selectModel = propModel.select(fn, {
+                    saveChild: false
+                });
                 forward(targetDM, selectModel);
             }
         });
         // propagate to children created by PROJECT operation
-        projectIterator(this, (targetDM, projString) => {
+        projectIterator(this, (targetDM, actualProjField) => {
             if (targetDM !== source) {
-                let projectModel;
-                projectModel = propModel.project(projString.split(','), {}, false);
+                let projectModel = propModel.project(actualProjField, {
+                    saveChild: false
+                });
                 forward(targetDM, projectModel);
             }
         });
@@ -468,67 +422,28 @@ class DataModel extends Relation {
     }
 
     /**
-     * Creates a bin based on provided buckets or based on
-     * calculated buckets created from configuration.
-     *
-     * @public
-     * @param {string} measureName - The name of the measure to bin.
-     * @param {Object} config - The binning configuration.
-     * @param {Array} config.buckets - The array of buckets.
-     * @param {number} config.binSize - The size of a bin.
-     * @param {number} config.numOfBins - The number of bins to create.
-     * @param {string} binnedFieldName - The name of the new field.
-     * @return {DataModel} Returns the new DataModel instance.
+     @param {String} measureName : name of measure which will be used to create bin
+     @param {Object} config : bucketObj : {} || binSize : number || noOfBins : number || binFieldName : string
+     @param {Function | FunctionName} reducer : binning reducer
      */
-    // bin(measureName, config, binnedFieldName) {
-    //     const clone = this.clone();
-    //     const namespaceFields = clone.getPartialFieldspace().fields;
-    //     const fieldMap = this._fieldConfig;
-    //     binnedFieldName = binnedFieldName || `${measureName}_binned`;
-    //     if (fieldMap[binnedFieldName]) {
-    //         throw new Error(`Field ${measureName} already exists.`);
-    //     }
-    //     if (!fieldMap[measureName]) {
-    //         throw new Error(`Field ${measureName} does not exist.`);
-    //     }
-    //     // get the data for field to be binned
-    //     const fieldIndex = fieldMap[measureName].index;
-    //     const fieldData = this.getPartialFieldspace().fields[fieldIndex].data;
-    //     // get the buckets
-    //     const buckets = config.buckets || createBuckets(fieldData, config);
-    //     const startVals = buckets.map(item => item.start || 0);
-    //     startVals.push(buckets[buckets.length - 1].end);
-    //     const getLabel = (value, start, end) => {
-    //         if (end - start === 1) {
-    //             return buckets[start].label;
-    //         }
-    //         const midIdx = start + Math.ceil((end - start) / 2);
-    //         const midVal = startVals[midIdx];
-    //         if (value === midVal) {
-    //             return buckets[midIdx].label;
-    //         }
-    //         if (value > midVal) {
-    //             return getLabel(value, midIdx, end);
-    //         }
-    //         return getLabel(value, start, midIdx);
-    //     };
-    //     const labelData = [];
-    //     // iterate over field data and assign label
-    //     rowDiffsetIterator(this._rowDiffset, (i) => {
-    //         const value = fieldData[i];
-    //         const label = getLabel(value, 0, startVals.length - 1);
-    //         labelData.push(label);
-    //     });
-    //     const binnedField = new Categorical(binnedFieldName, labelData, {
-    //         name: binnedFieldName,
-    //         type: FieldType.DIMENSION,
-    //     });
-
-    //     this.addField(binnedField);
-    //     persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binnedFieldName }, null);
-
-    //     return clone;
-    // }
+    bin(measureName, config = { }, reducer) {
+        const clone = this.clone();
+        const binFieldName = config.name || `${measureName}_binned`;
+        if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[measureName]) {
+            throw new Error(`Field ${measureName} already exists.`);
+        }
+        const field = this._partialFieldspace.fields.find(currfield => currfield.name === measureName);
+        const reducerFunc = reducerStore.resolve(reducer || field.defAggFn()) || reducerStore.defaultReducer();
+        const data = createBinnedFieldData(field.data, this._rowDiffset, reducerFunc, config);
+        const binField = createFields([data], [
+            {
+                name: binFieldName,
+                type: FieldType.DIMENSION
+            }], [binFieldName])[0];
+        clone.addField(binField);
+        persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binFieldName }, null);
+        return clone;
+    }
 }
 
 export default DataModel;

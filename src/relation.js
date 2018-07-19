@@ -1,14 +1,11 @@
-import { SelectionMode, ProjectionMode } from 'picasso-util';
-import { persistDerivation, updateFields, cloneWithSelect } from './helper';
+import { FilteringMode } from 'picasso-util';
+import { persistDerivation, updateFields, cloneWithSelect, cloneWithProject } from './helper';
+
 import {
     crossProduct,
     difference,
     naturalJoinFilter,
-    union,
-    calculatedMeasureIterator,
-    groupByIterator,
-    projectIterator,
-    selectIterator
+    union
 } from './operator';
 import { DM_DERIVATIVES } from './constants';
 import createFields from './field-creator';
@@ -174,13 +171,13 @@ class Relation {
      * @param {Function} selectFn - The function which will be looped through all the data
      * if it return true the row will be there in the DataModel.
      * @param {Object} [config] - The mode configuration.
-     * @param {string} [config.mode=SelectionMode.SELECTION] - The mode of the selection.
+     * @param {string} [config.mode=FilteringMode.NORMAL] - The mode of the selection.
      * @param {string} [saveChild=true] - It is used while cloning.
      * @return {DataModel} Returns the new DataModel instance(s) after operation.
      */
     select(selectFn, config) {
         const defConfig = {
-            mode: SelectionMode.SELECTION,
+            mode: FilteringMode.NORMAL,
             saveChild: true
         };
         config = Object.assign({}, defConfig, config);
@@ -188,17 +185,17 @@ class Relation {
         const cloneConfig = { saveChild: config.saveChild };
         let oDm;
 
-        if (config.mode === SelectionMode.ALL) {
+        if (config.mode === FilteringMode.ALL) {
             const selectDm = cloneWithSelect(
                 this,
                 selectFn,
-                { mode: SelectionMode.SELECTION },
+                { mode: FilteringMode.NORMAL },
                 cloneConfig
             );
             const rejectDm = cloneWithSelect(
                 this,
                 selectFn,
-                { mode: SelectionMode.INVERSE },
+                { mode: FilteringMode.INVERSE },
                 cloneConfig
             );
             oDm = [selectDm, rejectDm];
@@ -215,18 +212,14 @@ class Relation {
     }
 
     /**
-     * Sets the selection to the current DataModel instance.
+     * Returns whether datamodel has no data.
      *
-     * @param {Array} fields - The fields array.
-     * @param {Function} selectFn - The filter function.
-     * @param {Object} config - The mode configuration object.
-     * @param {string} config.mode - The type of mode to use.
-     * @return {string} Returns the Row diffset.
+     * @return {Boolean} Whether datamodel is empty or not.
      */
 
 
-    _isEmpty() {
-        return !this.rowDiffset.length || !this.colIdentifier.length;
+    isEmpty () {
+        return !this._rowDiffset.length || !this._colIdentifier.length;
     }
 
     /**
@@ -251,10 +244,14 @@ class Relation {
      * @public
      * @param {Array.<string | Regexp>} projField - An array of column names in string or regular expression.
      * @param {Object} [config={}] - An optional config.
-     * @param {boolean} [saveChild=true] - It is used while cloning.
      * @return {DataModel} Returns the new DataModel instance after operation.
      */
-    project(projField, config = { saveChild: true }) {
+    project (projField, config) {
+        const defConfig = {
+            mode: FilteringMode.NORMAL,
+            saveChild: true
+        };
+        config = Object.assign({}, defConfig, config);
         const fieldConfig = this.getFieldsConfig();
         const allFields = Object.keys(fieldConfig);
         const { mode } = config;
@@ -267,31 +264,27 @@ class Relation {
             }
             return acc;
         }, []);
+
         normalizedProjField = Array.from(new Set(normalizedProjField)).map(field => field.trim());
-        if (mode === ProjectionMode.EXCLUDE) {
-            const rejectionSet = allFields.filter(fieldName => normalizedProjField.indexOf(fieldName) === -1);
-            normalizedProjField = rejectionSet;
+        let dataModel;
+
+        if (mode === FilteringMode.ALL) {
+            let projectionClone = cloneWithProject(this, normalizedProjField, {
+                mode: FilteringMode.NORMAL,
+                saveChild: config.saveChild
+            }, allFields);
+            let rejectionClone = cloneWithProject(this, normalizedProjField, {
+                mode: FilteringMode.INVERSE,
+                saveChild: config.saveChild
+            }, allFields);
+            dataModel = [projectionClone, rejectionClone];
+        }
+        else {
+            let projectionClone = cloneWithProject(this, normalizedProjField, config, allFields);
+            dataModel = projectionClone;
         }
 
-        const clone = this.clone(config.saveChild);
-        // const projString = normalizedProjField.join(',');
-        // const presentField = allFields.filter(field =>
-        //     projString.search(new RegExp(`^${field}\\,|\\,${field}\\,|\\,${field}$|^${field}$`, 'i')) !== -1);
-        // clone._colIdentifier = presentField.join(',');
-        clone._colIdentifier = normalizedProjField.join(',');
-
-        clone.calculateFieldspace().calculateFieldsConfig();
-
-        if (config.saveChild) {
-            persistDerivation(
-                clone,
-                DM_DERIVATIVES.PROJECT,
-                { projField, config, projString: normalizedProjField.join(',') },
-                null
-            );
-        }
-
-        return clone;
+        return dataModel;
     }
 
     /**
@@ -315,38 +308,6 @@ class Relation {
         return this;
     }
 
-
-    /*
-     * Mutates a property of the current DataModel instance with a new value.
-     *
-     * @public
-     * @param {string} key - The property name to be changed.
-     * @param {string} value - The new value of the property.
-     * @return {DataModel} Returns the current DataModel instance itself.
-     */
-    __mutate(key, value) {
-        const nKey = `_${key}`;
-        this[nKey] = value;
-        selectIterator(this, (model, fn) => {
-            this.select(fn, { saveChild: false, mutationTarget: model });
-        });
-
-        projectIterator(this, (model) => {
-            model.__mutate(key, value);
-        });
-
-        calculatedMeasureIterator(this, (model, params) => {
-            model[key] = value;
-            this.__createMeasure(...[...params, false, model]);
-        });
-
-        groupByIterator(this, (model, params) => {
-            this.groupBy(...[params.groupByString.split(','), params.reducer], false, model);
-        });
-
-        this.calculateFieldspace().calculateFieldsConfig();
-        return this;
-    }
 
     /**
      * break the link between its parent and itself
