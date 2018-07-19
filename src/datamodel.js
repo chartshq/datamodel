@@ -486,7 +486,7 @@ class DataModel extends Relation {
         const binField = createFields([data], [
             {
                 name: binFieldName,
-                type: FieldType.MEASURE
+                type: FieldType.DIMENSION
             }], [binFieldName])[0];
         clone.addField(binField);
         persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binFieldName }, null);
