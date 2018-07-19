@@ -14,6 +14,7 @@ d3.json('./data/cars.json', (data) => {
         { profit: 18, sales: 25, first: 'White', second: 'walls' },
         { profit: 21, sales: 25, first: 'White', second: 'walls' },
         { profit: 18, sales: 25, first: 'White', second: 'walls' },
+        { profit: 21, sales: 25, first: 'White', second: 'walls' },
         { profit: 21, sales: 25, first: 'White', second: 'walls' }
     ];
     const schema1 = [
@@ -27,6 +28,9 @@ d3.json('./data/cars.json', (data) => {
         start : 0,
         end : [5,11,16,20,30]
     }
-    const bin = dataModel.bin('profit',{buckets })
-    bin;
+
+    const dm2 = dataModel.select(feild=> feild.sales.value === 25);
+    const bin = dm2.bin('profit', { binSize: 3, name: 'sumField' },(x)=>x[0]);
+    let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+    let profitData = bin.getFieldspace().fields.find(field => field.name === 'profit').data;
 });

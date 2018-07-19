@@ -33,7 +33,7 @@ export function createBinnedFieldData(fielddata, rowDiffset, reducerFunc, config
         });
     }
     else {
-        binSize = binSize || dataStore.length / numOfBins;
+        binSize = binSize || Math.floor(dataStore.length / numOfBins);
         let len = 0;
         while (len < dataStore.length) {
             let tempStore = [];
