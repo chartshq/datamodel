@@ -21,7 +21,7 @@ function childIterator(datamodel, callback, operation) {
                 break;
             case DM_DERIVATIVES.PROJECT:
                 if (child._derivation[0].op === DM_DERIVATIVES.PROJECT) {
-                    callback(child, child._derivation[0].meta.projString);
+                    callback(child, child._derivation[0].meta.actualProjField);
                 }
                 break;
             case DM_DERIVATIVES.GROUPBY:
@@ -31,8 +31,8 @@ function childIterator(datamodel, callback, operation) {
                             reducer: child._derivation[0].criteria });
                 }
                 break;
-            case DM_DERIVATIVES.CAL_MEASURE:
-                if (child._derivation[0].op === DM_DERIVATIVES.CAL_MEASURE) {
+            case DM_DERIVATIVES.CAL_VAR:
+                if (child._derivation[0].op === DM_DERIVATIVES.CAL_VAR) {
                     let params = {
                         config: child._derivation[0].meta.config,
                         fields: child._derivation[0].meta.fields,
@@ -65,8 +65,8 @@ export function selectIterator(datamodel, callback) {
  * @param {Function} callback - The callback to be invoked on each measure child. The parameters
  * provided to the callback are the child DataModel instance and the child params.
  */
-export function calculatedMeasureIterator(datamodel, callback) {
-    childIterator(datamodel, callback, DM_DERIVATIVES.CAL_MEASURE);
+export function calculatedVariableIterator(datamodel, callback) {
+    childIterator(datamodel, callback, DM_DERIVATIVES.CAL_VAR);
 }
 
 /**

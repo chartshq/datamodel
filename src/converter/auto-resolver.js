@@ -10,7 +10,7 @@ import { isArray, isObject, isString } from '../utils';
  * @param {Object} options - An optional config specific to data format.
  * @return {Array.<Object>} Returns an array of headers and column major data.
  */
-function AutoDetect(data, options) {
+function Auto(data, options) {
     let converter;
 
     if (isString(data)) {
@@ -26,4 +26,4 @@ function AutoDetect(data, options) {
     return converter(data, options);
 }
 
-export default AutoDetect;
+export default Auto;

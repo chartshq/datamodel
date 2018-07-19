@@ -2,10 +2,10 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import AutoDetect from './auto-detect';
+import Auto from './auto-resolver';
 
-describe('AutoDetect Converter', () => {
-    describe('#AutoDetect', () => {
+describe('Auto Converter', () => {
+    describe('#Auto', () => {
         it('should detect the JSON data', () => {
             const data = [
                 {
@@ -26,11 +26,11 @@ describe('AutoDetect Converter', () => {
             ];
             const emptyData = [];
 
-            let parsedData = AutoDetect(data);
+            let parsedData = Auto(data);
             let expected = [['a', 'b', 'c'], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
             expect(parsedData).to.deep.equal(expected);
 
-            parsedData = AutoDetect(emptyData);
+            parsedData = Auto(emptyData);
             expected = [[], []];
             expect(parsedData).to.deep.equal(expected);
         });
@@ -42,7 +42,7 @@ describe('AutoDetect Converter', () => {
                 [4, 5, 6],
                 [7, 8, 9]
             ];
-            let parsedData = AutoDetect(data);
+            let parsedData = Auto(data);
             let expected = [['a', 'b', 'c'], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
             expect(parsedData).to.deep.equal(expected);
 
@@ -51,26 +51,26 @@ describe('AutoDetect Converter', () => {
                 [4, 5, 6],
                 [7, 8, 9]
             ];
-            parsedData = AutoDetect(data, { firstRowHeader: false });
+            parsedData = Auto(data, { firstRowHeader: false });
             expected = [[], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
             expect(parsedData).to.deep.equal(expected);
         });
 
         it('should detect the CSV string data', () => {
             let data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9';
-            let parsedData = AutoDetect(data);
+            let parsedData = Auto(data);
             let expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
             expect(parsedData).to.deep.equal(expected);
 
             data = '1,2,3\n4,5,6\n7,8,9';
-            parsedData = AutoDetect(data, { firstRowHeader: false });
+            parsedData = Auto(data, { firstRowHeader: false });
             expected = [[], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
             expect(parsedData).to.deep.equal(expected);
         });
 
         it('should throw error on invalid data', () => {
             let data;
-            const mockFn = () => { AutoDetect(data); };
+            const mockFn = () => { Auto(data); };
             const errMSG = 'Couldn\'t detect the data format';
 
             data = 2;

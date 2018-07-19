@@ -40,6 +40,9 @@ class ReducerStore {
     }
 
     resolve(name) {
+        if (name instanceof Function) {
+            return name;
+        }
         return this.store.get(name);
     }
 }
