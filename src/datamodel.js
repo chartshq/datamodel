@@ -142,33 +142,12 @@ class DataModel extends Relation {
      * @param {DataModel} [existingDataModel] - An optional existing DataModel instance.
      * @return {DataModel} Returns the new DataModel instance after operation.
      */
-    groupBy (fieldsArr, reducers = {}, config = { saveChild: true, mutationTarget: null }) {
+    groupBy (fieldsArr, reducers = {}, config = { saveChild: true }) {
         const groupByString = `${fieldsArr.join()}`;
-        let present = false;
-        if (config.mutationTarget instanceof DataModel) {
-            let child = this._children.find(childElm =>
-                childElm._derivation
-                && childElm._derivation.length === 1
-                && childElm._derivation[0].op === DM_DERIVATIVES.GROUPBY
-                && childElm._derivation[0].meta.groupByString === groupByString
-                && childElm === config.mutationTarget
-            );
-
-            if (child) {
-                present = true;
-                child._derivation[0].meta.fieldsArr = fieldsArr;
-                child._derivation[0].meta.groupByString = groupByString;
-                child._derivation[0].meta.defaultReducer = reducerStore.defaultReducer();
-                child._derivation[0].criteria = reducers;
-            }
-        }
-
         let params = [this, fieldsArr, reducers];
-        if (present) {
-            params.push(config.mutationTarget);
-        }
         const newDataModel = groupBy(...params);
-        if (config.saveChild && !present) {
+
+        if (config.saveChild) {
             this._children.push(newDataModel);
             persistDerivation(
                 newDataModel,
@@ -176,9 +155,6 @@ class DataModel extends Relation {
                 { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() },
                 reducers
             );
-        }
-        if (present) {
-            config.mutationTarget.__mutate('rowDiffset', config.mutationTarget._rowDiffset);
         }
 
         newDataModel._parent = this;
@@ -230,7 +206,7 @@ class DataModel extends Relation {
      *  @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dm) => {}]
      * @param {Object} config : { saveChild : true | false , removeDependentDimensions : true|false}
      */
-    calculateVariable (schema, dependency, config = { saveChild: true, mutationTarget: null }) {
+    calculateVariable (schema, dependency, config = { saveChild: true }) {
         const fieldsConfig = this.getFieldsConfig();
         const depVars = dependency.slice(0, dependency.length - 1);
         const retrieveFn = dependency[dependency.length - 1];
@@ -247,19 +223,8 @@ class DataModel extends Relation {
             return fieldSpec.index;
         });
 
-        let clone;
-        if (config.mutationTarget instanceof Relation) {
-            clone = this._children.find(childElm =>
-                childElm._derivation
-                && childElm._derivation.length === 1
-                && childElm._derivation[0].op === DM_DERIVATIVES.CAL_VAR
-                && childElm === config.mutationTarget
-            );
-        }
+        let clone = this.clone();
 
-        if (!clone) {
-            clone = this.clone();
-        }
         const fs = clone.getFieldspace().fields;
         const suppliedFields = depFieldIndices.map(idx => fs[idx]);
 
@@ -271,28 +236,12 @@ class DataModel extends Relation {
         const [field] = createFields([computedValues], [schema], [schema.name]);
         clone.addField(field);
 
-        if (config.mutationTarget) {
-            config.mutationTarget._derivation[0].meta.config = schema;
-            config.mutationTarget._derivation[0].meta.fields = depVars;
-            config.mutationTarget._derivation[0].criteria = retrieveFn;
-        }
-
         if (config.saveChild) {
             persistDerivation(clone, DM_DERIVATIVES.CAL_VAR, { config: schema, fields: depVars }, retrieveFn);
         }
 
         return clone;
     }
-
-    /**
-     * Filters the current DataModel instance and only return those fields
-     * that appear in the propagation model or only those ROW_ID's
-     * that appear in the prop model.
-     *
-     * @private
-     * @param {DataModel} propModel - The propagation datamodel instance.
-     * @return {DataModel} Returns the filtered propagation model.
-     */
 
     /**
      * Propagates changes across all the connected DataModel instances.
@@ -393,15 +342,18 @@ class DataModel extends Relation {
         selectIterator(this, (targetDM, fn) => {
             if (targetDM !== source) {
                 let selectModel;
-                selectModel = propModel.select(fn, {}, false);
+                selectModel = propModel.select(fn, {
+                    saveChild: false
+                });
                 forward(targetDM, selectModel);
             }
         });
         // propagate to children created by PROJECT operation
-        projectIterator(this, (targetDM, projString) => {
+        projectIterator(this, (targetDM, actualProjField) => {
             if (targetDM !== source) {
-                let projectModel;
-                projectModel = propModel.project(projString.split(','), {}, false);
+                let projectModel = propModel.project(actualProjField, {
+                    saveChild: false
+                });
                 forward(targetDM, projectModel);
             }
         });

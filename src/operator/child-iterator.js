@@ -21,7 +21,7 @@ function childIterator(datamodel, callback, operation) {
                 break;
             case DM_DERIVATIVES.PROJECT:
                 if (child._derivation[0].op === DM_DERIVATIVES.PROJECT) {
-                    callback(child, child._derivation[0].meta.projString);
+                    callback(child, child._derivation[0].meta.actualProjField);
                 }
                 break;
             case DM_DERIVATIVES.GROUPBY:
