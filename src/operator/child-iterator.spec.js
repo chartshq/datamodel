@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions,no-unused-vars */
 
 import { expect } from 'chai';
-import { calculatedMeasureIterator } from './child-iterator';
+import { calculatedVariableIterator } from './child-iterator';
 import DataModel from '../index';
 
 const data1 = [
@@ -24,17 +24,17 @@ describe('Testing Child Iterator', () => {
         name: 'Efficiency'
     }, ['profit', 'sales', createdCallBack]);
 
-    let callback = function(model, params) {
-        if (dm.children.find(childElm => childElm === model)) {
+    let callback = (model, params) => {
+        if (dm._children.find(childElm => childElm === model)) {
             hasSameChild = true;
         }
         if (params.callback === createdCallBack) {
             hasSameFunction = true;
         }
     };
-    describe('#calculatedMeasureIterator', () => {
+    describe('#calculatedVariableIterator', () => {
         it('Should return expected child and its callback', () => {
-            calculatedMeasureIterator(dm, callback);
+            calculatedVariableIterator(dm, callback);
             expect(hasSameChild).to.equal(true);
             expect(hasSameFunction).to.equal(true);
         });

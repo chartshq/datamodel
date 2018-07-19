@@ -5,7 +5,7 @@ import {
     difference,
     naturalJoinFilter,
     union,
-    calculatedMeasureIterator,
+    calculatedVariableIterator,
     groupByIterator,
     projectIterator,
     selectIterator
@@ -208,7 +208,7 @@ class Relation {
                 childElm._derivation
                 && childElm._derivation.length === 1
                 && childElm._derivation[0].op === DM_DERIVATIVES.SELECT
-                && childElm === config.mutationTarget 
+                && childElm === config.mutationTarget
             );
         }
 
@@ -216,7 +216,7 @@ class Relation {
             rowDiffset = selectHelper(this._rowDiffset, this.getPartialFieldspace().fields, selectFn, config);
             config.mutationTarget.__mutate('rowDiffset', rowDiffset);
             child._derivation[0].criteria = selectFn;
-            respDM = child; 
+            respDM = child;
         } else {
             clonedDM = this.clone(config.saveChild);
             rowDiffset = selectHelper(clonedDM._rowDiffset, clonedDM.getPartialFieldspace().fields, selectFn, config);
@@ -272,7 +272,7 @@ class Relation {
      * @param {boolean} [saveChild=true] - It is used while cloning.
      * @return {DataModel} Returns the new DataModel instance after operation.
      */
-    project (projField, config = { saveChild : true }) {
+    project (projField, config = { saveChild: true }) {
         const fieldConfig = this.getFieldsConfig();
         const allFields = Object.keys(fieldConfig);
         const { mode } = config;
@@ -299,7 +299,7 @@ class Relation {
         clone._colIdentifier = normalizedProjField.join(',');
 
         clone.calculateFieldspace().calculateFieldsConfig();
-        
+
         if (config.saveChild) {
             persistDerivation(
                 clone,
@@ -353,7 +353,7 @@ class Relation {
             model.__mutate(key, value);
         });
 
-        calculatedMeasureIterator(this, (model, params) => {
+        calculatedVariableIterator(this, (model, params) => {
             model[key] = value;
             this.__createMeasure(...[...params, false, table]);
         });
