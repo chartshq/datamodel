@@ -184,7 +184,7 @@ class DataModel extends Relation {
         }
         sortList.forEach((row) => {
             const currRow = row;
-            currRow[1] = row[1] === 'desc' ? 'desc' : 'asc';
+            currRow[1] = String(row[1]).toLowerCase() === 'desc' ? 'desc' : 'asc';
         });
         this._sortingDetails = sortList;
         const struct = this.getData();
