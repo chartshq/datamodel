@@ -179,6 +179,9 @@ class DataModel extends Relation {
      * @return {DataModel}            it's own instance
      */
     sort (sortList) {
+        if (this.isEmpty()) {
+            return this;
+        }
         sortList.forEach((row) => {
             const currRow = row;
             currRow[1] = row[1] === 'desc' ? 'desc' : 'asc';
