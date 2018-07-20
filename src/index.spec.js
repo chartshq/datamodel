@@ -537,8 +537,8 @@ describe('DataModel', () => {
                 { name: 'population', type: 'measure' },
                 { name: 'city', type: 'dimension' },
             ];
-            const dataModel1 = new DataModel(data1, schema1, 'ModelA');
-            const dataModel2 = new DataModel(data2, schema2, 'ModelB');
+            const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
+            const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
 
             expect((dataModel1.join(dataModel2)).getData()).to.deep.equal({
                 schema: [

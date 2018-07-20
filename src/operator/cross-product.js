@@ -20,7 +20,7 @@ function defaultFilterFn() { return true; }
  * @param {boolean} [replaceCommonSchema=false] - The flag if the common name schema should be there.
  * @return {DataModel} Returns The newly created DataModel instance from the crossProduct operation.
  */
-export function crossProduct(dm1, dm2, filterFn, replaceCommonSchema = false, jointype = JOINS.CROSS) {
+export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, jointype = JOINS.CROSS) {
     const schema = [];
     const data = [];
     const applicableFilterFn = filterFn || defaultFilterFn;

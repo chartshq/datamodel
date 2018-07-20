@@ -1,17 +1,7 @@
 import { FilteringMode } from 'picasso-util';
-import { persistDerivation, updateFields, cloneWithSelect, cloneWithProject } from './helper';
-
-import {
-    crossProduct,
-    difference,
-    naturalJoinFilter,
-    union
-} from './operator';
+import { persistDerivation, updateFields, cloneWithSelect, cloneWithProject, updateData } from './helper';
+import { crossProduct, difference, naturalJoinFilter, union } from './operator';
 import { DM_DERIVATIVES } from './constants';
-import createFields from './field-creator';
-import defaultConfig from './default-config';
-import * as converter from './converter';
-import fieldStore from './field-store';
 
 /**
  * Provides the relation algebra logics.
@@ -26,18 +16,17 @@ class Relation {
      * @param {Object | string | Relation} data - The input tabular data in dsv or json format or
      * an existing Relation instance object.
      * @param {Array} schema - An array of data schema.
-     * @param {string} [name] - The name of the DataModel instance, if not provided will assign a random name.
      * @param {Object} [options] - The optional options.
      */
-    constructor(data, schema, name, options) {
+    constructor (...params) {
+        let source;
+
         this._parent = null;
         this._derivation = [];
         this._children = [];
 
-        if (data instanceof Relation) {
+        if (params.length === 1 && ((source = params[0]) instanceof Relation)) {
             // parent datamodel was passed as part of source
-            const source = data;
-
             this._colIdentifier = source._colIdentifier;
             this._rowDiffset = source._rowDiffset;
             this._parent = source;
@@ -46,11 +35,7 @@ class Relation {
 
             this.calculateFieldspace().calculateFieldsConfig();
         } else {
-            if (!data) {
-                throw new Error('Data not specified');
-            }
-
-            this._updateData(data, schema, name, options);
+            updateData(this, ...params);
             this.calculateFieldspace().calculateFieldsConfig();
         }
     }
@@ -61,41 +46,21 @@ class Relation {
      * @public
      * @return {Array} Returns an array of field schema.
      */
-    getSchema() {
+    getSchema () {
         return this.getFieldspace().fields.map(d => d.schema);
     }
 
-    getFieldspace() {
+    getFieldspace () {
         return this._fieldspace;
     }
 
-    calculateFieldspace() {
+    calculateFieldspace () {
         this._fieldspace = updateFields([this._rowDiffset, this._colIdentifier], this.getPartialFieldspace());
         return this;
     }
 
-    getPartialFieldspace() {
+    getPartialFieldspace () {
         return this._partialFieldspace;
-    }
-
-    _updateData(data, schema, name, options) {
-        options = Object.assign(Object.assign({}, defaultConfig), options);
-        const converterFn = converter[options.dataFormat];
-
-        if (!(converterFn && typeof converterFn === 'function')) {
-            throw new Error(`No converter function found for ${options.dataFormat} format`);
-        }
-
-        const [header, formattedData] = converterFn(data, options);
-        const fieldArr = createFields(formattedData, schema, header);
-
-        // This will create a new fieldStore with the fields
-        const nameSpace = fieldStore.createNamespace(fieldArr, name);
-        this._partialFieldspace = nameSpace;
-        // If data is provided create the default colIdentifier and rowDiffset
-        this._rowDiffset = `0-${formattedData[0] ? (formattedData[0].length - 1) : 0}`;
-        this._colIdentifier = (schema.map(_ => _.name)).join();
-        return this;
     }
 
     /**
@@ -114,7 +79,7 @@ class Relation {
      * DataModel
      * @return {DataModel}          the new DataModel created by joining
      */
-    join(joinWith, filterFn) {
+    join (joinWith, filterFn) {
         return crossProduct(this, joinWith, filterFn);
     }
 
@@ -130,7 +95,7 @@ class Relation {
      * @param  {DataModel} joinWith the DataModel with whom this DataModel will be joined
      * @return {DataModel}          The new joined DataModel
      */
-    naturalJoin(joinWith) {
+    naturalJoin (joinWith) {
         return crossProduct(this, joinWith, naturalJoinFilter(this, joinWith), true);
     }
 
@@ -145,7 +110,7 @@ class Relation {
      * operation is performed.
      * @return {DataModel} Returns the new DataModel instance after operation.
      */
-    union(unionWith) {
+    union (unionWith) {
         return union(this, unionWith);
     }
 
@@ -160,7 +125,7 @@ class Relation {
      * operation is performed.
      * @return {DataModel} Returns the new DataModel instance after operation.
      */
-    difference(differenceWith) {
+    difference (differenceWith) {
         return difference(this, differenceWith);
     }
 
@@ -175,7 +140,7 @@ class Relation {
      * @param {string} [saveChild=true] - It is used while cloning.
      * @return {DataModel} Returns the new DataModel instance(s) after operation.
      */
-    select(selectFn, config) {
+    select (selectFn, config) {
         const defConfig = {
             mode: FilteringMode.NORMAL,
             saveChild: true
@@ -230,7 +195,7 @@ class Relation {
      * in the parent instance.
      * @return {DataModel} - Returns the newly cloned DataModel instance.
      */
-    clone(saveChild = true) {
+    clone (saveChild = true) {
         const retDataModel = new this.constructor(this);
         if (saveChild) {
             this._children.push(retDataModel);
@@ -293,11 +258,11 @@ class Relation {
      * @public
      * @return {Object} - Returns the field definitions.
      */
-    getFieldsConfig() {
+    getFieldsConfig () {
         return this._fieldConfig;
     }
 
-    calculateFieldsConfig() {
+    calculateFieldsConfig () {
         this._fieldConfig = this._fieldspace.fields.reduce((acc, fieldDef, i) => {
             acc[fieldDef.name] = {
                 index: i,
@@ -312,7 +277,7 @@ class Relation {
     /**
      * break the link between its parent and itself
      */
-    dispose() {
+    dispose () {
         this._parent.removeChild(this);
         this._parent = null;
     }
@@ -321,7 +286,7 @@ class Relation {
      *
      * @param {DataModel} child : Delegates the parent to remove this child
      */
-    removeChild(child) {
+    removeChild (child) {
         // remove from child list
         let idx = this._children.findIndex(sibling => sibling === child);
         idx !== -1 ? this._children.splice(idx, 1) : true;
@@ -331,7 +296,7 @@ class Relation {
      * @param { DataModel } parent datamodel instance which will act as its parent of this.
      * @param { Queue } criteriaQueue Queue contains in-between operation meta-data
      */
-    addParent(parent, criteriaQueue = []) {
+    addParent (parent, criteriaQueue = []) {
         persistDerivation(this, DM_DERIVATIVES.COMPOSE, null, criteriaQueue);
         this._parent = parent;
         parent._children.push(this);

@@ -21,6 +21,7 @@
     "brace-style": "off",
     "no-param-reassign": "off",
     "no-iterator" : "off",
+    "no-cond-assign": "off",
     "no-restricted-syntax": [
        "error",
        "LabeledStatement",

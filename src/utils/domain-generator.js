@@ -4,7 +4,7 @@
  * @param {Array} data - The array of data.
  * @return {Array} Returns the measure domain.
  */
-export default function generateMeasureDomain(data) {
+export default (data) => {
     let min = Number.POSITIVE_INFINITY;
     let max = Number.NEGATIVE_INFINITY;
 
@@ -18,4 +18,4 @@ export default function generateMeasureDomain(data) {
     });
 
     return [min, max];
-}
+};

@@ -3,19 +3,19 @@ import { FieldType, getUniqueId } from 'picasso-util';
 const fieldStore = {
     data: {},
 
-    createNamespace(fieldArr, name) {
+    createNamespace (fieldArr, name) {
         const dataId = name || getUniqueId();
         this.data[dataId] = {
             name: dataId,
             fields: fieldArr,
-            fieldsObj() {
+            fieldsObj () {
                 const retObj = {};
                 this.fields.forEach((field) => {
                     retObj[field.name] = field;
                 });
                 return retObj;
             },
-            getMeasure() {
+            getMeasure () {
                 const retObj = {};
                 this.fields.forEach((field) => {
                     if (field.schema.type === FieldType.MEASURE) {
@@ -24,7 +24,7 @@ const fieldStore = {
                 });
                 return retObj;
             },
-            getDimension() {
+            getDimension () {
                 const retObj = {};
                 this.fields.forEach((field) => {
                     if (field.schema.type === FieldType.DIMENSION) {

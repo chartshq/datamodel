@@ -4,7 +4,7 @@
  * @param  {*} val - The value to be checked.
  * @return {boolean} Returns true if the value is an array otherwise returns false.
  */
-export function isArray(val) {
+export function isArray (val) {
     return Array.isArray(val);
 }
 
@@ -14,7 +14,7 @@ export function isArray(val) {
  * @param  {*} val - The value to be checked.
  * @return {boolean} Returns true if the value is an object otherwise returns false.
  */
-export function isObject(val) {
+export function isObject (val) {
     return val === Object(val);
 }
 
@@ -24,7 +24,7 @@ export function isObject(val) {
  * @param  {*} val - The value to be checked.
  * @return {boolean} Returns true if the value is a string value otherwise returns false.
  */
-export function isString(val) {
+export function isString (val) {
     return typeof val === 'string';
 }
 
@@ -34,7 +34,7 @@ export function isString(val) {
  * @param {*} val - The value to be checked.
  * @return {boolean} Returns true if the value is callable otherwise returns false.
  */
-export function isCallable(val) {
+export function isCallable (val) {
     return typeof val === 'function';
 }
 
@@ -44,6 +44,6 @@ export function isCallable(val) {
  * @param {Array} data - The input array.
  * @return {Array} Returns a new array of unique values.
  */
-export function uniqueValues(data) {
+export function uniqueValues (data) {
     return [...new Set(data)];
 }

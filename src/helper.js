@@ -4,11 +4,14 @@ import fieldStore from './field-store';
 import Value from './value';
 import { rowDiffsetIterator } from './operator';
 import { DM_DERIVATIVES, ROW_ID } from './constants';
+import createFields from './field-creator';
+import defaultConfig from './default-config';
+import * as converter from './converter';
 
 /**
  * Prepares the selection data.
  */
-function prepareSelectionData(fields, i) {
+function prepareSelectionData (fields, i) {
     const resp = {};
     for (let field of fields) {
         resp[field.name] = new Value(field.data[i], field);
@@ -185,4 +188,24 @@ export const cloneWithProject = (sourceDm, projField, config, allFields) => {
     }
 
     return cloned;
+};
+
+export const updateData = (relation, data, schema, options) => {
+    options = Object.assign(Object.assign({}, defaultConfig), options);
+    const converterFn = converter[options.dataFormat];
+
+    if (!(converterFn && typeof converterFn === 'function')) {
+        throw new Error(`No converter function found for ${options.dataFormat} format`);
+    }
+
+    const [header, formattedData] = converterFn(data, options);
+    const fieldArr = createFields(formattedData, schema, header);
+
+    // This will create a new fieldStore with the fields
+    const nameSpace = fieldStore.createNamespace(fieldArr, options.name);
+    relation._partialFieldspace = nameSpace;
+    // If data is provided create the default colIdentifier and rowDiffset
+    relation._rowDiffset = `0-${formattedData[0] ? (formattedData[0].length - 1) : 0}`;
+    relation._colIdentifier = (schema.map(_ => _.name)).join();
+    return relation;
 };

@@ -9,7 +9,7 @@ import { rowDiffsetIterator } from './row-diffset-iterator';
  * @param {dm} dm2 - The second dm instance.
  * @return {dm} Returns the newly created dm after union operation.
  */
-export function union(dm1, dm2) {
+export function union (dm1, dm2) {
     const hashTable = {};
     const schema = [];
     const schemaNameArr = [];
@@ -38,7 +38,7 @@ export function union(dm1, dm2) {
      * @param {dm} dm - The dm instance for which the data is inserted.
      * @param {Object} fieldsObj - The fieldStore object format.
      */
-    function prepareDataHelper(dm, fieldsObj) {
+    function prepareDataHelper (dm, fieldsObj) {
         rowDiffsetIterator(dm._rowDiffset, (i) => {
             const tuple = {};
             let hashData = '';

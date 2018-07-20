@@ -17,7 +17,7 @@ import { columnMajor } from '../utils';
  *    [7, 8, 9]
  * ];
  */
-function DSVArr(arr, options) {
+function DSVArr (arr, options) {
     const defaultOption = {
         firstRowHeader: true,
     };

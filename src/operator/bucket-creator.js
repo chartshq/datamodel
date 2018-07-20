@@ -8,7 +8,7 @@ import { rowDiffsetIterator } from './row-diffset-iterator';
  * @param {number} config.numOfBins - The number of bins to be created.
  * @return {Array} Returns an array of created bins.
  */
-export function createBinnedFieldData(fielddata, rowDiffset, reducerFunc, config) {
+export function createBinnedFieldData (fielddata, rowDiffset, reducerFunc, config) {
     let { buckets, numOfBins, binSize } = config;
     let dataStore = [];
     let binnedData = [];

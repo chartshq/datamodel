@@ -1,7 +1,7 @@
 import { defReducer, fnList } from '../operator';
 
 class ReducerStore {
-    constructor() {
+    constructor () {
         this.store = new Map();
         this.store.set('defReducer', defReducer);
 
@@ -10,7 +10,7 @@ class ReducerStore {
         });
     }
 
-    defaultReducer(...params) {
+    defaultReducer (...params) {
         if (params.length) {
             let reducer = params[0];
             if (typeof reducer === 'function') {
@@ -25,7 +25,7 @@ class ReducerStore {
 
         return this.store.get('defReducer');
     }
-    register(name, reducer) {
+    register (name, reducer) {
         if (typeof name === 'string' && typeof reducer === 'function') {
             this.store.set(name, reducer);
         }
@@ -33,13 +33,13 @@ class ReducerStore {
         return () => { this.__unregister(name); };
     }
 
-    __unregister(name) {
+    __unregister (name) {
         if (this.store.has(name)) {
             this.store.delete(name);
         }
     }
 
-    resolve(name) {
+    resolve (name) {
         if (name instanceof Function) {
             return name;
         }
@@ -50,7 +50,7 @@ class ReducerStore {
 const reducerStore = (function() {
     let store = null;
 
-    function getStore() {
+    function getStore () {
         if (store === null) {
             store = new ReducerStore();
         }

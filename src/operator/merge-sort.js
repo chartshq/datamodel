@@ -5,7 +5,7 @@
  * @param {*} b - The second value.
  * @return {number} Returns the comparison result e.g. 1 or 0 or -1.
  */
-function defSortFn(a, b) {
+function defSortFn (a, b) {
     const a1 = `${a}`;
     const b1 = `${b}`;
     if (a1 < b1) {
@@ -27,7 +27,7 @@ function defSortFn(a, b) {
  * @param {number} hi - The ending index of the second array half.
  * @param {Function} sortFn - The sort function.
  */
-function merge(arr, lo, mid, hi, sortFn) {
+function merge (arr, lo, mid, hi, sortFn) {
     const mainArr = arr;
     const auxArr = [];
     for (let i = lo; i <= hi; i += 1) {
@@ -63,7 +63,7 @@ function merge(arr, lo, mid, hi, sortFn) {
  * @param {Function} sortFn - The sort function.
  * @return {Array} Returns the target array itself.
  */
-function sort(arr, lo, hi, sortFn) {
+function sort (arr, lo, hi, sortFn) {
     if (hi === lo) { return arr; }
 
     const mid = lo + Math.floor((hi - lo) / 2);
@@ -83,7 +83,7 @@ function sort(arr, lo, hi, sortFn) {
  * @param {Function} [sortFn=defSortFn] - The sort function.
  * @return {Array} Returns the input array itself in sorted order.
  */
-export function mergeSort(arr, sortFn = defSortFn) {
+export function mergeSort (arr, sortFn = defSortFn) {
     if (arr.length > 1) {
         sort(arr, 0, arr.length - 1, sortFn);
     }

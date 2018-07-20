@@ -26,8 +26,8 @@ const schema2 = [
 describe('CrossProduct Functionality', () => {
     describe('#crossProduct', () => {
         it('should perform crossProduct on two datamodels', () => {
-            const dataModel1 = new DataModel(data1, schema1, 'ModelA');
-            const dataModel2 = new DataModel(data2, schema2, 'ModelB');
+            const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
+            const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
             const crossDataModel = crossProduct(dataModel1, dataModel2);
             expect(crossDataModel.getData()).to.deep.equal({
                 schema: [
@@ -47,8 +47,8 @@ describe('CrossProduct Functionality', () => {
             });
         });
         it('should perform crossProduct on two datamodels with given filterFn', () => {
-            const dataModel1 = new DataModel(data1, schema1, 'ModelA');
-            const dataModel2 = new DataModel(data2, schema2, 'ModelB');
+            const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
+            const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
             const crossDataModel = crossProduct(dataModel1, dataModel2,
                                                     obj => obj.ModelA.city === obj.ModelB.city, true);
 

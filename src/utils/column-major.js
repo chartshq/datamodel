@@ -4,7 +4,7 @@
  * @param {Object} store - The store object.
  * @return {Function} Returns the push function.
  */
-export default function columnMajor(store) {
+export default (store) => {
     let i = 0;
     return (...fields) => {
         fields.forEach((val, fieldIndex) => {
@@ -15,4 +15,4 @@ export default function columnMajor(store) {
         });
         i++;
     };
-}
+};

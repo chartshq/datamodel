@@ -11,7 +11,7 @@ import { rowDiffsetIterator } from './row-diffset-iterator';
  * @param {dm} dm2 - The second dm instance.
  * @return {dm} Returns the newly created dm after union operation.
  */
-export function difference(dm1, dm2) {
+export function difference (dm1, dm2) {
     const hashTable = {};
     const schema = [];
     const schemaNameArr = [];

@@ -22,7 +22,7 @@ import DSVArr from './dsv-arr';
  * 7,8,9
  * `
  */
-function DSVStr(str, options) {
+function DSVStr (str, options) {
     const defaultOption = {
         firstRowHeader: true,
         fieldSeparator: ','

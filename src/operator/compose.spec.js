@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions,no-unused-vars */
 import { expect } from 'chai';
 import DataModel from '../datamodel';
-import { compose, columnFilter, rowFilter, groupby, bin } from './compose';
+import { compose, columnFilter, rowFilter, groupBy, bin } from './compose';
 
 describe('Testing compose functionality', () => {
     const data1 = [
@@ -94,7 +94,7 @@ describe('Testing compose functionality', () => {
             let composedFn = compose(
             rowFilter(fields => fields.profit.value <= 15),
             columnFilter(['profit', 'sales']),
-            groupby(['profit'])
+            groupBy(['profit'])
         );
 
             let normalDm = dataModel.select(fields => fields.profit.value <= 15);

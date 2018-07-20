@@ -395,7 +395,7 @@ class DataModel extends Relation {
      * @param {string} eventName - The name of the event to unsubscribe.
      * @return {DataModel} Returns the current DataModel instance itself.
      */
-    unsubscribe(eventName) {
+    unsubscribe (eventName) {
         switch (eventName) {
         case PROPAGATION:
             this._onPropagation = [];
@@ -416,7 +416,7 @@ class DataModel extends Relation {
      * @param {DataModel} identifiers The propagated DataModel.
      * @memberof DataModel
      */
-    handlePropagation(payload, identifiers) {
+    handlePropagation (payload, identifiers) {
         let propListeners = this._onPropagation;
         propListeners.forEach(fn => fn.call(this, payload, identifiers));
     }
@@ -426,7 +426,7 @@ class DataModel extends Relation {
      @param {Object} config : bucketObj : {} || binSize : number || noOfBins : number || binFieldName : string
      @param {Function | FunctionName} reducer : binning reducer
      */
-    bin(measureName, config = { }, reducer) {
+    bin (measureName, config = { }, reducer) {
         const clone = this.clone();
         const binFieldName = config.name || `${measureName}_binned`;
         if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[measureName]) {

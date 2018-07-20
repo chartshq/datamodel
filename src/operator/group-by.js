@@ -10,7 +10,7 @@ import reducerStore from '../utils/reducer';
  * @param  {Array} fieldArr  user input of field Array
  * @return {Array}           arrays of field name
  */
-function getFieldArr(dataModel, fieldArr) {
+function getFieldArr (dataModel, fieldArr) {
     const retArr = [];
     const fieldStore = dataModel.getPartialFieldspace();
     const dimensions = fieldStore.getDimension();
@@ -33,7 +33,7 @@ function getFieldArr(dataModel, fieldArr) {
  * @param  {Object|function} [reducers={}] reducer provided by the users
  * @return {Object}               object containing reducer function for every measure
  */
-function getReducerObj(dataModel, reducers = {}) {
+function getReducerObj (dataModel, reducers = {}) {
     const retObj = {};
     const pReducers = reducers;
     const fieldStore = dataModel.getPartialFieldspace();
@@ -63,7 +63,7 @@ function getReducerObj(dataModel, reducers = {}) {
  * @param {DataModel} existingDataModel Existing datamodel instance
  * @return {DataModel} new dataModel with the group by
  */
-function groupBy(dataModel, fieldArr, reducers, existingDataModel) {
+function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     const sFieldArr = getFieldArr(dataModel, fieldArr);
     const reducerObj = getReducerObj(dataModel, reducers);
     const fieldStore = dataModel.getPartialFieldspace();

@@ -9,7 +9,7 @@ import { getCommonSchema } from './get-common-schema';
  * @param {DataModel} dm2 - The right DataModel instance.
  * @return {Function} Returns a function that is used in cross-product operation.
  */
-export function naturalJoinFilter(dm1, dm2) {
+export function naturalJoinFilter (dm1, dm2) {
     const dm1FieldStore = dm1.getPartialFieldspace();
     const dm2FieldStore = dm2.getPartialFieldspace();
     const dm1FieldStoreName = dm1FieldStore.name;

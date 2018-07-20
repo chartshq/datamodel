@@ -65,8 +65,8 @@ describe('Testing Outer Join', () => {
             type: 'dimension'
         },
     ];
-    const data23 = new DataModel(data1, schema1, 'ModelA');
-    const data24 = new DataModel(data2, schema2, 'ModelB');
+    const data23 = new DataModel(data1, schema1, { name: 'ModelA' });
+    const data24 = new DataModel(data2, schema2, { name: 'ModelB' });
     describe('#leftOuterJoin', () => {
         it('should return left join', () => {
             let expectedResult = {
