@@ -1,4 +1,4 @@
-/* global describe, it ,context */
+/* global describe, it, context */
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
@@ -7,15 +7,16 @@ import DataModel from './index';
 
 describe('DataModel', () => {
     describe('#clone', () => {
-        it('should clone successfully', () => {
+        it('should make a new copy of the current DataModel instance', () => {
             const data = [
-                { a: 10, aaa: 20, aaaa: 'd' },
-                { a: 15, aaa: 25, aaaa: 'demo' },
+                { age: 30, job: 'unemployed', marital: 'married' },
+                { age: 33, job: 'services', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' }
             ];
             const schema = [
-                { name: 'a', type: 'measure' },
-                { name: 'aaa', type: 'measure' },
-                { name: 'aaaa', type: 'dimension' },
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' },
             ];
             const dataModel = new DataModel(data, schema);
 
@@ -29,7 +30,7 @@ describe('DataModel', () => {
     });
 
     describe('#getData', () => {
-        it('should retrieves the data correctly', () => {
+        it('should return the data in the specified format', () => {
             const schema = [
                 { name: 'name', type: 'dimension' },
                 { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
@@ -125,107 +126,88 @@ describe('DataModel', () => {
     });
 
     describe('#project', () => {
-        it('should project the fields correctly', () => {
-            const data = [
-                { a: 10, aaa: 20, aaaa: 'd' },
-                { a: 15, aaa: 25, aaaa: 'demo' },
-            ];
-            const schema = [
-                { name: 'a', type: 'measure' },
-                { name: 'aaa', type: 'measure' },
-                { name: 'aaaa', type: 'dimension' },
-            ];
+        const data = [
+            { age: 30, education: 'tertiary', job: 'management', marital: 'married' },
+            { age: 59, education: 'secondary', job: 'blue-collar', marital: 'married' },
+            { age: 35, education: 'tertiary', job: 'management', marital: 'single' }
+        ];
+        const schema = [
+            { name: 'age', type: 'measure' },
+            { name: 'education', type: 'dimension' },
+            { name: 'job', type: 'dimension' },
+            { name: 'marital', type: 'dimension' }
+        ];
+
+        it('should make projection with the input fields', () => {
             const dataModel = new DataModel(data, schema);
-            const projectedDataModel = dataModel.project(['aaaa', 'a']);
-            const expData = {
-                schema: [
-                    { name: 'aaaa', type: 'dimension' },
-                    { name: 'a', type: 'measure' },
-                ],
+            const projectedDataModel = dataModel.project(['age', 'job']);
+            const expected = {
                 data: [
-                    ['d', 10],
-                    ['demo', 15],
+                    [30, 'management'],
+                    [59, 'blue-collar'],
+                    [35, 'management']
                 ],
-                uids: [0, 1]
+                schema: [
+                    { name: 'age', type: 'measure' },
+                    { name: 'job', type: 'dimension' },
+                ],
+                uids: [0, 1, 2]
             };
             expect(dataModel === projectedDataModel).to.be.false;
-            expect(projectedDataModel.getData()).to.deep.equal(expData);
+            expect(projectedDataModel.getData()).to.deep.equal(expected);
         });
 
-        it('should do inverted projections', () => {
-            const yodata = [
-                { a: 10, aaa: 20, aaaa: 'd' },
-                { a: 15, aaa: 25, aaaa: 'demo' },
-            ];
-            const yoschema = [
-                { name: 'a', type: 'measure' },
-                { name: 'aaa', type: 'measure' },
-                { name: 'aaaa', type: 'dimension' },
-            ];
-            const yodataModel = new DataModel(yodata, yoschema);
-            const invProjectedDataModel = yodataModel.project(['aaaa', 'a'], {
+        it('should make inverted projections', () => {
+            const dataModel = new DataModel(data, schema);
+            const invProjectedDataModel = dataModel.project(['age', 'job'], {
                 mode: FilteringMode.INVERSE
             });
             const expected = {
                 data: [
-                    [20],
-                    [25]
+                    ['tertiary', 'married'],
+                    ['secondary', 'married'],
+                    ['tertiary', 'single']
                 ],
                 schema: [
-                    {
-                        name: 'aaa',
-                        type: 'measure'
-                    }
+                    { name: 'education', type: 'dimension' },
+                    { name: 'marital', type: 'dimension' }
                 ],
-                uids: [0, 1]
+                uids: [0, 1, 2]
             };
             expect(expected).to.deep.equal(invProjectedDataModel.getData());
         });
 
-        it('should project fields when filtering mode is all', () => {
-            const yodata = [
-                { a: 10, aaa: 20, aaaa: 'd' },
-                { a: 15, aaa: 25, aaaa: 'demo' },
-            ];
-            const yoschema = [
-                { name: 'a', type: 'measure' },
-                { name: 'aaa', type: 'measure' },
-                { name: 'aaaa', type: 'dimension' },
-            ];
-            const yodataModel = new DataModel(yodata, yoschema);
-            const dataModels = yodataModel.project(['aaaa'], {
+        it('should make normal and inverse projection both when mode is ALL', () => {
+            const datamodel = new DataModel(data, schema);
+            const dataModels = datamodel.project(['age', 'job'], {
                 mode: FilteringMode.ALL
             });
+
             const projectedModel = {
                 data: [
-                    ['d'],
-                    ['demo']
+                    [30, 'management'],
+                    [59, 'blue-collar'],
+                    [35, 'management']
                 ],
                 schema: [
-                    {
-                        name: 'aaaa',
-                        type: 'dimension'
-                    }
+                    { name: 'age', type: 'measure' },
+                    { name: 'job', type: 'dimension' },
                 ],
-                uids: [0, 1]
+                uids: [0, 1, 2]
             };
             const rejectionModel = {
                 data: [
-                    [10, 20],
-                    [15, 25]
+                    ['tertiary', 'married'],
+                    ['secondary', 'married'],
+                    ['tertiary', 'single']
                 ],
                 schema: [
-                    {
-                        name: 'a',
-                        type: 'measure'
-                    },
-                    {
-                        name: 'aaa',
-                        type: 'measure'
-                    }
+                    { name: 'education', type: 'dimension' },
+                    { name: 'marital', type: 'dimension' }
                 ],
-                uids: [0, 1]
+                uids: [0, 1, 2]
             };
+
             expect(projectedModel).to.deep.equal(dataModels[0].getData());
             expect(rejectionModel).to.deep.equal(dataModels[1].getData());
         });
@@ -233,245 +215,179 @@ describe('DataModel', () => {
 
 
     describe('#select', () => {
-        it('should perform selection', () => {
-            const data = [
-                { a: 10, aaa: 20, aaaa: 'd' },
-                { a: 15, aaa: 25, aaaa: 'demo' },
-                { a: 9, aaa: 35, aaaa: 'demo' },
-                { a: 7, aaa: 15, aaaa: 'demo' },
-                { a: 35, aaa: 5, aaaa: 'demo' },
-                { a: 10, aaa: 10, aaaa: 'demoo' },
-            ];
-            const schema = [
-                { name: 'a', type: 'measure' },
-                { name: 'aaa', type: 'measure' },
-                { name: 'aaaa', type: 'dimension' },
-            ];
+        const data = [
+            { age: 30, job: 'management', marital: 'married' },
+            { age: 59, job: 'blue-collar', marital: 'married' },
+            { age: 35, job: 'management', marital: 'single' },
+            { age: 57, job: 'self-employed', marital: 'married' },
+            { age: 28, job: 'blue-collar', marital: 'married' },
+        ];
+        const schema = [
+            { name: 'age', type: 'measure' },
+            { name: 'job', type: 'dimension' },
+            { name: 'marital', type: 'dimension' }
+        ];
+
+        it('should perform normal selection', () => {
             const dataModel = new DataModel(data, schema);
-            const projectedDataModel = (dataModel.project(['aaaa', 'a'])).select(fields =>
-                fields.a.value <= 10 && fields.aaaa.value === 'demo');
+            const selectedDm = dataModel.select(fields => fields.age.value < 40);
             const expData = {
-                schema: [
-                    { name: 'aaaa', type: 'dimension' },
-                    { name: 'a', type: 'measure' },
-                ],
                 data: [
-                    ['demo', 9],
-                    ['demo', 7],
+                    [30, 'management', 'married'],
+                    [35, 'management', 'single'],
+                    [28, 'blue-collar', 'married']
                 ],
-                uids: [2, 3]
+                schema,
+                uids: [0, 2, 4]
             };
+
             // check project is not applied on the same DataModel
-            expect(dataModel === projectedDataModel).to.be.false;
-            expect(projectedDataModel._rowDiffset).to.equal('2-3');
+            expect(dataModel === selectedDm).to.be.false;
+            expect(selectedDm._rowDiffset).to.equal('0,2,4');
             // Check The return data
-            expect(projectedDataModel.getData()).to.deep.equal(expData);
+            expect(selectedDm.getData()).to.deep.equal(expData);
         });
 
-        it('should perform selection properly with modes', () => {
-            const data1 = [
-                { profit: 10, sales: 20, city: 'a', state: 'aa' },
-                { profit: 15, sales: 25, city: 'b', state: 'bb' },
-                { profit: 10, sales: 20, city: 'a', state: 'ab' },
-                { profit: 15, sales: 25, city: 'b', state: 'ba' },
-            ];
-            const schema1 = [
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
-                { name: 'city', type: 'dimension' },
-                { name: 'state', type: 'dimension' },
-            ];
-            const dataModel = new DataModel(data1, schema1, 'Yo');
-            const selected = dataModel.select(fields => fields.profit.value === 10).getData();
-            const rejected = dataModel.select(fields => fields.profit.value === 10, {
-                mode: 'inverse'
+        it('should perform selection with the specified modes', () => {
+            const dataModel = new DataModel(data, schema);
+            const selected = dataModel.select(fields => fields.marital.value === 'married').getData();
+            const rejected = dataModel.select(fields => fields.marital.value === 'married', {
+                mode: FilteringMode.INVERSE
             }).getData();
-            const teenTitansUnite = dataModel.select(fields => fields.profit.value === 10, {
-                mode: 'all'
+            const selectionAll = dataModel.select(fields => fields.marital.value === 'married', {
+                mode: FilteringMode.ALL
             });
+
             expect(selected).to.deep.equal({
-                schema: schema1,
                 data: [
-                    [10, 20, 'a', 'aa'],
-                    [10, 20, 'a', 'ab']
+                    [30, 'management', 'married'],
+                    [59, 'blue-collar', 'married'],
+                    [57, 'self-employed', 'married'],
+                    [28, 'blue-collar', 'married']
                 ],
-                uids: [0, 2]
+                schema,
+                uids: [0, 1, 3, 4]
             });
             expect(rejected).to.deep.equal({
-                schema: schema1,
                 data: [
-                    [15, 25, 'b', 'bb'],
-                    [15, 25, 'b', 'ba']
+                    [35, 'management', 'single']
                 ],
-                uids: [1, 3]
+                schema,
+                uids: [2]
             });
-            expect(teenTitansUnite[0].getData()).to.deep.equal({
-                schema: schema1,
-                data: [
-                    [10, 20, 'a', 'aa'],
-                    [10, 20, 'a', 'ab']
-                ],
-                uids: [0, 2]
-            });
-            expect(teenTitansUnite[1].getData()).to.deep.equal({
-                schema: schema1,
-                data: [
-                    [15, 25, 'b', 'bb'],
-                    [15, 25, 'b', 'ba']
-                ],
-                uids: [1, 3]
-            });
+            expect(selectionAll[0].getData()).to.deep.equal(selected);
+            expect(selectionAll[1].getData()).to.deep.equal(rejected);
         });
 
         it('should perform selection functionality in extreme condition', () => {
-            const data = [
-                { a: 10, aaa: 20, aaaa: 'd' },
-                { a: 15, aaa: 25, aaaa: 'demo' },
-                { a: 9, aaa: 35, aaaa: 'demo' },
-                { a: 7, aaa: 15, aaaa: 'demoo' },
-                { a: 35, aaa: 5, aaaa: 'demo' },
-                { a: 10, aaa: 10, aaaa: 'demo' },
-                { a: 10, aaa: 5, aaaa: 'demo' },
-                { a: 10, aaa: 10, aaaa: 'demo' },
-                { a: 10, aaa: 10, aaaa: 'demoo' },
-                { a: 10, aaa: 10, aaaa: 'demo' },
-            ];
-            const schema = [
-                { name: 'a', type: 'measure' },
-                { name: 'aaa', type: 'measure' },
-                { name: 'aaaa', type: 'dimension' },
-            ];
             const dataModel = new DataModel(data, schema);
-            const projectedDataModel = (dataModel.project(['aaaa', 'a'])).select(fields =>
-                fields.aaaa.value === 'demo');
+            const selectedDm = dataModel.project(['age', 'job']).select(fields =>
+                fields.job.value === 'management');
             // Check if repetition select works
-            const projectedDataModel1 = projectedDataModel.select(fields =>
-                fields.a.value === 10);
+            const selectedDm2 = selectedDm.select(fields =>
+                fields.marital.value === 'single');
             let expData = {
-                schema: [
-                    { name: 'aaaa', type: 'dimension' },
-                    { name: 'a', type: 'measure' },
-                ],
                 data: [
-                    ['demo', 15],
-                    ['demo', 9],
-                    ['demo', 35],
-                    ['demo', 10],
-                    ['demo', 10],
-                    ['demo', 10],
-                    ['demo', 10],
+                    [30, 'management'],
+                    [35, 'management']
                 ],
-                uids: [1, 2, 4, 5, 6, 7, 9]
+                schema: [
+                    { name: 'age', type: 'measure' },
+                    { name: 'job', type: 'dimension' },
+                ],
+                uids: [0, 2]
             };
             // check project is not applied on the same DataModel
-            expect(dataModel === projectedDataModel).to.be.false;
-            expect(projectedDataModel._rowDiffset).to.equal('1-2,4-7,9');
+            expect(dataModel === selectedDm).to.be.false;
+            expect(selectedDm._rowDiffset).to.equal('0,2');
             // Check The return data
-            expect(projectedDataModel.getData()).to.deep.equal(expData);
+            expect(selectedDm.getData()).to.deep.equal(expData);
 
             expData = {
-                schema: [
-                    { name: 'aaaa', type: 'dimension' },
-                    { name: 'a', type: 'measure' },
-                ],
                 data: [
-                    ['demo', 10],
-                    ['demo', 10],
-                    ['demo', 10],
-                    ['demo', 10],
+                    [35, 'management']
                 ],
-                uids: [5, 6, 7, 9]
+                schema: [
+                    { name: 'age', type: 'measure' },
+                    { name: 'job', type: 'dimension' },
+                ],
+                uids: [2]
             };
-            expect(projectedDataModel1._rowDiffset).to.equal('5-7,9');
+            expect(selectedDm2._rowDiffset).to.equal('2');
             // Check The return data
-            expect(projectedDataModel1.getData()).to.deep.equal(expData);
+            expect(selectedDm2.getData()).to.deep.equal(expData);
         });
     });
 
     describe('#sort', () => {
         it('should perform sorting properly', () => {
             const data = [
-                { a: 10, aaa: 20 },
-                { a: 15, aaa: 25 },
-                { a: 9, aaa: 35 },
-                { a: 7, aaa: 20 },
-                { a: 35, aaa: 5 },
-                { a: 10, aaa: 10 },
+                { age: 30, job: 'management', marital: 'married' },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' }
             ];
             const schema = [
-                { name: 'a', type: 'measure' },
-                { name: 'aaa', type: 'measure' },
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
             ];
+
             const dataModel = new DataModel(data, schema);
             const expData = {
-                schema: [
-                    { name: 'a', type: 'measure' },
-                    { name: 'aaa', type: 'measure' },
-                ],
                 data: [
-                    [9, 35],
-                    [15, 25],
-                    [7, 20],
-                    [10, 20],
-                    [10, 10],
-                    [35, 5],
+                    [59, 'blue-collar', 'married'],
+                    [57, 'self-employed', 'married'],
+                    [35, 'management', 'single'],
+                    [30, 'management', 'married']
                 ],
-                uids: [2, 1, 3, 0, 5, 4]
+                schema,
+                uids: [1, 3, 2, 0]
             };
             dataModel.sort([
-                ['aaa', 'desc'],
-                ['a'],
+                ['age', 'desc']
             ]);
             expect(dataModel._sortingDetails).to.deep.equal([
-                ['aaa', 'desc'],
-                ['a', 'asc'],
+                ['age', 'desc']
             ]);
             expect(dataModel.getData()).to.deep.equal(expData);
         });
 
         it('should perform multi sort properly', () => {
             const data = [
-                { a: 2, aa: 1, aaa: 1 },
-                { a: 2, aa: 6, aaa: 12 },
-                { a: 1, aa: 15, aaa: 9 },
-                { a: 1, aa: 15, aaa: 12 },
-                { a: 1, aa: 6, aaa: 15 },
-                { a: 2, aa: 1, aaa: 56 },
-                { a: 2, aa: 1, aaa: 3 },
-                { a: 1, aa: 15, aaa: 10 },
-                { a: 2, aa: 6, aaa: 9 },
-                { a: 1, aa: 6, aaa: 4 },
+                { age: 30, job: 'management', marital: 'married' },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' },
+                { age: 28, job: 'blue-collar', marital: 'married' },
+                { age: 30, job: 'blue-collar', marital: 'single' },
             ];
             const schema = [
-                { name: 'a', type: 'measure' },
-                { name: 'aa', type: 'measure' },
-                { name: 'aaa', type: 'measure' },
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
             ];
+
             const dataModel = new DataModel(data, schema);
             const expData = {
-                schema: [
-                    { name: 'a', type: 'measure' },
-                    { name: 'aa', type: 'measure' },
-                    { name: 'aaa', type: 'measure' },
-                ],
                 data: [
-                    [1, 15, 9],
-                    [1, 15, 10],
-                    [1, 15, 12],
-                    [1, 6, 4],
-                    [1, 6, 15],
-                    [2, 6, 9],
-                    [2, 6, 12],
-                    [2, 1, 1],
-                    [2, 1, 3],
-                    [2, 1, 56],
+                    [59, 'blue-collar', 'married'],
+                    [57, 'self-employed', 'married'],
+                    [35, 'management', 'single'],
+                    [30, 'blue-collar', 'single'],
+                    [30, 'management', 'married'],
+                    [28, 'blue-collar', 'married']
                 ],
-                uids: [2, 7, 3, 9, 4, 8, 1, 0, 6, 5]
+                schema,
+                uids: [1, 3, 2, 5, 0, 4]
             };
             dataModel.sort([
-                ['a'],
-                ['aa', 'desc'],
-                ['aaa'],
+                ['age', 'desc'],
+                ['job'],
+            ]);
+            expect(dataModel._sortingDetails).to.deep.equal([
+                ['age', 'desc'],
+                ['job', 'asc'],
             ]);
             expect(dataModel.getData()).to.deep.equal(expData);
         });
@@ -559,15 +475,15 @@ describe('DataModel', () => {
             expect((dataModel1.join(dataModel2, obj => obj.ModelA.city === obj.ModelB.city))
                             .getData()).to.deep.equal({
                                 schema: [
-                                    { name: 'profit', type: 'measure' },
-                                    { name: 'sales', type: 'measure' },
-                                    { name: 'ModelA.city', type: 'dimension' },
-                                    { name: 'population', type: 'measure' },
-                                    { name: 'ModelB.city', type: 'dimension' },
+                        { name: 'profit', type: 'measure' },
+                        { name: 'sales', type: 'measure' },
+                        { name: 'ModelA.city', type: 'dimension' },
+                        { name: 'population', type: 'measure' },
+                        { name: 'ModelB.city', type: 'dimension' },
                                 ],
                                 data: [
-                                    [10, 20, 'a', 200, 'a'],
-                                    [15, 25, 'b', 250, 'b'],
+                        [10, 20, 'a', 200, 'a'],
+                        [15, 25, 'b', 250, 'b'],
                                 ],
                                 uids: [0, 1]
                             });
