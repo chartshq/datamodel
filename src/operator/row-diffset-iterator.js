@@ -5,7 +5,7 @@
  * @param {string} rowDiffset - The row diffset string e.g. '0-4,6,10-13'.
  * @param {Function} callback - The callback function to be called with every index.
  */
-export function rowDiffsetIterator(rowDiffset, callback) {
+export function rowDiffsetIterator (rowDiffset, callback) {
     if (rowDiffset.length > 0) {
         const rowDiffArr = rowDiffset.split(',');
         rowDiffArr.forEach((diffStr) => {

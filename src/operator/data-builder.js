@@ -10,7 +10,7 @@ import { mergeSort } from './merge-sort';
  * @param {integer} index - The index of the data which will be sorted.
  * @return {Function} Returns the the sorting function.
  */
-function getSortFn(dataType, sortType, index) {
+function getSortFn (dataType, sortType, index) {
     let retFunc;
     switch (dataType) {
     case 'measure':
@@ -48,7 +48,7 @@ function getSortFn(dataType, sortType, index) {
  * @param {Object} options - The options required to create the type of the data.
  * @return {Object} Returns an object containing the multidimensional array and the relative schema.
  */
-export function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, options) {
+export function dataBuilder (fieldStore, rowDiffset, colIdentifier, sortingDetails, options) {
     const defOptions = {
         addUid: false,
         columnWise: false

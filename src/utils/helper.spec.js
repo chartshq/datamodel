@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { isArray, isObject, isCallable, isString, uniqueValues } from './helper';
 
 describe('Utils', () => {
-    describe('#isArray()', () => {
+    describe('#isArray', () => {
         it('should return true for array value', () => {
             expect(isArray([])).to.be.true;
             expect(isArray([1, 2])).to.be.true;
@@ -17,7 +17,7 @@ describe('Utils', () => {
         });
     });
 
-    describe('#isObject()', () => {
+    describe('#isObject', () => {
         it('should return true for object value', () => {
             expect(isObject({})).to.be.true;
             expect(isObject([1, 2])).to.be.true;
@@ -30,7 +30,7 @@ describe('Utils', () => {
         });
     });
 
-    describe('#isCallable()', () => {
+    describe('#isCallable', () => {
         it('should return true for function value', () => {
             expect(isCallable(() => {})).to.be.true;
             expect(isCallable(Object)).to.be.true;
@@ -42,7 +42,7 @@ describe('Utils', () => {
         });
     });
 
-    describe('#isString()', () => {
+    describe('#isString', () => {
         it('should return true for string value', () => {
             expect(isString('abc')).to.be.true;
         });
@@ -53,7 +53,7 @@ describe('Utils', () => {
         });
     });
 
-    describe('#uniqueValues()', () => {
+    describe('#uniqueValues', () => {
         it('should return unique values from input array', () => {
             expect(uniqueValues([1, 2, 1, 3]).sort()).to.deep.equal([1, 2, 3]);
             expect(uniqueValues([])).to.deep.equal([]);

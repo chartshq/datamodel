@@ -1,22 +1,7 @@
-import { SelectionMode } from 'picasso-util';
-import createFields from './create-fields';
-
-import { rowDiffsetIterator } from './operator';
-import defaultConfig from './default-config';
-import * as converter from './converter';
-import Value from './value';
-import fieldStore from './field-store';
-
-/**
- * Prepares the selection data.
- */
-function prepareSelectionData(fields, i) {
-    const resp = {};
-    for (let field of fields) {
-        resp[field.name] = new Value(field.data[i], field);
-    }
-    return resp;
-}
+import { FilteringMode } from 'picasso-util';
+import { persistDerivation, updateFields, cloneWithSelect, cloneWithProject, updateData } from './helper';
+import { crossProduct, difference, naturalJoinFilter, union } from './operator';
+import { DM_DERIVATIVES } from './constants';
 
 /**
  * Provides the relation algebra logics.
@@ -28,115 +13,294 @@ class Relation {
      * a field store with these fields in global space which can be used
      * by other functions for calculations and other operations on data
      *
-     * @param {Object | string | Relation} data - The input tabular data in csv or json format or
+     * @param {Object | string | Relation} data - The input tabular data in dsv or json format or
      * an existing Relation instance object.
      * @param {Array} schema - An array of data schema.
-     * @param {string} [name] - The name of the DataModel instance, if not provided will assign a random name.
      * @param {Object} [options] - The optional options.
      */
-    constructor(data, schema, name, options) {
-        if (data instanceof Relation) {
+    constructor (...params) {
+        let source;
+
+        this._parent = null;
+        this._derivation = [];
+        this._children = [];
+
+        if (params.length === 1 && ((source = params[0]) instanceof Relation)) {
             // parent datamodel was passed as part of source
-            const source = data;
-            // Copy the required property
-            this.colIdentifier = source.colIdentifier;
-            this.rowDiffset = source.rowDiffset;
-            this.fieldMap = source.fieldMap;
-            this._nameSpace = source.getNameSpace();
+            this._colIdentifier = source._colIdentifier;
+            this._rowDiffset = source._rowDiffset;
+            this._parent = source;
+            this._partialFieldspace = this._parent._partialFieldspace;
+            this._fieldspace = source._fieldspace;
+
+            this.calculateFieldspace().calculateFieldsConfig();
         } else {
-            if (!data) {
-                throw new Error('Data not specified');
-            }
-            this._updateData(data, schema, name, options);
+            updateData(this, ...params);
+            this.calculateFieldspace().calculateFieldsConfig();
         }
-    }
-
-    _updateData (data, schema, name, options) {
-        options = Object.assign(Object.assign({}, defaultConfig), options);
-        const converterFn = converter[options.dataFormat];
-
-        if (!(converterFn && typeof converterFn === 'function')) {
-            throw new Error(`No converter function found for ${options.dataFormat} format`);
-        }
-
-        const [header, formattedData] = converterFn(data, options);
-        const fieldArr = createFields(formattedData, schema, header);
-
-        // This will create a new fieldStore with the fields
-        const nameSpace = fieldStore.createNameSpace(fieldArr, name);
-        this._nameSpace = nameSpace;
-        // this.fieldMap = schema.reduce((acc, fieldDef, i) => {
-        //     acc[fieldDef.name] = {
-        //         index: i,
-        //         def: fieldDef
-        //     };
-        //     return acc;
-        // }, {});
-        // If data is provided create the default colIdentifier and rowDiffset
-        this.rowDiffset = `0-${formattedData[0] ? (formattedData[0].length - 1) : 0}`;
-        this.colIdentifier = (schema.map(_ => _.name)).join();
-        return this;
     }
 
     /**
-     * Sets the projection to the DataModel instance only the projection string
+     * Returns the schema details for all fields.
      *
-     * @param {string} projString - The projection to be applied.
-     * @return {DataModel} Returns the current DataModel instance.
+     * @public
+     * @return {Array} Returns an array of field schema.
      */
-    _projectHelper(projString) {
-        let presentField = Object.keys(this.fieldMap);
-        this.colIdentifier = projString;
+    getSchema () {
+        return this.getFieldspace().fields.map(d => d.schema);
+    }
 
-        presentField = presentField.filter(field =>
-            projString.search(new RegExp(`^${field}\\,|\\,${field}\\,|\\,${field}$|^${field}$`, 'i')) !== -1);
+    getFieldspace () {
+        return this._fieldspace;
+    }
 
-        this.fieldMap = presentField.reduce((acc, val) => {
-            acc[val] = this.fieldMap[val];
+    calculateFieldspace () {
+        this._fieldspace = updateFields([this._rowDiffset, this._colIdentifier], this.getPartialFieldspace());
+        return this;
+    }
+
+    getPartialFieldspace () {
+        return this._partialFieldspace;
+    }
+
+    /**
+     * this reflect the cross-product of the relational algebra or can be called as theta join.
+     * It take another DataModel instance and create new DataModel with the cross-product data and
+     * filter the data according to the filter function provided.
+     * Say there are two dataModel modelA with 4 column 5 rows and modelB with 3 column 6 row
+     * so the new DataModel modelA X modelB will have 7(4 + 3) rows and 30(5 * 6) columns (if no
+     * filter function is provided).
+     *
+     * @todo Make this API user-friendly.
+     *
+     * @public
+     * @param  {DataModel} joinWith The DataModel to be joined with this DataModel
+     * @param  {Function} filterFn Function that will filter the result of the crossProduct
+     * DataModel
+     * @return {DataModel}          the new DataModel created by joining
+     */
+    join (joinWith, filterFn) {
+        return crossProduct(this, joinWith, filterFn);
+    }
+
+    /**
+     * This can join two DataModel to form a new DataModel which meet the requirement of
+     * natural join.
+     * it's not possible to pass a filter function as the filter function is decided according to
+     * the definition of natural join
+     *
+     * @todo Make this API user-friendly.
+     *
+     * @public
+     * @param  {DataModel} joinWith the DataModel with whom this DataModel will be joined
+     * @return {DataModel}          The new joined DataModel
+     */
+    naturalJoin (joinWith) {
+        return crossProduct(this, joinWith, naturalJoinFilter(this, joinWith), true);
+    }
+
+    /**
+     * Performs union operation of the relational algebra.
+     * It can be termed as vertical joining of all the unique tuples
+     * from both the DataModel instances. The requirement is both
+     * the DataModel instances should have same column name and order.
+     *
+     * @public
+     * @param {DataModel} unionWith - Another DataModel instance to which union
+     * operation is performed.
+     * @return {DataModel} Returns the new DataModel instance after operation.
+     */
+    union (unionWith) {
+        return union(this, unionWith);
+    }
+
+    /**
+     * Performs difference operation of the relational algebra.
+     * It can be termed as vertical joining of all the tuples
+     * those are not in the second DataModel. The requirement
+     * is both the DataModel instances should have same column name and order.
+     *
+     * @public
+     * @param {DataModel} differenceWith - Another DataModel instance to which difference
+     * operation is performed.
+     * @return {DataModel} Returns the new DataModel instance after operation.
+     */
+    difference (differenceWith) {
+        return difference(this, differenceWith);
+    }
+
+    /**
+     * Performs selection operation of the relational algebra.
+     *
+     * @public
+     * @param {Function} selectFn - The function which will be looped through all the data
+     * if it return true the row will be there in the DataModel.
+     * @param {Object} [config] - The mode configuration.
+     * @param {string} [config.mode=FilteringMode.NORMAL] - The mode of the selection.
+     * @param {string} [saveChild=true] - It is used while cloning.
+     * @return {DataModel} Returns the new DataModel instance(s) after operation.
+     */
+    select (selectFn, config) {
+        const defConfig = {
+            mode: FilteringMode.NORMAL,
+            saveChild: true
+        };
+        config = Object.assign({}, defConfig, config);
+
+        const cloneConfig = { saveChild: config.saveChild };
+        let oDm;
+
+        if (config.mode === FilteringMode.ALL) {
+            const selectDm = cloneWithSelect(
+                this,
+                selectFn,
+                { mode: FilteringMode.NORMAL },
+                cloneConfig
+            );
+            const rejectDm = cloneWithSelect(
+                this,
+                selectFn,
+                { mode: FilteringMode.INVERSE },
+                cloneConfig
+            );
+            oDm = [selectDm, rejectDm];
+        } else {
+            oDm = cloneWithSelect(
+                this,
+                selectFn,
+                config,
+                cloneConfig
+            );
+        }
+
+        return oDm;
+    }
+
+    /**
+     * Returns whether datamodel has no data.
+     *
+     * @return {Boolean} Whether datamodel is empty or not.
+     */
+
+
+    isEmpty () {
+        return !this._rowDiffset.length || !this._colIdentifier.length;
+    }
+
+    /**
+     * Creates a clone  from the current DataModel instance with child parent relationship.
+     *
+     * @public
+     * @param {boolean} [saveChild=true] - Whether the cloned instance would be recorded
+     * in the parent instance.
+     * @return {DataModel} - Returns the newly cloned DataModel instance.
+     */
+    clone (saveChild = true) {
+        const retDataModel = new this.constructor(this);
+        if (saveChild) {
+            this._children.push(retDataModel);
+        }
+        return retDataModel;
+    }
+
+    /**
+     * Performs projection operation on the current DataModel instance.
+     *
+     * @public
+     * @param {Array.<string | Regexp>} projField - An array of column names in string or regular expression.
+     * @param {Object} [config={}] - An optional config.
+     * @return {DataModel} Returns the new DataModel instance after operation.
+     */
+    project (projField, config) {
+        const defConfig = {
+            mode: FilteringMode.NORMAL,
+            saveChild: true
+        };
+        config = Object.assign({}, defConfig, config);
+        const fieldConfig = this.getFieldsConfig();
+        const allFields = Object.keys(fieldConfig);
+        const { mode } = config;
+
+        let normalizedProjField = projField.reduce((acc, field) => {
+            if (field.constructor.name === 'RegExp') {
+                acc.push(...allFields.filter(fieldName => fieldName.search(field) !== -1));
+            } else if (field in fieldConfig) {
+                acc.push(field);
+            }
+            return acc;
+        }, []);
+
+        normalizedProjField = Array.from(new Set(normalizedProjField)).map(field => field.trim());
+        let dataModel;
+
+        if (mode === FilteringMode.ALL) {
+            let projectionClone = cloneWithProject(this, normalizedProjField, {
+                mode: FilteringMode.NORMAL,
+                saveChild: config.saveChild
+            }, allFields);
+            let rejectionClone = cloneWithProject(this, normalizedProjField, {
+                mode: FilteringMode.INVERSE,
+                saveChild: config.saveChild
+            }, allFields);
+            dataModel = [projectionClone, rejectionClone];
+        }
+        else {
+            let projectionClone = cloneWithProject(this, normalizedProjField, config, allFields);
+            dataModel = projectionClone;
+        }
+
+        return dataModel;
+    }
+
+    /**
+     * Returns index and field details in an object where key is the field name.
+     *
+     * @public
+     * @return {Object} - Returns the field definitions.
+     */
+    getFieldsConfig () {
+        return this._fieldConfig;
+    }
+
+    calculateFieldsConfig () {
+        this._fieldConfig = this._fieldspace.fields.reduce((acc, fieldDef, i) => {
+            acc[fieldDef.name] = {
+                index: i,
+                def: { name: fieldDef._ref.name, type: fieldDef._ref.fieldType }
+            };
             return acc;
         }, {});
         return this;
     }
 
+
     /**
-     * Sets the selection to the current DataModel instance.
-     *
-     * @param {Array} fields - The fields array.
-     * @param {Function} selectFn - The filter function.
-     * @param {Object} config - The mode configuration object.
-     * @param {string} config.mode - The type of mode to use.
-     * @return {string} Returns the Row diffset.
+     * break the link between its parent and itself
      */
-    _selectHelper(fields, selectFn, config) {
-        const newRowDiffSet = [];
-        let lastInsertedValue = -1;
-        let { mode } = config;
-        // newRowDiffSet last index
-        let li;
-        let checker = index => selectFn(prepareSelectionData(fields, index), index);
-        if (mode === SelectionMode.INVERSE) {
-            checker = index => !selectFn(prepareSelectionData(fields, index));
-        }
-        rowDiffsetIterator(this.rowDiffset, (i) => {
-            if (checker(i)) {
-                // Check for if this value to be attached to the last diffset ie. 1-5 format
-                if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
-                    li = newRowDiffSet.length - 1;
-                    newRowDiffSet[li] = `${newRowDiffSet[li].split('-')[0]}-${i}`;
-                } else {
-                    newRowDiffSet.push(`${i}`);
-                }
-                lastInsertedValue = i;
-            }
-        });
-        return newRowDiffSet.join(',');
+    dispose () {
+        this._parent.removeChild(this);
+        this._parent = null;
     }
 
-
-    _isEmpty () {
-        return !this.rowDiffset.length || !this.colIdentifier.length;
+    /**
+     *
+     * @param {DataModel} child : Delegates the parent to remove this child
+     */
+    removeChild (child) {
+        // remove from child list
+        let idx = this._children.findIndex(sibling => sibling === child);
+        idx !== -1 ? this._children.splice(idx, 1) : true;
     }
-
+    /**
+     *
+     * @param { DataModel } parent datamodel instance which will act as its parent of this.
+     * @param { Queue } criteriaQueue Queue contains in-between operation meta-data
+     */
+    addParent (parent, criteriaQueue = []) {
+        persistDerivation(this, DM_DERIVATIVES.COMPOSE, null, criteriaQueue);
+        this._parent = parent;
+        parent._children.push(this);
+    }
 }
 
 export default Relation;

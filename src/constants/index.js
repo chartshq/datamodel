@@ -16,8 +16,7 @@ export const DM_DERIVATIVES = {
     PROJECT: 'project',
     GROUPBY: 'group',
     COMPOSE: 'compose',
-    CAL_MEASURE: 'calculatedMeasure',
-    CAL_DIMENSION: 'generatedDimension',
+    CAL_VAR: 'calculatedVariable',
     BIN: 'bin'
 };
 

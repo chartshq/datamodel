@@ -37,7 +37,7 @@ function createUnitField (data, schema) {
  * @param {Array} headers - The array of header names.
  * @return {Array.<Field>} Returns an array of newly created field instances.
  */
-function createFields(dataColumn, schema, headers) {
+function createFields (dataColumn, schema, headers) {
     const headersObj = {};
 
     if (!(headers && headers.length)) {

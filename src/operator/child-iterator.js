@@ -8,8 +8,8 @@ import { DM_DERIVATIVES } from '../constants';
  * @param {function} callback
  * @param {DM_DERIVATIVES} operation
  */
-function childIterator(datamodel, callback, operation) {
-    const children = datamodel.children;
+function childIterator (datamodel, callback, operation) {
+    const children = datamodel._children;
     children.forEach((child) => {
         if (child._derivation
             && child._derivation.length === 1) {
@@ -21,7 +21,7 @@ function childIterator(datamodel, callback, operation) {
                 break;
             case DM_DERIVATIVES.PROJECT:
                 if (child._derivation[0].op === DM_DERIVATIVES.PROJECT) {
-                    callback(child, child._derivation[0].meta.projString);
+                    callback(child, child._derivation[0].meta.actualProjField);
                 }
                 break;
             case DM_DERIVATIVES.GROUPBY:
@@ -31,8 +31,8 @@ function childIterator(datamodel, callback, operation) {
                             reducer: child._derivation[0].criteria });
                 }
                 break;
-            case DM_DERIVATIVES.CAL_MEASURE:
-                if (child._derivation[0].op === DM_DERIVATIVES.CAL_MEASURE) {
+            case DM_DERIVATIVES.CAL_VAR:
+                if (child._derivation[0].op === DM_DERIVATIVES.CAL_VAR) {
                     let params = {
                         config: child._derivation[0].meta.config,
                         fields: child._derivation[0].meta.fields,
@@ -54,7 +54,7 @@ function childIterator(datamodel, callback, operation) {
  * provided to the callback are the child DataModel instance and the selection
  * function used to create it.
  */
-export function selectIterator(datamodel, callback) {
+export function selectIterator (datamodel, callback) {
     childIterator(datamodel, callback, DM_DERIVATIVES.SELECT);
 }
 
@@ -65,8 +65,8 @@ export function selectIterator(datamodel, callback) {
  * @param {Function} callback - The callback to be invoked on each measure child. The parameters
  * provided to the callback are the child DataModel instance and the child params.
  */
-export function calculatedMeasureIterator(datamodel, callback) {
-    childIterator(datamodel, callback, DM_DERIVATIVES.CAL_MEASURE);
+export function calculatedVariableIterator (datamodel, callback) {
+    childIterator(datamodel, callback, DM_DERIVATIVES.CAL_VAR);
 }
 
 /**
@@ -77,7 +77,7 @@ export function calculatedMeasureIterator(datamodel, callback) {
  * provided to the callback are the child DataModel instance and the
  * projection string.
  */
-export function projectIterator(datamodel, callback) {
+export function projectIterator (datamodel, callback) {
     childIterator(datamodel, callback, DM_DERIVATIVES.PROJECT);
 }
 
@@ -89,7 +89,7 @@ export function projectIterator(datamodel, callback) {
  * @param {Function} callback - The callback to be invoked. The parameters
  * provided to the callback are the child DataModel instance and the groupBy string used to create it.
  */
-export function groupByIterator(datamodel, callback) {
+export function groupByIterator (datamodel, callback) {
     childIterator(datamodel, callback, DM_DERIVATIVES.GROUPBY);
 }
 

@@ -31,20 +31,22 @@ const schema2 = [
 ];
 
 describe('Checking difference', () => {
-    it('Basic difference test cases', () => {
-        const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
-        const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'state']);
-        const differenceDataModel = difference(dataModel1, dataModel2);
-        expect(differenceDataModel.getData()).to.deep.equal({
-            schema: [
+    describe('#difference', () => {
+        it('should return difference between to datamodels having same schema', () => {
+            const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
+            const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'state']);
+            const differenceDataModel = difference(dataModel1, dataModel2);
+            expect(differenceDataModel.getData()).to.deep.equal({
+                schema: [
                 { name: 'city', type: 'dimension' },
                 { name: 'state', type: 'dimension' },
-            ],
-            data: [
+                ],
+                data: [
                 ['a', 'aa'],
                 ['b', 'bb'],
-            ],
-            uids: [0, 1]
+                ],
+                uids: [0, 1]
+            });
         });
     });
 });

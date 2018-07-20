@@ -26,29 +26,31 @@ const schema2 = [
     { name: 'state', type: 'dimension' },
 ];
 
-describe('Checking union', () => {
-    it('Basic union test cases', () => {
-        const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
-        const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'state']);
-        const unionDataModel = union(dataModel1, dataModel2);
-        expect(unionDataModel.getData()).to.deep.equal({
-            schema: [
+describe('Testing union', () => {
+    describe('#union', () => {
+        it('should perform basic union', () => {
+            const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
+            const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'state']);
+            const unionDataModel = union(dataModel1, dataModel2);
+            expect(unionDataModel.getData()).to.deep.equal({
+                schema: [
                 { name: 'city', type: 'dimension' },
                 { name: 'state', type: 'dimension' },
-            ],
-            data: [
+                ],
+                data: [
                 ['a', 'aa'],
                 ['b', 'bb'],
                 ['a', 'ab'],
                 ['b', 'ba'],
-            ],
-            uids: [0, 1, 2, 3]
+                ],
+                uids: [0, 1, 2, 3]
+            });
         });
-    });
-    it('union if fields are not same', () => {
-        const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
-        const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'profit']);
-        const unionDataModel = union(dataModel1, dataModel2);
-        expect(unionDataModel.getData()).to.deep.equal(dataModel1.getData());
+        it('should not perform union if fields are not same', () => {
+            const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
+            const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'profit']);
+            const unionDataModel = union(dataModel1, dataModel2);
+            expect(unionDataModel.getData()).to.deep.equal(dataModel1.getData());
+        });
     });
 });

@@ -26,7 +26,7 @@ import { columnMajor } from '../utils';
  *    }
  * ];
  */
-function FlatJSON(arr) {
+function FlatJSON (arr) {
     const header = {};
     let i = 0;
     let insertionIndex;
