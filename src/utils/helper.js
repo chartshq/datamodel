@@ -47,3 +47,28 @@ export function isCallable (val) {
 export function uniqueValues (data) {
     return [...new Set(data)];
 }
+
+/**
+ * Checks Whether two arrays have same content.
+ *
+ * @param {Array} arr1 - The first array.
+ * @param {Array} arr2 - The 2nd array.
+ * @return {boolean} Returns whether two array have same content.
+ */
+export function isArrEqual(arr1, arr2) {
+    if (!isArray(arr1) || !isArray(arr2)) {
+        return arr1 === arr2;
+    }
+
+    if (arr1.length !== arr2.length) {
+        return false;
+    }
+
+    for (let i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
