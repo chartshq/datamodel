@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { isArray, isObject, isCallable, isString, uniqueValues } from './helper';
+import { isArray, isObject, isCallable, isString, uniqueValues, isArrEqual } from './helper';
 
 describe('Utils', () => {
     describe('#isArray', () => {
@@ -57,6 +57,26 @@ describe('Utils', () => {
         it('should return unique values from input array', () => {
             expect(uniqueValues([1, 2, 1, 3]).sort()).to.deep.equal([1, 2, 3]);
             expect(uniqueValues([])).to.deep.equal([]);
+        });
+    });
+
+    describe('#isArrEqual', () => {
+        it('should return true for two arrays with same content', () => {
+            expect(isArrEqual([1, 2, 3], [1, 2, 3])).to.be.true;
+            expect(isArrEqual([], [])).to.be.true;
+        });
+
+        it('should return false for two arrays with different content', () => {
+            expect(isArrEqual([1, 2, 3], [1, 3, 2])).to.be.false;
+            expect(isArrEqual([1], [2])).to.be.false;
+            expect(isArrEqual([1, 2], [2])).to.be.false;
+        });
+
+        it('should use strict equality operator for non-array values', () => {
+            expect(isArrEqual([1, 2, 3], undefined)).to.be.false;
+            expect(isArrEqual({}, {})).to.be.false;
+            expect(isArrEqual(2, 2)).to.be.true;
+            expect(isArrEqual(undefined, undefined)).to.be.true;
         });
     });
 });
