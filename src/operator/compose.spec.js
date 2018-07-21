@@ -1,5 +1,6 @@
 /* global describe, it */
 /* eslint-disable no-unused-expressions,no-unused-vars */
+
 import { expect } from 'chai';
 import DataModel from '../datamodel';
 import { compose, columnFilter, rowFilter, groupBy, bin } from './compose';
@@ -20,7 +21,7 @@ describe('Testing compose functionality', () => {
     const schema1 = [
         {
             name: 'id',
-            type: 'dimention'
+            type: 'dimension'
         },
         {
             name: 'profit',
@@ -43,7 +44,7 @@ describe('Testing compose functionality', () => {
     const schema2 = [
         {
             name: 'id',
-            type: 'dimention'
+            type: 'dimension'
         },
         {
             name: 'netprofit',
@@ -64,46 +65,49 @@ describe('Testing compose functionality', () => {
         },
     ];
     describe('#compose', () => {
-        it('should returm same data when composed with only one function', () => {
+        it('should return same data when composed with only one function', () => {
             const dataModel = new DataModel(data1, schema1);
             const dataModel2 = new DataModel(data1, schema1);
             let composedFn = compose(
-            rowFilter(fields => fields.profit.value <= 15),
+                rowFilter(fields => fields.profit.value <= 15),
 
-        );
+            );
             let normalDm = dataModel.select(fields => fields.profit.value <= 15);
             let composedDm = composedFn(dataModel2);
             expect(normalDm.getData()).to.deep.equal(composedDm.getData());
         });
-        it('should returm same data when composed with select and project function', () => {
+
+        it('should return same data when composed with select and project function', () => {
             const dataModel = new DataModel(data1, schema1);
             const dataModel2 = new DataModel(data1, schema1);
             let composedFn = compose(
-            rowFilter(fields => fields.profit.value <= 15),
-            columnFilter(['profit', 'sales'])
-        );
+                rowFilter(fields => fields.profit.value <= 15),
+                columnFilter(['profit', 'sales'])
+            );
 
             let normalDm = dataModel.select(fields => fields.profit.value <= 15);
             normalDm = normalDm.project(['profit', 'sales']);
             let composedDm = composedFn(dataModel2);
             expect(normalDm.getData()).to.deep.equal(composedDm.getData());
         });
-        it('should returm same data when composed with select and project and groupby function', () => {
+
+        it('should return same data when composed with select and project and groupby function', () => {
             const dataModel = new DataModel(data1, schema1);
             const dataModel2 = new DataModel(data1, schema1);
             let composedFn = compose(
-            rowFilter(fields => fields.profit.value <= 15),
-            columnFilter(['profit', 'sales']),
-            groupBy(['profit'])
-        );
+                rowFilter(fields => fields.profit.value <= 15),
+                columnFilter(['profit', 'sales']),
+                groupBy(['profit'])
+            );
 
             let normalDm = dataModel.select(fields => fields.profit.value <= 15);
             normalDm = normalDm.project(['profit', 'sales']);
             normalDm = normalDm.groupBy(['profit']);
             let composedDm = composedFn(dataModel2);
-        // debugger;
+            // debugger;
             expect(normalDm.getData()).to.deep.equal(composedDm.getData());
         });
+
         it('should compose bin', () => {
             const data = [
                 { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
@@ -127,11 +131,12 @@ describe('Testing compose functionality', () => {
             const bins = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
 
             let composedFn = compose(
-            bin('profit', { binSize: 5, name: 'sumField' }));
+                bin('profit', { binSize: 5, name: 'sumField' }));
 
             let composedDm = composedFn(dataModel);
             expect(bins.getData()).to.deep.equal(composedDm.getData());
         });
+
         it('should compose bin and select', () => {
             const data = [
                 { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
@@ -158,11 +163,37 @@ describe('Testing compose functionality', () => {
 
             let selectedBin = bins.select(fields => fields.profit.value <= 15);
             let composedFn = compose(
-           bin('profit', { binSize: 5, name: 'sumField' }),
-           rowFilter(fields => fields.profit.value <= 15)
-        );
+                bin('profit', { binSize: 5, name: 'sumField' }),
+                rowFilter(fields => fields.profit.value <= 15)
+            );
             let composedDm = composedFn(dataModel2);
             expect(selectedBin.getData()).to.deep.equal(composedDm.getData());
+        });
+
+        it('should support nested composing', () => {
+            const dataModel = new DataModel(data1, schema1);
+            const dataModel2 = new DataModel(data1, schema1);
+            const composedFn = compose(
+                rowFilter(fields => fields.profit.value <= 15),
+            );
+
+            const nestedComposedFn1 = compose(
+                composedFn,
+                columnFilter(['profit', 'sales'])
+            );
+            let normalDm = dataModel.select(fields => fields.profit.value <= 15);
+            normalDm = normalDm.project(['profit', 'sales']);
+            let composedDm = nestedComposedFn1(dataModel2);
+            expect(normalDm.getData()).to.deep.equal(composedDm.getData());
+
+            const nestedComposedFn2 = compose(
+                composedFn,
+                bin('profit', { binSize: 5, name: 'sumField' })
+            );
+            normalDm = dataModel.select(fields => fields.profit.value <= 15);
+            normalDm = normalDm.bin('profit', { binSize: 5, name: 'sumField' });
+            composedDm = nestedComposedFn2(dataModel2);
+            expect(normalDm.getData()).to.deep.equal(composedDm.getData());
         });
     });
 });
