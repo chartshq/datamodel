@@ -17,10 +17,10 @@ export function naturalJoinFilter (dm1, dm2) {
     const commonSchemaArr = getCommonSchema(dm1FieldStore, dm2FieldStore);
 
     return (obj) => {
-        let retainTuple = false;
+        let retainTuple = true;
         commonSchemaArr.forEach((fieldName) => {
             if (obj[dm1FieldStoreName][fieldName] ===
-                obj[dm2FieldStoreName][fieldName]) {
+                obj[dm2FieldStoreName][fieldName] && retainTuple) {
                 retainTuple = true;
             } else {
                 retainTuple = false;
