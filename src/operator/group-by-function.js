@@ -3,7 +3,7 @@
  * @param  {Array} arr array of values
  * @return {number}     sum of the array
  */
-function sum(arr) {
+function sum (arr) {
     const isNestedArray = arr[0] instanceof Array;
     return arr.reduce((carry, a) => {
         if (isNestedArray) {
@@ -18,7 +18,7 @@ function sum(arr) {
  * @param  {Array} arr array of values
  * @return {number}     mean of the array
  */
-function avg(arr) {
+function avg (arr) {
     const isNestedArray = arr[0] instanceof Array;
     const len = arr.length || 1;
     const arrSum = sum(arr);
@@ -33,7 +33,7 @@ function avg(arr) {
  * @param  {Array} arr array of values
  * @return {number}     min of the array
  */
-function min(arr) {
+function min (arr) {
     const isNestedArray = arr[0] instanceof Array;
     if (isNestedArray) {
         return arr.reduce((carry, a) => carry.map((x, i) => Math.min(x, a[i])),
@@ -47,7 +47,7 @@ function min(arr) {
  * @param  {Array} arr array of values
  * @return {number}     max of the array
  */
-function max(arr) {
+function max (arr) {
     const isNestedArray = arr[0] instanceof Array;
     if (isNestedArray) {
         return arr.reduce((carry, a) => carry.map((x, i) => Math.max(x, a[i])),
@@ -61,7 +61,7 @@ function max(arr) {
  * @param  {Array} arr array of values
  * @return {number}     first value of the array
  */
-function first(arr) {
+function first (arr) {
     return arr[0];
 }
 
@@ -70,7 +70,7 @@ function first(arr) {
  * @param  {Array} arr array of values
  * @return {number}     last value of the array
  */
-function last(arr) {
+function last (arr) {
     return arr[arr.length - 1];
 }
 
@@ -79,7 +79,7 @@ function last(arr) {
  * @param  {Array} arr array of values
  * @return {number}     count of the array
  */
-function count(arr) {
+function count (arr) {
     const isNestedArray = arr[0] instanceof Array;
     const len = arr.length;
     if (isNestedArray) {
@@ -94,7 +94,7 @@ function count(arr) {
  * @param {Array.<number>} arr - The input array.
  * @return {number} Returns the variance of the input array.
  */
-function variance(arr) {
+function variance (arr) {
     let mean = avg(arr);
     return avg(arr.map(num => (num - mean) ** 2));
 }
@@ -105,7 +105,7 @@ function variance(arr) {
  * @param {Array.<number>} arr - The input array.
  * @return {number} Returns the square root of the variance.
  */
-function std(arr) {
+function std (arr) {
     return Math.sqrt(variance(arr));
 }
 

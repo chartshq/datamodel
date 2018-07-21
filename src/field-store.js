@@ -3,28 +3,19 @@ import { FieldType, getUniqueId } from 'picasso-util';
 const fieldStore = {
     data: {},
 
-    /**
-     * Adds a new data to the fieldStore and returns the data.
-     *
-     * @todo This function needs to write freshly.
-     *
-     * @param  {Array} fieldArr the list of field that will be present in this data
-     * @param  {string} name name of the field store
-     * @return {Object}          the data as a object which is added
-     */
-    createNameSpace(fieldArr, name) {
+    createNamespace (fieldArr, name) {
         const dataId = name || getUniqueId();
         this.data[dataId] = {
             name: dataId,
             fields: fieldArr,
-            fieldsObj() {
+            fieldsObj () {
                 const retObj = {};
                 this.fields.forEach((field) => {
                     retObj[field.name] = field;
                 });
                 return retObj;
             },
-            getMeasure() {
+            getMeasure () {
                 const retObj = {};
                 this.fields.forEach((field) => {
                     if (field.schema.type === FieldType.MEASURE) {
@@ -33,7 +24,7 @@ const fieldStore = {
                 });
                 return retObj;
             },
-            getDimension() {
+            getDimension () {
                 const retObj = {};
                 this.fields.forEach((field) => {
                     if (field.schema.type === FieldType.DIMENSION) {

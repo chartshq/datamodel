@@ -1,56 +1,30 @@
 const DataModel = window.DataModel.default;
 
-const schema = [
-    {
-        name: 'name',
-        type: 'dimension'
-    },
-    {
-        name: 'birthday',
-        type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
-    },
-    {
-        name: 'roll',
-        type: 'measure'
-    }
+const data1 = [
+    { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+    { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+    { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+    { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+    { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+    { profit: 18, sales: 25, first: 'White', second: 'walls' },
+    { profit: 21, sales: 25, first: 'White', second: 'walls' },
+    { profit: 18, sales: 25, first: 'White', second: 'walls' },
+    { profit: 21, sales: 25, first: 'White', second: 'walls' },
+    { profit: 21, sales: 25, first: 'White', second: 'walls' }
 ];
-
-const data = [
-    {
-        name: 'Rousan',
-        birthday: '1995-07-05',
-        roll: 12
-    },
-    {
-        name: 'Sumant',
-        birthday: '1996-08-04',
-        roll: 89
-    },
-    {
-        name: 'Ajay',
-        birthday: '1994-01-03',
-        roll: 33
-    },
-    {
-        name: 'Sushant',
-        birthday: '1994-01-03',
-        roll: 33
-    },
-    {
-        name: 'Samim',
-        birthday: '1994-01-03',
-        roll: 33
-    },
-    {
-        name: 'Akash',
-        birthday: '1994-01-03',
-        roll: 33
-    }
+const schema1 = [
+    { name: 'profit', type: 'measure' },
+    { name: 'sales', type: 'measure' },
+    { name: 'first', type: 'dimension' },
+    { name: 'second', type: 'dimension' },
 ];
+const dataModel = new DataModel(data1, schema1, 'Yo');
+const buckets = {
+    start: 0,
+    end: [5, 11, 16, 20, 30]
+};
 
-const dm = new DataModel(data, schema);
-
-window.data = dm;
-console.log(dm.getData());
+const dm2 = dataModel.select(feild => feild.sales.value === 25);
+const bin = dm2.bin('profit', { binSize: 3, name: 'sumField' }, x => x[0]);
+let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+let profitData = bin.getFieldspace().fields.find(field => field.name === 'profit').data;

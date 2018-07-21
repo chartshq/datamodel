@@ -19,18 +19,31 @@ describe('Partial Field Type', () => {
         field = new PartialField(schema.name, data, schema);
     });
 
-    it('should hold data and schema references', () => {
-        expect(field.data).to.deep.equal(data);
-        expect(field.schema).to.deep.equal(schema);
+    describe('#data , #schema', () => {
+        it('should hold data and schema references', () => {
+            expect(field.data).to.deep.equal(data);
+            expect(field.schema).to.deep.equal(schema);
+        });
+    });
+    describe('#fieldName', () => {
+        it('should implement fieldName getter methods', () => {
+            expect(field.fieldName()).to.equal(schema.name);
+        });
     });
 
-    it('should implement getter methods', () => {
-        expect(field.fieldName()).to.equal(schema.name);
-        expect(field.type()).to.equal(schema.type);
-        expect(field.description()).to.equal(schema.description);
+    describe('#type', () => {
+        it('should implement type getter methods', () => {
+            expect(field.type()).to.equal(schema.type);
+        });
     });
 
-    describe('#prototype.clone()', () => {
+    describe('#description', () => {
+        it('should implement description getter methods', () => {
+            expect(field.description()).to.equal(schema.description);
+        });
+    });
+
+    describe('#clone', () => {
         it('should clone current instance with new data', () => {
             const newData = [];
             const cloned = field.clone(newData);

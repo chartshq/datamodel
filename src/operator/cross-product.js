@@ -20,30 +20,30 @@ function defaultFilterFn() { return true; }
  * @param {boolean} [replaceCommonSchema=false] - The flag if the common name schema should be there.
  * @return {DataModel} Returns The newly created DataModel instance from the crossProduct operation.
  */
-export function crossProduct(dataModel1, dataModel2, filterFn, replaceCommonSchema = false, jointype = JOINS.CROSS) {
+export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, jointype = JOINS.CROSS) {
     const schema = [];
     const data = [];
     const applicableFilterFn = filterFn || defaultFilterFn;
-    const dataModel1FieldStore = dataModel1.getNameSpace();
-    const dataModel2FieldStore = dataModel2.getNameSpace();
-    const dataModel1FieldStoreName = dataModel1FieldStore.name;
-    const dataModel2FieldStoreName = dataModel2FieldStore.name;
-    const name = `${dataModel1FieldStore.name}.${dataModel2FieldStore.name}`;
-    const commonSchemaList = getCommonSchema(dataModel1FieldStore, dataModel2FieldStore);
+    const dm1FieldStore = dm1.getPartialFieldspace();
+    const dm2FieldStore = dm2.getPartialFieldspace();
+    const dm1FieldStoreName = dm1FieldStore.name;
+    const dm2FieldStoreName = dm2FieldStore.name;
+    const name = `${dm1FieldStore.name}.${dm2FieldStore.name}`;
+    const commonSchemaList = getCommonSchema(dm1FieldStore, dm2FieldStore);
 
     // Here prepare the schema
-    dataModel1FieldStore.fields.forEach((field) => {
+    dm1FieldStore.fields.forEach((field) => {
         const tmpSchema = extend2({}, field.schema);
         if (commonSchemaList.indexOf(tmpSchema.name) !== -1 && !replaceCommonSchema) {
-            tmpSchema.name = `${dataModel1FieldStore.name}.${tmpSchema.name}`;
+            tmpSchema.name = `${dm1FieldStore.name}.${tmpSchema.name}`;
         }
         schema.push(tmpSchema);
     });
-    dataModel2FieldStore.fields.forEach((field) => {
+    dm2FieldStore.fields.forEach((field) => {
         const tmpSchema = extend2({}, field.schema);
         if (commonSchemaList.indexOf(tmpSchema.name) !== -1) {
             if (!replaceCommonSchema) {
-                tmpSchema.name = `${dataModel2FieldStore.name}.${tmpSchema.name}`;
+                tmpSchema.name = `${dm2FieldStore.name}.${tmpSchema.name}`;
                 schema.push(tmpSchema);
             }
         } else {
@@ -52,23 +52,23 @@ export function crossProduct(dataModel1, dataModel2, filterFn, replaceCommonSche
     });
 
     // Here prepare Data
-    rowDiffsetIterator(dataModel1.rowDiffset, (i) => {
+    rowDiffsetIterator(dm1._rowDiffset, (i) => {
         let rowAdded = false;
         let rowPosition;
-        rowDiffsetIterator(dataModel2.rowDiffset, (ii) => {
+        rowDiffsetIterator(dm2._rowDiffset, (ii) => {
             const tuple = [];
             const userArg = {};
-            userArg[dataModel1FieldStoreName] = {};
-            userArg[dataModel2FieldStoreName] = {};
-            dataModel1FieldStore.fields.forEach((field) => {
+            userArg[dm1FieldStoreName] = {};
+            userArg[dm2FieldStoreName] = {};
+            dm1FieldStore.fields.forEach((field) => {
                 tuple.push(field.data[i]);
-                userArg[dataModel1FieldStoreName][field.name] = field.data[i];
+                userArg[dm1FieldStoreName][field.name] = field.data[i];
             });
-            dataModel2FieldStore.fields.forEach((field) => {
+            dm2FieldStore.fields.forEach((field) => {
                 if (!(commonSchemaList.indexOf(field.schema.name) !== -1 && replaceCommonSchema)) {
                     tuple.push(field.data[ii]);
                 }
-                userArg[dataModel2FieldStoreName][field.name] = field.data[ii];
+                userArg[dm2FieldStoreName][field.name] = field.data[ii];
             });
             if (applicableFilterFn(userArg)) {
                 const tupleObj = {};
@@ -86,7 +86,7 @@ export function crossProduct(dataModel1, dataModel2, filterFn, replaceCommonSche
             }
             else if ((jointype === JOINS.LEFTOUTER || jointype === JOINS.RIGHTOUTER) && !rowAdded) {
                 const tupleObj = {};
-                let len = dataModel1FieldStore.fields.length - 1;
+                let len = dm1FieldStore.fields.length - 1;
                 tuple.forEach((cellVal, iii) => {
                     if (iii <= len) {
                         tupleObj[schema[iii].name] = cellVal;

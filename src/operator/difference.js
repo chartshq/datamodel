@@ -3,33 +3,33 @@ import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 
 /**
- * Performs the union operation between two DataModel instances.
+ * Performs the union operation between two dm instances.
  *
  * @todo Fix the conflicts between union and difference terminology here.
  *
- * @param {DataModel} dataModel1 - The first DataModel instance.
- * @param {DataModel} dataModel2 - The second DataModel instance.
- * @return {DataModel} Returns the newly created DataModel after union operation.
+ * @param {dm} dm1 - The first dm instance.
+ * @param {dm} dm2 - The second dm instance.
+ * @return {dm} Returns the newly created dm after union operation.
  */
-export function difference(dataModel1, dataModel2) {
+export function difference (dm1, dm2) {
     const hashTable = {};
     const schema = [];
     const schemaNameArr = [];
     const data = [];
-    const dataModel1FieldStore = dataModel1.getNameSpace();
-    const dataModel2FieldStore = dataModel2.getNameSpace();
-    const dataModel1FieldStoreFieldObj = dataModel1FieldStore.fieldsObj();
-    const dataModel2FieldStoreFieldObj = dataModel2FieldStore.fieldsObj();
-    const name = `${dataModel1FieldStore.name} union ${dataModel2FieldStore.name}`;
+    const dm1FieldStore = dm1.getPartialFieldspace();
+    const dm2FieldStore = dm2.getPartialFieldspace();
+    const dm1FieldStoreFieldObj = dm1FieldStore.fieldsObj();
+    const dm2FieldStoreFieldObj = dm2FieldStore.fieldsObj();
+    const name = `${dm1FieldStore.name} union ${dm2FieldStore.name}`;
 
-    // For union the columns should match otherwise return a clone of the dataModel1
-    if (dataModel1.colIdentifier !== dataModel2.colIdentifier) {
-        return dataModel1.clone();
+    // For union the columns should match otherwise return a clone of the dm1
+    if (dm1.colIdentifier !== dm2.colIdentifier) {
+        return dm1.clone();
     }
 
     // Prepare the schema
-    (dataModel1.colIdentifier.split(',')).forEach((fieldName) => {
-        const field = dataModel1FieldStoreFieldObj[fieldName];
+    (dm1._colIdentifier.split(',')).forEach((fieldName) => {
+        const field = dm1FieldStoreFieldObj[fieldName];
         schema.push(extend2({}, field.schema));
         schemaNameArr.push(field.schema.name);
     });
@@ -37,12 +37,12 @@ export function difference(dataModel1, dataModel2) {
     /**
      * The helper function to create the data.
      *
-     * @param {DataModel} dataModel - The DataModel instance for which the data is inserted.
+     * @param {dm} dm - The dm instance for which the data is inserted.
      * @param {Object} fieldsObj - The fieldStore object format.
      * @param {boolean} addData - If true only tuple will be added to the data.
      */
-    function prepareDataHelper(dataModel, fieldsObj, addData) {
-        rowDiffsetIterator(dataModel.rowDiffset, (i) => {
+    function prepareDataHelper(dm, fieldsObj, addData) {
+        rowDiffsetIterator(dm._rowDiffset, (i) => {
             const tuple = {};
             let hashData = '';
             schemaNameArr.forEach((schemaName) => {
@@ -58,8 +58,8 @@ export function difference(dataModel1, dataModel2) {
     }
 
     // Prepare the data
-    prepareDataHelper(dataModel2, dataModel2FieldStoreFieldObj, false);
-    prepareDataHelper(dataModel1, dataModel1FieldStoreFieldObj, true);
+    prepareDataHelper(dm2, dm2FieldStoreFieldObj, false);
+    prepareDataHelper(dm1, dm1FieldStoreFieldObj, true);
 
     return new DataModel(data, schema, name);
 }

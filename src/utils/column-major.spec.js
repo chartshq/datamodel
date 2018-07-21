@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import columnMajor from './column-major';
 
 describe('Utils', () => {
-    describe('#columnMajor()', () => {
+    describe('#columnMajor', () => {
         it('should return a push function', () => {
             let store = [];
             let pushFn = columnMajor(store);

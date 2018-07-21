@@ -1,20 +1,20 @@
-# DATATABLE 
+# DATAMODEL 
 
-DataTable is a front-end, JavaScript-based, comprehensive Recommendation Engine and Dashboarding Tool for Data Visualization. This includes simple and complex charts (like the column and bar chart, pie and doughnut chart, the treemap, heatmap, and logarithmic chart), gauges (like the angular gauge, bulb gauge, and the thermometer gauge) and maps (all continents, major countries, and all US states), with the added capability to visualize data using analytical techniques like time series, etc.
+DataModel is a front-end, JavaScript-based, comprehensive Recommendation Engine and Dashboarding Tool for Data Visualization. This includes simple and complex charts (like the column and bar chart, pie and doughnut chart, the treemap, heatmap, and logarithmic chart), gauges (like the angular gauge, bulb gauge, and the thermometer gauge) and maps (all continents, major countries, and all US states), with the added capability to visualize data using analytical techniques like time series, etc.
 
 ## Version ##
 Currently the build system is on the FSB-10 version.
 
 ## How do I get set up? ##
 
-The Data Table Application has its developer version in the remote repository of FusionCharts in BitBucket. Only members with access can clone the application.
+The Data Model Application has its developer version in the remote repository of FusionCharts in BitBucket. Only members with access can clone the application.
 The `package.json` file contains all the dependencies and the configurations for the build.
 
-### Setting up the DataTable Developer Application
+### Setting up the DataModel Developer Application
 
-1. Clone the datatable Repo
+1. Clone the datamodel Repo
 
-   `git clone git@bitbucket.org:fusioncharts/datatable.git`
+   `git clone git@bitbucket.org:fusioncharts/datamodel.git`
    
 2. Install all Dependencies
 
@@ -37,10 +37,10 @@ The details to contributing to this project has been listed out in the `CONTRIBU
 Repo Owners :
 
     Akash Goswami       -   akash@fusioncharts.com
-    Subash Halder       -   subhash@fusioncharts.com
 
 Other members :
     Ranajit Banerjee    -   ranajit.banerjee@fusioncharts.com
-    Sumit Pal           -   sumit@fusioncharts.com
     Mridul Meharia      -   mridul@fusioncharts.com
     Sushrut Shivaswamy  -   sushrut@fusioncharts.com
+    Ujjal Kumar Dutta   -   ujjal@fusioncharts.com
+    Rousan Ali          -   rousan@fusioncharts.com

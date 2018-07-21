@@ -1,5 +1,5 @@
-export function compose(...operations) {
-    return function(dm) {
+export const compose = (...operations) =>
+    (dm) => {
         let currentDM = dm;
         let frstChild;
         const derivations = [];
@@ -11,46 +11,23 @@ export function compose(...operations) {
             }
         });
 
-        currentDM.__addParent(dm, derivations);
+        currentDM.addParent(dm, derivations);
         if (derivations.length > 1) {
             frstChild.dispose();
         }
 
         return currentDM;
     };
-}
-
 
 /**
  *
  * Operator Wrappers for :
  * select,project,bin,groupby
  */
-export function bin(...args) {
-    function action(dm) {
-        return dm.createBin(...args);
-    }
-    return action;
-}
+export const bin = (...args) => dm => dm.bin(...args);
 
-export function rowFilter(...args) {
-    function action(dm) {
-        return dm.select(...args);
-    }
-    return action;
-}
+export const rowFilter = (...args) => dm => dm.select(...args);
 
-export function columnFilter(...args) {
-    function action(dm) {
-        return dm.project(...args);
-    }
-    return action;
-}
+export const columnFilter = (...args) => dm => dm.project(...args);
 
-export function groupby(...args) {
-    function action(dm) {
-        return dm.groupBy(...args);
-    }
-    return action;
-}
-
+export const groupBy = (...args) => dm => dm.groupBy(...args);

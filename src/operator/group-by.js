@@ -10,9 +10,9 @@ import reducerStore from '../utils/reducer';
  * @param  {Array} fieldArr  user input of field Array
  * @return {Array}           arrays of field name
  */
-function getFieldArr(dataModel, fieldArr) {
+function getFieldArr (dataModel, fieldArr) {
     const retArr = [];
-    const fieldStore = dataModel.getNameSpace();
+    const fieldStore = dataModel.getPartialFieldspace();
     const dimensions = fieldStore.getDimension();
     Object.entries(dimensions).forEach(([key]) => {
         if (fieldArr && fieldArr.length) {
@@ -33,10 +33,10 @@ function getFieldArr(dataModel, fieldArr) {
  * @param  {Object|function} [reducers={}] reducer provided by the users
  * @return {Object}               object containing reducer function for every measure
  */
-function getReducerObj(dataModel, reducers = {}) {
+function getReducerObj (dataModel, reducers = {}) {
     const retObj = {};
     const pReducers = reducers;
-    const fieldStore = dataModel.getNameSpace();
+    const fieldStore = dataModel.getPartialFieldspace();
     const measures = fieldStore.getMeasure();
     let reducer = reducerStore.defaultReducer();
     if (typeof reducers === 'function') {
@@ -63,10 +63,10 @@ function getReducerObj(dataModel, reducers = {}) {
  * @param {DataModel} existingDataModel Existing datamodel instance
  * @return {DataModel} new dataModel with the group by
  */
-function groupBy(dataModel, fieldArr, reducers, existingDataModel) {
+function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     const sFieldArr = getFieldArr(dataModel, fieldArr);
     const reducerObj = getReducerObj(dataModel, reducers);
-    const fieldStore = dataModel.getNameSpace();
+    const fieldStore = dataModel.getPartialFieldspace();
     const fieldStoreObj = fieldStore.fieldsObj();
     const dbName = fieldStore.name;
     const dimensionArr = [];
@@ -88,7 +88,7 @@ function groupBy(dataModel, fieldArr, reducers, existingDataModel) {
     });
     // Prepare the data
     let rowCount = 0;
-    rowDiffsetIterator(dataModel.rowDiffset, (i) => {
+    rowDiffsetIterator(dataModel._rowDiffset, (i) => {
         let hash = '';
         dimensionArr.forEach((_) => {
             hash = `${hash}-${fieldStoreObj[_].data[i]}`;
@@ -117,7 +117,7 @@ function groupBy(dataModel, fieldArr, reducers, existingDataModel) {
         });
     });
     if (existingDataModel) {
-        existingDataModel._updateData(data, schema, dbName);
+        existingDataModel.calculateFieldspace();
         newDataModel = existingDataModel;
     }
     else {

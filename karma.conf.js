@@ -6,6 +6,7 @@ module.exports = function (config) {
             'test.webpack.js',
         ],
         webpack: {
+            devtool: 'inline-source-map',
             module: {
                 rules: [
                     // instrument only testing sources with Istanbul

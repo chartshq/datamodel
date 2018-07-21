@@ -5,22 +5,22 @@ import { getCommonSchema } from './get-common-schema';
  * It generates a function that will have the logic to join two
  * DataModel instances by the process of natural join.
  *
- * @param {DataModel} dataModel1 - The left DataModel instance.
- * @param {DataModel} dataModel2 - The right DataModel instance.
+ * @param {DataModel} dm1 - The left DataModel instance.
+ * @param {DataModel} dm2 - The right DataModel instance.
  * @return {Function} Returns a function that is used in cross-product operation.
  */
-export function naturalJoinFilter(dataModel1, dataModel2) {
-    const dataModel1FieldStore = dataModel1.getNameSpace();
-    const dataModel2FieldStore = dataModel2.getNameSpace();
-    const dataModel1FieldStoreName = dataModel1FieldStore.name;
-    const dataModel2FieldStoreName = dataModel2FieldStore.name;
-    const commonSchemaArr = getCommonSchema(dataModel1FieldStore, dataModel2FieldStore);
+export function naturalJoinFilter (dm1, dm2) {
+    const dm1FieldStore = dm1.getPartialFieldspace();
+    const dm2FieldStore = dm2.getPartialFieldspace();
+    const dm1FieldStoreName = dm1FieldStore.name;
+    const dm2FieldStoreName = dm2FieldStore.name;
+    const commonSchemaArr = getCommonSchema(dm1FieldStore, dm2FieldStore);
 
     return (obj) => {
         let retainTuple = false;
         commonSchemaArr.forEach((fieldName) => {
-            if (obj[dataModel1FieldStoreName][fieldName] ===
-                obj[dataModel2FieldStoreName][fieldName]) {
+            if (obj[dm1FieldStoreName][fieldName] ===
+                obj[dm2FieldStoreName][fieldName]) {
                 retainTuple = true;
             } else {
                 retainTuple = false;

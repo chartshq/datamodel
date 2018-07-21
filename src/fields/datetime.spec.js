@@ -1,4 +1,4 @@
-/* global describe, it, beforeEach */
+/* global describe, it, before */
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
@@ -6,7 +6,8 @@ import { DimensionSubtype } from 'picasso-util';
 import { DateTimeFormatter } from '../utils';
 import DateTime from './datetime';
 
-describe('DateTime Field Type', () => {
+describe('DateTime', () => {
+    let field;
     const schema = {
         name: 'Date',
         type: 'dimension',
@@ -14,17 +15,18 @@ describe('DateTime Field Type', () => {
         format: '%Y-%m-%d'
     };
     const data = ['2017-03-01', '2017-03-02', '2017-03-03'];
-    let field;
 
-    beforeEach(() => {
+    before(() => {
         field = new DateTime(schema.name, data, schema);
     });
 
-    it('should implement getter methods', () => {
-        expect(field.subType()).to.equal(schema.subtype);
+    describe('#subType', () => {
+        it('should implement getter methods', () => {
+            expect(field.subType()).to.equal(schema.subtype);
+        });
     });
 
-    describe('#prototype.parse()', () => {
+    describe('#parse', () => {
         it('should return parsed timestamp', () => {
             const dateStr = '2017-03-01';
 
@@ -46,11 +48,26 @@ describe('DateTime Field Type', () => {
             };
             expect(mockedParseFn).not.throw(Error);
         });
+
+        it('should parse the timestamp if date format is not given', () => {
+            const alternateSchema = {
+                name: 'StartDate',
+                type: 'dimension',
+                sybtype: DimensionSubtype.TEMPORAL
+            };
+
+            const alternateData = ['2017-09-08T05:56:40.873Z', '2017-11-15T05:17:49.842Z', '2017-12-26T03:28:04.709Z'];
+            const alternateField = new DateTime(alternateSchema.name, alternateData, alternateSchema);
+
+            expect(alternateField.data.join()).to.deep.equal(alternateData.map(d => +(new Date(d))).join());
+        });
     });
 
-    it('Should correctly calculate Min diff between dates array', () => {
-        field = new DateTime(schema.name, data, schema);
-        let diff = field.getMinDiff();
-        expect(diff).to.equal(86400000);
+    describe('#getMinDiff', () => {
+        it('should correctly calculate Min diff between dates array', () => {
+            field = new DateTime(schema.name, data, schema);
+            let diff = field.getMinDiff();
+            expect(diff).to.equal(86400000);
+        });
     });
 });
