@@ -17,6 +17,7 @@ d3.json('./data/cars.json', (data) => {
     const data2 = [
         { population: 200, city: 'a',type:"aa" },
         { population: 250, city: 'b',type:"kk" },
+        { population: 250, city: 'm',type:"kk" },
     ];
     const schema2 = [
         { name: 'population', type: 'measure' },
@@ -26,6 +27,9 @@ d3.json('./data/cars.json', (data) => {
     const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
     const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
 
-    const k = dataModel1.naturalJoin(dataModel2)
-    k;
+   
+    const l = DataModel.Operators.leftOuterJoin(dataModel1,dataModel2,obj=>obj.ModelA.city === obj.ModelB.city)
+    const m = DataModel.Operators.rightOuterJoin(dataModel1,dataModel2,obj=>obj.ModelA.city === obj.ModelB.city)
+    const k = DataModel.Operators.fullOuterJoin(dataModel2,dataModel1,obj=>obj.ModelA.city === obj.ModelB.city)
+    l;
 });

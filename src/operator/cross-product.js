@@ -31,6 +31,9 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
     const name = `${dm1FieldStore.name}.${dm2FieldStore.name}`;
     const commonSchemaList = getCommonSchema(dm1FieldStore, dm2FieldStore);
 
+    if (dm1FieldStoreName === dm2FieldStoreName) {
+        throw new Error('DataModels must have different names');
+    }
     // Here prepare the schema
     dm1FieldStore.fields.forEach((field) => {
         const tmpSchema = extend2({}, field.schema);
