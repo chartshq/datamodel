@@ -1,7 +1,7 @@
 import DataModel from '../index';
 import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
-
+import { isArrEqual } from '../utils/helper';
 /**
  * Performs the union operation between two dm instances.
  *
@@ -21,9 +21,9 @@ export function union (dm1, dm2) {
     const name = `${dm1FieldStore.name} union ${dm2FieldStore.name}`;
 
     // For union the columns should match otherwise return a clone of the dm1
-    // if (dm1._colIdentifier !== dm2._colIdentifier) {
-    //     return dm1.clone();
-    // }
+    if (!isArrEqual(dm1._colIdentifier.split(',').sort(), dm2._colIdentifier.split(',').sort())) {
+        return dm1.clone();
+    }
 
     // Prepare the schema
     (dm1._colIdentifier.split(',')).forEach((fieldName) => {
