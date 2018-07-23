@@ -175,7 +175,9 @@ export const cloneWithProject = (sourceDm, projField, config, allFields) => {
     if (config.mode === FilteringMode.INVERSE) {
         projectionSet = allFields.filter(fieldName => projField.indexOf(fieldName) === -1);
     }
-    cloned._colIdentifier = projectionSet.join(',');
+    cloned._colIdentifier = sourceDm._colIdentifier.split(',')
+                            .filter(coll => projectionSet.indexOf(coll) !== -1).join();
+    // cloned._colIdentifier = projectionSet.join(',');
     cloned.calculateFieldspace().calculateFieldsConfig();
     // Store reference to child model and projection fields
     if (config.saveChild) {
