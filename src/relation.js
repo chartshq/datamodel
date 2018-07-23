@@ -266,7 +266,7 @@ class Relation {
         this._fieldConfig = this._fieldspace.fields.reduce((acc, fieldDef, i) => {
             acc[fieldDef.name] = {
                 index: i,
-                def: { name: fieldDef._ref.name, type: fieldDef._ref.fieldType }
+                def: { name: fieldDef._ref.name, type: fieldDef._ref.fieldType, subtype: fieldDef._ref.subType() }
             };
             return acc;
         }, {});
