@@ -77,7 +77,7 @@ class DataModel extends Relation {
 
         const dataGenerated = dataBuilder.call(
             this,
-            this.getFieldspace().fields,
+            this.getPartialFieldspace().fields,
             this._rowDiffset,
             this._colIdentifier,
             this._sortingDetails,

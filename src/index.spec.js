@@ -211,6 +211,23 @@ describe('DataModel', () => {
             expect(projectedModel).to.deep.equal(dataModels[0].getData());
             expect(rejectionModel).to.deep.equal(dataModels[1].getData());
         });
+
+        it('should maintain the order of column names given in project params', () => {
+            const datamodel = new DataModel(data, schema);
+            const dataModels = datamodel.project(['job', 'age', 'marital', 'education']);
+            const expColumnOrder = 'job,age,marital,education';
+            expect(dataModels._colIdentifier).to.equal(expColumnOrder);
+        });
+
+        it('should maintain the order of column names in fieldConfig and schema', () => {
+            const datamodel = new DataModel(data, schema);
+            const dataModels = datamodel.project(['job', 'age', 'marital', 'education']);
+            const shecma = dataModels.getData().schema.map((scheme, i) => ({ name: scheme.name, index: i }));
+            const fieldMap = dataModels.getFieldsConfig();
+            shecma.forEach((sch) => {
+                expect(sch.index).to.equal(fieldMap[sch.name].index);
+            });
+        });
     });
 
 
