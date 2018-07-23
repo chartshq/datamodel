@@ -10,17 +10,17 @@ import { getCommonSchema } from './get-common-schema';
  * @return {Function} Returns a function that is used in cross-product operation.
  */
 export function naturalJoinFilter (dm1, dm2) {
-    const dm1FieldStore = dm1.getPartialFieldspace();
-    const dm2FieldStore = dm2.getPartialFieldspace();
+    const dm1FieldStore = dm1.getFieldspace();
+    const dm2FieldStore = dm2.getFieldspace();
     const dm1FieldStoreName = dm1FieldStore.name;
     const dm2FieldStoreName = dm2FieldStore.name;
     const commonSchemaArr = getCommonSchema(dm1FieldStore, dm2FieldStore);
 
     return (obj) => {
-        let retainTuple = false;
+        let retainTuple = true;
         commonSchemaArr.forEach((fieldName) => {
             if (obj[dm1FieldStoreName][fieldName] ===
-                obj[dm2FieldStoreName][fieldName]) {
+                obj[dm2FieldStoreName][fieldName] && retainTuple) {
                 retainTuple = true;
             } else {
                 retainTuple = false;

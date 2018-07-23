@@ -50,7 +50,7 @@ describe('Testing union', () => {
             const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
             const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'profit']);
             const unionDataModel = union(dataModel1, dataModel2);
-            expect(unionDataModel.getData()).to.deep.equal(dataModel1.getData());
+            expect(unionDataModel).to.equal(null);
         });
     });
 });

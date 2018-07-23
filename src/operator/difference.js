@@ -1,6 +1,7 @@
 import DataModel from '../index';
 import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
+import { isArrEqual } from '../utils/helper';
 
 /**
  * Performs the union operation between two dm instances.
@@ -16,15 +17,15 @@ export function difference (dm1, dm2) {
     const schema = [];
     const schemaNameArr = [];
     const data = [];
-    const dm1FieldStore = dm1.getPartialFieldspace();
-    const dm2FieldStore = dm2.getPartialFieldspace();
+    const dm1FieldStore = dm1.getFieldspace();
+    const dm2FieldStore = dm2.getFieldspace();
     const dm1FieldStoreFieldObj = dm1FieldStore.fieldsObj();
     const dm2FieldStoreFieldObj = dm2FieldStore.fieldsObj();
     const name = `${dm1FieldStore.name} union ${dm2FieldStore.name}`;
 
-    // For union the columns should match otherwise return a clone of the dm1
-    if (dm1.colIdentifier !== dm2.colIdentifier) {
-        return dm1.clone();
+   // For union the columns should match otherwise return a clone of the dm1
+    if (!isArrEqual(dm1._colIdentifier.split(',').sort(), dm2._colIdentifier.split(',').sort())) {
+        return null;
     }
 
     // Prepare the schema
