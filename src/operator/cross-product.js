@@ -24,15 +24,15 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
     const schema = [];
     const data = [];
     const applicableFilterFn = filterFn || defaultFilterFn;
-    const dm1FieldStore = dm1.getPartialFieldspace();
-    const dm2FieldStore = dm2.getPartialFieldspace();
+    const dm1FieldStore = dm1.getFieldspace();
+    const dm2FieldStore = dm2.getFieldspace();
     const dm1FieldStoreName = dm1FieldStore.name;
     const dm2FieldStoreName = dm2FieldStore.name;
     const name = `${dm1FieldStore.name}.${dm2FieldStore.name}`;
     const commonSchemaList = getCommonSchema(dm1FieldStore, dm2FieldStore);
 
     if (dm1FieldStoreName === dm2FieldStoreName) {
-        throw new Error('DataModels must have different names');
+        throw new Error('DataModels must have different alias names');
     }
     // Here prepare the schema
     dm1FieldStore.fields.forEach((field) => {

@@ -14,15 +14,15 @@ export function union (dm1, dm2) {
     const schema = [];
     const schemaNameArr = [];
     const data = [];
-    const dm1FieldStore = dm1.getPartialFieldspace();
-    const dm2FieldStore = dm2.getPartialFieldspace();
+    const dm1FieldStore = dm1.getFieldspace();
+    const dm2FieldStore = dm2.getFieldspace();
     const dm1FieldStoreFieldObj = dm1FieldStore.fieldsObj();
     const dm2FieldStoreFieldObj = dm2FieldStore.fieldsObj();
     const name = `${dm1FieldStore.name} union ${dm2FieldStore.name}`;
 
     // For union the columns should match otherwise return a clone of the dm1
     if (!isArrEqual(dm1._colIdentifier.split(',').sort(), dm2._colIdentifier.split(',').sort())) {
-        return dm1.clone();
+        return null;
     }
 
     // Prepare the schema
