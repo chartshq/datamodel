@@ -174,4 +174,19 @@ describe('Field Type', () => {
             expect(diff).to.equal(86400000);
         });
     });
+    describe('#domain', () => {
+        const schema2 = {
+            name: 'Date',
+            type: 'dimension',
+            subtype: DimensionSubtype.TEMPORAL,
+            format: '%Y-%m-%d'
+        };
+        const data2 = ['2017-03-01', '2017-03-02', '2017-03-03'];
+        it('should return min max date on calling domain', () => {
+            let partialField = new DateTime(schema2.name, data2, schema2);
+            let field = new Field(partialField, '0-2');
+            let diff = field.domain();
+            expect(diff).to.deep.equal([1488306600000, 1488479400000]);
+        });
+    });
 });
