@@ -1098,19 +1098,19 @@ describe('DataModel', () => {
     });
 
     context('Statistics function test', () => {
-        describe('#Sum', () => {
+        describe('#sum', () => {
             it('should return sum for 1D array', () => {
-                expect(DataModel.Statistics.Sum([10, 12, 17])).to.equal(39);
+                expect(DataModel.Stats.sum([10, 12, 17])).to.equal(39);
             });
         });
-        describe('#Sum', () => {
+        describe('#sum', () => {
             it('should return sum for 2D Array', () => {
-                expect(DataModel.Statistics.Sum([[10, 20], [12, 22], [27, 17]])).to.deep.equal([49, 59]);
+                expect(DataModel.Stats.sum([[10, 20], [12, 22], [27, 17]])).to.deep.equal([49, 59]);
             });
         });
-        describe('#Average', () => {
-            it('should return Average for 1D Array', () => {
-                expect(DataModel.Statistics.Average([10, 12, 17])).to.equal(39 / 3);
+        describe('#svg', () => {
+            it('should return average for 1D Array', () => {
+                expect(DataModel.Stats.avg([10, 12, 17])).to.equal(39 / 3);
             });
         });
     });
