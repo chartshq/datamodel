@@ -189,4 +189,29 @@ describe('Field Type', () => {
             expect(diff).to.deep.equal([1488306600000, 1488479400000]);
         });
     });
+    describe('#getData', () => {
+        const schema3 = {
+            name: 'Miles_per_Gallon',
+            type: FieldType.MEASURE,
+            unit: 'cm',
+            scale: '1000',
+            numberformat: '12-3-3',
+            description: 'This is description',
+            defAggFn: () => {}
+        };
+        const data3 = [1, 3, 4, 78];
+
+        let field4;
+        let partialField = new Measure(schema3.name, data3, schema3);
+        beforeEach(() => {
+            field4 = new Field(partialField, '0-3');
+        });
+        it('should return field data based on rowdiffset', () => {
+            expect(field4.getData()).to.deep.equal(data3);
+        });
+        it('should return field data based on rowdiffset after a select operation', () => {
+            field4 = new Field(partialField, '0-1,3');
+            expect(field4.getData()).to.deep.equal([1, 3, 78]);
+        });
+    });
 });
