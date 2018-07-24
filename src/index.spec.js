@@ -5,6 +5,10 @@ import { expect } from 'chai';
 import { FilteringMode } from 'picasso-util';
 import DataModel from './index';
 
+function avg(...nums) {
+    return nums.reduce((acc, next) => acc + next, 0) / nums.length;
+}
+
 describe('DataModel', () => {
     describe('#clone', () => {
         it('should make a new copy of the current DataModel instance', () => {
@@ -122,6 +126,49 @@ describe('DataModel', () => {
                 uids: [0, 1, 2]
             };
             expect(generatedData).to.deep.equal(expected);
+        });
+
+        it('should return sorted data according to the specified config', () => {
+            const data = [
+                { performance: 'low', horsepower: 100, weight: 2 },
+                { performance: 'high', horsepower: 400, weight: 1 },
+                { performance: 'medium', horsepower: 20, weight: 1.5 },
+                { performance: 'decent', horsepower: 30, weight: 0.5 }
+            ];
+            const schema = [
+                { name: 'performance', type: 'dimension' },
+                { name: 'horsepower', type: 'measure' },
+                { name: 'weight', type: 'measure' }
+            ];
+
+            const dm = new DataModel(data, schema);
+            const expected = {
+                schema: [
+                    {
+                        name: 'performance',
+                        type: 'dimension'
+                    },
+                    {
+                        name: 'horsepower',
+                        type: 'measure'
+                    },
+                    {
+                        name: 'weight',
+                        type: 'measure'
+                    }
+                ],
+                data: [
+                    ['medium', 20, 1.5],
+                    ['decent', 30, 0.5],
+                    ['low', 100, 2],
+                    ['high', 400, 1]
+                ],
+                uids: [2, 3, 0, 1]
+            };
+
+            expect(dm.getData({
+                sort: [['horsepower', 'asc']]
+            })).to.deep.equal(expected);
         });
     });
 
@@ -332,8 +379,11 @@ describe('DataModel', () => {
                 { name: 'job', type: 'dimension' },
                 { name: 'marital', type: 'dimension' }
             ];
-
             const dataModel = new DataModel(data, schema);
+
+            const sortedDm = dataModel.sort([
+                ['age', 'desc']
+            ]);
             const expData = {
                 data: [
                     [59, 'blue-collar', 'married'],
@@ -342,15 +392,14 @@ describe('DataModel', () => {
                     [30, 'management', 'married']
                 ],
                 schema,
-                uids: [1, 3, 2, 0]
+                uids: [0, 1, 2, 3]
             };
-            dataModel.sort([
+
+            expect(sortedDm).not.to.equal(dataModel);
+            expect(sortedDm._sortingDetails).to.deep.equal([
                 ['age', 'desc']
             ]);
-            expect(dataModel._sortingDetails).to.deep.equal([
-                ['age', 'desc']
-            ]);
-            expect(dataModel.getData()).to.deep.equal(expData);
+            expect(sortedDm.getData()).to.deep.equal(expData);
         });
 
         it('should perform multi sort properly', () => {
@@ -367,8 +416,12 @@ describe('DataModel', () => {
                 { name: 'job', type: 'dimension' },
                 { name: 'marital', type: 'dimension' }
             ];
-
             const dataModel = new DataModel(data, schema);
+
+            const sortedDm = dataModel.sort([
+                ['age', 'desc'],
+                ['job'],
+            ]);
             const expData = {
                 data: [
                     [59, 'blue-collar', 'married'],
@@ -379,17 +432,13 @@ describe('DataModel', () => {
                     [28, 'blue-collar', 'married']
                 ],
                 schema,
-                uids: [1, 3, 2, 5, 0, 4]
+                uids: [0, 1, 2, 3, 4, 5]
             };
-            dataModel.sort([
+            expect(sortedDm._sortingDetails).to.deep.equal([
                 ['age', 'desc'],
                 ['job'],
             ]);
-            expect(dataModel._sortingDetails).to.deep.equal([
-                ['age', 'desc'],
-                ['job', 'asc'],
-            ]);
-            expect(dataModel.getData()).to.deep.equal(expData);
+            expect(sortedDm.getData()).to.deep.equal(expData);
         });
 
         it('should perform sort with string data', () => {
@@ -409,6 +458,10 @@ describe('DataModel', () => {
                 { name: 'Location', type: 'dimension' },
             ];
             const dataModel = new DataModel(data, schema);
+
+            const sortedDm = dataModel.sort([
+                ['Gender', 'desc'],
+            ]);
             const expData = {
                 schema: [
                     { name: 'Name', type: 'dimension' },
@@ -425,12 +478,107 @@ describe('DataModel', () => {
                     ['Teen', 14, 'Female', 'Kolkata'],
                     ['Usha', 49, 'Female', 'Kolkata'],
                 ],
-                uids: [0, 2, 4, 5, 6, 1, 3]
+                uids: [0, 1, 2, 3, 4, 5, 6]
             };
-            dataModel.sort([
-                ['Gender', 'desc'],
+            expect(sortedDm.getData()).to.deep.equal(expData);
+        });
+
+        it('should perform sort with sorting function', () => {
+            const data = [
+                { age: 30, job: 'management', marital: 'married' },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' },
+                { age: 28, job: 'blue-collar', marital: 'married' },
+                { age: 30, job: 'blue-collar', marital: 'single' },
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
+            ];
+            const dataModel = new DataModel(data, schema);
+
+            const sortedDm = dataModel.sort([
+                ['age', (a, b) => b - a],
+                ['job'],
             ]);
-            expect(dataModel.getData()).to.deep.equal(expData);
+            const expData = {
+                data: [
+                    [59, 'blue-collar', 'married'],
+                    [57, 'self-employed', 'married'],
+                    [35, 'management', 'single'],
+                    [30, 'blue-collar', 'single'],
+                    [30, 'management', 'married'],
+                    [28, 'blue-collar', 'married']
+                ],
+                schema,
+                uids: [0, 1, 2, 3, 4, 5]
+            };
+            expect(sortedDm.getData()).to.deep.equal(expData);
+        });
+
+        it('should perform sort by another field', () => {
+            const data = [
+                { performance: 'low', horsepower: 100, weight: 2 },
+                { performance: 'high', horsepower: 400, weight: 1 },
+                { performance: 'medium', horsepower: 20, weight: 1.5 },
+                { performance: 'low', horsepower: 50, weight: 4 },
+                { performance: 'medium', horsepower: 660, weight: 5 },
+                { performance: 'decent', horsepower: 30, weight: 0.5 }
+            ];
+            const schema = [
+                { name: 'performance', type: 'dimension' },
+                { name: 'horsepower', type: 'measure' },
+                { name: 'weight', type: 'measure' }
+            ];
+            const dataModel = new DataModel(data, schema);
+
+            let sortingDetails = [
+                ['performance', ['horsepower', (a, b) => avg(...a.horsepower) - avg(...b.horsepower)]],
+                ['horsepower', 'asc']
+            ];
+            let sortedDm = dataModel.sort(sortingDetails);
+            let expected = {
+                schema: [
+                    { name: 'performance', type: 'dimension' },
+                    { name: 'horsepower', type: 'measure' },
+                    { name: 'weight', type: 'measure' }
+                ],
+                data: [
+                    ['decent', 30, 0.5],
+                    ['low', 50, 4],
+                    ['low', 100, 2],
+                    ['medium', 20, 1.5],
+                    ['medium', 660, 5],
+                    ['high', 400, 1]
+                ],
+                uids: [0, 1, 2, 3, 4, 5]
+            };
+            expect(sortedDm.getData()).to.deep.equal(expected);
+
+            sortingDetails = [
+                ['performance', ['horsepower', 'weight', (a, b) => (avg(...a.horsepower) * avg(...a.weight)) - (avg(...b.horsepower) * avg(...b.weight))]],
+                ['horsepower', 'desc']
+            ];
+            sortedDm = dataModel.sort(sortingDetails);
+            expected = {
+                schema: [
+                    { name: 'performance', type: 'dimension' },
+                    { name: 'horsepower', type: 'measure' },
+                    { name: 'weight', type: 'measure' }
+                ],
+                data: [
+                    ['decent', 30, 0.5],
+                    ['low', 100, 2],
+                    ['low', 50, 4],
+                    ['high', 400, 1],
+                    ['medium', 660, 5],
+                    ['medium', 20, 1.5]
+                ],
+                uids: [0, 1, 2, 3, 4, 5]
+            };
+            expect(sortedDm.getData()).to.deep.equal(expected);
         });
     });
 
