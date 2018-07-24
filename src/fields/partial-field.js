@@ -51,6 +51,11 @@ class PartialField {
         throw new Error('Not yet implemented!');
     }
 
+    subType() {
+        return null;
+    }
+
+
     /**
      * Parse the input value before using.
      *

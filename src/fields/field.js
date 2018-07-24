@@ -1,3 +1,4 @@
+import { DimensionSubtype } from 'picasso-util';
 import { rowDiffsetIterator } from '../operator/row-diffset-iterator'
 ;
 
@@ -22,7 +23,7 @@ export default class Field {
             data.push(this._ref.data[i]);
         });
 
-        if (this._ref.fieldType === 'dimension') {
+        if (this._ref.fieldType === 'dimension' && this._ref.subType() !== DimensionSubtype.TEMPORAL) {
             domain = [...new Set(data)];
         } else {
             let minD = Math.min.apply(null, data);
