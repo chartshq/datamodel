@@ -32,10 +32,7 @@ class DataModel extends Relation {
         super(...args);
 
         this._onPropagation = [];
-        this._sortingDetails = {
-            column: [],
-            type: []
-        };
+        this._sortingDetails = [];
     }
 
     static get Reducers () {
@@ -51,6 +48,7 @@ class DataModel extends Relation {
      * @param {Object} [options.order='row'] - Define the order of the data: row or column.
      * @param {Object} [options.formatter=null] - An object map containing field specific formatter function.
      * @param {Object} [options.withUid=false] - Whether the data uids will be included or not.
+     * @param {Object} [options.sort=[]] - The sorting details to sort the data.
      * @return {Array} Returns a multidimensional array of the data.
      * @example
      *
@@ -71,7 +69,8 @@ class DataModel extends Relation {
         const defOptions = {
             order: 'row',
             formatter: null,
-            withUid: false
+            withUid: false,
+            sort: []
         };
         options = Object.assign({}, defOptions, options);
 
@@ -80,7 +79,7 @@ class DataModel extends Relation {
             this.getPartialFieldspace().fields,
             this._rowDiffset,
             this._colIdentifier,
-            this._sortingDetails,
+            options.sort,
             {
                 columnWise: options.order === 'column',
                 addUid: !!options.withUid
@@ -172,30 +171,23 @@ class DataModel extends Relation {
      * It helps to define the sorting order of the returned data.
      * This is similar to the orderBy functionality of the database
      * you have to pass the array of array [['columnName', 'sortType(asc|desc)']] and the
-     * function getData will give the data accordingly
-     *
-     * Please note no new DataModel will be created from this call, as this function overwrite the
-     * previous sorting config
-     *
-     * @todo Fix whether a new DataModel instance is returned or not.
+     * function getData will give the data accordingly.
      *
      * @public
-     * @param  {Array} sortList The array of all the column that need to be sorted
-     * @return {DataModel}            it's own instance
+     * @param {Array} sortingDetails - An array containing the sorting details with column names;
+     * @return {DataModel} Returns a new sorted instance of DataModel.
      */
-    sort (sortList) {
-        if (this.isEmpty()) {
-            return this;
-        }
-        sortList.forEach((row) => {
-            const currRow = row;
-            currRow[1] = String(row[1]).toLowerCase() === 'desc' ? 'desc' : 'asc';
+    sort (sortingDetails) {
+        const rawData = this.getData({
+            order: 'row',
+            sort: sortingDetails
         });
-        this._sortingDetails = sortList;
-        const struct = this.getData();
-        // append header
-        const header = struct.schema.map(field => field.name);
-        return new this.constructor([header].concat(struct.data), struct.schema, null, { dataFormat: 'DSVArr' });
+        const header = rawData.schema.map(field => field.name);
+        const dataInCSVArr = [header].concat(rawData.data);
+
+        const sortedDm = new this.constructor(dataInCSVArr, rawData.schema, null, { dataFormat: 'DSVArr' });
+        sortedDm._sortingDetails = sortingDetails;
+        return sortedDm;
     }
 
     addField (field) {

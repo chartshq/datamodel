@@ -204,3 +204,17 @@ export const updateData = (relation, data, schema, options) => {
     relation._colIdentifier = (schema.map(_ => _.name)).join();
     return relation;
 };
+
+export const fieldInSchema = (schema, field) => {
+    let i = 0;
+
+    for (; i < schema.length; ++i) {
+        if (field === schema[i].name) {
+            return {
+                type: schema[i].subtype || schema[i].type,
+                index: i
+            };
+        }
+    }
+    return null;
+};
