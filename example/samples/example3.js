@@ -1,31 +1,19 @@
 const DataModel = window.DataModel.default;
 d3.json('./data/cars.json', (data) => {
     const data1 = [
-        { profit: 10, sales: 20, city: 'a', type: 'aa' },
-        { profit: 15, sales: 25, city: 'b', type: 'aa' },
-        { profit: 15, sales: 25, city: 'c', type: 'aa' },
+        { age: 30, job: 'management', marital: 'married' },
+        { age: 59, job: 'blue-collar', marital: 'married' },
+        { age: 35, job: 'management', marital: 'single' },
+        { age: 57, job: 'self-employed', marital: 'married' },
+        { age: 28, job: 'blue-collar', marital: 'married' },
     ];
-    const schema1 = [
-        { name: 'profit', type: 'measure' },
-        { name: 'sales', type: 'measure' },
-        { name: 'city', type: 'dimension' },
-        { name: 'type', type: 'dimension' },
+    const schema = [
+        { name: 'age', type: 'measure' },
+        { name: 'job', type: 'dimension' },
+        { name: 'marital', type: 'dimension' }
     ];
-    // const data2 = [
-    //     { population: 200, city: 'a', type: 'aa' },
-    //     { population: 250, city: 'b', type: 'kk' },
-    //     { population: 250, city: 'm', type: 'kk' },
-    // ];
-    // const schema2 = [
-    //     { name: 'population', type: 'measure' },
-    //     { name: 'city', type: 'dimension' },
-    //     { name: 'type', type: 'dimension' },
-    // ];
-    const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
-    // const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
-    const proj = dataModel1.project(['sales', 'profit']);
-    console.log(proj);
-    // console.log(proj.calculateFieldspace());
-    console.log(proj.getFieldsConfig());
+    const dataModel = new DataModel(data1, schema);
+    const selectedDm = dataModel.select(fields => fields.age.value < 40);
+    selectedDm.getFieldspace().fields[0].domain();
 });
 

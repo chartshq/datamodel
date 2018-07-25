@@ -334,6 +334,27 @@ describe('DataModel', () => {
             // Check The return data
             expect(selectedDm2.getData()).to.deep.equal(expData);
         });
+
+        it('should perform selection and field domain should return only selected data', () => {
+            const dataModel = new DataModel(data, schema);
+            const selectedDm = dataModel.select(fields => fields.age.value < 40);
+            const expData = {
+                data: [
+                    [30, 'management', 'married'],
+                    [35, 'management', 'single'],
+                    [28, 'blue-collar', 'married']
+                ],
+                schema,
+                uids: [0, 2, 4]
+            };
+
+            // check project is not applied on the same DataModel
+            expect(dataModel === selectedDm).to.be.false;
+            expect(selectedDm._rowDiffset).to.equal('0,2,4');
+            // Check The return data
+            expect(selectedDm.getData()).to.deep.equal(expData);
+            expect(selectedDm.getFieldspace().fields[0].domain()).to.deep.equal([28, 35]);
+        });
     });
 
     describe('#sort', () => {
