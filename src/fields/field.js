@@ -19,10 +19,7 @@ export default class Field {
     domain() {
         let data = [];
         let domain = null;
-        rowDiffsetIterator(this._rowDiff, (i) => {
-            data.push(this._ref.data[i]);
-        });
-
+        data = this.getData();
         if (this._ref.fieldType === 'dimension' && this._ref.subType() !== DimensionSubtype.TEMPORAL) {
             domain = [...new Set(data)];
         } else {
@@ -121,5 +118,13 @@ export default class Field {
      */
     defAggFn() {
         return this._ref.defAggFn();
+    }
+
+    getData() {
+        let data = [];
+        rowDiffsetIterator(this._rowDiff, (i) => {
+            data.push(this._ref.data[i]);
+        });
+        return data;
     }
 }
