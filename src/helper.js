@@ -153,6 +153,7 @@ export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) =
         selectConfig
     );
     cloned._rowDiffset = rowDiffset;
+    cloned.calculateFieldspace().calculateFieldsConfig();
     // Store reference to child model and selector function
     if (cloneConfig.saveChild) {
         persistDerivation(cloned, DM_DERIVATIVES.SELECT, { config: selectConfig }, selectFn);
