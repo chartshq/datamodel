@@ -596,7 +596,8 @@ describe('DataModel', () => {
             expect(sortedDm.getData()).to.deep.equal(expected);
 
             sortingDetails = [
-                ['performance', ['horsepower', 'weight', (a, b) => (avg(...a.horsepower) * avg(...a.weight)) - (avg(...b.horsepower) * avg(...b.weight))]],
+                ['performance', ['horsepower', 'weight',
+                    (a, b) => (avg(...a.horsepower) * avg(...a.weight)) - (avg(...b.horsepower) * avg(...b.weight))]],
                 ['horsepower', 'desc']
             ];
             sortedDm = dataModel.sort(sortingDetails);

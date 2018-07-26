@@ -193,7 +193,7 @@ class DataModel extends Relation {
     addField (field) {
         this._colIdentifier += `,${field.fieldName()}`;
         this._partialFieldspace.fields.push(field);
-        this.calculateFieldspace().calculateFieldsConfig();
+        this.__calculateFieldspace().calculateFieldsConfig();
         return this;
     }
 

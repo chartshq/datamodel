@@ -19,11 +19,11 @@ function prepareSelectionData (fields, i) {
     return resp;
 }
 
-export const updateFields = ([rowDiffset, colIdentifier], partialFieldspace) => {
+export const updateFields = ([rowDiffset, colIdentifier], partialFieldspace, fieldStoreName) => {
     let collID = colIdentifier.split(',');
     let partialFieldMap = partialFieldspace.fieldsObj();
     let newFields = collID.map(coll => new Field(partialFieldMap[coll], rowDiffset));
-    return fieldStore.createNamespace(newFields, partialFieldspace.name);
+    return fieldStore.createNamespace(newFields, fieldStoreName);
 };
 
 export const persistDerivation = (model, operation, config = {}, criteriaFn) => {
@@ -153,7 +153,7 @@ export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) =
         selectConfig
     );
     cloned._rowDiffset = rowDiffset;
-    cloned.calculateFieldspace().calculateFieldsConfig();
+    cloned.__calculateFieldspace().calculateFieldsConfig();
     // Store reference to child model and selector function
     if (cloneConfig.saveChild) {
         persistDerivation(cloned, DM_DERIVATIVES.SELECT, { config: selectConfig }, selectFn);
@@ -171,7 +171,7 @@ export const cloneWithProject = (sourceDm, projField, config, allFields) => {
     // cloned._colIdentifier = sourceDm._colIdentifier.split(',')
     //                         .filter(coll => projectionSet.indexOf(coll) !== -1).join();
     cloned._colIdentifier = projectionSet.join(',');
-    cloned.calculateFieldspace().calculateFieldsConfig();
+    cloned.__calculateFieldspace().calculateFieldsConfig();
     // Store reference to child model and projection fields
     if (config.saveChild) {
         persistDerivation(

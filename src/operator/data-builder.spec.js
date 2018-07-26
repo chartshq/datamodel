@@ -332,7 +332,9 @@ describe('Checking dataBuilder', () => {
                 '0-5',
                 'performance,horsepower,weight',
                 [
-                    ['performance', ['horsepower', 'weight', (a, b) => (avg(...a.horsepower) * avg(...a.weight)) - (avg(...b.horsepower) * avg(...b.weight))]],
+                    ['performance', ['horsepower', 'weight',
+                        (a, b) => (avg(...a.horsepower) * avg(...a.weight))
+                            - (avg(...b.horsepower) * avg(...b.weight))]],
                     ['horsepower', 'desc']
                 ]
             );
