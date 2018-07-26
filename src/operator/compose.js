@@ -26,8 +26,8 @@ export const compose = (...operations) =>
  */
 export const bin = (...args) => dm => dm.bin(...args);
 
-export const rowFilter = (...args) => dm => dm.select(...args);
+export const select = (...args) => dm => dm.select(...args);
 
-export const columnFilter = (...args) => dm => dm.project(...args);
+export const project = (...args) => dm => dm.project(...args);
 
 export const groupBy = (...args) => dm => dm.groupBy(...args);

@@ -1,6 +1,7 @@
 export { createBinnedFieldData } from './bucket-creator';
 export { selectIterator, calculatedVariableIterator, projectIterator, groupByIterator } from './child-iterator';
-export { compose, bin, rowFilter, columnFilter, groupby } from './compose';
+export { compose, bin, select, project, groupby } from './compose';
+export { calculateVariable, sort } from './pure-operators';
 export { crossProduct } from './cross-product';
 export { dataBuilder } from './data-builder';
 export { difference } from './difference';
@@ -13,4 +14,3 @@ export { naturalJoin } from './natural-join';
 export { leftOuterJoin, rightOuterJoin, fullOuterJoin } from './outer-join';
 export { rowDiffsetIterator } from './row-diffset-iterator';
 export { union } from './union';
-
