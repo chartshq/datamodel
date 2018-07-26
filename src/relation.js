@@ -266,6 +266,10 @@ class Relation {
     }
 
     calculateFieldsConfig () {
+        if (this.isEmpty()) {
+            this._fieldConfig = {};
+            return this;
+        }
         this._fieldConfig = this._fieldspace.fields.reduce((acc, fieldDef, i) => {
             acc[fieldDef.name] = {
                 index: i,
