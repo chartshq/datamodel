@@ -20,7 +20,7 @@ function prepareSelectionData (fields, i) {
 }
 
 export const updateFields = ([rowDiffset, colIdentifier], partialFieldspace, fieldStoreName) => {
-    let collID = colIdentifier.split(',');
+    let collID = colIdentifier.length ? colIdentifier.split(',') : [];
     let partialFieldMap = partialFieldspace.fieldsObj();
     let newFields = collID.map(coll => new Field(partialFieldMap[coll], rowDiffset));
     return fieldStore.createNamespace(newFields, fieldStoreName);
@@ -200,7 +200,7 @@ export const updateData = (relation, data, schema, options) => {
     const nameSpace = fieldStore.createNamespace(fieldArr, options.name);
     relation._partialFieldspace = nameSpace;
     // If data is provided create the default colIdentifier and rowDiffset
-    relation._rowDiffset = `0-${formattedData[0] ? (formattedData[0].length - 1) : 0}`;
+    relation._rowDiffset = formattedData.length && formattedData[0].length ? `0-${formattedData[0].length - 1}` : '';
     relation._colIdentifier = (schema.map(_ => _.name)).join();
     return relation;
 };

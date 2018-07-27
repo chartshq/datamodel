@@ -33,6 +33,24 @@ describe('DataModel', () => {
         });
     });
 
+    context('Test for empty DataModel', () => {
+        let data = [];
+        let schema = [];
+        let edm = new DataModel(data, schema);
+        it('should return empty data array', () => {
+            expect(edm.getData().data).to.deep.equal([]);
+        });
+        it('should return have empty fields array', () => {
+            expect(edm.getFieldspace().fields.length).to.equal(0);
+        });
+        it('should have zero columns', () => {
+            expect(edm._colIdentifier).to.equal('');
+        });
+        it('should have empty rowDiffset', () => {
+            expect(edm._rowDiffset).to.equal('');
+        });
+    });
+
     describe('#getData', () => {
         it('should return the data in the specified format', () => {
             const schema = [
