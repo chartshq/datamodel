@@ -33,6 +33,24 @@ describe('DataModel', () => {
         });
     });
 
+    context('Test for empty DataModel', () => {
+        let data = [];
+        let schema = [];
+        let edm = new DataModel(data, schema);
+        it('should return empty data array', () => {
+            expect(edm.getData().data).to.deep.equal([]);
+        });
+        it('should return have empty fields array', () => {
+            expect(edm.getFieldspace().fields.length).to.equal(0);
+        });
+        it('should have zero columns', () => {
+            expect(edm._colIdentifier).to.equal('');
+        });
+        it('should have empty rowDiffset', () => {
+            expect(edm._rowDiffset).to.equal('');
+        });
+    });
+
     describe('#getData', () => {
         it('should return the data in the specified format', () => {
             const schema = [
@@ -596,7 +614,8 @@ describe('DataModel', () => {
             expect(sortedDm.getData()).to.deep.equal(expected);
 
             sortingDetails = [
-                ['performance', ['horsepower', 'weight', (a, b) => (avg(...a.horsepower) * avg(...a.weight)) - (avg(...b.horsepower) * avg(...b.weight))]],
+                ['performance', ['horsepower', 'weight',
+                    (a, b) => (avg(...a.horsepower) * avg(...a.weight)) - (avg(...b.horsepower) * avg(...b.weight))]],
                 ['horsepower', 'desc']
             ];
             sortedDm = dataModel.sort(sortingDetails);

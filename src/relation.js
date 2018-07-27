@@ -1,4 +1,4 @@
-import { FilteringMode } from 'picasso-util';
+import { FilteringMode, getUniqueId } from 'picasso-util';
 import { persistDerivation, updateFields, cloneWithSelect, cloneWithProject, updateData } from './helper';
 import { crossProduct, difference, naturalJoinFilter, union } from './operator';
 import { DM_DERIVATIVES } from './constants';
@@ -25,18 +25,19 @@ class Relation {
         this._derivation = [];
         this._children = [];
 
+
         if (params.length === 1 && ((source = params[0]) instanceof Relation)) {
             // parent datamodel was passed as part of source
             this._colIdentifier = source._colIdentifier;
             this._rowDiffset = source._rowDiffset;
             this._parent = source;
             this._partialFieldspace = this._parent._partialFieldspace;
-            this._fieldspace = source._fieldspace;
-
-            this.calculateFieldspace().calculateFieldsConfig();
+            this._fieldStoreName = getUniqueId();
+            this.__calculateFieldspace().calculateFieldsConfig();
         } else {
             updateData(this, ...params);
-            this.calculateFieldspace().calculateFieldsConfig();
+            this._fieldStoreName = this._partialFieldspace.name;
+            this.__calculateFieldspace().calculateFieldsConfig();
         }
     }
 
@@ -54,8 +55,9 @@ class Relation {
         return this._fieldspace;
     }
 
-    calculateFieldspace () {
-        this._fieldspace = updateFields([this._rowDiffset, this._colIdentifier], this.getPartialFieldspace());
+    __calculateFieldspace () {
+        this._fieldspace = updateFields([this._rowDiffset, this._colIdentifier],
+             this.getPartialFieldspace(), this._fieldStoreName);
         return this;
     }
 

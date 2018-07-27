@@ -117,7 +117,7 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
         });
     });
     if (existingDataModel) {
-        existingDataModel.calculateFieldspace();
+        existingDataModel.__calculateFieldspace();
         newDataModel = existingDataModel;
     }
     else {

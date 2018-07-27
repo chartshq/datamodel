@@ -193,7 +193,7 @@ class DataModel extends Relation {
     addField (field) {
         this._colIdentifier += `,${field.fieldName()}`;
         this._partialFieldspace.fields.push(field);
-        this.calculateFieldspace().calculateFieldsConfig();
+        this.__calculateFieldspace().calculateFieldsConfig();
         return this;
     }
 
@@ -299,8 +299,8 @@ class DataModel extends Relation {
             }
         });
         // propagate to parent if parent is not source
-        if (this.parent && source !== this.parent) {
-            forwardPropagation(this.parent, propModel, grouped);
+        if (this._parent && source !== this._parent) {
+            forwardPropagation(this._parent, propModel, grouped);
         }
     }
 
@@ -366,8 +366,8 @@ class DataModel extends Relation {
             }
         });
         // propagate to parent if parent is not source
-        if (this.parent && source !== this.parent) {
-            forward(this.parent, propModel, true);
+        if (this._parent && source !== this._parent) {
+            forward(this._parent, propModel, true);
         }
     }
 
