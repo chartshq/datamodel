@@ -324,7 +324,7 @@ class DataModel extends Relation {
      * @param {Object} payload Object with insertion related fields.
      * @memberof DataModel
      */
-    propagateInterpolatedValues (rangeObj, payload, fromSource) {
+    propagateInterpolatedValues (rangeObj, payload, fromSource, sourceIdentifiers) {
         const source = fromSource || this;
         let propModel = rangeObj;
         if (!(propModel instanceof DataModel)) {
@@ -341,13 +341,17 @@ class DataModel extends Relation {
                 saveChild: false
             });
         }
+        if (sourceIdentifiers === undefined) {
+            sourceIdentifiers = propModel;
+        }
         const forward = (dataModel, propagationModel, isParent) => {
             dataModel.handlePropagation({
                 payload,
                 data: propagationModel,
+                sourceIdentifiers
             });
             dataModel.propagateInterpolatedValues(isParent ?
-                rangeObj : propagationModel, payload, this);
+                rangeObj : propagationModel, payload, this, sourceIdentifiers);
         };
         // propagate to children created by SELECT operation
         selectIterator(this, (targetDM, fn) => {
