@@ -32,7 +32,6 @@ class Relation {
             this._rowDiffset = source._rowDiffset;
             this._parent = source;
             this._partialFieldspace = this._parent._partialFieldspace;
-            // this._fieldspace = source._fieldspace;
             this._fieldStoreName = getUniqueId();
             this.__calculateFieldspace().calculateFieldsConfig();
         } else {
@@ -266,10 +265,6 @@ class Relation {
     }
 
     calculateFieldsConfig () {
-        if (this.isEmpty()) {
-            this._fieldConfig = {};
-            return this;
-        }
         this._fieldConfig = this._fieldspace.fields.reduce((acc, fieldDef, i) => {
             acc[fieldDef.name] = {
                 index: i,
