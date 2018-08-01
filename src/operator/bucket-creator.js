@@ -8,46 +8,43 @@ import { rowDiffsetIterator } from './row-diffset-iterator';
  * @param {number} config.numOfBins - The number of bins to be created.
  * @return {Array} Returns an array of created bins.
  */
-export function createBinnedFieldData (fielddata, rowDiffset, reducerFunc, config) {
-    let { buckets, numOfBins, binSize } = config;
+export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
+    let { buckets, numOfBins, binSize, start } = config;
     let dataStore = [];
     let binnedData = [];
     rowDiffsetIterator(rowDiffset, (i) => {
         dataStore.push({
-            data: fielddata[i],
+            data: field.data[i],
             index: i
         });
     });
 
-    if (buckets) {
-        let prevEndpoint = -Infinity;
-        buckets.end.forEach((endPoint, i) => {
-            let tempStore = dataStore.filter(datum => datum.data > prevEndpoint && datum.data <= endPoint);
-            let dataVals = tempStore.map(datum => datum.data);
-            if ((buckets.start || buckets.start === 0) && i === 0) {
-                dataVals.push(buckets.start);
-            }
-            let binVal = reducerFunc(dataVals);
-            tempStore.forEach((datum) => { binnedData[datum.index] = binVal; });
-            prevEndpoint = endPoint;
-        });
-    }
-    else {
-        binSize = binSize || Math.floor(dataStore.length / numOfBins);
-        let len = 0;
-        while (len < dataStore.length) {
-            let tempStore = [];
-            for (let i = len; i < (len + binSize); i++) {
-                if (!dataStore[i]) break;
-                tempStore.push(dataStore[i].data);
-            }
-            let binVal = reducerFunc(tempStore);
-            for (let i = len; i < (len + binSize); i++) {
-                if (!dataStore[i]) break;
-                binnedData[dataStore[i].index] = binVal;
-            }
-            len += binSize;
+    if (!buckets) {
+        let [min, max] = field.domain();
+        max += 1;
+        binSize = binSize || (max - min) / numOfBins;
+        let end = [];
+        let extraBinELm = (max - min) % binSize;
+        if (!numOfBins && extraBinELm !== 0) {
+            max = max + binSize - extraBinELm;
         }
+        let binEnd = min + binSize;
+        while (binEnd <= max) {
+            end.push(binEnd);
+            binEnd += binSize;
+        }
+        buckets = { start, end };
     }
+    let prevEndpoint = -Infinity;
+    buckets.end.forEach((endPoint, i) => {
+        let tempStore = dataStore.filter(datum => datum.data >= prevEndpoint && datum.data < endPoint);
+        let dataVals = tempStore.map(datum => datum.data);
+        if ((buckets.start || buckets.start === 0) && i === 0) {
+            dataVals.push(buckets.start);
+        }
+        let binVal = reducerFunc(dataVals);
+        tempStore.forEach((datum) => { binnedData[datum.index] = binVal; });
+        prevEndpoint = endPoint;
+    });
     return binnedData;
 }

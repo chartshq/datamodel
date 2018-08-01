@@ -1101,7 +1101,7 @@ describe('DataModel', () => {
             const dataModel = new DataModel(data1, schema1, 'Yo');
             const bin = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
             let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
-            let expData = ['65', '65', '65', '65', '65', '99', '99', '99', '99', '99'];
+            let expData = ['20', '81', '81', '81', '20', '81', '63', '81', '63', '63'];
             expect(expData).to.deep.equal(fieldData);
         });
         // it('should return correct bins when binned after a selct operation', () => {

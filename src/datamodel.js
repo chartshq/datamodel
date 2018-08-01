@@ -434,7 +434,7 @@ class DataModel extends Relation {
         }
         const field = this._partialFieldspace.fields.find(currfield => currfield.name === measureName);
         const reducerFunc = reducerStore.resolve(reducer || field.defAggFn()) || reducerStore.defaultReducer();
-        const data = createBinnedFieldData(field.data, this._rowDiffset, reducerFunc, config);
+        const data = createBinnedFieldData(field, this._rowDiffset, reducerFunc, config);
         const binField = createFields([data], [
             {
                 name: binFieldName,
