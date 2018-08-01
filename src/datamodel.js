@@ -253,10 +253,14 @@ class DataModel extends Relation {
      * @param {Object} payload - The interaction specific details.
      * @param {DataModel} source - The source DataModel instance.
      */
-    propagate (identifiers, payload, source, grouped = false) {
+    propagate (identifiers, payload, source, grouped = false, sourceIdentifiers) {
         let propModel = identifiers;
         if (!(propModel instanceof DataModel)) {
             propModel = assembleModelFromIdentifiers(this, identifiers);
+        }
+
+        if (sourceIdentifiers === undefined) {
+            sourceIdentifiers = propModel;
         }
 
         // create the filtered model
@@ -266,8 +270,9 @@ class DataModel extends Relation {
             targetDM.handlePropagation({
                 payload,
                 data: propagationData,
+                sourceIdentifiers
             });
-            targetDM.propagate(propagationData, payload, this, group);
+            targetDM.propagate(propagationData, payload, this, group, sourceIdentifiers);
         };
         // propagate to children created by SELECT operation
         selectIterator(this, (targetDM, criteria) => {
@@ -294,7 +299,9 @@ class DataModel extends Relation {
                     groupByString,
                 } = conf;
                 // group the filtered model based on groupBy string of target
-                const groupedPropModel = filteredModel.groupBy(groupByString.split(','), reducer, false);
+                const groupedPropModel = filteredModel.groupBy(groupByString.split(','), reducer, {
+                    saveChild: false
+                });
                 forwardPropagation(targetDM, groupedPropModel, true);
             }
         });
@@ -317,7 +324,7 @@ class DataModel extends Relation {
      * @param {Object} payload Object with insertion related fields.
      * @memberof DataModel
      */
-    propagateInterpolatedValues (rangeObj, payload, fromSource) {
+    propagateInterpolatedValues (rangeObj, payload, fromSource, sourceIdentifiers) {
         const source = fromSource || this;
         let propModel = rangeObj;
         if (!(propModel instanceof DataModel)) {
@@ -330,15 +337,21 @@ class DataModel extends Relation {
                     include = include && fields[fieldName] <= domain[1];
                 });
                 return include;
-            }, {}, false);
+            }, {
+                saveChild: false
+            });
+        }
+        if (sourceIdentifiers === undefined) {
+            sourceIdentifiers = propModel;
         }
         const forward = (dataModel, propagationModel, isParent) => {
             dataModel.handlePropagation({
                 payload,
                 data: propagationModel,
+                sourceIdentifiers
             });
             dataModel.propagateInterpolatedValues(isParent ?
-                rangeObj : propagationModel, payload, this);
+                rangeObj : propagationModel, payload, this, sourceIdentifiers);
         };
         // propagate to children created by SELECT operation
         selectIterator(this, (targetDM, fn) => {
