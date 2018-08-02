@@ -19,6 +19,6 @@ d3.json('./data/cars.json', (data) => {
         { name: 'second', type: 'dimension' },
     ];
     const dataModel = new DataModel(data1, schema1, 'Yo');
-    const bin = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
+    const bin = dataModel.bin('profit', { binSize: 5, name: 'sumField' }, 'count');
     bin;
 });

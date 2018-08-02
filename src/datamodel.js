@@ -454,8 +454,12 @@ class DataModel extends Relation {
                 type: FieldType.DIMENSION
             }], [binFieldName])[0];
         clone.addField(binField);
-        persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binFieldName }, null);
-        return clone;
+        let binedClone = clone.groupBy([binFieldName], {
+            measureName: reducerFunc
+        });
+        binedClone._parent = clone._parent;
+        persistDerivation(binedClone, DM_DERIVATIVES.BIN, { measureName, config, binFieldName }, null);
+        return binedClone;
     }
 }
 

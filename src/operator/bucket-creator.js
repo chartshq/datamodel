@@ -12,6 +12,7 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
     let { buckets, numOfBins, binSize, start } = config;
     let dataStore = [];
     let binnedData = [];
+    let [min, max] = field.domain();
     rowDiffsetIterator(rowDiffset, (i) => {
         dataStore.push({
             data: field.data[i],
@@ -20,7 +21,6 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
     });
 
     if (!buckets) {
-        let [min, max] = field.domain();
         max += 1;
         binSize = binSize || (max - min) / numOfBins;
         let end = [];
@@ -33,18 +33,23 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
             end.push(binEnd);
             binEnd += binSize;
         }
+        start = start || min;
         buckets = { start, end };
     }
-    let prevEndpoint = -Infinity;
-    buckets.end.forEach((endPoint, i) => {
+    let prevEndpoint = buckets.start || min;
+    buckets.end.forEach((endPoint) => {
         let tempStore = dataStore.filter(datum => datum.data >= prevEndpoint && datum.data < endPoint);
-        let dataVals = tempStore.map(datum => datum.data);
-        if ((buckets.start || buckets.start === 0) && i === 0) {
-            dataVals.push(buckets.start);
-        }
-        let binVal = reducerFunc(dataVals);
-        tempStore.forEach((datum) => { binnedData[datum.index] = binVal; });
+        tempStore.forEach((datum) => { binnedData[datum.index] = `${prevEndpoint} - ${endPoint}`; });
         prevEndpoint = endPoint;
     });
+
+    // create a bin for values less than start
+    dataStore.filter(datum => datum.data < buckets.start)
+                    .forEach((datum) => { binnedData[datum.index] = `< -${buckets.start}`; });
+
+    // create a bin for values more than end
+    dataStore.filter(datum => datum.data >= buckets.end[buckets.end.length - 1])
+                    .forEach((datum) => { binnedData[datum.index] = `> - ${buckets.end[buckets.end.length - 1]}`; });
+
     return binnedData;
 }
