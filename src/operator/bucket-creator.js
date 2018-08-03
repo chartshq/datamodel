@@ -1,4 +1,5 @@
 import { rowDiffsetIterator } from './row-diffset-iterator';
+import { curry } from 'picasso-util';
 /**
  * Creates bin f from the data and the supplied config.
  *
@@ -13,6 +14,7 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
     let dataStore = [];
     let binnedData = [];
     let [min, max] = field.domain();
+    let oriMax = max;
     rowDiffsetIterator(rowDiffset, (i) => {
         dataStore.push({
             data: field.data[i],
@@ -39,17 +41,23 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
     let prevEndpoint = buckets.start || min;
     buckets.end.forEach((endPoint) => {
         let tempStore = dataStore.filter(datum => datum.data >= prevEndpoint && datum.data < endPoint);
-        tempStore.forEach((datum) => { binnedData[datum.index] = `${prevEndpoint} - ${endPoint}`; });
+        tempStore.forEach((datum) => { binnedData[datum.index] = `${prevEndpoint}-${endPoint}`; });
         prevEndpoint = endPoint;
     });
 
     // create a bin for values less than start
     dataStore.filter(datum => datum.data < buckets.start)
-                    .forEach((datum) => { binnedData[datum.index] = `< -${buckets.start}`; });
+                    .forEach((datum) => { binnedData[datum.index] = `${min}-${buckets.start}`; });
 
     // create a bin for values more than end
     dataStore.filter(datum => datum.data >= buckets.end[buckets.end.length - 1])
-                    .forEach((datum) => { binnedData[datum.index] = `> - ${buckets.end[buckets.end.length - 1]}`; });
-
-    return binnedData;
+                    .forEach((datum) =>
+                    { binnedData[datum.index] = `${buckets.end[buckets.end.length - 1]}-${oriMax}`; });
+    let mid = binnedData.reduce((acc, cur) => {
+        let binArray = cur.split('-').map(x => parseFloat(x));
+        acc.push((binArray[0] + binArray[1]) / 2);
+        return acc;
+    }, []);
+    buckets.end.unshift(buckets.start);
+    return { data: binnedData, mid, range: buckets.end };
 }

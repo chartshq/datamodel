@@ -1,5 +1,5 @@
 import { FieldType, DimensionSubtype } from 'picasso-util';
-import { Measure, Categorical, DateTime } from './fields';
+import { Measure, Categorical, DateTime, DiscreteMeasure } from './fields';
 
 /**
  * Creates a field instance according to the provided data and schema.
@@ -13,7 +13,12 @@ import { Measure, Categorical, DateTime } from './fields';
 function createUnitField (data, schema) {
     switch (schema.type) {
     case FieldType.MEASURE:
-        return new Measure(schema.name, data, schema);
+        switch (schema.subtype) {
+        case 'discreteMeasure':
+            return new DiscreteMeasure(schema.name, data, schema, schema.bins);
+        default:
+            return new Measure(schema.name, data, schema);
+        }
     case FieldType.DIMENSION:
     default:
         switch (schema.subtype) {

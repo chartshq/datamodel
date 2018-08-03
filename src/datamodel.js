@@ -1,6 +1,6 @@
 /* eslint-disable default-case */
 
-import { FieldType } from 'picasso-util';
+import { FieldType, DimensionSubtype } from 'picasso-util';
 import { persistDerivation, assembleModelFromIdentifiers, filterPropagationModel } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {
@@ -447,19 +447,20 @@ class DataModel extends Relation {
         }
         const field = this._partialFieldspace.fields.find(currfield => currfield.name === measureName);
         const reducerFunc = reducerStore.resolve(reducer || field.defAggFn()) || reducerStore.defaultReducer();
-        const data = createBinnedFieldData(field, this._rowDiffset, reducerFunc, config);
-        const binField = createFields([data], [
+        const dataSet = createBinnedFieldData(field, this._rowDiffset, reducerFunc, config);
+        const binField = createFields([dataSet.data], [
             {
                 name: binFieldName,
-                type: FieldType.DIMENSION
+                type: FieldType.MEASURE,
+                subtype: 'discreteMeasure',
+                bins: {
+                    range: dataSet.range,
+                    mid: dataSet.mid
+                }
             }], [binFieldName])[0];
         clone.addField(binField);
-        let binedClone = clone.groupBy([binFieldName], {
-            measureName: reducerFunc
-        });
-        binedClone._parent = clone._parent;
-        persistDerivation(binedClone, DM_DERIVATIVES.BIN, { measureName, config, binFieldName }, null);
-        return binedClone;
+        persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binFieldName }, null);
+        return clone;
     }
 }
 
