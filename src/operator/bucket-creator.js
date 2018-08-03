@@ -1,5 +1,5 @@
 import { rowDiffsetIterator } from './row-diffset-iterator';
-import { curry } from 'picasso-util';
+
 /**
  * Creates bin f from the data and the supplied config.
  *
@@ -53,11 +53,10 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
     dataStore.filter(datum => datum.data >= buckets.end[buckets.end.length - 1])
                     .forEach((datum) =>
                     { binnedData[datum.index] = `${buckets.end[buckets.end.length - 1]}-${oriMax}`; });
-    let mid = binnedData.reduce((acc, cur) => {
-        let binArray = cur.split('-').map(x => parseFloat(x));
-        acc.push((binArray[0] + binArray[1]) / 2);
-        return acc;
-    }, []);
     buckets.end.unshift(buckets.start);
+    let mid = [];
+    for (let i = 1; i < buckets.end.length; i++) {
+        mid.push((buckets.end[i - 1] + buckets.end[i]) / 2);
+    }
     return { data: binnedData, mid, range: buckets.end };
 }

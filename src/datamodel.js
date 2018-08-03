@@ -1,6 +1,6 @@
 /* eslint-disable default-case */
 
-import { FieldType, DimensionSubtype } from 'picasso-util';
+import { FieldType } from 'picasso-util';
 import { persistDerivation, assembleModelFromIdentifiers, filterPropagationModel } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {
@@ -452,7 +452,7 @@ class DataModel extends Relation {
             {
                 name: binFieldName,
                 type: FieldType.MEASURE,
-                subtype: 'discreteMeasure',
+                subtype: 'discreteMeasure', // @todo : DimensionSubtype
                 bins: {
                     range: dataSet.range,
                     mid: dataSet.mid

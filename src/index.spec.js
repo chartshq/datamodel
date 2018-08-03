@@ -1051,7 +1051,7 @@ describe('DataModel', () => {
             };
             const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
             let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
-            let expectedData = ['20', '45', '45', '45', '20', '36', '42', '36', '42'];
+            let expectedData = ['5-11', '11-16', '11-16', '11-16', '5-11', '16-20', '20-30', '16-20', '20-30'];
             expect(fieldData).to.deep.equal(expectedData);
         });
         it('should bin data when num of bins given', () => {
@@ -1076,7 +1076,7 @@ describe('DataModel', () => {
             const dataModel = new DataModel(data1, schema1, 'Yo');
             const bin = dataModel.bin('profit', { numOfBins: 2, name: 'sumField' });
             let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
-            let expData = ['65', '65', '65', '65', '65', '99', '99', '99', '99', '99'];
+            let expData = ['10-16', '10-16', '10-16', '10-16', '10-16', '16-22', '16-22', '16-22', '16-22', '16-22'];
             expect(fieldData).to.deep.equal(expData);
         });
         it('should bin data when binSize is given', () => {
@@ -1101,8 +1101,12 @@ describe('DataModel', () => {
             const dataModel = new DataModel(data1, schema1, 'Yo');
             const bin = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
             let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
-            let expData = ['20', '81', '81', '81', '20', '81', '63', '81', '63', '63'];
+            let expData = ['10-15', '15-20', '15-20', '15-20', '10-15', '15-20', '20-25', '15-20', '20-25', '20-25'];
             expect(expData).to.deep.equal(fieldData);
+            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().mid)
+                            .to.deep.equal([12.5, 17.5, 22.5]);
+            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().range)
+                            .to.deep.equal([10, 15, 20, 25]);
         });
         // it('should return correct bins when binned after a selct operation', () => {
         //     const data1 = [
