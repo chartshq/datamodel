@@ -4,7 +4,7 @@ import Measure from './measure';
 /**
  * Represents categorical field subtype.
  *
- * @extends Dimension
+ * @extends Measure
  */
 class DiscreteMeasure extends Measure {
     constructor(name, data, schema, bin) {
