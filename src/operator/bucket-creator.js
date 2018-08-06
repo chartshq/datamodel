@@ -20,6 +20,8 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
     let prevEndpoint;
     let mid;
     let range;
+
+    // create dataStore with index according to rowDiffSet
     rowDiffsetIterator(rowDiffset, (i) => {
         dataStore.push({
             data: field.data[i],
@@ -27,6 +29,7 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
         });
     });
 
+    // create buckets if buckets not given
     if (!buckets) {
         max += 1;
         binSize = binSize || (max - min) / numOfBins;
@@ -43,7 +46,11 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
         start = start || min;
         buckets = { start, end };
     }
+
+    // initialize intial bucket start
     prevEndpoint = buckets.start === 0 ? 0 : buckets.start || min;
+
+    // mark each data in dataStore to respective buckets
     buckets.end.forEach((endPoint) => {
         let tempStore = dataStore.filter(datum => datum.data >= prevEndpoint && datum.data < endPoint);
         tempStore.forEach((datum) => { binnedData[datum.index] = `${prevEndpoint}-${endPoint}`; });
@@ -58,12 +65,19 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
     dataStore.filter(datum => datum.data >= buckets.end[buckets.end.length - 1])
                     .forEach((datum) =>
                     { binnedData[datum.index] = `${buckets.end[buckets.end.length - 1]}-${oriMax}`; });
+
+    // create range and mid
+    // append start to bucket marks
     buckets.end.unshift(buckets.start);
     range = new Set(buckets.end);
-    min < buckets.start ? range.add(min) : false;
-    oriMax > buckets.end[buckets.end.length - 1] ? range.add(oriMax) : false;
+
+    // Add endpoints to buckets marks if not added
+    if (min < buckets.start) { range.add(min); }
+    if (oriMax > buckets.end[buckets.end.length - 1]) { range.add(oriMax); }
+
     range = [...range].sort((a, b) => a - b);
     mid = [];
+
     for (let i = 1; i < range.length; i++) {
         mid.push((range[i - 1] + range[i]) / 2);
     }
