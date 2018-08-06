@@ -21,4 +21,5 @@ d3.json('./data/cars.json', (data) => {
     const dataModel = new DataModel(data1, schema1, 'Yo');
     const bin = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
     let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+    let expData = ['10-15', '15-20', '15-20', '15-20', '10-15', '15-20', '20-25', '15-20', '20-25', '20-25'];
 });

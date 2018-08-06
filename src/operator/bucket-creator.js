@@ -15,6 +15,11 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
     let binnedData = [];
     let [min, max] = field.domain();
     let oriMax = max;
+    let end = [];
+    let binEnd;
+    let prevEndpoint;
+    let mid;
+    let range;
     rowDiffsetIterator(rowDiffset, (i) => {
         dataStore.push({
             data: field.data[i],
@@ -25,12 +30,12 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
     if (!buckets) {
         max += 1;
         binSize = binSize || (max - min) / numOfBins;
-        let end = [];
-        let extraBinELm = (max - min) % binSize;
+
+        const extraBinELm = (max - min) % binSize;
         if (!numOfBins && extraBinELm !== 0) {
             max = max + binSize - extraBinELm;
         }
-        let binEnd = min + binSize;
+        binEnd = min + binSize;
         while (binEnd <= max) {
             end.push(binEnd);
             binEnd += binSize;
@@ -38,7 +43,7 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
         start = start || min;
         buckets = { start, end };
     }
-    let prevEndpoint = buckets.start || min;
+    prevEndpoint = buckets.start === 0 ? 0 : buckets.start || min;
     buckets.end.forEach((endPoint) => {
         let tempStore = dataStore.filter(datum => datum.data >= prevEndpoint && datum.data < endPoint);
         tempStore.forEach((datum) => { binnedData[datum.index] = `${prevEndpoint}-${endPoint}`; });
@@ -54,9 +59,13 @@ export function createBinnedFieldData (field, rowDiffset, reducerFunc, config) {
                     .forEach((datum) =>
                     { binnedData[datum.index] = `${buckets.end[buckets.end.length - 1]}-${oriMax}`; });
     buckets.end.unshift(buckets.start);
-    let mid = [];
-    for (let i = 1; i < buckets.end.length; i++) {
-        mid.push((buckets.end[i - 1] + buckets.end[i]) / 2);
+    range = new Set(buckets.end);
+    min < buckets.start ? range.add(min) : false;
+    oriMax > buckets.end[buckets.end.length - 1] ? range.add(oriMax) : false;
+    range = [...range].sort((a, b) => a - b);
+    mid = [];
+    for (let i = 1; i < range.length; i++) {
+        mid.push((range[i - 1] + range[i]) / 2);
     }
-    return { data: binnedData, mid, range: buckets.end };
+    return { data: binnedData, mid, range };
 }

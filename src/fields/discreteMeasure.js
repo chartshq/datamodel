@@ -10,7 +10,7 @@ class DiscreteMeasure extends Measure {
     constructor(name, data, schema, bin) {
         super(name, data, schema);
         this.bin = bin;
-        this.subtype = 'discreteMeasure';
+        this.subtype = 'discrete';
     }
 
     /**

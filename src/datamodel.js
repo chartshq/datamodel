@@ -452,7 +452,7 @@ class DataModel extends Relation {
             {
                 name: binFieldName,
                 type: FieldType.MEASURE,
-                subtype: 'discreteMeasure', // @todo : DimensionSubtype
+                subtype: 'discrete', // @todo : DimensionSubtype
                 bins: {
                     range: dataSet.range,
                     mid: dataSet.mid

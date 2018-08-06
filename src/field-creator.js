@@ -14,7 +14,7 @@ function createUnitField (data, schema) {
     switch (schema.type) {
     case FieldType.MEASURE:
         switch (schema.subtype) {
-        case 'discreteMeasure':
+        case 'discrete':
             return new DiscreteMeasure(schema.name, data, schema, schema.bins);
         default:
             return new Measure(schema.name, data, schema);

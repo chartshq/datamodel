@@ -1054,6 +1054,39 @@ describe('DataModel', () => {
             let expectedData = ['5-11', '11-16', '11-16', '11-16', '5-11', '16-20', '20-30', '16-20', '20-30'];
             expect(fieldData).to.deep.equal(expectedData);
         });
+        it('should bin the data when buckets are given but data value having lesser and greater value', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 5, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 5, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 32, sales: 25, first: 'White', second: 'walls' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, 'Yo');
+
+            const buckets = {
+                start: 10,
+                end: [11, 16, 20, 30]
+            };
+            const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
+            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+            let expectedData = ['10-11', '5-10', '5-10', '11-16', '10-11', '16-20', '20-30', '16-20', '30-32'];
+            expect(fieldData).to.deep.equal(expectedData);
+            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().mid)
+                            .to.deep.equal([7.5, 10.5, 13.5, 18, 25, 31]);
+            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().range)
+                            .to.deep.equal([5, 10, 11, 16, 20, 30, 32]);
+        });
         it('should bin data when num of bins given', () => {
             const data1 = [
                 { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
