@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import DataModel from '../datamodel';
-import { compose, columnFilter, rowFilter, groupBy, bin } from './compose';
+import { compose, project, select, groupBy, bin } from './compose';
 
 describe('Testing compose functionality', () => {
     const data1 = [
@@ -69,7 +69,7 @@ describe('Testing compose functionality', () => {
             const dataModel = new DataModel(data1, schema1);
             const dataModel2 = new DataModel(data1, schema1);
             let composedFn = compose(
-                rowFilter(fields => fields.profit.value <= 15),
+                select(fields => fields.profit.value <= 15),
 
             );
             let normalDm = dataModel.select(fields => fields.profit.value <= 15);
@@ -81,8 +81,8 @@ describe('Testing compose functionality', () => {
             const dataModel = new DataModel(data1, schema1);
             const dataModel2 = new DataModel(data1, schema1);
             let composedFn = compose(
-                rowFilter(fields => fields.profit.value <= 15),
-                columnFilter(['profit', 'sales'])
+                select(fields => fields.profit.value <= 15),
+                project(['profit', 'sales'])
             );
 
             let normalDm = dataModel.select(fields => fields.profit.value <= 15);
@@ -95,8 +95,8 @@ describe('Testing compose functionality', () => {
             const dataModel = new DataModel(data1, schema1);
             const dataModel2 = new DataModel(data1, schema1);
             let composedFn = compose(
-                rowFilter(fields => fields.profit.value <= 15),
-                columnFilter(['profit', 'sales']),
+                select(fields => fields.profit.value <= 15),
+                project(['profit', 'sales']),
                 groupBy(['profit'])
             );
 
@@ -164,7 +164,7 @@ describe('Testing compose functionality', () => {
             let selectedBin = bins.select(fields => fields.profit.value <= 15);
             let composedFn = compose(
                 bin('profit', { binSize: 5, name: 'sumField' }),
-                rowFilter(fields => fields.profit.value <= 15)
+                select(fields => fields.profit.value <= 15)
             );
             let composedDm = composedFn(dataModel2);
             expect(selectedBin.getData()).to.deep.equal(composedDm.getData());
@@ -174,12 +174,12 @@ describe('Testing compose functionality', () => {
             const dataModel = new DataModel(data1, schema1);
             const dataModel2 = new DataModel(data1, schema1);
             const composedFn = compose(
-                rowFilter(fields => fields.profit.value <= 15),
+                select(fields => fields.profit.value <= 15),
             );
 
             const nestedComposedFn1 = compose(
                 composedFn,
-                columnFilter(['profit', 'sales'])
+                project(['profit', 'sales'])
             );
             let normalDm = dataModel.select(fields => fields.profit.value <= 15);
             normalDm = normalDm.project(['profit', 'sales']);
