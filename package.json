@@ -38,7 +38,7 @@
   ],
   "dependencies": {
     "d3-dsv": "^1.0.8",
-    "muze-util": "git+ssh://git@bitbucket.org/fusioncharts/muze-util.git#develop"
+    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
