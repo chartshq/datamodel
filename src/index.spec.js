@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { FilteringMode } from 'picasso-util';
+import { FilteringMode } from 'muze-util';
 import DataModel from './index';
 
 function avg(...nums) {

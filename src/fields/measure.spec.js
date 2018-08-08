@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { FieldType } from 'picasso-util';
+import { FieldType } from 'muze-util';
 import Measure from './measure';
 
 describe('Measure Field Type', () => {

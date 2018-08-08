@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { FieldType } from 'picasso-util';
+import { FieldType } from 'muze-util';
 import Dimension from './dimension';
 
 describe('Dimension Field Type', () => {

@@ -1,4 +1,4 @@
-import { FieldType, FilteringMode } from 'picasso-util';
+import { FieldType, FilteringMode } from 'muze-util';
 import Field from './fields/field';
 import fieldStore from './field-store';
 import Value from './value';

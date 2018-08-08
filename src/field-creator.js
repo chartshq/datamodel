@@ -1,4 +1,4 @@
-import { FieldType, DimensionSubtype } from 'picasso-util';
+import { FieldType, DimensionSubtype } from 'muze-util';
 import { Measure, Categorical, DateTime } from './fields';
 
 /**

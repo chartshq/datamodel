@@ -1,6 +1,6 @@
 /* eslint-disable default-case */
 
-import { FieldType } from 'picasso-util';
+import { FieldType } from 'muze-util';
 import { persistDerivation, assembleModelFromIdentifiers, filterPropagationModel } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {

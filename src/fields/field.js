@@ -1,4 +1,4 @@
-import { DimensionSubtype } from 'picasso-util';
+import { DimensionSubtype } from 'muze-util';
 import { rowDiffsetIterator } from '../operator/row-diffset-iterator'
 ;
 

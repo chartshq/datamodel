@@ -1,4 +1,4 @@
-import { DataFormat } from 'picasso-util';
+import { DataFormat } from 'muze-util';
 
 export default {
     dataFormat: DataFormat.AUTO
