@@ -4,12 +4,19 @@
 import { expect } from 'chai';
 import { FilteringMode } from 'picasso-util';
 import DataModel from './index';
+import pkg from '../package.json';
 
 function avg(...nums) {
     return nums.reduce((acc, next) => acc + next, 0) / nums.length;
 }
 
 describe('DataModel', () => {
+    describe('#version', () => {
+        it('should be same to the version value specified in package.json file', () => {
+            expect(DataModel.version).to.equal(pkg.version);
+        });
+    });
+
     describe('#clone', () => {
         it('should make a new copy of the current DataModel instance', () => {
             const data = [
