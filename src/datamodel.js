@@ -439,15 +439,14 @@ class DataModel extends Relation {
      @param {Object} config : bucketObj : {} || binSize : number || noOfBins : number || binFieldName : string
      @param {Function | FunctionName} reducer : binning reducer
      */
-    bin (measureName, config = { }, reducer) {
+    bin (measureName, config = { }) {
         const clone = this.clone();
         const binFieldName = config.name || `${measureName}_binned`;
         if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[measureName]) {
             throw new Error(`Field ${measureName} already exists.`);
         }
         const field = this._partialFieldspace.fields.find(currfield => currfield.name === measureName);
-        const reducerFunc = reducerStore.resolve(reducer || field.defAggFn()) || reducerStore.defaultReducer();
-        const dataSet = createBinnedFieldData(field, this._rowDiffset, reducerFunc, config);
+        const dataSet = createBinnedFieldData(field, this._rowDiffset, config);
         const binField = createFields([dataSet.data], [
             {
                 name: binFieldName,
