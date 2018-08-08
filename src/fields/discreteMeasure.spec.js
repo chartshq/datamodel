@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { FieldType } from 'picasso-util';
+import { FieldType } from 'muze-util';
 import DiscreteMeasure from './discreteMeasure';
 
 describe('Measure Field Subtype', () => {
