@@ -365,11 +365,16 @@ class DataModel extends Relation {
         }
         const field = this._partialFieldspace.fields.find(currfield => currfield.name === measureName);
         const reducerFunc = reducerStore.resolve(reducer || field.defAggFn()) || reducerStore.defaultReducer();
-        const data = createBinnedFieldData(field, this._rowDiffset, reducerFunc, config);
-        const binField = createFields([data], [
+        const dataSet = createBinnedFieldData(field, this._rowDiffset, reducerFunc, config);
+        const binField = createFields([dataSet.data], [
             {
                 name: binFieldName,
-                type: FieldType.DIMENSION
+                type: FieldType.MEASURE,
+                subtype: 'discrete', // @todo : DimensionSubtype
+                bins: {
+                    range: dataSet.range,
+                    mid: dataSet.mid
+                }
             }], [binFieldName])[0];
         clone.addField(binField);
         persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binFieldName }, null);
