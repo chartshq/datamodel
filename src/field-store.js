@@ -1,4 +1,4 @@
-import { FieldType, getUniqueId } from 'muze-util';
+import { FieldType, getUniqueId } from 'muze-utils';
 
 const fieldStore = {
     data: {},

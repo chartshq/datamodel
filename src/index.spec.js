@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { FilteringMode } from 'muze-util';
+import { FilteringMode } from 'muze-utils';
 import DataModel from './index';
 import pkg from '../package.json';
 

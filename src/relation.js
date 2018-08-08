@@ -1,4 +1,4 @@
-import { FilteringMode, getUniqueId } from 'muze-util';
+import { FilteringMode, getUniqueId } from 'muze-utils';
 import { persistDerivation, updateFields, cloneWithSelect, cloneWithProject, updateData } from './helper';
 import { crossProduct, difference, naturalJoinFilter, union } from './operator';
 import { DM_DERIVATIVES } from './constants';

@@ -1,4 +1,4 @@
-import { FieldType, DimensionSubtype } from 'muze-util'; 
+import { FieldType, DimensionSubtype } from 'muze-utils';
 import { Measure, Categorical, DateTime, DiscreteMeasure } from './fields';
 
 /**

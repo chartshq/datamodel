@@ -1,4 +1,4 @@
-import { FieldType, FilteringMode } from 'muze-util';
+import { FieldType, FilteringMode } from 'muze-utils';
 import Field from './fields/field';
 import fieldStore from './field-store';
 import Value from './value';

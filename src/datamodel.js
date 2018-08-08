@@ -1,6 +1,6 @@
 /* eslint-disable default-case */
 
-import { FieldType } from 'muze-util';
+import { FieldType } from 'muze-utils';
 import { persistDerivation, propagateIdentifiers, propagateRange, assembleModelFromIdentifiers } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {

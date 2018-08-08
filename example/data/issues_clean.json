@@ -4380,7 +4380,7 @@
         "assignee": "Rousan Ali",
         "updateDate": "2018-05-31T21:08:45.526+0530",
         "status": "Resolved",
-        "summary": "Remove cyclic dependancy from muze-util",
+        "summary": "Remove cyclic dependancy from muze-utils",
         "timespent": null,
         "aggregatedTimespent": null,
         "storyPoint": 1,

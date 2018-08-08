@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { DimensionSubtype } from 'muze-util';
+import { DimensionSubtype } from 'muze-utils';
 import { DateTimeFormatter } from '../utils';
 import DateTime from './datetime';
 
