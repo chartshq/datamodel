@@ -1,15 +1,12 @@
 /* eslint-disable default-case */
 
 import { FieldType } from 'muze-util';
-import { persistDerivation, assembleModelFromIdentifiers, filterPropagationModel } from './helper';
+import { persistDerivation, propagateIdentifiers, propagateRange, assembleModelFromIdentifiers } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {
     dataBuilder,
     rowDiffsetIterator,
-    groupBy,
-    groupByIterator,
-    projectIterator,
-    selectIterator,
+    groupBy
 } from './operator';
 import { createBinnedFieldData } from './operator/bucket-creator';
 import Relation from './relation';
@@ -251,64 +248,20 @@ class DataModel extends Relation {
      * @public
      * @param {Array} identifiers - A list of identifiers that were interacted with.
      * @param {Object} payload - The interaction specific details.
-     * @param {DataModel} source - The source DataModel instance.
+     *
+     * @return {DataModel} DataModel instance.
      */
-    propagate (identifiers, payload, source, grouped = false, sourceIdentifiers) {
+    propagate (identifiers, payload) {
         let propModel = identifiers;
-        if (!(propModel instanceof DataModel)) {
+        if (!(identifiers && identifiers instanceof DataModel)) {
             propModel = assembleModelFromIdentifiers(this, identifiers);
         }
 
-        if (sourceIdentifiers === undefined) {
-            sourceIdentifiers = propModel;
-        }
-
-        // create the filtered model
-        const filteredModel = filterPropagationModel(this, propModel);
-        // function to propagate to target the DataModel instance.
-        const forwardPropagation = (targetDM, propagationData, group) => {
-            targetDM.handlePropagation({
-                payload,
-                data: propagationData,
-                sourceIdentifiers
-            });
-            targetDM.propagate(propagationData, payload, this, group, sourceIdentifiers);
-        };
-        // propagate to children created by SELECT operation
-        selectIterator(this, (targetDM, criteria) => {
-            if (targetDM !== source) {
-                let selectedModel = propModel;
-                if (grouped) {
-                    selectedModel = !propModel._isEmpty() && propModel.select(criteria);
-                }
-                forwardPropagation(targetDM, selectedModel);
-            }
+        propagateIdentifiers(this, propModel, {
+            grouped: false,
+            payload
         });
-        // propagate to children created by PROJECT operation
-        projectIterator(this, (targetDM) => {
-            if (targetDM !== source) {
-                // pass al the props cause it won't make a difference
-                forwardPropagation(targetDM, propModel, grouped);
-            }
-        });
-        // propagate to children created by groupBy operation
-        groupByIterator(this, (targetDM, conf) => {
-            if (targetDM !== source) {
-                const {
-                    reducer,
-                    groupByString,
-                } = conf;
-                // group the filtered model based on groupBy string of target
-                const groupedPropModel = filteredModel.groupBy(groupByString.split(','), reducer, {
-                    saveChild: false
-                });
-                forwardPropagation(targetDM, groupedPropModel, true);
-            }
-        });
-        // propagate to parent if parent is not source
-        if (this._parent && source !== this._parent) {
-            forwardPropagation(this._parent, propModel, grouped);
-        }
+        return this;
     }
 
     /**
@@ -322,10 +275,11 @@ class DataModel extends Relation {
      * @private
      * @param {Object} rangeObj Object with field names and corresponding selected ranges.
      * @param {Object} payload Object with insertion related fields.
+     *
+     * @return {DataModel} DataModel instance.
      * @memberof DataModel
      */
-    propagateInterpolatedValues (rangeObj, payload, fromSource, sourceIdentifiers) {
-        const source = fromSource || this;
+    propagateInterpolatedValues (rangeObj, payload) {
         let propModel = rangeObj;
         if (!(propModel instanceof DataModel)) {
             const measures = Object.keys(rangeObj);
@@ -341,47 +295,11 @@ class DataModel extends Relation {
                 saveChild: false
             });
         }
-        if (sourceIdentifiers === undefined) {
-            sourceIdentifiers = propModel;
-        }
-        const forward = (dataModel, propagationModel, isParent) => {
-            dataModel.handlePropagation({
-                payload,
-                data: propagationModel,
-                sourceIdentifiers
-            });
-            dataModel.propagateInterpolatedValues(isParent ?
-                rangeObj : propagationModel, payload, this, sourceIdentifiers);
-        };
-        // propagate to children created by SELECT operation
-        selectIterator(this, (targetDM, fn) => {
-            if (targetDM !== source) {
-                let selectModel;
-                selectModel = propModel.select(fn, {
-                    saveChild: false
-                });
-                forward(targetDM, selectModel);
-            }
+        propagateRange(this, propModel, {
+            payload,
+            grouped: false
         });
-        // propagate to children created by PROJECT operation
-        projectIterator(this, (targetDM, actualProjField) => {
-            if (targetDM !== source) {
-                let projectModel = propModel.project(actualProjField, {
-                    saveChild: false
-                });
-                forward(targetDM, projectModel);
-            }
-        });
-        // propagate to children created by GROUPBY operation
-        groupByIterator(this, (targetDM) => {
-            if (targetDM !== source) {
-                forward(targetDM, propModel);
-            }
-        });
-        // propagate to parent if parent is not source
-        if (this._parent && source !== this._parent) {
-            forward(this._parent, propModel, true);
-        }
+        return this;
     }
 
     /**
@@ -429,9 +347,9 @@ class DataModel extends Relation {
      * @param {DataModel} identifiers The propagated DataModel.
      * @memberof DataModel
      */
-    handlePropagation (payload, identifiers) {
+    handlePropagation (payload) {
         let propListeners = this._onPropagation;
-        propListeners.forEach(fn => fn.call(this, payload, identifiers));
+        propListeners.forEach(fn => fn.call(this, payload));
     }
 
     /**
@@ -439,19 +357,23 @@ class DataModel extends Relation {
      @param {Object} config : bucketObj : {} || binSize : number || noOfBins : number || binFieldName : string
      @param {Function | FunctionName} reducer : binning reducer
      */
-    bin (measureName, config = { }, reducer) {
+    bin (measureName, config = { }) {
         const clone = this.clone();
         const binFieldName = config.name || `${measureName}_binned`;
         if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[measureName]) {
             throw new Error(`Field ${measureName} already exists.`);
         }
         const field = this._partialFieldspace.fields.find(currfield => currfield.name === measureName);
-        const reducerFunc = reducerStore.resolve(reducer || field.defAggFn()) || reducerStore.defaultReducer();
-        const data = createBinnedFieldData(field.data, this._rowDiffset, reducerFunc, config);
-        const binField = createFields([data], [
+        const dataSet = createBinnedFieldData(field, this._rowDiffset, config);
+        const binField = createFields([dataSet.data], [
             {
                 name: binFieldName,
-                type: FieldType.DIMENSION
+                type: FieldType.MEASURE,
+                subtype: 'discrete', // @todo : DimensionSubtype
+                bins: {
+                    range: dataSet.range,
+                    mid: dataSet.mid
+                }
             }], [binFieldName])[0];
         clone.addField(binField);
         persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binFieldName }, null);

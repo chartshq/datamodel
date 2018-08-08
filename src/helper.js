@@ -2,7 +2,12 @@ import { FieldType, FilteringMode } from 'muze-util';
 import Field from './fields/field';
 import fieldStore from './field-store';
 import Value from './value';
-import { rowDiffsetIterator } from './operator';
+import {
+    rowDiffsetIterator,
+    groupByIterator,
+    projectIterator,
+    selectIterator
+} from './operator';
 import { DM_DERIVATIVES, ROW_ID } from './constants';
 import createFields from './field-creator';
 import defaultConfig from './default-config';
@@ -217,4 +222,121 @@ export const fieldInSchema = (schema, field) => {
         }
     }
     return null;
+};
+
+export const propagateIdentifiers = (dataModel, identifiers, config = {}, source) => {
+    let propModel = identifiers;
+    let payload = config.payload;
+    let sourceIdentifiers = config.sourceIdentifiers;
+    let grouped = config.grouped;
+
+    source = source || dataModel;
+    if (sourceIdentifiers === undefined) {
+        config.sourceIdentifiers = sourceIdentifiers = propModel;
+    }
+
+    // create the filtered model
+    const filteredModel = filterPropagationModel(dataModel, propModel);
+    // function to propagate to target the DataModel instance.
+    const forwardPropagation = (targetDM, propagationData, group) => {
+        targetDM.handlePropagation({
+            payload,
+            data: propagationData,
+            sourceIdentifiers
+        });
+        propagateIdentifiers(targetDM, propagationData, {
+            payload,
+            sourceIdentifiers,
+            grouped: group
+        }, dataModel);
+    };
+    // propagate to children created by SELECT operation
+    selectIterator(dataModel, (targetDM, criteria) => {
+        if (targetDM !== source) {
+            let selectedModel = propModel;
+            if (grouped) {
+                selectedModel = !propModel._isEmpty() && propModel.select(criteria);
+            }
+            forwardPropagation(targetDM, selectedModel, grouped);
+        }
+    });
+    // propagate to children created by PROJECT operation
+    projectIterator(dataModel, (targetDM) => {
+        if (targetDM !== source) {
+            // pass al the props cause it won't make a difference
+            forwardPropagation(targetDM, propModel, grouped);
+        }
+    });
+    // propagate to children created by groupBy operation
+    groupByIterator(dataModel, (targetDM, conf) => {
+        if (targetDM !== source) {
+            const {
+                reducer,
+                groupByString,
+            } = conf;
+            // group the filtered model based on groupBy string of target
+            const groupedPropModel = filteredModel.groupBy(groupByString.split(','), reducer, {
+                saveChild: false
+            });
+            forwardPropagation(targetDM, groupedPropModel, true);
+        }
+    });
+    // propagate to parent if parent is not source
+    if (dataModel._parent && source !== dataModel._parent) {
+        forwardPropagation(dataModel._parent, propModel, grouped);
+    }
+};
+
+export const propagateRange = (dataModel, propModel, config = {}, source) => {
+    let payload = config.payload;
+    let sourceIdentifiers = config.sourceIdentifiers;
+
+    source = source || dataModel;
+    if (sourceIdentifiers === undefined) {
+        config.sourceIdentifiers = sourceIdentifiers = propModel;
+    }
+
+    const forward = (targetDM, propagationModel, isParent) => {
+        targetDM.handlePropagation({
+            payload,
+            data: propagationModel,
+            sourceIdentifiers
+        });
+        propagateRange(targetDM, isParent ? propModel : propagationModel, {
+            payload,
+            sourceIdentifiers
+        }, dataModel);
+    };
+
+    // propagate to children created by SELECT operation
+    selectIterator(dataModel, (targetDM, fn) => {
+        if (targetDM !== source) {
+            let selectModel;
+            selectModel = propModel.select(fn, {
+                saveChild: false
+            });
+            forward(targetDM, selectModel);
+        }
+    });
+    // propagate to children created by PROJECT operation
+    projectIterator(dataModel, (targetDM, actualProjField) => {
+        if (targetDM !== source) {
+            let projectModel = propModel.project(actualProjField, {
+                saveChild: false
+            });
+            forward(targetDM, projectModel);
+        }
+    });
+
+    // propagate to children created by GROUPBY operation
+    groupByIterator(dataModel, (targetDM) => {
+        if (targetDM !== source) {
+            forward(targetDM, propModel);
+        }
+    });
+
+    // propagate to parent if parent is not source
+    if (dataModel._parent && source !== dataModel._parent) {
+        forward(dataModel._parent, propModel);
+    }
 };

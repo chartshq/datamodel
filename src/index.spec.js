@@ -4,12 +4,19 @@
 import { expect } from 'chai';
 import { FilteringMode } from 'muze-util';
 import DataModel from './index';
+import pkg from '../package.json';
 
 function avg(...nums) {
     return nums.reduce((acc, next) => acc + next, 0) / nums.length;
 }
 
 describe('DataModel', () => {
+    describe('#version', () => {
+        it('should be same to the version value specified in package.json file', () => {
+            expect(DataModel.version).to.equal(pkg.version);
+        });
+    });
+
     describe('#clone', () => {
         it('should make a new copy of the current DataModel instance', () => {
             const data = [
@@ -1051,8 +1058,41 @@ describe('DataModel', () => {
             };
             const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
             let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
-            let expectedData = ['20', '45', '45', '45', '20', '36', '42', '36', '42'];
+            let expectedData = ['5-11', '11-16', '11-16', '11-16', '5-11', '16-20', '20-30', '16-20', '20-30'];
             expect(fieldData).to.deep.equal(expectedData);
+        });
+        it('should bin the data when buckets are given but data value having lesser and greater value', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 5, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 5, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 32, sales: 25, first: 'White', second: 'walls' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, 'Yo');
+
+            const buckets = {
+                start: 10,
+                end: [11, 16, 20, 30]
+            };
+            const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
+            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+            let expectedData = ['10-11', '5-10', '5-10', '11-16', '10-11', '16-20', '20-30', '16-20', '30-32'];
+            expect(fieldData).to.deep.equal(expectedData);
+            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().mid)
+                            .to.deep.equal([7.5, 10.5, 13.5, 18, 25, 31]);
+            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().range)
+                            .to.deep.equal([5, 10, 11, 16, 20, 30, 32]);
         });
         it('should bin data when num of bins given', () => {
             const data1 = [
@@ -1076,7 +1116,7 @@ describe('DataModel', () => {
             const dataModel = new DataModel(data1, schema1, 'Yo');
             const bin = dataModel.bin('profit', { numOfBins: 2, name: 'sumField' });
             let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
-            let expData = ['65', '65', '65', '65', '65', '99', '99', '99', '99', '99'];
+            let expData = ['10-16', '10-16', '10-16', '10-16', '10-16', '16-22', '16-22', '16-22', '16-22', '16-22'];
             expect(fieldData).to.deep.equal(expData);
         });
         it('should bin data when binSize is given', () => {
@@ -1101,8 +1141,12 @@ describe('DataModel', () => {
             const dataModel = new DataModel(data1, schema1, 'Yo');
             const bin = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
             let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
-            let expData = ['65', '65', '65', '65', '65', '99', '99', '99', '99', '99'];
+            let expData = ['10-15', '15-20', '15-20', '15-20', '10-15', '15-20', '20-25', '15-20', '20-25', '20-25'];
             expect(expData).to.deep.equal(fieldData);
+            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().mid)
+                            .to.deep.equal([12.5, 17.5, 22.5]);
+            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().range)
+                            .to.deep.equal([10, 15, 20, 25]);
         });
         // it('should return correct bins when binned after a selct operation', () => {
         //     const data1 = [
