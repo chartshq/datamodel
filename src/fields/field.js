@@ -1,4 +1,4 @@
-import { DimensionSubtype } from 'picasso-util';
+import { DimensionSubtype } from 'muze-utils';
 import { rowDiffsetIterator } from '../operator/row-diffset-iterator'
 ;
 
@@ -77,7 +77,7 @@ export default class Field {
     // }
 
     subType() {
-        return this._ref.subtype();
+        return this._ref.subType();
     }
 
     getMinDiff () {
@@ -126,5 +126,9 @@ export default class Field {
             data.push(this._ref.data[i]);
         });
         return data;
+    }
+
+    bins() {
+        return this._ref.bins();
     }
 }

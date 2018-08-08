@@ -1,4 +1,4 @@
-import { DimensionSubtype, getMinDiff } from 'picasso-util';
+import { DimensionSubtype, getMinDiff } from 'muze-utils';
 import Dimension from './dimension';
 import { DateTimeFormatter } from '../utils';
 

@@ -27,7 +27,7 @@ module.exports = function (config) {
                             options: { esModules: true },
                         },
                         enforce: 'pre',
-                        exclude: /node_modules|src\/utils\/|\.spec\.js$|\/picasso-util/,
+                        exclude: /node_modules|src\/utils\/|\.spec\.js$|\/muze-utils/,
                     },
                 ],
             },

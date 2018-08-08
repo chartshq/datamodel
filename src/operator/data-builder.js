@@ -1,4 +1,4 @@
-import { FieldType, DimensionSubtype } from 'picasso-util';
+import { FieldType, DimensionSubtype } from 'muze-utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import { mergeSort } from './merge-sort';
 import { fieldInSchema } from '../helper';

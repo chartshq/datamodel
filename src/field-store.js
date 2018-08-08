@@ -1,4 +1,4 @@
-import { FieldType, getUniqueId } from 'picasso-util';
+import { FieldType, getUniqueId } from 'muze-utils';
 
 const fieldStore = {
     data: {},

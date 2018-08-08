@@ -1,6 +1,6 @@
 /* global describe, it, beforeEach */
 /* eslint-disable no-unused-expressions */
-import { DimensionSubtype, FieldType } from 'picasso-util';
+import { DimensionSubtype, FieldType } from 'muze-utils';
 import { expect } from 'chai';
 
 import Field from './field';

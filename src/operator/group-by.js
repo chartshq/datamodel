@@ -14,6 +14,8 @@ function getFieldArr (dataModel, fieldArr) {
     const retArr = [];
     const fieldStore = dataModel.getPartialFieldspace();
     const dimensions = fieldStore.getDimension();
+    const measures = fieldStore.getMeasure();
+
     Object.entries(dimensions).forEach(([key]) => {
         if (fieldArr && fieldArr.length) {
             if (fieldArr.indexOf(key) !== -1) {
@@ -21,6 +23,18 @@ function getFieldArr (dataModel, fieldArr) {
             }
         } else {
             retArr.push(key);
+        }
+    });
+
+    Object.entries(measures).forEach(([key]) => {
+        if (measures[key].subType() === 'discrete') {
+            if (fieldArr && fieldArr.length) {
+                if (fieldArr.indexOf(key) !== -1) {
+                    retArr.push(key);
+                }
+            } else {
+                retArr.push(key);
+            }
         }
     });
     return retArr;
@@ -79,9 +93,9 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     Object.entries(fieldStoreObj).forEach(([key, value]) => {
         if (sFieldArr.indexOf(key) !== -1 || reducerObj[key]) {
             schema.push(extend2({}, value.schema));
-            if (value.schema.type === 'measure') {
+            if (value.schema.type === 'measure' && value.schema.subtype !== 'discrete') {
                 measureArr.push(key);
-            } else {
+            } else if (value.schema.type === 'dimension' || value.schema.subtype === 'discrete') {
                 dimensionArr.push(key);
             }
         }

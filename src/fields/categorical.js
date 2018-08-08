@@ -1,4 +1,4 @@
-import { DimensionSubtype } from 'picasso-util';
+import { DimensionSubtype } from 'muze-utils';
 import Dimension from './dimension';
 
 /**
