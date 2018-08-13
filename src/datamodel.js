@@ -10,7 +10,7 @@ import {
 } from './operator';
 import { createBinnedFieldData } from './operator/bucket-creator';
 import Relation from './relation';
-import reducerStore from './utils/reducer';
+import reducerStore from './utils/reducer-store';
 import createFields from './field-creator';
 
 /**
