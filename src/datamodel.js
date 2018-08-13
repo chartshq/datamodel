@@ -13,17 +13,52 @@ import Relation from './relation';
 import reducerStore from './utils/reducer';
 import createFields from './field-creator';
 
-/**
- * A model which has been built on the concept of relational algebra.
+/** @public
+ * 
+ * DataModel is an in-browser representation of tabular data. It supports relaiton algebra operators as well as generic 
+ * data processing opearators.
+ * {@link Relation} is the base class which defines all the relational algebra opreators. DataModel gives definition of
+ * generic data processing operators which are not relational algebra complient.
  *
+ * @class
  * @extends Relation
  */
 class DataModel extends Relation {
 
-    /**
-     * Creates a new DataModel instance.
+    /** @public
+     * 
+     * Creates a new DataModel instance by providing data and schema. Data could be of the form of
+     * - Flat JSON
+     * - DSV String
+     * - 2D Array
+     * 
+     * By default DataModel finds suitable adapter to serialize the data. DataModel also expects a schema for
+     * identifying the variables.
+     * 
+     * Learn more about schema here.
+     * 
+     * @example
+     * const data = loadData('cars.csv');
+     * const schema = [
+     *      { name: 'Name', type: 'dimension' },
+     *      { name: 'Miles_per_Gallon', type: 'measure', unit : 'cm', scale: '1000', numberformat: '12-3-3' },
+     *      { name: 'Cylinders', type: 'dimension' },
+     *      { name: 'Displacement', type: 'measure' },
+     *      { name: 'Horsepower', type: 'measure' },
+     *      { name: 'Weight_in_lbs', type: 'measure' },
+     *      { name: 'Acceleration', type: 'measure' },
+     *      { name: 'Year', type: 'dimension' },
+     *      { name: 'Origin', type: 'dimension' }
+     * ];
+     * const dm = new DataModel(data, schema, { name: 'Cars' });
+     * table(dm);
      *
-     * @param {Array} args - The arguments which is passed directly to the parent class.
+     * @param {Object.<Array> | string | Array.<Array>} data in the above mentioned format
+     * @param {Object.<Array>} schema defination of the variables. The order of the variables in data and order of the
+     *      variables in schema has to be same
+     * @param {object} options - optional arguments
+     * @param {string} options.name - name of the datamodel instance. If no name is given an auto generated name is
+     *      assigned to the instance.
      */
     constructor (...args) {
         super(...args);
@@ -32,6 +67,14 @@ class DataModel extends Relation {
         this._sortingDetails = [];
     }
 
+    /** @public
+     * 
+     * Reducers are simple functions which reduces an array of value to a representative value.
+     * Like an array of numbers `[10, 20, 5, 15]` can be reduced to 12.5 if a average / mean reducer funciton is
+     * applied. All the fields in datamodel (variables in data) needs a reducer to handle aggregation.
+     * 
+     * @return {ReducerStore} singleton instance of {@link ReducerStore}.
+     */
     static get Reducers () {
         return reducerStore;
     }
