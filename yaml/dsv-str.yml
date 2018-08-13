@@ -1,0 +1,16 @@
+---
+  title: "dsv-str.js"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "___DSVStr___"
+    - 
+      type: "markdown-section"
+      content: "\n| Param | Type | Description |\n| --- | --- | --- |\n| str | string | The input DSV string. |\n| options | Object | Option to control the behaviour of the parsing. |\n| options.firstRowHeader | boolean | Whether the first row of the dsv string data is header or not. |\n| options.fieldSeparator | string | The separator of two consecutive field. |"
+    - 
+      type: "markdown-section"
+      content: "Parses and converts data formatted in DSV string to a manageable internal format."
+    - 
+      type: "code-section"
+      content: "// Sample input data:\nconst data = `\na,b,c\n1,2,3\n4,5,6\n7,8,9\n`"
