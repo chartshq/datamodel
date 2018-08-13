@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import REDUCER from './reducer';
+import REDUCER from './reducer-store';
 import { defReducer, fnList } from '../operator';
 
 describe('Testing Reducer Functionality', () => {

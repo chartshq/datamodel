@@ -1,7 +1,7 @@
 import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import DataModel from '../index';
-import reducerStore from '../utils/reducer';
+import reducerStore from '../utils/reducer-store';
 
 /**
  * This function sanitize the user given field and return a common Array structure field
