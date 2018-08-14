@@ -59,6 +59,11 @@ class ReducerStore {
      *      return sum;
      *  })
      * 
+     *  // datamodel (dm) is already prepared with cars.json
+     *  const dm1 = dm.groupBy(['origin'], {
+     *      accleration: 'meanSquared'
+     *  });
+     * 
      * @param {string} name a formal name for a reducer. If the name already exists in store it is overridden by the new
      *      definition.
      * @param {Function} reducer definition of the {@link reducer} function.

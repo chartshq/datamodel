@@ -16,6 +16,6 @@
  *      return sum;
  *  }
  * 
- * @param {Number.<array>} arr array of numbers which needs to be reduced to a single number.
+ * @param {Array.<Number>} arr array of numbers which needs to be reduced to a single number.
  * @return {Number} single representative number
  */

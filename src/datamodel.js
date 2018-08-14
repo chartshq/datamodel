@@ -53,8 +53,8 @@ class DataModel extends Relation {
      * const dm = new DataModel(data, schema, { name: 'Cars' });
      * table(dm);
      *
-     * @param {Object.<Array> | string | Array.<Array>} data in the above mentioned format
-     * @param {Object.<Array>} schema defination of the variables. The order of the variables in data and order of the
+     * @param {Array.<Object> | string | Array.<Array>} data in the above mentioned format
+     * @param {Array.<Schema>} schema defination of the variables. The order of the variables in data and order of the
      *      variables in schema has to be same
      * @param {object} options - optional arguments
      * @param {string} options.name - name of the datamodel instance. If no name is given an auto generated name is
@@ -79,31 +79,32 @@ class DataModel extends Relation {
         return reducerStore;
     }
 
-    /**
-     * Returns the data after operation in the format of
-     * multidimensional array according to the given option value.
-     *
-     * @public
-     * @param {Object} [options] - Define how the data need to be returned.
-     * @param {Object} [options.order='row'] - Define the order of the data: row or column.
-     * @param {Object} [options.formatter=null] - An object map containing field specific formatter function.
-     * @param {Object} [options.withUid=false] - Whether the data uids will be included or not.
-     * @param {Object} [options.sort=[]] - The sorting details to sort the data.
-     * @return {Array} Returns a multidimensional array of the data.
+    /** @public
+     * 
+     * Returns the data attached to an instance in JSON format.
+     * 
      * @example
+     * // DataModel instance is already prepared and assigned to dm variable
+     *  const data = dm.getData({
+     *      order: 'column',
+     *      formatter: {
+     *          origin: (val) => val === 'European Union' ? 'EU' : val;
+     *      } 
+     *  });
+     *  console.log(data);
+     * 
      *
-     * // Return data with formatted date value.
-     * const options = {
-     *  order: 'row',
-     *  formatter: {
-     *      birthday: (val, rowId, schema) => {
-     *          return yourCustomFormatter(val, "%Y-%m-%d");
-     *      }
-     *  }
-     * }
-     *
-     *  const dm = new DataModel(data, schema);
-     *  const dataFormatted = dm.getData(options);
+     * @param {Object} [options] Options to control how the raw data is to be returned.
+     * @param {string} [options.order='row'] Defines if data is retieved in row order or column order. Possible values
+     *      are `'rows'` and `'columns'`
+     * @param {object} [options.formatter=null] Formats the output data. This expects an object, where the keys are
+     *      the name of the variable needs to be formatted. The formatter is a function in the form of
+     *      ```
+     *          function (value, rowId, schema) => { ... }
+     *      ```
+     *      Know more about {@link Fomatter}.
+     * 
+     * @return {Array} Returns a multidimensional array of the data.
      */
     getData (options) {
         const defOptions = {
@@ -175,13 +176,13 @@ class DataModel extends Relation {
         return dataGenerated;
     }
 
-    /**
+    /** @public
+     * 
      * Performs group-by operation on the current DataModel instance according to
      * the fields and reducers provided.
      * The fields can be skipped in that case all field will be taken into consideration.
      * The reducer can also be given, If nothing is provided sum will be the default reducer.
      *
-     * @public
      * @param {Array} fieldsArr - An array containing the name of the columns.
      * @param {Object | Function | string} [reducers={}] - The reducer function.
      * @param {string} [saveChild=true] - Whether the child to save  or not.
