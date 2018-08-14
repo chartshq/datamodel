@@ -176,20 +176,21 @@ class DataModel extends Relation {
         return dataGenerated;
     }
 
-    /**
+    /** @public
      *
+     * Groupby groups the data by using dimensions and reducing measures. It expects a list of dimensions using which it
+     * projects the datamodel and perform aggregations to reduce the duplicate tuple to one.
      *
-     * Performs group-by operation on the current DataModel instance according to
-     * the fields and reducers provided.
-     * The fields can be skipped in that case all field will be taken into consideration.
-     * The reducer can also be given, If nothing is provided sum will be the default reducer.
+     * @example
+     * const groupedDM = dm.groupBy(['Year'] );
+     * console.log(groupedDm);
      *
-     * @public
-     * @param {Array} fieldsArr - An array containing the name of the columns.
-     * @param {Object | Function | string} [reducers={}] - The reducer function.
-     * @param {string} [saveChild=true] - Whether the child to save  or not.
-     * @param {DataModel} [existingDataModel] - An optional existing DataModel instance.
-     * @return {DataModel} Returns the new DataModel instance after operation.
+     * @param {Array.<string>} fieldsArr - Array containing the name of fields
+     * @param {Object} [reducers={}] - A map whose key is the variable name and value is the name of the reducer. If its
+     *      not passed, or any variable is ommitted, default aggregation function is used from the schema of the
+     *      variable.
+     *
+     * @return {DataModel} Returns a new DataModel after performing the groupby.
      */
     groupBy (fieldsArr, reducers = {}, config = { saveChild: true }) {
         const groupByString = `${fieldsArr.join()}`;
@@ -241,7 +242,8 @@ class DataModel extends Relation {
     }
 
     /**
-     *
+     * @public
+     * This method helps to create a new
      * @param {Object} varConfig :{
      *  name: 'new-var',
      *  type: 'measure | dimension',
@@ -384,9 +386,35 @@ class DataModel extends Relation {
     }
 
     /**
-     @param {String} measureName : name of measure which will be used to create bin
-     @param {Object} config : bucketObj : {} || binSize : number || noOfBins : number || binFieldName : string
-     @param {Function | FunctionName} reducer : binning reducer
+     * @public
+     * This method performs binning of the field provided and
+     * returns a datamodel with a new Discreet Measure Field.
+     *
+     * @example
+     *
+     * const data = [
+     *           { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+     *           { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
+     * const schema1 = [
+     *           { name: 'profit', type: 'measure' },
+     *           { name: 'sales', type: 'measure' },
+     *           { name: 'first', type: 'dimension' },
+     *           { name: 'second', type: 'dimension' },
+     *       ];
+     * const dataModel = new DataModel(data1, schema1, 'Yo');
+     * const binDM = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
+     *
+     * @param {String} measureName : name of measure which will be used to create bin
+     * @param {Object} config : Config required for bucket creation.
+     * @param {Object} config.bucketObj : provides buckets to perform binning
+     *                                     @example const buckets = {
+     *                                                              start: 10,
+     *                                                               end: [11, 16, 20, 30]
+     *                                                           };
+     * @param {Number} config.binSize : bucket size for each bin
+     * @param {Number} config.noOfBins : no of bins that will be created
+     * @param {String} config.binFieldName : name of the new binned field to be created.
+     * @returns {DataModel} new DataModel instance with the newly created bin.
      */
     bin (measureName, config = { }) {
         const clone = this.clone();
