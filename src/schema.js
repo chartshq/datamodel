@@ -1,9 +1,16 @@
 /** @public
  * @module Schema
+<<<<<<< HEAD
  *
  * Schema is a used to describe a variable. The properties of schema are different for dimension and measure. The `name`
  * property is only property in schema which is mandatory.
  *
+=======
+ * 
+ * Schema is a used to describe a variable present in data. Schema are different for dimension and measure. The `name`
+ * is only property in schema which is mandatory.
+ * 
+>>>>>>> 293f7d87b5f33ce7e171199d51e049e018b8f0a4
  * Following properties are available on the schema object both for measure and dimension
  *
  * - `name`: name of the field. The variable must exist in the data,

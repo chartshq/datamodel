@@ -241,17 +241,66 @@ class DataModel extends Relation {
         return this;
     }
 
-    /**
+     /**
      * @public
-     * This method helps to create a new
-     * @param {Object} varConfig :{
-     *  name: 'new-var',
-     *  type: 'measure | dimension',
-     *  subype: 'temporal | ...',
-     *  all the variable what schema gets
-     *  }}
-     * @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dm) => {}]
+     *
+     * This method helps to create a new Dimension or Measure.To create either of them one
+     * just need to give the schema as required as explained below.
+     *
+     * @example Create a new Dimension
+     *  const data1 = [
+     *          { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+     *          { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+     *         { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+     *           { profit: 15, sales: 25, first: 'White', second: 'walls' },
+     *      ];
+     *       const schema1 = [
+     *           { name: 'profit', type: 'measure' },
+     *           { name: 'sales', type: 'measure' },
+     *           { name: 'first', type: 'dimension' },
+     *           { name: 'second', type: 'dimension' },
+     *       ];
+     *       const dataModel = new DataModel(data1, schema1, 'Yo');
+     *       const newDm = dataModel.calculateVariable({
+     *           name: 'Song',
+     *           type: 'dimension'
+     *      }, ['first', 'second', (first, second) =>
+     *          `${first} ${second}`
+     *      ]);
+     * Here we create a new dimension named 'Songs'
+     *
+     * @example Create a new Measure
+     * const data1 = [
+     *           { profit: 10, sales: 20, city: 'a', state: 'aa' },
+     *           { profit: 15, sales: 25, city: 'b', state: 'bb' },
+     *           { profit: 10, sales: 20, city: 'a', state: 'ab' },
+     *           { profit: 15, sales: 25, city: 'b', state: 'ba' },
+     *       ];
+     *       const schema1 = [
+     *           { name: 'profit', type: 'measure' },
+     *           { name: 'sales', type: 'measure' },
+     *           { name: 'city', type: 'dimension' },
+     *           { name: 'state', type: 'dimension' },
+     *       ];
+     *       const dataModel = new DataModel(data1, schema1, 'Yo');
+     *
+     *       const next = dataModel.project(['profit', 'sales']).select(f => +f.profit > 10);
+     *       const child = next.calculateVariable({
+     *           name: 'Efficiency',
+     *           type: 'measure'
+     *       }, ['profit', 'sales', (profit, sales) => profit / sales]);
+     *
+     * Here we create a new Measure named 'Efficiency'
+     *
+     * @param {Object} varConfig : provides the schema for new variable
+     * @param {String} varConfig.name: variable name,
+     * @param {String} varConfig.type: type of variable to be created => 'measure | dimension',
+     * @param {String} varConfig.subype: provided subtype of field
+     * @param {Array} dependency : provides the dependents fields on which the new field depends and
+     * the reducer which produce the value of the field ['dep-var-1', 'dep-var-2', 'dep-var-3',
+     *                                                      ([var1, var2, var3], rowIndex, dm) => {}]
      * @param {Object} config : { saveChild : true | false , removeDependentDimensions : true|false}
+     * @return {DataModel} returns a datamodel with the new field.
      */
     calculateVariable (schema, dependency, config = { saveChild: true }) {
         const fieldsConfig = this.getFieldsConfig();
@@ -387,33 +436,76 @@ class DataModel extends Relation {
 
     /**
      * @public
-     * This method performs binning of the field provided and
-     * returns a datamodel with a new Discreet Measure Field.
+     * 
+     * Perfoms binning on a measure field based on a binning configuration. This method does not aggregate the number of
+     * rows present in DataModel instance. When this operator is applied, it creates a new field with a special kind of
+     * measure DiscreteMeasure where it places the binned value for a given row.
      *
+     * The binning configuration is defined by
+     * - providing custom bucket configuration
+     * - providing bin number
+     * - providing bin size
+     * 
+     * When custom buckets are provided as part of binning configuration
+     * @example 
+     *  const data = [
+     *      { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+     *      { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
+     *  const schema1 = [
+     *      { name: 'profit', type: 'measure' },
+     *      { name: 'sales', type: 'measure' },
+     *      { name: 'first', type: 'dimension' },
+     *      { name: 'second', type: 'dimension' },
+     *  ];
+     *  const dataModel = new DataModel(data1, schema1, 'Yo');
+     *  const buckets = {
+     *      start: 10
+     *      stops: [11, 16, 20, 30]
+     *  };
+     *  const config = { buckets, name: 'sumField' }
+     *  const binDM = dataModel.bin('profit', config);\
+     * 
+     * When binCount is defined as part of binning configuration
+     * @example 
+     *  const data = [
+     *      { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+     *      { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
+     *  const schema1 = [
+     *      { name: 'profit', type: 'measure' },
+     *      { name: 'sales', type: 'measure' },
+     *      { name: 'first', type: 'dimension' },
+     *      { name: 'second', type: 'dimension' },
+     *  ];
+     *  const dataModel = new DataModel(data1, schema1, 'Yo');
+     *  const config = { binCount: 2, name: 'sumField' }
+     *  const binDM = dataModel.bin('profit', config);
+     *
+     * When binSize is defined as part of binning configuration
      * @example
+     *  const data = [
+     *      { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+     *      { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
+     *  const schema1 = [
+     *      { name: 'profit', type: 'measure' },
+     *      { name: 'sales', type: 'measure' },
+     *      { name: 'first', type: 'dimension' },
+     *      { name: 'second', type: 'dimension' },
+     *  ];
+     *  const dataModel = new DataModel(data1, schema1, 'Yo');
+     *  const config = { binSize: 2, name: 'sumField' }
+     *  const binDM = dataModel.bin('profit', config);
      *
-     * const data = [
-     *           { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-     *           { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
-     * const schema1 = [
-     *           { name: 'profit', type: 'measure' },
-     *           { name: 'sales', type: 'measure' },
-     *           { name: 'first', type: 'dimension' },
-     *           { name: 'second', type: 'dimension' },
-     *       ];
-     * const dataModel = new DataModel(data1, schema1, 'Yo');
-     * const binDM = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
-     *
-     * @param {String} measureName : name of measure which will be used to create bin
-     * @param {Object} config : Config required for bucket creation.
-     * @param {Object} config.bucketObj : provides buckets to perform binning
-     *                                     @example const buckets = {
-     *                                                              start: 10,
-     *                                                               end: [11, 16, 20, 30]
-     *                                                           };
-     * @param {Number} config.binSize : bucket size for each bin
-     * @param {Number} config.noOfBins : no of bins that will be created
-     * @param {String} config.binFieldName : name of the new binned field to be created.
+     * @param {String} measureName : Name of measure which will be used to create bin
+     * @param {Object} config : Config required for bucket creation
+     * @param {Object} config.bucketObj : Provides custom buckets definition to perform binning
+     * @param {Array.<Number>} config.bucketObj.stops : Defination of bucket ranges. The first number of array is
+     *      inclusive and the second number of array is exclusive.
+     * @param {Number} [config.bucketObj.startAt] : Force the start of the bin. If not mentioned, the start of the bin
+     *      is the first number in the stops
+     * @param {Number} config.binSize : Bucket size for each bin
+     * @param {Number} config.binCount : no of bins which will be created
+     * @param {String} config.binFieldName : name of the new binned field to be created
+     * 
      * @returns {DataModel} new DataModel instance with the newly created bin.
      */
     bin (measureName, config = { }) {
