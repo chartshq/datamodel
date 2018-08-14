@@ -10,12 +10,12 @@ import { rowDiffsetIterator } from './row-diffset-iterator';
  * @return {Array} Returns an array of created bins.
  */
 export function createBinnedFieldData (field, rowDiffset, config) {
-    let { buckets, numOfBins, binSize, start } = config;
+    let { buckets, binCount, binSize, start } = config;
     let dataStore = [];
     let binnedData = [];
     let [min, max] = field.domain();
     let oriMax = max;
-    let end = [];
+    let stops = [];
     let binEnd;
     let prevEndpoint;
     let mid;
@@ -32,26 +32,26 @@ export function createBinnedFieldData (field, rowDiffset, config) {
     // create buckets if buckets not given
     if (!buckets) {
         max += 1;
-        binSize = binSize || (max - min) / numOfBins;
+        binSize = binSize || (max - min) / binCount;
 
         const extraBinELm = (max - min) % binSize;
-        if (!numOfBins && extraBinELm !== 0) {
+        if (!binCount && extraBinELm !== 0) {
             max = max + binSize - extraBinELm;
         }
         binEnd = min + binSize;
         while (binEnd <= max) {
-            end.push(binEnd);
+            stops.push(binEnd);
             binEnd += binSize;
         }
         start = start || min;
-        buckets = { start, end };
+        buckets = { start, stops };
     }
 
     // initialize intial bucket start
     prevEndpoint = buckets.start === 0 ? 0 : buckets.start || min;
 
     // mark each data in dataStore to respective buckets
-    buckets.end.forEach((endPoint) => {
+    buckets.stops.forEach((endPoint) => {
         let tempStore = dataStore.filter(datum => datum.data >= prevEndpoint && datum.data < endPoint);
         tempStore.forEach((datum) => { binnedData[datum.index] = `${prevEndpoint}-${endPoint}`; });
         prevEndpoint = endPoint;
@@ -62,18 +62,18 @@ export function createBinnedFieldData (field, rowDiffset, config) {
                     .forEach((datum) => { binnedData[datum.index] = `${min}-${buckets.start}`; });
 
     // create a bin for values more than end
-    dataStore.filter(datum => datum.data >= buckets.end[buckets.end.length - 1])
+    dataStore.filter(datum => datum.data >= buckets.stops[buckets.stops.length - 1])
                     .forEach((datum) =>
-                    { binnedData[datum.index] = `${buckets.end[buckets.end.length - 1]}-${oriMax}`; });
+                    { binnedData[datum.index] = `${buckets.stops[buckets.stops.length - 1]}-${oriMax}`; });
 
     // create range and mid
     // append start to bucket marks
-    buckets.end.unshift(buckets.start);
-    range = new Set(buckets.end);
+    buckets.stops.unshift(buckets.start);
+    range = new Set(buckets.stops);
 
     // Add endpoints to buckets marks if not added
     if (min < buckets.start) { range.add(min); }
-    if (oriMax > buckets.end[buckets.end.length - 1]) { range.add(oriMax); }
+    if (oriMax > buckets.stops[buckets.stops.length - 1]) { range.add(oriMax); }
 
     range = [...range].sort((a, b) => a - b);
     mid = [];

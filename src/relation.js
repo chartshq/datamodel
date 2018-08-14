@@ -59,6 +59,14 @@ class Relation {
     }
 
     /**
+     * @public
+     * This is a api whicg returns the name of the DataModel
+     */
+    getName() {
+        return this._fieldStoreName;
+    }
+
+    /**
      * Returns the data and columns info associated with the current
      * {@link Relation} instance after applying the relational
      * operations.

@@ -245,61 +245,73 @@ class DataModel extends Relation {
      * @public
      *
      * This method helps to create a new Dimension or Measure.To create either of them one
-     * just need to give the schema as required as explained below.
+     * just need to give the schema of the new field and also pass the dependent fields names
+     * along with a reducer function. The reducer function is a operator which operates on the dependent
+     * fields to give out te value of the new fields.
      *
-     * @example Create a new Dimension
-     *  const data1 = [
-     *          { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-     *          { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-     *         { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-     *           { profit: 15, sales: 25, first: 'White', second: 'walls' },
-     *      ];
-     *       const schema1 = [
-     *           { name: 'profit', type: 'measure' },
-     *           { name: 'sales', type: 'measure' },
-     *           { name: 'first', type: 'dimension' },
-     *           { name: 'second', type: 'dimension' },
-     *       ];
-     *       const dataModel = new DataModel(data1, schema1, 'Yo');
-     *       const newDm = dataModel.calculateVariable({
-     *           name: 'Song',
-     *           type: 'dimension'
-     *      }, ['first', 'second', (first, second) =>
-     *          `${first} ${second}`
-     *      ]);
-     * Here we create a new dimension named 'Songs'
+     * Following are the examples:
      *
-     * @example Create a new Measure
+     * Create a new Dimension
+     * @example
      * const data1 = [
-     *           { profit: 10, sales: 20, city: 'a', state: 'aa' },
-     *           { profit: 15, sales: 25, city: 'b', state: 'bb' },
-     *           { profit: 10, sales: 20, city: 'a', state: 'ab' },
-     *           { profit: 15, sales: 25, city: 'b', state: 'ba' },
-     *       ];
-     *       const schema1 = [
-     *           { name: 'profit', type: 'measure' },
-     *           { name: 'sales', type: 'measure' },
-     *           { name: 'city', type: 'dimension' },
-     *           { name: 'state', type: 'dimension' },
-     *       ];
-     *       const dataModel = new DataModel(data1, schema1, 'Yo');
+     *    { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+     *    { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+     *    { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+     *    { profit: 15, sales: 25, first: 'White', second: 'walls' },
+     * ];
+     * const schema1 = [
+     *    { name: 'profit', type: 'measure' },
+     *    { name: 'sales', type: 'measure' },
+     *    { name: 'first', type: 'dimension' },
+     *    { name: 'second', type: 'dimension' },
+     * ];
+     * const dataModel = new DataModel(data1, schema1, 'Yo');
+     * const newDm = dataModel.calculateVariable(
+     *    {
+     *     name: 'Song',
+     *     type: 'dimension'
+     *    }, ['first', 'second', (first, second) =>
+     *      `${first} ${second}`
+     *   ]);
+     * Here we create a new dimension named 'Songs' whose value will contain
+     * the result of reducer given.
      *
-     *       const next = dataModel.project(['profit', 'sales']).select(f => +f.profit > 10);
-     *       const child = next.calculateVariable({
-     *           name: 'Efficiency',
-     *           type: 'measure'
-     *       }, ['profit', 'sales', (profit, sales) => profit / sales]);
+     * Create a new Measure
+     * @example
+     * const data1 = [
+     *    { profit: 10, sales: 20, city: 'a', state: 'aa' },
+     *    { profit: 15, sales: 25, city: 'b', state: 'bb' },
+     *    { profit: 10, sales: 20, city: 'a', state: 'ab' },
+     *    { profit: 15, sales: 25, city: 'b', state: 'ba' },
+     * ];
+     * const schema1 = [
+     *    { name: 'profit', type: 'measure' },
+     *    { name: 'sales', type: 'measure' },
+     *    { name: 'city', type: 'dimension' },
+     *    { name: 'state', type: 'dimension' },
+     *  ];
+     * const dataModel = new DataModel(data1, schema1, 'Yo');
+     * const child = dataModel.calculateVariable(
+     *     {
+     *       name: 'Efficiency',
+     *       type: 'measure'
+     *     }, ['profit', 'sales', (profit, sales) => profit / sales]);
      *
      * Here we create a new Measure named 'Efficiency'
      *
-     * @param {Object} varConfig : provides the schema for new variable
-     * @param {String} varConfig.name: variable name,
-     * @param {String} varConfig.type: type of variable to be created => 'measure | dimension',
-     * @param {String} varConfig.subype: provided subtype of field
-     * @param {Array} dependency : provides the dependents fields on which the new field depends and
+     * @param {Object} varConfig: Provides the schema for new variable
+     * @param {String} varConfig.name: New variable name,
+     * @param {String} varConfig.type: Type of variable to be created => 'measure | dimension',
+     * @param {String} varConfig.subype: Subtype of the variable
+     * @param {Array} dependency : Provides the dependents fields on which the new variable depends and a
      * the reducer which produce the value of the field ['dep-var-1', 'dep-var-2', 'dep-var-3',
      *                                                      ([var1, var2, var3], rowIndex, dm) => {}]
-     * @param {Object} config : { saveChild : true | false , removeDependentDimensions : true|false}
+     * the last element will be a reducer which will generate the new variable from given variable
+     * @param {Object} config : Additional costomization for the resultant DataModel
+     * @param {Boolean} config.saveChild : Indicates whether resultant dataModel will linked to its parent
+     * @param {Boolean} config.removeDependentDimensions : Indicates whether dependent fields
+     *                                                          needs to be removed.saveChild
+     *
      * @return {DataModel} returns a datamodel with the new field.
      */
     calculateVariable (schema, dependency, config = { saveChild: true }) {
@@ -436,7 +448,7 @@ class DataModel extends Relation {
 
     /**
      * @public
-     * 
+     *
      * Perfoms binning on a measure field based on a binning configuration. This method does not aggregate the number of
      * rows present in DataModel instance. When this operator is applied, it creates a new field with a special kind of
      * measure DiscreteMeasure where it places the binned value for a given row.
@@ -445,9 +457,9 @@ class DataModel extends Relation {
      * - providing custom bucket configuration
      * - providing bin number
      * - providing bin size
-     * 
+     *
      * When custom buckets are provided as part of binning configuration
-     * @example 
+     * @example
      *  const data = [
      *      { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
      *      { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
@@ -464,9 +476,9 @@ class DataModel extends Relation {
      *  };
      *  const config = { buckets, name: 'sumField' }
      *  const binDM = dataModel.bin('profit', config);\
-     * 
+     *
      * When binCount is defined as part of binning configuration
-     * @example 
+     * @example
      *  const data = [
      *      { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
      *      { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
@@ -505,7 +517,7 @@ class DataModel extends Relation {
      * @param {Number} config.binSize : Bucket size for each bin
      * @param {Number} config.binCount : no of bins which will be created
      * @param {String} config.binFieldName : name of the new binned field to be created
-     * 
+     *
      * @returns {DataModel} new DataModel instance with the newly created bin.
      */
     bin (measureName, config = { }) {
