@@ -14,8 +14,8 @@ import reducerStore from './utils/reducer-store';
 import createFields from './field-creator';
 
 /** @public
- * 
- * DataModel is an in-browser representation of tabular data. It supports relaiton algebra operators as well as generic 
+ *
+ * DataModel is an in-browser representation of tabular data. It supports relaiton algebra operators as well as generic
  * data processing opearators.
  * {@link Relation} is the base class which defines all the relational algebra opreators. DataModel gives definition of
  * generic data processing operators which are not relational algebra complient.
@@ -26,17 +26,17 @@ import createFields from './field-creator';
 class DataModel extends Relation {
 
     /** @public
-     * 
+     *
      * Creates a new DataModel instance by providing data and schema. Data could be of the form of
      * - Flat JSON
      * - DSV String
      * - 2D Array
-     * 
+     *
      * By default DataModel finds suitable adapter to serialize the data. DataModel also expects a schema for
      * identifying the variables.
-     * 
+     *
      * Learn more about schema here.
-     * 
+     *
      * @example
      * const data = loadData('cars.csv');
      * const schema = [
@@ -68,11 +68,11 @@ class DataModel extends Relation {
     }
 
     /** @public
-     * 
+     *
      * Reducers are simple functions which reduces an array of value to a representative value.
      * Like an array of numbers `[10, 20, 5, 15]` can be reduced to 12.5 if a average / mean reducer funciton is
      * applied. All the fields in datamodel (variables in data) needs a reducer to handle aggregation.
-     * 
+     *
      * @return {ReducerStore} singleton instance of {@link ReducerStore}.
      */
     static get Reducers () {
@@ -80,19 +80,19 @@ class DataModel extends Relation {
     }
 
     /** @public
-     * 
+     *
      * Returns the data attached to an instance in JSON format.
-     * 
+     *
      * @example
      * // DataModel instance is already prepared and assigned to dm variable
      *  const data = dm.getData({
      *      order: 'column',
      *      formatter: {
      *          origin: (val) => val === 'European Union' ? 'EU' : val;
-     *      } 
+     *      }
      *  });
      *  console.log(data);
-     * 
+     *
      *
      * @param {Object} [options] Options to control how the raw data is to be returned.
      * @param {string} [options.order='row'] Defines if data is retieved in row order or column order. Possible values
@@ -103,7 +103,7 @@ class DataModel extends Relation {
      *          function (value, rowId, schema) => { ... }
      *      ```
      *      Know more about {@link Fomatter}.
-     * 
+     *
      * @return {Array} Returns a multidimensional array of the data.
      */
     getData (options) {
@@ -177,10 +177,10 @@ class DataModel extends Relation {
     }
 
     /** @public
-     * 
+     *
      * Groupby groups the data by using dimensions and reducing measures. It expects a list of dimensions using which it
      * projects the datamodel and perform aggregations to reduce the duplicate tuple to one.
-     * 
+     *
      * @example
      * const groupedDM = dm.groupBy(['Year'] );
      * console.log(groupedDm);
@@ -189,7 +189,7 @@ class DataModel extends Relation {
      * @param {Object} [reducers={}] - A map whose key is the variable name and value is the name of the reducer. If its
      *      not passed, or any variable is ommitted, default aggregation function is used from the schema of the
      *      variable.
-     * 
+     *
      * @return {DataModel} Returns a new DataModel after performing the groupby.
      */
     groupBy (fieldsArr, reducers = {}, config = { saveChild: true }) {
@@ -385,9 +385,34 @@ class DataModel extends Relation {
     }
 
     /**
-     @param {String} measureName : name of measure which will be used to create bin
-     @param {Object} config : bucketObj : {} || binSize : number || noOfBins : number || binFieldName : string
-     @param {Function | FunctionName} reducer : binning reducer
+     * @public
+     * This method performs binning of the field provided and
+     * returns a datamodel with a new Discreet Measure Field.
+     *
+     * @example
+     *
+     * const data = [
+     *           { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+     *           { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
+     * const schema1 = [
+     *           { name: 'profit', type: 'measure' },
+     *           { name: 'sales', type: 'measure' },
+     *           { name: 'first', type: 'dimension' },
+     *           { name: 'second', type: 'dimension' },
+     *       ];
+     * const dataModel = new DataModel(data1, schema1, 'Yo');
+     * const binDM = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
+     *
+     * @param {String} measureName : name of measure which will be used to create bin
+     * @param {Object} config : Config required for bucket creation.
+     * @param {Object} config.bucketObj : provides buckets to perform binning
+     *                                     @example const buckets = {
+     *                                                              start: 10,
+     *                                                               end: [11, 16, 20, 30]
+     *                                                           };
+     * @param {Number} config.binSize : bucket size for each bin
+     * @param {Number} config.noOfBins : no of bins that will be created
+     * @param {String} config.binFieldName : name of the new binned field to be created.
      */
     bin (measureName, config = { }) {
         const clone = this.clone();
