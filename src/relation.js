@@ -4,15 +4,22 @@ import { crossProduct, difference, naturalJoinFilter, union } from './operator';
 import { DM_DERIVATIVES } from './constants';
 
 /**
- * Provides the relation algebra logics.
+ * Provides the basic implementation of relational algebra
+ * operators like selection, projection, union, rename etc.
  */
 class Relation {
 
     /**
-     * If passed any data this will create a field array and will create
-     * a field store with these fields in global space which can be used
-     * by other functions for calculations and other operations on data
      *
+     * Creates a new Relation instance by providing underlying data and schema.
+     * The data type could be one of followings:
+     * - Flat JSON
+     * - DSV String
+     * - 2D Array
+     *
+     * See {@link DataModel} for more details.
+     *
+     * @public
      * @param {Object | string | Relation} data - The input tabular data in dsv or json format or
      * an existing Relation instance object.
      * @param {Array} schema - An array of data schema.
@@ -24,7 +31,6 @@ class Relation {
         this._parent = null;
         this._derivation = [];
         this._children = [];
-
 
         if (params.length === 1 && ((source = params[0]) instanceof Relation)) {
             // parent datamodel was passed as part of source

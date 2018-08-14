@@ -14,8 +14,8 @@ import reducerStore from './utils/reducer-store';
 import createFields from './field-creator';
 
 /** @public
- * 
- * DataModel is an in-browser representation of tabular data. It supports relaiton algebra operators as well as generic 
+ *
+ * DataModel is an in-browser representation of tabular data. It supports relaiton algebra operators as well as generic
  * data processing opearators.
  * {@link Relation} is the base class which defines all the relational algebra opreators. DataModel gives definition of
  * generic data processing operators which are not relational algebra complient.
@@ -26,17 +26,17 @@ import createFields from './field-creator';
 class DataModel extends Relation {
 
     /** @public
-     * 
+     *
      * Creates a new DataModel instance by providing data and schema. Data could be of the form of
      * - Flat JSON
      * - DSV String
      * - 2D Array
-     * 
+     *
      * By default DataModel finds suitable adapter to serialize the data. DataModel also expects a schema for
      * identifying the variables.
-     * 
+     *
      * Learn more about schema here.
-     * 
+     *
      * @example
      * const data = loadData('cars.csv');
      * const schema = [
@@ -68,11 +68,11 @@ class DataModel extends Relation {
     }
 
     /** @public
-     * 
+     *
      * Reducers are simple functions which reduces an array of value to a representative value.
      * Like an array of numbers `[10, 20, 5, 15]` can be reduced to 12.5 if a average / mean reducer funciton is
      * applied. All the fields in datamodel (variables in data) needs a reducer to handle aggregation.
-     * 
+     *
      * @return {ReducerStore} singleton instance of {@link ReducerStore}.
      */
     static get Reducers () {
@@ -80,19 +80,19 @@ class DataModel extends Relation {
     }
 
     /** @public
-     * 
+     *
      * Returns the data attached to an instance in JSON format.
-     * 
+     *
      * @example
      * // DataModel instance is already prepared and assigned to dm variable
      *  const data = dm.getData({
      *      order: 'column',
      *      formatter: {
      *          origin: (val) => val === 'European Union' ? 'EU' : val;
-     *      } 
+     *      }
      *  });
      *  console.log(data);
-     * 
+     *
      *
      * @param {Object} [options] Options to control how the raw data is to be returned.
      * @param {string} [options.order='row'] Defines if data is retieved in row order or column order. Possible values
@@ -103,7 +103,7 @@ class DataModel extends Relation {
      *          function (value, rowId, schema) => { ... }
      *      ```
      *      Know more about {@link Fomatter}.
-     * 
+     *
      * @return {Array} Returns a multidimensional array of the data.
      */
     getData (options) {
@@ -176,13 +176,15 @@ class DataModel extends Relation {
         return dataGenerated;
     }
 
-    /** @public
-     * 
+    /**
+     *
+     *
      * Performs group-by operation on the current DataModel instance according to
      * the fields and reducers provided.
      * The fields can be skipped in that case all field will be taken into consideration.
      * The reducer can also be given, If nothing is provided sum will be the default reducer.
      *
+     * @public
      * @param {Array} fieldsArr - An array containing the name of the columns.
      * @param {Object | Function | string} [reducers={}] - The reducer function.
      * @param {string} [saveChild=true] - Whether the child to save  or not.
@@ -246,7 +248,7 @@ class DataModel extends Relation {
      *  subype: 'temporal | ...',
      *  all the variable what schema gets
      *  }}
-     *  @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dm) => {}]
+     * @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dm) => {}]
      * @param {Object} config : { saveChild : true | false , removeDependentDimensions : true|false}
      */
     calculateVariable (schema, dependency, config = { saveChild: true }) {
