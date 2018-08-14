@@ -48,7 +48,8 @@ class Relation {
     }
 
     /**
-     * Returns the schema details for all fields.
+     * Returns the schema details as an array which was previously used
+     * to create the {@link Relation} instance.
      *
      * @public
      * @return {Array} Returns an array of field schema.
@@ -57,6 +58,14 @@ class Relation {
         return this.getFieldspace().fields.map(d => d.schema);
     }
 
+    /**
+     * Returns the data and columns info associated with the current
+     * {@link Relation} instance after applying the relational
+     * operations.
+     *
+     * @public
+     * @return {Array} Returns an array of fields info.
+     */
     getFieldspace () {
         return this._fieldspace;
     }
