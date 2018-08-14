@@ -4,22 +4,18 @@ import { crossProduct, difference, naturalJoinFilter, union } from './operator';
 import { DM_DERIVATIVES } from './constants';
 
 /**
- * Provides the basic implementation of relational algebra
- * operators like selection, projection, union, rename etc.
+ * Relation class exposes its purpose from its nomenclature. It provides the definitions of basic operators of Relational
+ * Algebra like selection, projection, union, rename etc.
+ *
+ * It is extended by {@link DataModel} to inherit the functionalities of Relational Algebra concept.
  */
 class Relation {
 
     /**
      *
      * Creates a new Relation instance by providing underlying data and schema.
-     * The data type could be one of followings:
-     * - Flat JSON
-     * - DSV String
-     * - 2D Array
      *
-     * See {@link DataModel} for more details.
-     *
-     * @public
+     * @private
      * @param {Object | string | Relation} data - The input tabular data in dsv or json format or
      * an existing Relation instance object.
      * @param {Array} schema - An array of data schema.
@@ -48,10 +44,30 @@ class Relation {
     }
 
     /**
-     * Returns the schema details as an array which was previously used
-     * to create the {@link Relation} instance.
-     *
      * @public
+     *
+     * Retrieves the schema details for every fields as an array. Each array element is an object describing the
+     * corresponding field schema like field name, field type etc.
+     *
+     * Refer to {@link Schema} and {@link Field} docs for more details about Schema and field respectively.
+     *
+     * ```javascript
+     * const schema = yourDataModel.getSchema();
+     *
+     * // schema:
+     * // [
+     * //   { name: 'Name', type: 'dimension' },
+     * //   { name: 'Miles_per_Gallon', type: 'measure', numberFormat: (val) => `${val} miles / gallon` },
+     * //   { name: 'Cylinder', type: 'dimension' },
+     * //   { name: 'Displacement', type: 'measure', defAggFn: 'max' },
+     * //   { name: 'HorsePower', type: 'measure', defAggFn: 'max' },
+     * //   { name: 'Weight_in_lbs', type: 'measure', defAggFn: 'avg',  },
+     * //   { name: 'Acceleration', type: 'measure', defAggFn: 'avg' },
+     * //   { name: 'Year', type: 'dimension', subtype: 'datetime', format: '%Y' },
+     * //   { name: 'Origin' }
+     * // ]
+    * ```
+     *
      * @return {Array} Returns an array of field schema.
      */
     getSchema () {
