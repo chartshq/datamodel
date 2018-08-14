@@ -250,7 +250,7 @@ class DataModel extends Relation {
      *  subype: 'temporal | ...',
      *  all the variable what schema gets
      *  }}
-     *  @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dm) => {}]
+     * @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dm) => {}]
      * @param {Object} config : { saveChild : true | false , removeDependentDimensions : true|false}
      */
     calculateVariable (schema, dependency, config = { saveChild: true }) {
