@@ -242,7 +242,8 @@ class DataModel extends Relation {
     }
 
     /**
-     *
+     * @public
+     * This method helps to create a new
      * @param {Object} varConfig :{
      *  name: 'new-var',
      *  type: 'measure | dimension',
@@ -413,6 +414,7 @@ class DataModel extends Relation {
      * @param {Number} config.binSize : bucket size for each bin
      * @param {Number} config.noOfBins : no of bins that will be created
      * @param {String} config.binFieldName : name of the new binned field to be created.
+     * @returns {DataModel} new DataModel instance with the newly created bin.
      */
     bin (measureName, config = { }) {
         const clone = this.clone();
