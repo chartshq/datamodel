@@ -178,16 +178,19 @@ class DataModel extends Relation {
 
     /** @public
      * 
-     * Performs group-by operation on the current DataModel instance according to
-     * the fields and reducers provided.
-     * The fields can be skipped in that case all field will be taken into consideration.
-     * The reducer can also be given, If nothing is provided sum will be the default reducer.
+     * Groupby groups the data by using dimensions and reducing measures. It expects a list of dimensions using which it
+     * projects the datamodel and perform aggregations to reduce the duplicate tuple to one.
+     * 
+     * @example
+     * const groupedDM = dm.groupBy(['Year'] );
+     * console.log(groupedDm);
      *
-     * @param {Array} fieldsArr - An array containing the name of the columns.
-     * @param {Object | Function | string} [reducers={}] - The reducer function.
-     * @param {string} [saveChild=true] - Whether the child to save  or not.
-     * @param {DataModel} [existingDataModel] - An optional existing DataModel instance.
-     * @return {DataModel} Returns the new DataModel instance after operation.
+     * @param {Array.<string>} fieldsArr - Array containing the name of fields
+     * @param {Object} [reducers={}] - A map whose key is the variable name and value is the name of the reducer. If its
+     *      not passed, or any variable is ommitted, default aggregation function is used from the schema of the
+     *      variable.
+     * 
+     * @return {DataModel} Returns a new DataModel after performing the groupby.
      */
     groupBy (fieldsArr, reducers = {}, config = { saveChild: true }) {
         const groupByString = `${fieldsArr.join()}`;
