@@ -243,7 +243,7 @@ class DataModel extends Relation {
 
     /**
      * @public
-     * This method helps to create a new
+     * This method helps to create a new field
      * @param {Object} varConfig :{
      *  name: 'new-var',
      *  type: 'measure | dimension',
@@ -387,11 +387,14 @@ class DataModel extends Relation {
 
     /**
      * @public
-     * This method performs binning of the field provided and
-     * returns a datamodel with a new Discreet Measure Field.
+     * This method performs binning of the field provided and returns a datamodel with a new Discrete Measure Field.
      *
-     * @example
+     * There are three types of binning possible with this method as follows:
+     * 1. Performs binning in the buckets provided as parameter.
+     * 2. Performs binning by creating the number of bins given by the user.
+     * 3. Performs binning by creating bins of the given bin size.
      *
+     * @example When buckets are provided.
      * const data = [
      *           { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
      *           { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
@@ -402,15 +405,44 @@ class DataModel extends Relation {
      *           { name: 'second', type: 'dimension' },
      *       ];
      * const dataModel = new DataModel(data1, schema1, 'Yo');
-     * const binDM = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
+     * const buckets = {
+     *           start: 10,
+     *          end: [11, 16, 20, 30]
+     *       };
+     * const config = {buckets, name: 'sumField'}
+     * const binDM = dataModel.bin('profit', config);
+     *
+     * @example When number of bins are given
+     * const data = [
+     *           { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+     *           { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
+     * const schema1 = [
+     *           { name: 'profit', type: 'measure' },
+     *           { name: 'sales', type: 'measure' },
+     *           { name: 'first', type: 'dimension' },
+     *           { name: 'second', type: 'dimension' },
+     *       ];
+     * const dataModel = new DataModel(data1, schema1, 'Yo');
+     * const config = { numOfBins: 2, name: 'sumField' }
+     * const binDM = dataModel.bin('profit', config);
+     *
+     * @example When number of bins are given
+     * const data = [
+     *           { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+     *           { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
+     * const schema1 = [
+     *           { name: 'profit', type: 'measure' },
+     *           { name: 'sales', type: 'measure' },
+     *           { name: 'first', type: 'dimension' },
+     *           { name: 'second', type: 'dimension' },
+     *       ];
+     * const dataModel = new DataModel(data1, schema1, 'Yo');
+     * const config = { binSize: 2, name: 'sumField' }
+     * const binDM = dataModel.bin('profit', config);
      *
      * @param {String} measureName : name of measure which will be used to create bin
      * @param {Object} config : Config required for bucket creation.
      * @param {Object} config.bucketObj : provides buckets to perform binning
-     *                                     @example const buckets = {
-     *                                                              start: 10,
-     *                                                               end: [11, 16, 20, 30]
-     *                                                           };
      * @param {Number} config.binSize : bucket size for each bin
      * @param {Number} config.noOfBins : no of bins that will be created
      * @param {String} config.binFieldName : name of the new binned field to be created.
