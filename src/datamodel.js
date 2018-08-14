@@ -241,17 +241,66 @@ class DataModel extends Relation {
         return this;
     }
 
-    /**
+     /**
      * @public
-     * This method helps to create a new field
-     * @param {Object} varConfig :{
-     *  name: 'new-var',
-     *  type: 'measure | dimension',
-     *  subype: 'temporal | ...',
-     *  all the variable what schema gets
-     *  }}
-     * @param {Array} paramConfig : ['dep-var-1', 'dep-var-2', 'dep-var-3', ([var1, var2, var3], rowIndex, dm) => {}]
+     *
+     * This method helps to create a new Dimension or Measure.To create either of them one
+     * just need to give the schema as required as explained below.
+     *
+     * @example Create a new Dimension
+     *  const data1 = [
+     *          { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+     *          { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+     *         { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+     *           { profit: 15, sales: 25, first: 'White', second: 'walls' },
+     *      ];
+     *       const schema1 = [
+     *           { name: 'profit', type: 'measure' },
+     *           { name: 'sales', type: 'measure' },
+     *           { name: 'first', type: 'dimension' },
+     *           { name: 'second', type: 'dimension' },
+     *       ];
+     *       const dataModel = new DataModel(data1, schema1, 'Yo');
+     *       const newDm = dataModel.calculateVariable({
+     *           name: 'Song',
+     *           type: 'dimension'
+     *      }, ['first', 'second', (first, second) =>
+     *          `${first} ${second}`
+     *      ]);
+     * Here we create a new dimension named 'Songs'
+     *
+     * @example Create a new Measure
+     * const data1 = [
+     *           { profit: 10, sales: 20, city: 'a', state: 'aa' },
+     *           { profit: 15, sales: 25, city: 'b', state: 'bb' },
+     *           { profit: 10, sales: 20, city: 'a', state: 'ab' },
+     *           { profit: 15, sales: 25, city: 'b', state: 'ba' },
+     *       ];
+     *       const schema1 = [
+     *           { name: 'profit', type: 'measure' },
+     *           { name: 'sales', type: 'measure' },
+     *           { name: 'city', type: 'dimension' },
+     *           { name: 'state', type: 'dimension' },
+     *       ];
+     *       const dataModel = new DataModel(data1, schema1, 'Yo');
+     *
+     *       const next = dataModel.project(['profit', 'sales']).select(f => +f.profit > 10);
+     *       const child = next.calculateVariable({
+     *           name: 'Efficiency',
+     *           type: 'measure'
+     *       }, ['profit', 'sales', (profit, sales) => profit / sales]);
+     *
+     * Here we create a new Measure named 'Efficiency'
+     *
+     * @param {Object} varConfig : provides the schema for new variable
+     * @param {String} varConfig.name: variable name,
+     * @param {String} varConfig.type: type of variable to be created => 'measure | dimension',
+     * @param {String} varConfig.subype: provided subtype of field
+     * @param {Array} dependency : provides the dependents fields on which the new field depends and
+     * the reducer which produce the value of the field ['dep-var-1', 'dep-var-2', 'dep-var-3',
+     *                                                      ([var1, var2, var3], rowIndex, dm) => {}]
      * @param {Object} config : { saveChild : true | false , removeDependentDimensions : true|false}
+     * @return {DataModel} returns a datamodel with the new field.
      */
     calculateVariable (schema, dependency, config = { saveChild: true }) {
         const fieldsConfig = this.getFieldsConfig();
