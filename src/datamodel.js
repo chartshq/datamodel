@@ -280,22 +280,7 @@ class DataModel extends Relation {
      * @memberof DataModel
      */
     propagateInterpolatedValues (rangeObj, payload) {
-        let propModel = rangeObj;
-        if (!(propModel instanceof DataModel)) {
-            const measures = Object.keys(rangeObj);
-            propModel = this.select((fields) => {
-                let include = true;
-                measures.forEach((fieldName) => {
-                    const domain = rangeObj[fieldName];
-                    include = include && fields[fieldName] >= domain[0];
-                    include = include && fields[fieldName] <= domain[1];
-                });
-                return include;
-            }, {
-                saveChild: false
-            });
-        }
-        propagateRange(this, propModel, {
+        propagateRange(this, rangeObj, {
             payload,
             grouped: false
         });
