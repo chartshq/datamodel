@@ -75,6 +75,38 @@ class Relation {
     }
 
     /**
+     * @public
+     *
+     * Returns the name of the {@link DataModel} instance. If no name was specified during {@link DataModel} initialization,
+     * then it returns a auto-generated name.
+     *
+     * const data = [
+     *   { profit: 10, sales: 20, city: 'a' },
+     *   { profit: 15, sales: 25, city: 'b' },
+     * ];
+     * const schema = [
+     *   { name: 'profit', type: 'measure' },
+     *   { name: 'sales', type: 'measure' },
+     *   { name: 'city', type: 'dimension' },
+     * ];
+     *
+     * // here no name is specified
+     * const dm = new DataModel(data, schema);
+     * console.log(dm.getName());
+     *
+     * // here a name is specified
+     * const dm = new DataModel(data, schema, { name: 'MyAwesomeDataModel' });
+     * console.log(dm.getName());
+     *
+     * @return {string} Returns the name of the DataModel instance.
+     */
+    getName() {
+        return this._fieldStoreName;
+    }
+
+    /**
+     * @public
+     *
      * A DataModel can have multiple operations applied on it, which causes to transform the underlying data and field
      * schema from its parent DataModel. Every datamodel persists its data and transaction history.
      * This method retrieves the current status of data, schema and returns that.
@@ -99,7 +131,6 @@ class Relation {
      * console.log(dt.getFieldspace().fields)
      * console.log(dt2.getFieldspace().fields)
      *
-     * @public
      * @return {Array} Returns an object containing the fields info.
      */
     getFieldspace () {

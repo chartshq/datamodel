@@ -1054,7 +1054,7 @@ describe('DataModel', () => {
 
             const buckets = {
                 start: 0,
-                end: [5, 11, 16, 20, 30]
+                stops: [5, 11, 16, 20, 30]
             };
             const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
             let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
@@ -1083,7 +1083,7 @@ describe('DataModel', () => {
 
             const buckets = {
                 start: 10,
-                end: [11, 16, 20, 30]
+                stops: [11, 16, 20, 30]
             };
             const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
             let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
@@ -1114,7 +1114,7 @@ describe('DataModel', () => {
                 { name: 'second', type: 'dimension' },
             ];
             const dataModel = new DataModel(data1, schema1, 'Yo');
-            const bin = dataModel.bin('profit', { numOfBins: 2, name: 'sumField' });
+            const bin = dataModel.bin('profit', { binCount: 2, name: 'sumField' });
             let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
             let expData = ['10-16', '10-16', '10-16', '10-16', '10-16', '16-22', '16-22', '16-22', '16-22', '16-22'];
             expect(fieldData).to.deep.equal(expData);
