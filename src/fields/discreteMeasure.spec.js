@@ -12,7 +12,7 @@ describe('Measure Field Subtype', () => {
         subtype: 'discrete',
         unit: 'cm',
         scale: '1000',
-        numberformat: '12-3-3',
+        numberFormat: '12-3-3',
         description: 'This is description',
         defAggFn: () => {}
     };
