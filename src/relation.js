@@ -54,18 +54,18 @@ class Relation {
      * ```javascript
      * const schema = yourDataModel.getSchema();
      *
-     * // schema:
-     * // [
-     * //   { name: 'Name', type: 'dimension' },
-     * //   { name: 'Miles_per_Gallon', type: 'measure', numberFormat: (val) => `${val} miles / gallon` },
-     * //   { name: 'Cylinder', type: 'dimension' },
-     * //   { name: 'Displacement', type: 'measure', defAggFn: 'max' },
-     * //   { name: 'HorsePower', type: 'measure', defAggFn: 'max' },
-     * //   { name: 'Weight_in_lbs', type: 'measure', defAggFn: 'avg',  },
-     * //   { name: 'Acceleration', type: 'measure', defAggFn: 'avg' },
-     * //   { name: 'Year', type: 'dimension', subtype: 'datetime', format: '%Y' },
-     * //   { name: 'Origin' }
-     * // ]
+     * the schema:
+     * [
+     *   { name: 'Name', type: 'dimension' },
+     *   { name: 'Miles_per_Gallon', type: 'measure', numberFormat: (val) => `${val} miles / gallon` },
+     *   { name: 'Cylinder', type: 'dimension' },
+     *   { name: 'Displacement', type: 'measure', defAggFn: 'max' },
+     *   { name: 'HorsePower', type: 'measure', defAggFn: 'max' },
+     *   { name: 'Weight_in_lbs', type: 'measure', defAggFn: 'avg',  },
+     *   { name: 'Acceleration', type: 'measure', defAggFn: 'avg' },
+     *   { name: 'Year', type: 'dimension', subtype: 'datetime', format: '%Y' },
+     *   { name: 'Origin' }
+     * ]
     * ```
      *
      * @return {Array} Returns an array of field schema.
@@ -75,12 +75,32 @@ class Relation {
     }
 
     /**
-     * Returns the data and columns info associated with the current
-     * {@link Relation} instance after applying the relational
-     * operations.
+     * A DataModel can have multiple operations applied on it, which causes to transform the underlying data and field
+     * schema from its parent DataModel. Every datamodel persists its data and transaction history.
+     * This method retrieves the current status of data, schema and returns that.
+     *
+     * @example
+     * const schema = [
+     *    { name: 'Name', type: 'dimension' },
+     *    { name: 'HorsePower', type: 'measure' },
+     *    { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *    { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *    { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *    { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *    { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(schema, data);
+     * const dt2 = dt.project(["Name", "HorsePower"]);
+     *
+     * console.log(dt.getFieldspace().fields)
+     * console.log(dt2.getFieldspace().fields)
      *
      * @public
-     * @return {Array} Returns an array of fields info.
+     * @return {Array} Returns an object containing the fields info.
      */
     getFieldspace () {
         return this._fieldspace;
@@ -97,48 +117,131 @@ class Relation {
     }
 
     /**
-     * this reflect the cross-product of the relational algebra or can be called as theta join.
-     * It take another DataModel instance and create new DataModel with the cross-product data and
-     * filter the data according to the filter function provided.
-     * Say there are two dataModel modelA with 4 column 5 rows and modelB with 3 column 6 row
-     * so the new DataModel modelA X modelB will have 7(4 + 3) rows and 30(5 * 6) columns (if no
-     * filter function is provided).
-     *
-     * @todo Make this API user-friendly.
-     *
      * @public
-     * @param  {DataModel} joinWith The DataModel to be joined with this DataModel
-     * @param  {Function} filterFn Function that will filter the result of the crossProduct
-     * DataModel
-     * @return {DataModel}          the new DataModel created by joining
+     *
+     * Performs the cross-product operation of the relational algebra between two {@link DataModel} instances and returns
+     * a new {@link DataModel} instance containing the results. This operation is also called theta join.
+     *
+     * Refer to the following link for more info about join operation:
+     * <Here_put_a_good_resource_link_on_join>
+     *
+     * It takes an optional function which filters the generated result rows. The argument of this filter function
+     * is an object containing the row data of the both datamodel instance in the current iteration state.
+     *
+     * Suppose, there are two {@link DataModel} modelA with 3 columns 2 rows and modelB with 2 columns 2 rows.
+     * So, after cross product between modelA and modelB, the resultant datamodel will have (3 + 2) = 5 columns and
+     * (2 * 2) = 4 rows (if no filter function is provided).
+     *
+     * @example
+     * const data1 = [
+     *   { profit: 10, sales: 20, city: 'a' },
+     *   { profit: 15, sales: 25, city: 'b' },
+     * ];
+     * const schema1 = [
+     *   { name: 'profit', type: 'measure' },
+     *   { name: 'sales', type: 'measure' },
+     *   { name: 'city', type: 'dimension' },
+     * ];
+     * const data2 = [
+     *   { population: 200, city: 'a' },
+     *   { population: 250, city: 'b' },
+     * ];
+     * const schema2 = [
+     *   { name: 'population', type: 'measure' },
+     *   { name: 'city', type: 'dimension' },
+     * ];
+     * const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
+     * const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
+     *
+     * // without filter function
+     * console.log(dataModel1.join(dataModel2).getData());
+     *
+     * // with filter function
+     * console.log(dataModel1.join(dataModel2, obj => obj.ModelA.city === obj.ModelB.city).getData());
+     *
+     * @param {DataModel} joinWith - The DataModel to be joined with the current DataModel.
+     * @param {Function} filterFn - The function that will filter the result of the crossProduct.
+     * @return {DataModel} Returns the new DataModel created after joining.
      */
     join (joinWith, filterFn) {
         return crossProduct(this, joinWith, filterFn);
     }
 
     /**
-     * This can join two DataModel to form a new DataModel which meet the requirement of
-     * natural join.
-     * it's not possible to pass a filter function as the filter function is decided according to
-     * the definition of natural join
-     *
-     * @todo Make this API user-friendly.
-     *
      * @public
-     * @param  {DataModel} joinWith the DataModel with whom this DataModel will be joined
-     * @return {DataModel}          The new joined DataModel
+     *
+     * Performs the natural join operations of the relational algebra between two {@link DataModel} instances and returns
+     * a new {@link DataModel} containing the resultant data.
+     *
+     * Natural join is a special kind of cross-product join, where a filter function is performed for the common
+     * columns between two {@link DataModel} on the resultant cross-product rows.
+     * Refer to the following link for more info about naturalJoin:
+     * <Here_put_a_good_resource_link_on_natural_join>
+     *
+     * @example
+     * const data1 = [
+     *   { profit: 10, sales: 20, city: 'a' },
+     *   { profit: 15, sales: 25, city: 'b' },
+     * ];
+     * const schema1 = [
+     *   { name: 'profit', type: 'measure' },
+     *   { name: 'sales', type: 'measure' },
+     *   { name: 'city', type: 'dimension' },
+     * ];
+     * const data2 = [
+     *   { population: 200, city: 'a' },
+     *   { population: 250, city: 'b' },
+     * ];
+     * const schema2 = [
+     *   { name: 'population', type: 'measure' },
+     *   { name: 'city', type: 'dimension' },
+     * ];
+     * const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
+     * const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
+     *
+     * console.log(dataModel1.naturalJoin(dataModel2).getData());
+     *
+     * @param {DataModel} joinWith - The DataModel with whom this DataModel will be joined.
+     * @return {DataModel} Returns the new DataModel created after joining.
      */
     naturalJoin (joinWith) {
         return crossProduct(this, joinWith, naturalJoinFilter(this, joinWith), true);
     }
 
     /**
-     * Performs union operation of the relational algebra.
-     * It can be termed as vertical joining of all the unique tuples
-     * from both the DataModel instances. The requirement is both
-     * the DataModel instances should have same column name and order.
-     *
      * @public
+     *
+     * Performs the union operation of the relational algebra between two {@link DataModel} instances and returns
+     * a new {@link DataModel} containing the resultant data.
+     * This operation can be termed as vertical joining of all the unique tuples from both the DataModel instances.
+     * The requirement is both the {@link DataModel} instances should have same column names and order.
+     *
+     * Refer to the following link for more info about union operator:
+     * <Here_put_a_good_resource_link_on_union>
+     *
+     * @example
+     * const data1 = [
+     *   { profit: 10, sales: 20, city: 'a' },
+     *   { profit: 15, sales: 25, city: 'b' },
+     * ];
+     * const schema1 = [
+     *   { name: 'profit', type: 'measure' },
+     *   { name: 'sales', type: 'measure' },
+     *   { name: 'city', type: 'dimension' },
+     * ];
+     * const data2 = [
+     *   { population: 200, city: 'a' },
+     *   { population: 250, city: 'b' },
+     * ];
+     * const schema2 = [
+     *   { name: 'population', type: 'measure' },
+     *   { name: 'city', type: 'dimension' },
+     * ];
+     * const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
+     * const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
+     *
+     * console.log(dataModel1.union(dataModel2).getData());
+     *
      * @param {DataModel} unionWith - Another DataModel instance to which union
      * operation is performed.
      * @return {DataModel} Returns the new DataModel instance after operation.
@@ -148,12 +251,39 @@ class Relation {
     }
 
     /**
-     * Performs difference operation of the relational algebra.
-     * It can be termed as vertical joining of all the tuples
-     * those are not in the second DataModel. The requirement
-     * is both the DataModel instances should have same column name and order.
-     *
      * @public
+     *
+     * Performs the difference operation of the relational algebra between two {@link DataModel} instances and returns
+     * a new {@link DataModel} containing the resultant data.
+     * This operation can be termed as vertical joining of all the tuples those are not in the second {@link DataModel} instance.
+     * The requirement is both the {@link DataModel} instances should have same column names and order.
+     *
+     * Refer to the following link for more info about difference operator:
+     * <Here_put_a_good_resource_link_on_difference>
+     *
+     * @example
+     * const data1 = [
+     *    { profit: 10, sales: 20, city: 'a' },
+     *    { profit: 15, sales: 25, city: 'b' },
+     *  ];
+     * const schema1 = [
+     *   { name: 'profit', type: 'measure' },
+     *   { name: 'sales', type: 'measure' },
+     *   { name: 'city', type: 'dimension' },
+     * ];
+     * const data2 = [
+     *   { population: 200, city: 'a' },
+     *   { population: 250, city: 'b' },
+     * ];
+     * const schema2 = [
+     *   { name: 'population', type: 'measure' },
+     *   { name: 'city', type: 'dimension' },
+     * ];
+     * const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
+     * const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
+     *
+     * console.log(dataModel1.difference(dataModel2).getData());
+     *
      * @param {DataModel} differenceWith - Another DataModel instance to which difference
      * operation is performed.
      * @return {DataModel} Returns the new DataModel instance after operation.
@@ -163,12 +293,56 @@ class Relation {
     }
 
     /**
-     * Performs selection operation of the relational algebra.
-     *
      * @public
-     * @param {Function} selectFn - The function which will be looped through all the data
-     * if it return true the row will be there in the DataModel.
-     * @param {Object} [config] - The mode configuration.
+     *
+     * Performs the selection operation of the relational algebra on the current {@link DataModel} instance according to
+     * the specified selection function and returns a new {@link DataModel} instance containing the selected rows.
+     *
+     * The selection operation can be performed on three modes:
+     *  * NORMAL: In this mode, only the selected rows will be returned.
+     *  * INVERSE: In this mode, only the non-selected rows i.e. inverted rows will be returned.
+     *  * ALL: In this mode, both the selected rows and the inverted rows will be returned.
+     *
+     * Refer to the following link for more info about select operator:
+     * <Here_put_a_good_resource_link_on_select>
+     *
+     * The selection function is called for every rows with an object as argument containing each column data for the
+     * current iteration row.
+     *
+     * @example
+     * const schema = [
+     *    { name: 'Name', type: 'dimension' },
+     *    { name: 'HorsePower', type: 'measure' },
+     *    { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *    { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *    { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *    { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *    { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(schema, data);
+     *
+     * // with selection mode NORMAL:
+     * const normDt = dt.select(fields => fields.Origin.value === "USA")
+     * console.log(normDt.getData());
+     *
+     * // with selection mode INVERSE:
+     * const inverDt = dt.select(fields => fields.Origin.value === "USA", { mode: DataModel.FilteringMode.INVERSE })
+     * console.log(inverDt.getData());
+     *
+     * // with selection mode ALL:
+     * const dtArr = dt.select(fields => fields.Origin.value === "USA", { mode: DataModel.FilteringMode.ALL })
+     * // print the selected parts
+     * console.log(dtArr[0].getData());
+     * // print the inverted parts
+     * console.log(dtArr[1].getData());
+     *
+     * @param {Function} selectFn - The function which will be looped through all the data,
+     * if it returns true, the row will be selected.
+     * @param {Object} [config] - The configuration object.
      * @param {string} [config.mode=FilteringMode.NORMAL] - The mode of the selection.
      * @param {string} [saveChild=true] - It is used while cloning.
      * @return {DataModel} Returns the new DataModel instance(s) after operation.
@@ -210,20 +384,32 @@ class Relation {
     }
 
     /**
-     * Returns whether datamodel has no data.
+     * @public
      *
-     * @return {Boolean} Whether datamodel is empty or not.
+     * Returns whether the current {@link DataModel} instance has no data.
+     *
+     * @example
+     * const schema = [
+     *    { name: 'Name', type: 'dimension' },
+     *    { name: 'HorsePower', type: 'measure' },
+     *    { name: "Origin", type: 'dimension' }
+     * ];
+     * const data = [];
+     *
+     * const dt = new DataModel(schema, data);
+     * console.log(dt.isEmpty());
+     *
+     * @return {Boolean} Returns true if the datamodel has no data, otherwise returns false.
      */
-
-
     isEmpty () {
         return !this._rowDiffset.length || !this._colIdentifier.length;
     }
 
     /**
-     * Creates a clone  from the current DataModel instance with child parent relationship.
      *
-     * @public
+     * Creates a clone from the current DataModel instance with child parent relationship.
+     *
+     * @private
      * @param {boolean} [saveChild=true] - Whether the cloned instance would be recorded
      * in the parent instance.
      * @return {DataModel} - Returns the newly cloned DataModel instance.
@@ -237,11 +423,57 @@ class Relation {
     }
 
     /**
-     * Performs projection operation on the current DataModel instance.
+
      *
      * @public
+     *
+     * Performs the projection operation of the relational algebra on the current {@link DataModel} instance.
+     * It extracts the data for the specified column names from current {@link DataModel} and returns a new
+     * {@link DataModel} containing those filtered columns and corresponding data.
+     *
+     * The projection operation can be performed on three modes:
+     *  * NORMAL: In this mode, it extracts the data for the input column names.
+     *  * INVERSE: In this mode, it extracts the data for those column names which are not listed in the input array.
+     *  * ALL: In this mode, it extracts data for the both groups of column names.
+     *
+     * Refer to the following link for more info about projection operation:
+     * <Here_put_a_good_resource_link_on_projection>
+     *
+     * @example
+     * const schema = [
+     *    { name: 'Name', type: 'dimension' },
+     *    { name: 'HorsePower', type: 'measure' },
+     *    { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *    { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *    { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *    { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *    { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(schema, data);
+     *
+     * // with projection mode NORMAL:
+     * const normDt = dt.project(["Name", "HorsePower"]);
+     * console.log(normDt.getData());
+     *
+     * // with projection mode INVERSE:
+     * const inverDt = dt.project(["Name", "HorsePower"], { mode: DataModel.FilteringMode.INVERSE })
+     * console.log(inverDt.getData());
+     *
+     * // with selection mode ALL:
+     * const dtArr = dt.project(["Name", "HorsePower"], { mode: DataModel.FilteringMode.ALL })
+     * // print the normal parts
+     * console.log(dtArr[0].getData());
+     * // print the inverted parts
+     * console.log(dtArr[1].getData());
+     *
      * @param {Array.<string | Regexp>} projField - An array of column names in string or regular expression.
-     * @param {Object} [config={}] - An optional config.
+     * @param {Object} [config] - An optional config.
+     * @param {string} [config.mode=FilteringMode.NORMAL] - The mode of the projection.
+     * @param {string} [saveChild=true] - It is used while cloning.
      * @return {DataModel} Returns the new DataModel instance after operation.
      */
     project (projField, config) {
@@ -288,7 +520,7 @@ class Relation {
     /**
      * Returns index and field details in an object where key is the field name.
      *
-     * @public
+     * @private
      * @return {Object} - Returns the field definitions.
      */
     getFieldsConfig () {
@@ -308,7 +540,30 @@ class Relation {
 
 
     /**
-     * break the link between its parent and itself
+     * @public
+     *
+     * Frees up the resources associated with the current {@link DataModel} instance and breaks the link between its
+     * parent and itself.
+     *
+     * @example
+     * const schema = [
+     *    { name: 'Name', type: 'dimension' },
+     *    { name: 'HorsePower', type: 'measure' },
+     *    { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *    { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *    { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *    { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *    { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(schema, data);
+     *
+     * const dt2 = dt.select(fields => fields.Origin.value === "USA")
+     * dt2.dispose();
+     *
      */
     dispose () {
         this._parent.removeChild(this);
@@ -316,18 +571,44 @@ class Relation {
     }
 
     /**
+     * @public
      *
-     * @param {DataModel} child : Delegates the parent to remove this child
+     * Removes the specified child {@link DataModel} from the child list of the current {@link DataModel} instance.
+     *
+     * @example
+     * const schema = [
+     *    { name: 'Name', type: 'dimension' },
+     *    { name: 'HorsePower', type: 'measure' },
+     *    { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *    { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *    { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *    { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *    { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(schema, data);
+     *
+     * const dt2 = dt.select(fields => fields.Origin.value === "USA")
+     * dt.removeChild(dt2);
+     *
+     * @param {DataModel} child - Delegates the parent to remove this child.
      */
     removeChild (child) {
-        // remove from child list
         let idx = this._children.findIndex(sibling => sibling === child);
         idx !== -1 ? this._children.splice(idx, 1) : true;
     }
+
     /**
+     * Adds the specified {@link DataModel} as a parent for the current {@link DataModel} instance.
      *
-     * @param { DataModel } parent datamodel instance which will act as its parent of this.
-     * @param { Queue } criteriaQueue Queue contains in-between operation meta-data
+     * The optional criteriaQueue is an array containing the history of transaction performed on parent {@link DataModel}
+     * to get the current one.
+     *
+     * @param {DataModel} parent - The datamodel instance which will act as parent.
+     * @param {Array} criteriaQueue - Queue contains in-between operation meta-data.
      */
     addParent (parent, criteriaQueue = []) {
         persistDerivation(this, DM_DERIVATIVES.COMPOSE, null, criteriaQueue);
