@@ -92,7 +92,7 @@ export const select = (...args) => dm => dm.select(...args);
  *
  * @public
  *
- * This is compose project operator.It performs the binning operations
+ * This is compose project operator.It performs the project operations
  *
  * @param {args} : See {@link DataModel} and [DataModel's project function ]{@link DataModel#project}.
  *
