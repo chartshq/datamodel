@@ -1,5 +1,5 @@
 export const compose = (...operations) =>
-    (dm) => {
+    (dm, saveChild = true) => {
         let currentDM = dm;
         let frstChild;
         const derivations = [];
@@ -11,7 +11,7 @@ export const compose = (...operations) =>
             }
         });
 
-        currentDM.addParent(dm, derivations);
+        saveChild && currentDM.addParent(dm, derivations);
         if (derivations.length > 1) {
             frstChild.dispose();
         }

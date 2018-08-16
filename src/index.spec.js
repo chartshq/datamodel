@@ -987,47 +987,6 @@ describe('DataModel', () => {
                 projetionFlag && selectionFlag && groupByFlag
             ).to.be.true;
         });
-
-        it('should do an interpolated propagation', () => {
-            const data1 = [
-                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-                { profit: 15, sales: 25, first: 'White', second: 'walls' },
-            ];
-            const schema1 = [
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
-                { name: 'first', type: 'dimension' },
-                { name: 'second', type: 'dimension' },
-            ];
-            let inProjetionFlag = false;
-            let inSelectionFlag = false;
-            let inGroupByFlag = false;
-            const dataModel = new DataModel(data1, schema1, 'Yo');
-            const projected = dataModel.project(['profit']);
-            const selected = dataModel.select(fields => fields.profit.value > 10);
-            const grouped = dataModel.groupBy(['sales']);
-            // interpolated propagation handlers
-            projected.on('propagation', () => {
-                inProjetionFlag = true;
-            });
-            selected.on('propagation', () => {
-                inSelectionFlag = true;
-            });
-            grouped.on('propagation', () => {
-                inGroupByFlag = true;
-            });
-            dataModel.propagateInterpolatedValues({
-                profit: [2, 12],
-                sales: [18, 30]
-            }, {
-                action: 'reaction'
-            });
-            expect(
-                inProjetionFlag && inSelectionFlag && inGroupByFlag
-            ).to.be.true;
-        });
     });
 
 
