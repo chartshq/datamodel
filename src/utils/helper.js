@@ -72,3 +72,14 @@ export function isArrEqual(arr1, arr2) {
 
     return true;
 }
+
+/**
+ * Checks Whether two arrays have same content.
+ *
+ * @param {Array} arr1 - The first array.
+ * @param {Array} arr2 - The 2nd array.
+ * @return {boolean} Returns whether two array have same content.
+ */
+export function formatNumber(val) {
+    return val;
+}

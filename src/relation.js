@@ -38,6 +38,10 @@ class Relation {
             updateData(this, ...params);
             this._fieldStoreName = this._partialFieldspace.name;
             this.__calculateFieldspace().calculateFieldsConfig();
+            this._propagationNameSpace = {
+                mutableActions: {},
+                immutableActions: {}
+            };
         }
     }
 
@@ -49,6 +53,10 @@ class Relation {
      */
     getSchema () {
         return this.getFieldspace().fields.map(d => d.schema);
+    }
+
+    getName () {
+        return this._fieldStoreName;
     }
 
     getFieldspace () {
@@ -197,8 +205,27 @@ class Relation {
      * in the parent instance.
      * @return {DataModel} - Returns the newly cloned DataModel instance.
      */
-    clone (saveChild = true) {
-        const retDataModel = new this.constructor(this);
+    clone (saveChild = true, linkParent = true) {
+        let retDataModel;
+        if (linkParent === false) {
+            const dataObj = this.getData({
+                getAllFields: true
+            });
+            const data = dataObj.data;
+            const schema = dataObj.schema;
+            const jsonData = data.map((row) => {
+                const rowObj = {};
+                schema.forEach((field, i) => {
+                    rowObj[field.name] = row[i];
+                });
+                return rowObj;
+            });
+            retDataModel = new this.constructor(jsonData, schema);
+        }
+        else {
+            retDataModel = new this.constructor(this);
+        }
+
         if (saveChild) {
             this._children.push(retDataModel);
         }
@@ -245,8 +272,7 @@ class Relation {
                 saveChild: config.saveChild
             }, allFields);
             dataModel = [projectionClone, rejectionClone];
-        }
-        else {
+        } else {
             let projectionClone = cloneWithProject(this, normalizedProjField, config, allFields);
             dataModel = projectionClone;
         }

@@ -103,15 +103,6 @@ export default class Field {
     }
 
     /**
-     * Getter for number format value of the field.
-     *
-     * @return {string} Returns number format of the field.
-     */
-    numberformat() {
-        return this._ref.numberformat();
-    }
-
-    /**
      * Getter for aggregation function of the field.
      *
      * @return {Function} Returns aggregation function of the field.

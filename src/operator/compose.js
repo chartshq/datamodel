@@ -1,8 +1,10 @@
 export const compose = (...operations) =>
-    (dm) => {
+    (dm, config = { saveChild: true }) => {
         let currentDM = dm;
         let frstChild;
         const derivations = [];
+        const saveChild = config.saveChild;
+
         operations.forEach((operation) => {
             currentDM = operation(currentDM);
             derivations.push(...currentDM._derivation);
@@ -11,7 +13,7 @@ export const compose = (...operations) =>
             }
         });
 
-        currentDM.addParent(dm, derivations);
+        saveChild && currentDM.addParent(dm, derivations);
         if (derivations.length > 1) {
             frstChild.dispose();
         }

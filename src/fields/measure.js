@@ -1,5 +1,5 @@
 import PartialField from './partial-field';
-import { generateMeasureDomain } from '../utils';
+import { generateMeasureDomain, formatNumber } from '../utils';
 
 /**
  * Represents measure field type.
@@ -19,8 +19,8 @@ class Measure extends PartialField {
         super(name, data, schema);
         this.fieldUnit = schema.unit;
         this.fieldScale = schema.scale;
-        this.fieldNumberformat = schema.numberformat;
         this.fieldDefAggFn = schema.defAggFn;
+        this.fieldNumberformat = schema.numberFormat instanceof Function ? schema.numberFormat : formatNumber;
     }
 
     /**
@@ -69,8 +69,9 @@ class Measure extends PartialField {
      *
      * @return {string} Returns number format of the field.
      */
-    numberformat() {
-        return this.fieldNumberformat;
+    numberFormat() {
+        const formatter = this.fieldNumberformat;
+        return val => formatter(val);
     }
 
     /**

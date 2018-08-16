@@ -10,7 +10,7 @@ class Value {
    * Creates new Value instance.
    *
    * @param {*} val - the primitive value from the field cell.
-   * @param {String | Field} field - The field from which the value belongs.
+   * @param {string | Field} field - The field from which the value belongs.
    */
     constructor (val, field) {
         Object.defineProperty(this, '_value', {

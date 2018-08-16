@@ -11,7 +11,7 @@ describe('Measure Field Type', () => {
         type: FieldType.MEASURE,
         unit: 'cm',
         scale: '1000',
-        numberformat: '12-3-3',
+        numberFormat: val => `${val}2`,
         description: 'This is description',
         defAggFn: () => {}
     };
@@ -34,9 +34,9 @@ describe('Measure Field Type', () => {
         });
     });
 
-    describe('#numberformat', () => {
-        it('should implement numberformat getter methods', () => {
-            expect(field.numberformat()).to.equal(schema.numberformat);
+    describe('#numberFormat', () => {
+        it('should implement numberFormat getter methods', () => {
+            expect(field.numberFormat()(100)).to.equal('1002');
         });
     });
 
