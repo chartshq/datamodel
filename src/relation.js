@@ -271,8 +271,7 @@ class Relation {
                 saveChild: config.saveChild
             }, allFields);
             dataModel = [projectionClone, rejectionClone];
-        }
-        else {
+        } else {
             let projectionClone = cloneWithProject(this, normalizedProjField, config, allFields);
             dataModel = projectionClone;
         }

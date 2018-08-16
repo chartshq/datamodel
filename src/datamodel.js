@@ -1,8 +1,13 @@
 /* eslint-disable default-case */
 
 import { FieldType } from 'muze-utils';
-import { persistDerivation, getRootGroupByModel, propagateToAllDataModels, getRootDataModel,
-    propagateImmutableActions } from './helper';
+import {
+    persistDerivation,
+    getRootGroupByModel,
+    propagateToAllDataModels,
+    getRootDataModel,
+    propagateImmutableActions
+} from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {
     dataBuilder,
@@ -197,8 +202,7 @@ class DataModel extends Relation {
 
         if (!partialFieldspace.fieldsObj()[field.fieldName()]) {
             partialFieldspace.fields.push(field);
-        }
-        else {
+        } else {
             const fieldIndex = partialFieldspace.fields.findIndex(fieldinst => fieldinst.name === fieldName);
             fieldIndex >= 0 && (partialFieldspace.fields[fieldIndex] = field);
         }

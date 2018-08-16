@@ -105,7 +105,9 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
     }
     const filteredModel = operation === 'and' ? compose(...fns.map(fn => select(fn, {
         saveChild: false
-    })))(model.clone(false, false), false) : model.select(fields => fns.some(fn => fn(fields)));
+    })))(model.clone(false, false), {
+        saveChild: false
+    }) : model.select(fields => fns.some(fn => fn(fields)));
     return filteredModel;
 };
 
@@ -296,21 +298,17 @@ export const propagateImmutableActions = (propagationNameSpace, rootModels, prop
     const rootModel = rootModels.model;
     const immutableActions = propagationNameSpace.immutableActions;
     for (let sourceId in immutableActions) {
-        if ({}.hasOwnProperty.call(immutableActions, sourceId)) {
-            const actions = immutableActions[sourceId];
-            for (let action in actions) {
-                if ({}.hasOwnProperty.call(actions, action)) {
-                    const criteriaModel = actions[action].criteria;
-                    propagateToAllDataModels(criteriaModel, {
-                        groupByModel: rootGroupByModel,
-                        model: rootModel
-                    }, {
-                        propagationNameSpace,
-                        payload: actions[action].payload,
-                        propagationSourceId
-                    });
-                }
-            }
+        const actions = immutableActions[sourceId];
+        for (let action in actions) {
+            const criteriaModel = actions[action].criteria;
+            propagateToAllDataModels(criteriaModel, {
+                groupByModel: rootGroupByModel,
+                model: rootModel
+            }, {
+                propagationNameSpace,
+                payload: actions[action].payload,
+                propagationSourceId
+            });
         }
     }
 };
