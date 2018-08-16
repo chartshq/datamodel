@@ -105,5 +105,5 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
         });
     });
 
-    return new DataModel(data, schema, name);
+    return new DataModel(data, schema, { name });
 }

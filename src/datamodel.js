@@ -229,7 +229,7 @@ class DataModel extends Relation {
         const header = rawData.schema.map(field => field.name);
         const dataInCSVArr = [header].concat(rawData.data);
 
-        const sortedDm = new this.constructor(dataInCSVArr, rawData.schema, null, { dataFormat: 'DSVArr' });
+        const sortedDm = new this.constructor(dataInCSVArr, rawData.schema, { dataFormat: 'DSVArr' });
         sortedDm._sortingDetails = sortingDetails;
         return sortedDm;
     }
@@ -265,7 +265,7 @@ class DataModel extends Relation {
      *    { name: 'first', type: 'dimension' },
      *    { name: 'second', type: 'dimension' },
      * ];
-     * const dataModel = new DataModel(data1, schema1, 'Yo');
+     * const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
      * const newDm = dataModel.calculateVariable(
      *    {
      *     name: 'Song',
@@ -290,7 +290,7 @@ class DataModel extends Relation {
      *    { name: 'city', type: 'dimension' },
      *    { name: 'state', type: 'dimension' },
      *  ];
-     * const dataModel = new DataModel(data1, schema1, 'Yo');
+     * const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
      * const child = dataModel.calculateVariable(
      *     {
      *       name: 'Efficiency',
@@ -469,7 +469,7 @@ class DataModel extends Relation {
      *      { name: 'first', type: 'dimension' },
      *      { name: 'second', type: 'dimension' },
      *  ];
-     *  const dataModel = new DataModel(data1, schema1, 'Yo');
+     *  const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
      *  const buckets = {
      *      start: 10
      *      stops: [11, 16, 20, 30]
@@ -488,7 +488,7 @@ class DataModel extends Relation {
      *      { name: 'first', type: 'dimension' },
      *      { name: 'second', type: 'dimension' },
      *  ];
-     *  const dataModel = new DataModel(data1, schema1, 'Yo');
+     *  const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
      *  const config = { binCount: 2, name: 'sumField' }
      *  const binDM = dataModel.bin('profit', config);
      *
@@ -503,7 +503,7 @@ class DataModel extends Relation {
      *      { name: 'first', type: 'dimension' },
      *      { name: 'second', type: 'dimension' },
      *  ];
-     *  const dataModel = new DataModel(data1, schema1, 'Yo');
+     *  const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
      *  const config = { binSize: 2, name: 'sumField' }
      *  const binDM = dataModel.bin('profit', config);
      *

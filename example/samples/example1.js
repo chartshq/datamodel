@@ -53,7 +53,7 @@ d3.json('./data/cars.json', (data) => {
         { name: 'city', type: 'dimension' },
         { name: 'state', type: 'dimension' },
     ];
-    const dataModel = new DataModel(data1, schema1, 'Yo');
+    const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
     const next = dataModel.project(['profit', 'sales']).select(f => +f.profit > 10);
     const child = next.createMeasure({
         name: 'Efficiency'
@@ -208,5 +208,5 @@ function load (url) {
 
 // load('../../js/cars.csv')
 //     .then((res) => {
-//         dm = new DataModel(res.split('\n').map(line => line.split(',')), {}, 'myDataModel', { dataFormat: 'DSVArr' });
+//         dm = new DataModel(res.split('\n').map(line => line.split(',')), {}, { name: "myDataModel", dataFormat: 'DSVArr' });
 //     });

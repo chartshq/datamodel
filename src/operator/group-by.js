@@ -135,7 +135,7 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
         newDataModel = existingDataModel;
     }
     else {
-        newDataModel = new DataModel(data, schema, dbName);
+        newDataModel = new DataModel(data, schema, { name: dbName });
     }
     return newDataModel;
 }
