@@ -80,7 +80,7 @@ describe('Field Type', () => {
             type: FieldType.MEASURE,
             unit: 'cm',
             scale: '1000',
-            numberformat: '12-3-3',
+            numberFormat: '12-3-3',
             description: 'This is description',
             defAggFn: () => {}
         };
@@ -105,9 +105,9 @@ describe('Field Type', () => {
             });
         });
 
-        describe('#numberformat', () => {
-            it('should implement numberformat getter methods', () => {
-                expect(field3.numberformat()).to.equal(schema3.numberformat);
+        describe('#numberFormat', () => {
+            it('should implement numberFormat getter methods', () => {
+                expect(field3.numberFormat()).to.equal(schema3.numberFormat);
             });
         });
 
@@ -195,7 +195,7 @@ describe('Field Type', () => {
             type: FieldType.MEASURE,
             unit: 'cm',
             scale: '1000',
-            numberformat: '12-3-3',
+            numberFormat: '12-3-3',
             description: 'This is description',
             defAggFn: () => {}
         };
