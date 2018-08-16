@@ -1,5 +1,5 @@
 export const compose = (...operations) =>
-    (dm, config = { saveChild: false }) => {
+    (dm, config = { saveChild: true }) => {
         let currentDM = dm;
         let frstChild;
         const derivations = [];
