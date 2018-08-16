@@ -31,7 +31,7 @@
  * The schema would be something like
  * @example
  *  const schema = [
- * 	    { name: 'Name', type: 'dimension' },
+ *      { name: 'Name', type: 'dimension' },
  *      { name: 'Miles_per_Gallon', type: 'measure', numberFormat: (val) => `${val} miles / gallon` },
  *      { name: 'Cylinder', type: 'dimension' },
  *      { name: 'Displacement', type: 'measure', defAggFn: 'max' },

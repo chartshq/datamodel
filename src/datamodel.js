@@ -15,9 +15,9 @@ import createFields from './field-creator';
 
 /** @public
  *
- * DataModel is an in-browser representation of tabular data. It supports relaiton algebra operators as well as generic
- * data processing opearators.
- * {@link Relation} is the base class which defines all the relational algebra opreators. DataModel gives definition of
+ * DataModel is an in-browser representation of tabular data. It supports relational algebra operators as well as
+ * generic data processing opearators.
+ * DataModel extends {@link Relation} which defines all the relational algebra opreators. DataModel gives definition of
  * generic data processing operators which are not relational algebra complient.
  *
  * @class
@@ -32,33 +32,32 @@ class DataModel extends Relation {
      * - DSV String
      * - 2D Array
      *
-     * By default DataModel finds suitable adapter to serialize the data. DataModel also expects a schema for
-     * identifying the variables.
-     *
-     * Learn more about schema here.
+     * By default DataModel finds suitable adapter to serialize the data. DataModel also expects a {@link Schema} for
+     * identifying the variables present in data.
      *
      * @example
      * const data = loadData('cars.csv');
      * const schema = [
      *      { name: 'Name', type: 'dimension' },
-     *      { name: 'Miles_per_Gallon', type: 'measure', unit : 'cm', scale: '1000', numberformat: '12-3-3' },
+     *      { name: 'Miles_per_Gallon', type: 'measure', unit : 'cm', scale: '1000', numberformat: val => `${val}G`},
      *      { name: 'Cylinders', type: 'dimension' },
      *      { name: 'Displacement', type: 'measure' },
      *      { name: 'Horsepower', type: 'measure' },
      *      { name: 'Weight_in_lbs', type: 'measure' },
      *      { name: 'Acceleration', type: 'measure' },
-     *      { name: 'Year', type: 'dimension' },
+     *      { name: 'Year', type: 'dimension', subtype: 'datetime', format: '%Y' },
      *      { name: 'Origin', type: 'dimension' }
      * ];
      * const dm = new DataModel(data, schema, { name: 'Cars' });
      * table(dm);
      *
-     * @param {Array.<Object> | string | Array.<Array>} data in the above mentioned format
-     * @param {Array.<Schema>} schema defination of the variables. The order of the variables in data and order of the
-     *      variables in schema has to be same
-     * @param {object} options - optional arguments
-     * @param {string} options.name - name of the datamodel instance. If no name is given an auto generated name is
+     * @param {Array.<Object> | string | Array.<Array>} data Input data in any of the above mentioned formats
+     * @param {Array.<Schema>} schema Defination of the variables. Order of the variables in data and order of the
+     *      variables in schema has to be same.
+     * @param {object} [options] Optional arguments to specify more settings regarding the creation part
+     * @param {string} [options.name] Name of the datamodel instance. If no name is given an auto generated name is
      *      assigned to the instance.
+     * @param {string} [options.fieldSeparator=','] specify field separator type if the data is of type dsv string.
      */
     constructor (...args) {
         super(...args);
@@ -70,10 +69,10 @@ class DataModel extends Relation {
     /** @public
      *
      * Reducers are simple functions which reduces an array of value to a representative value.
-     * Like an array of numbers `[10, 20, 5, 15]` can be reduced to 12.5 if a average / mean reducer funciton is
+     * Like an array of numbers `[10, 20, 5, 15]` can be reduced to 12.5 if average / mean reducer funciton is
      * applied. All the fields in datamodel (variables in data) needs a reducer to handle aggregation.
      *
-     * @return {ReducerStore} singleton instance of {@link ReducerStore}.
+     * @return {ReducerStore} Singleton instance of {@link ReducerStore}.
      */
     static get Reducers () {
         return reducerStore;
@@ -104,7 +103,13 @@ class DataModel extends Relation {
      *      ```
      *      Know more about {@link Fomatter}.
      *
-     * @return {Array} Returns a multidimensional array of the data.
+     * @return {Array} Returns a multidimensional array of the data with schema. The return format looks like
+     *      ```
+     *          {
+     *              data,
+     *              schema
+     *          }   
+     *      ``` 
      */
     getData (options) {
         const defOptions = {
@@ -179,18 +184,19 @@ class DataModel extends Relation {
     /** @public
      *
      * Groupby groups the data by using dimensions and reducing measures. It expects a list of dimensions using which it
-     * projects the datamodel and perform aggregations to reduce the duplicate tuple to one.
+     * projects the datamodel and perform aggregations to reduce the duplicate tuple to one. Refer this 
+     * {@link link_to_one_example_with_group_by | document} to know the intuition behind groupBy.
      *
      * @example
      * const groupedDM = dm.groupBy(['Year'] );
      * console.log(groupedDm);
      *
-     * @param {Array.<string>} fieldsArr - Array containing the name of fields
+     * @param {Array.<string>} fieldsArr - Array containing the name of dimensions 
      * @param {Object} [reducers={}] - A map whose key is the variable name and value is the name of the reducer. If its
      *      not passed, or any variable is ommitted, default aggregation function is used from the schema of the
      *      variable.
      *
-     * @return {DataModel} Returns a new DataModel after performing the groupby.
+     * @return {DataModel} Returns a new DataModel instance after performing the groupby.
      */
     groupBy (fieldsArr, reducers = {}, config = { saveChild: true }) {
         const groupByString = `${fieldsArr.join()}`;
@@ -244,75 +250,36 @@ class DataModel extends Relation {
      /**
      * @public
      *
-     * This method helps to create a new Dimension or Measure.To create either of them one
-     * just need to give the schema of the new field and also pass the dependent fields names
-     * along with a reducer function. The reducer function is a operator which operates on the dependent
-     * fields to give out te value of the new fields.
-     *
-     * Following are the examples:
-     *
-     * Create a new Dimension
+     * Creates a new variable calculated from existing variable. This method expects the defination of the newly created
+     * variable and a function which resolves the value of the new variable from existing variables.
+     * 
+     * Can create a new measure based on existing variables
      * @example
-     * const data1 = [
-     *    { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-     *    { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-     *    { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-     *    { profit: 15, sales: 25, first: 'White', second: 'walls' },
-     * ];
-     * const schema1 = [
-     *    { name: 'profit', type: 'measure' },
-     *    { name: 'sales', type: 'measure' },
-     *    { name: 'first', type: 'dimension' },
-     *    { name: 'second', type: 'dimension' },
-     * ];
-     * const dataModel = new DataModel(data1, schema1, 'Yo');
-     * const newDm = dataModel.calculateVariable(
-     *    {
-     *     name: 'Song',
-     *     type: 'dimension'
-     *    }, ['first', 'second', (first, second) =>
-     *      `${first} ${second}`
-     *   ]);
-     * Here we create a new dimension named 'Songs' whose value will contain
-     * the result of reducer given.
+     *  // DataModel already prepared and assigned to dm vairable;
+     *  const newDm = dataModel.calculateVariable({
+     *      name: 'powerToWeight',
+     *      type: 'measure'
+     *  }, ['horsepower', 'weight_in_lbs', (hp, weight) => hp / weight ]);
+     * 
      *
-     * Create a new Measure
+     * Can create a new dimension based on existing variables
      * @example
-     * const data1 = [
-     *    { profit: 10, sales: 20, city: 'a', state: 'aa' },
-     *    { profit: 15, sales: 25, city: 'b', state: 'bb' },
-     *    { profit: 10, sales: 20, city: 'a', state: 'ab' },
-     *    { profit: 15, sales: 25, city: 'b', state: 'ba' },
-     * ];
-     * const schema1 = [
-     *    { name: 'profit', type: 'measure' },
-     *    { name: 'sales', type: 'measure' },
-     *    { name: 'city', type: 'dimension' },
-     *    { name: 'state', type: 'dimension' },
-     *  ];
-     * const dataModel = new DataModel(data1, schema1, 'Yo');
-     * const child = dataModel.calculateVariable(
+     *  // DataModel already prepared and assigned to dm vairable;
+     *  const child = dataModel.calculateVariable(
      *     {
      *       name: 'Efficiency',
-     *       type: 'measure'
-     *     }, ['profit', 'sales', (profit, sales) => profit / sales]);
+     *       type: 'dimension'
+     *     }, ['horsepower', (hp) => {
+     *      if (hp < 80) { return 'low'; },
+     *      else if (hp < 120) { return 'moderate'; }
+     *      else { return 'high' }
+     *  }]);
      *
-     * Here we create a new Measure named 'Efficiency'
      *
-     * @param {Object} varConfig: Provides the schema for new variable
-     * @param {String} varConfig.name: New variable name,
-     * @param {String} varConfig.type: Type of variable to be created => 'measure | dimension',
-     * @param {String} varConfig.subype: Subtype of the variable
-     * @param {Array} dependency : Provides the dependents fields on which the new variable depends and a
-     * the reducer which produce the value of the field ['dep-var-1', 'dep-var-2', 'dep-var-3',
-     *                                                      ([var1, var2, var3], rowIndex, dm) => {}]
-     * the last element will be a reducer which will generate the new variable from given variable
-     * @param {Object} config : Additional costomization for the resultant DataModel
-     * @param {Boolean} config.saveChild : Indicates whether resultant dataModel will linked to its parent
-     * @param {Boolean} config.removeDependentDimensions : Indicates whether dependent fields
-     *                                                          needs to be removed.saveChild
+     * @param {Schema} schema: Schema of newly defined variable
+     * @param {VariableResolver} resolver: Resolver format to resolve the current variable
      *
-     * @return {DataModel} returns a datamodel with the new field.
+     * @return {DataModel} Instance of DataModel with the new field
      */
     calculateVariable (schema, dependency, config = { saveChild: true }) {
         const fieldsConfig = this.getFieldsConfig();
@@ -354,7 +321,6 @@ class DataModel extends Relation {
     /**
      * Propagates changes across all the connected DataModel instances.
      *
-     * @public
      * @param {Array} identifiers - A list of identifiers that were interacted with.
      * @param {Object} payload - The interaction specific details.
      *
@@ -399,7 +365,6 @@ class DataModel extends Relation {
     /**
      * Associates a callback with an event name.
      *
-     * @public
      * @param {string} eventName - The name of the event.
      * @param {Function} callback - The callback to invoke.
      * @return {DataModel} Returns this current DataModel instance itself.
@@ -450,75 +415,49 @@ class DataModel extends Relation {
      * @public
      *
      * Perfoms binning on a measure field based on a binning configuration. This method does not aggregate the number of
-     * rows present in DataModel instance. When this operator is applied, it creates a new field with a special kind of
-     * measure DiscreteMeasure where it places the binned value for a given row.
-     *
-     * The binning configuration is defined by
-     * - providing custom bucket configuration
-     * - providing bin number
-     * - providing bin size
+     * rows present in DataModel instance after binning, it just adds a new field with the binned value. Refer binning
+     * {@link example_of_binning | example} to have a intuition of what binning is and the use case.
+     * 
+     * Binning can be configured by
+     * - providing custom bin configuration with non uniform buckets
+     * - providing bin count 
+     * - providing each bin size
      *
      * When custom buckets are provided as part of binning configuration
      * @example
-     *  const data = [
-     *      { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-     *      { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
-     *  const schema1 = [
-     *      { name: 'profit', type: 'measure' },
-     *      { name: 'sales', type: 'measure' },
-     *      { name: 'first', type: 'dimension' },
-     *      { name: 'second', type: 'dimension' },
-     *  ];
-     *  const dataModel = new DataModel(data1, schema1, 'Yo');
+     *  // DataModel already prepared and assigned to dm vairable
      *  const buckets = {
-     *      start: 10
-     *      stops: [11, 16, 20, 30]
+     *      start: 30
+     *      stops: [80, 100, 110]
      *  };
-     *  const config = { buckets, name: 'sumField' }
-     *  const binDM = dataModel.bin('profit', config);\
+     *  const config = { buckets, name: 'binnedHP' }
+     *  const binDM = dataModel.bin('horsepower', config);\
      *
-     * When binCount is defined as part of binning configuration
+     * When `binCount` is defined as part of binning configuration
      * @example
-     *  const data = [
-     *      { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-     *      { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
-     *  const schema1 = [
-     *      { name: 'profit', type: 'measure' },
-     *      { name: 'sales', type: 'measure' },
-     *      { name: 'first', type: 'dimension' },
-     *      { name: 'second', type: 'dimension' },
-     *  ];
-     *  const dataModel = new DataModel(data1, schema1, 'Yo');
-     *  const config = { binCount: 2, name: 'sumField' }
-     *  const binDM = dataModel.bin('profit', config);
+     *  // DataModel already prepared and assigned to dm vairable
+     *  const config = { binCount: 5, name: 'binnedHP' }
+     *  const binDM = dataModel.bin('horsepower', config);
      *
-     * When binSize is defined as part of binning configuration
+     * When `binSize` is defined as part of binning configuration
      * @example
-     *  const data = [
-     *      { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-     *      { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }]
-     *  const schema1 = [
-     *      { name: 'profit', type: 'measure' },
-     *      { name: 'sales', type: 'measure' },
-     *      { name: 'first', type: 'dimension' },
-     *      { name: 'second', type: 'dimension' },
-     *  ];
-     *  const dataModel = new DataModel(data1, schema1, 'Yo');
-     *  const config = { binSize: 2, name: 'sumField' }
-     *  const binDM = dataModel.bin('profit', config);
+     *  // DataModel already prepared and assigned to dm vairable
+     *  const config = { binSize: 200, name: 'binnedHorsepower' }
+     *  const binDM = dataModel.bin('horsepower', config);
      *
-     * @param {String} measureName : Name of measure which will be used to create bin
-     * @param {Object} config : Config required for bucket creation
-     * @param {Object} config.bucketObj : Provides custom buckets definition to perform binning
-     * @param {Array.<Number>} config.bucketObj.stops : Defination of bucket ranges. The first number of array is
-     *      inclusive and the second number of array is exclusive.
-     * @param {Number} [config.bucketObj.startAt] : Force the start of the bin. If not mentioned, the start of the bin
-     *      is the first number in the stops
-     * @param {Number} config.binSize : Bucket size for each bin
-     * @param {Number} config.binCount : no of bins which will be created
-     * @param {String} config.binFieldName : name of the new binned field to be created
+     * @param {String} name Name of measure which will be used to create bin
+     * @param {Object} config Config required for bin creation
+     * @param {Array.<Number>} config.bucketObj.stops Defination of bucket ranges. Two subsequent number from arrays
+     *      are picked and a range is created. The first number from range is inclusive and the second number from range
+     *      is exclusive.
+     * @param {Number} [config.bucketObj.startAt] Force the start of the bin from a particular number. 
+     *      If not mentioned, the start of the bin or the lower domain of the data if stops is not mentioned, else its 
+     *      the first value of the stop.
+     * @param {Number} config.binSize Bucket size for each bin
+     * @param {Number} config.binCount Number of bins which will be created
+     * @param {String} config.name Name of the new binned field to be created
      *
-     * @returns {DataModel} new DataModel instance with the newly created bin.
+     * @returns {DataModel} Instance of new DataModel with the newly created bin.
      */
     bin (measureName, config = { }) {
         const clone = this.clone();
