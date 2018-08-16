@@ -289,10 +289,10 @@ class DataModel extends Relation {
     }
 
     addToPropNamespace (sourceId, payload, criteria, isMutableAction) {
+        let sourceNamespace;
         const action = payload.action;
         const rootModel = getRootDataModel(this);
         const propagationNameSpace = rootModel._propagationNameSpace;
-        let sourceNamespace;
 
         if (isMutableAction) {
             !propagationNameSpace.mutableActions[sourceId] && (propagationNameSpace.mutableActions[sourceId] = {});

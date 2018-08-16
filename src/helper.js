@@ -259,9 +259,9 @@ export const getRootDataModel = (model) => {
 export const propagateToAllDataModels = (identifiers, rootModels, config) => {
     let criteria;
     let propModel;
-
     const propagationNameSpace = config.propagationNameSpace;
     const payload = config.payload;
+
     if (identifiers === null) {
         criteria = null;
     } else {
