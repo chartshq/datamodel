@@ -55,9 +55,10 @@ class Relation {
         return this.getFieldspace().fields.map(d => d.schema);
     }
 
-    getName() {
+    getName () {
         return this._fieldStoreName;
     }
+
     getFieldspace () {
         return this._fieldspace;
     }
