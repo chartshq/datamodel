@@ -292,8 +292,8 @@ export const propagateToAllDataModels = (identifiers, rootModels, config) => {
 
 
 export const propagateImmutableActions = (propagationNameSpace, rootModels, propagationSourceId) => {
-    const rootModel = rootModels.rootModel;
-    const rootGroupByModel = rootModels.rootGroupByModel;
+    const rootGroupByModel = rootModels.groupByModel;
+    const rootModel = rootModels.model;
     const immutableActions = propagationNameSpace.immutableActions;
     for (let sourceId in immutableActions) {
         if ({}.hasOwnProperty.call(immutableActions, sourceId)) {
