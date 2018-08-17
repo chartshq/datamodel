@@ -58,5 +58,5 @@ export function union (dm1, dm2) {
     prepareDataHelper(dm1, dm1FieldStoreFieldObj);
     prepareDataHelper(dm2, dm2FieldStoreFieldObj);
 
-    return new DataModel(data, schema, name);
+    return new DataModel(data, schema, { name });
 }

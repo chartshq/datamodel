@@ -33,8 +33,8 @@ const schema2 = [
 describe('Checking difference', () => {
     describe('#difference', () => {
         it('should return difference between to datamodels having same schema', () => {
-            const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
-            const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'state']);
+            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' })).project(['city', 'state']);
+            const dataModel2 = (new DataModel(data2, schema2, { name: 'ModelB' })).project(['city', 'state']);
             const differenceDataModel = difference(dataModel1, dataModel2);
             expect(differenceDataModel.getData()).to.deep.equal({
                 schema: [

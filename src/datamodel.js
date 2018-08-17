@@ -218,14 +218,59 @@ class DataModel extends Relation {
     }
 
     /**
-     * It helps to define the sorting order of the returned data.
-     * This is similar to the orderBy functionality of the database
-     * you have to pass the array of array [['columnName', 'sortType(asc|desc)']] and the
-     * function getData will give the data accordingly.
-     *
      * @public
-     * @param {Array} sortingDetails - An array containing the sorting details with column names;
-     * @return {DataModel} Returns a new sorted instance of DataModel.
+     *
+     * Performs sorting operation on the current {@link DataModel} instance according to the specified sorting details,
+     * It doesn't mutate the current {@link DataModel}, instead returns a new {@link DataModel} instance containing the
+     * sorted data.
+     *
+     * The `sortingDetails` is an array of individual sorting operations, each individual sorting is a combination of
+     * the target field name on which the sorting will be applied and the sorting direction: `ASC` or `DESC` or a
+     * sorting function.
+     *
+     * Consider the following example, where data is sorted by `Origin` field in `DESC` order first and then
+     * nested sorting is applied by `Acceleration` field in `ASC` order.
+     *
+     * @example
+     * // here dm is the pre-declared DataModel instance containing the data of 'cars.json' file
+     * let sortedDm = dm.sort([
+     *    ["Origin", "DESC"]
+     *    ["Acceleration"] // here the default value of sorting order ASC is used
+     * ]);
+     *
+     * console.log(dm.getData());
+     * console.log(sortedDm.getData());
+     *
+     * // Sort with a custom sorting function
+     * sortedDm = dm.sort([
+     *    ["Origin", "DESC"]
+     *    ["Acceleration", (a, b) => a - b] // here used a custom sorting function instead of ASC or DESC
+     * ]);
+     *
+     * console.log(dm.getData());
+     * console.log(sortedDm.getData());
+     * @end
+     *
+     * Addition to this normal sorting, the data can also be sorted by the related field instead of the target field.
+     * Suppose a DataModel named `cars` contains three fields `Origin`, `Name` and `Acceleration`. Now, the data in this
+     * model can be sorted by `Origin` field according to the average value of all `Acceleration` values for a
+     * particular `Origin` value.
+     *
+     * Consider the following example, where the DataModel is sorted by `Origin` according to the average value of
+     * `Acceleration` field.
+     *
+     * @example
+     * // here dm is the pre-declared DataModel instance containing the data of 'cars.json' file
+     * const sortedDm = dm.sort([
+     *     ['Origin', ['Acceleration', (a, b) => avg(...a.Acceleration) - avg(...b.Acceleration)]]
+     * ]);
+     *
+     * console.log(dm.getData());
+     * console.log(sortedDm.getData());
+     * @end
+     *
+     * @param {Array} sortingDetails - An array containing the sorting details with column names.
+     * @return {DataModel} Returns a new instance of DataModel with sorted data.
      */
     sort (sortingDetails) {
         const rawData = this.getData({
@@ -235,7 +280,7 @@ class DataModel extends Relation {
         const header = rawData.schema.map(field => field.name);
         const dataInCSVArr = [header].concat(rawData.data);
 
-        const sortedDm = new this.constructor(dataInCSVArr, rawData.schema, null, { dataFormat: 'DSVArr' });
+        const sortedDm = new this.constructor(dataInCSVArr, rawData.schema, { dataFormat: 'DSVArr' });
         sortedDm._sortingDetails = sortingDetails;
         return sortedDm;
     }

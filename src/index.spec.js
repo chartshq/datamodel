@@ -822,8 +822,8 @@ describe('DataModel', () => {
                 { name: 'city', type: 'dimension' },
                 { name: 'state', type: 'dimension' },
             ];
-            const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
-            const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'state']);
+            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' })).project(['city', 'state']);
+            const dataModel2 = (new DataModel(data2, schema2, { name: 'ModelB' })).project(['city', 'state']);
 
             expect(dataModel1.difference(dataModel2).getData()).to.deep.equal({
                 schema: [
@@ -868,7 +868,7 @@ describe('DataModel', () => {
                 { name: 'city', type: 'dimension' },
                 { name: 'state', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, 'Yo');
+            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
 
             const next = dataModel.project(['profit', 'sales']).select(f => +f.profit > 10);
             const child = next.calculateVariable({
@@ -904,7 +904,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, 'Yo');
+            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
             const newDm = dataModel.calculateVariable({
                 name: 'Song',
                 type: 'dimension'
@@ -961,7 +961,7 @@ describe('DataModel', () => {
             let projetionFlag = false;
             let selectionFlag = false;
             let groupByFlag = false;
-            const dataModel = new DataModel(data1, schema1, 'Yo');
+            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
             const projected = dataModel.project(['profit']);
             const selected = dataModel.select(fields => fields.profit.valueOf() > 10);
             const grouped = dataModel.groupBy(['first']);
@@ -1004,7 +1004,7 @@ describe('DataModel', () => {
             let inProjetionFlag = false;
             let inSelectionFlag = false;
             let inGroupByFlag = false;
-            const dataModel = new DataModel(data1, schema1, 'Yo');
+            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
             const projected = dataModel.project(['profit']);
             const selected = dataModel.select(fields => fields.profit.value > 10);
             const grouped = dataModel.groupBy(['sales']);
@@ -1050,7 +1050,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, 'Yo');
+            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
 
             const buckets = {
                 start: 0,
@@ -1079,7 +1079,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, 'Yo');
+            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
 
             const buckets = {
                 start: 10,
@@ -1113,7 +1113,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, 'Yo');
+            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
             const bin = dataModel.bin('profit', { binCount: 2, name: 'sumField' });
             let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
             let expData = ['10-16', '10-16', '10-16', '10-16', '10-16', '16-22', '16-22', '16-22', '16-22', '16-22'];
@@ -1138,7 +1138,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, 'Yo');
+            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
             const bin = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
             let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
             let expData = ['10-15', '15-20', '15-20', '15-20', '10-15', '15-20', '20-25', '15-20', '20-25', '20-25'];
@@ -1167,7 +1167,7 @@ describe('DataModel', () => {
         //         { name: 'first', type: 'dimension' },
         //         { name: 'second', type: 'dimension' },
         //     ];
-        //     const dataModel = new DataModel(data1, schema1, 'Yo');
+        //     const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
 
         //     const dm2 = dataModel.select(feild => feild.sales.value === 25);
         //     const bin = dm2.bin('profit', { binSize: 3, name: 'sumField' }, x => x[0]);

@@ -18,7 +18,7 @@ d3.json('./data/cars.json', (data) => {
         { name: 'first', type: 'dimension' },
         { name: 'second', type: 'dimension' },
     ];
-    const dataModel = new DataModel(data1, schema1, 'Yo');
+    const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
     const bin = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
     const k = bin.groupBy(['sumField']);
     let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
@@ -38,7 +38,7 @@ d3.json('./data/cars.json', (data) => {
     // ];
 
 
-    // const dataModel = new DataModel(data1, schema1, 'Yo');
+    // const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
     // const grouped = dataModel.groupBy(['first']);
     // grouped;
 });

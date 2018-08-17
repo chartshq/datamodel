@@ -22,15 +22,15 @@ const schema1 = [
 describe('Test groupBy', () => {
     describe('#getFieldArr', () => {
         it('should return field data for the given fields', () => {
-            const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
+            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
             expect(getFieldArr(dataModel1, ['city', 'state'])).to.deep.equal(['city', 'state']);
         });
         it('should return all field data if no fields provided ', () => {
-            const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
+            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
             expect(getFieldArr(dataModel1)).to.deep.equal(['city', 'state']);
         });
         it('should return only valid fields if invalid fields provided', () => {
-            const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
+            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
             expect(getFieldArr(dataModel1, ['city', 'state', 'abc', 'profit'])).to
                             .deep.equal(['city', 'state']);
         });
@@ -38,21 +38,21 @@ describe('Test groupBy', () => {
 
     describe('#getReducerObj', () => {
         it('should return default reducer', () => {
-            const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
+            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
             expect(getReducerObj(dataModel1)).to.deep.equal({
                 profit: defReducer,
                 sales: defReducer,
             });
         });
         it('should return default reducer when no reducer is passed in parameter', () => {
-            const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
+            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
             expect(getReducerObj(dataModel1, {})).to.deep.equal({
                 profit: defReducer,
                 sales: defReducer,
             });
         });
         it('should return given reducer passed in params', () => {
-            const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
+            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
             /**
              * sample function
              * @return {number} 0
@@ -70,7 +70,7 @@ describe('Test groupBy', () => {
 
     describe('#groupBy', () => {
         it('should return a grouped dataModel', () => {
-            const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
+            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
             const reqData = {
                 schema: [
                 { name: 'city', type: 'dimension' },
