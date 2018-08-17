@@ -4,7 +4,7 @@ import { crossProduct, difference, naturalJoinFilter, union } from './operator';
 import { DM_DERIVATIVES } from './constants';
 
 /**
- * Relation class exposes its purpose from its nomenclature. It provides the definitions of basic operators of 
+ * Relation class exposes its purpose from its nomenclature. It provides the definitions of basic operators of
  * relational algebra like selection, projection, union, difference etc.
  *
  * It is extended by {@link DataModel} to inherit the functionalities of relational algebra concept.
@@ -108,35 +108,21 @@ class Relation {
      * is an object containing the row data of the both datamodel instance in the current iteration state.
      *
      * @example
-     * const data1 = [
-     *   { profit: 10, sales: 20, city: 'a' },
-     *   { profit: 15, sales: 25, city: 'b' },
-     * ];
-     * const schema1 = [
-     *   { name: 'profit', type: 'measure' },
-     *   { name: 'sales', type: 'measure' },
-     *   { name: 'city', type: 'dimension' },
-     * ];
-     * const data2 = [
-     *   { population: 200, city: 'a' },
-     *   { population: 250, city: 'b' },
-     * ];
-     * const schema2 = [
-     *   { name: 'population', type: 'measure' },
-     *   { name: 'city', type: 'dimension' },
-     * ];
-     * const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
-     * const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
+     *
+     * // lets create another dataModels from dm to test join
+     * let newDm = dm.project(['Origin','Cylinders'])
+     * let anotherNewDm = dm.project(['Name','Miles_per_Gallon','Origin'])
      *
      * // without filter function
-     * console.log(dataModel1.join(dataModel2).getData());
+     * console.log(anotherNewDm.join(newdm).getData());
      *
      * // with filter function
-     * console.log(dataModel1.join(dataModel2, obj => obj.ModelA.city === obj.ModelB.city).getData());
+     * console.log(anotherNewDm.join(newdm,
+     * obj => obj.[newdm.getName()].Origin === obj.[anotherNewDm.getName()].Origin).getData());
      *
      * @param {DataModel} joinWith - The DataModel to be joined with the current instance DataModel.
-     * @param {Function} filterFn - The predicate function that will filter the result of the crossProduct.
-     *       
+     * @param {JoinFilter} filterFn - The predicate function that will filter the result of the crossProduct.
+     *
      * @return {DataModel} Returns the new DataModel created after joining.
      */
     join (joinWith, filterFn) {
@@ -146,7 +132,8 @@ class Relation {
     /**
      * @public
      *
-     * Performs the natural join operations of the relational algebra between two {@link DataModel} instances and returns
+     * Performs the natural join operations of the relational algebra between two {@link DataModel} instances
+     * and returns
      * a new {@link DataModel} containing the resultant data.
      *
      * Natural join is a special kind of cross-product join, where a filter function is performed for the common
@@ -155,27 +142,11 @@ class Relation {
      * <Here_put_a_good_resource_link_on_natural_join>
      *
      * @example
-     * const data1 = [
-     *   { profit: 10, sales: 20, city: 'a' },
-     *   { profit: 15, sales: 25, city: 'b' },
-     * ];
-     * const schema1 = [
-     *   { name: 'profit', type: 'measure' },
-     *   { name: 'sales', type: 'measure' },
-     *   { name: 'city', type: 'dimension' },
-     * ];
-     * const data2 = [
-     *   { population: 200, city: 'a' },
-     *   { population: 250, city: 'b' },
-     * ];
-     * const schema2 = [
-     *   { name: 'population', type: 'measure' },
-     *   { name: 'city', type: 'dimension' },
-     * ];
-     * const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
-     * const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
+     * // lets create another dataModels from dm to test join
+     * let newDm = dm.project(['Origin','Cylinders'])
+     * let anotherNewDm = dm.project(['Name','Miles_per_Gallon','Origin'])
      *
-     * console.log(dataModel1.naturalJoin(dataModel2).getData());
+     * console.log(newDm.naturalJoin(anotherNewDm).getData());
      *
      * @param {DataModel} joinWith - The DataModel with whom this DataModel will be joined.
      * @return {DataModel} Returns the new DataModel created after joining.
@@ -231,7 +202,8 @@ class Relation {
      *
      * Performs the difference operation of the relational algebra between two {@link DataModel} instances and returns
      * a new {@link DataModel} containing the resultant data.
-     * This operation can be termed as vertical joining of all the tuples those are not in the second {@link DataModel} instance.
+     * This operation can be termed as vertical joining of all the tuples those are not in the
+     * second {@link DataModel} instance.
      * The requirement is both the {@link DataModel} instances should have same column names and order.
      *
      * Refer to the following link for more info about difference operator:
