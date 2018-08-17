@@ -4,10 +4,12 @@ import { crossProduct, difference, naturalJoinFilter, union } from './operator';
 import { DM_DERIVATIVES } from './constants';
 
 /**
- * Relation class exposes its purpose from its nomenclature. It provides the definitions of basic operators of Relational
- * Algebra like selection, projection, union, rename etc.
+ * Relation class exposes its purpose from its nomenclature. It provides the definitions of basic operators of 
+ * relational algebra like selection, projection, union, difference etc.
  *
- * It is extended by {@link DataModel} to inherit the functionalities of Relational Algebra concept.
+ * It is extended by {@link DataModel} to inherit the functionalities of relational algebra concept.
+ *
+ * @public
  */
 class Relation {
 
@@ -44,95 +46,41 @@ class Relation {
     }
 
     /**
+     * Retrieves the {@link Schema | schema} details for every {@link Field | field} as an array.
+     *
      * @public
      *
-     * Retrieves the schema details for every fields as an array. Each array element is an object describing the
-     * corresponding field schema like field name, field type etc.
-     *
-     * Refer to {@link Schema} and {@link Field} docs for more details about Schema and field respectively.
-     *
-     * ```javascript
-     * const schema = yourDataModel.getSchema();
-     *
-     * the schema:
-     * [
-     *   { name: 'Name', type: 'dimension' },
-     *   { name: 'Miles_per_Gallon', type: 'measure', numberFormat: (val) => `${val} miles / gallon` },
-     *   { name: 'Cylinder', type: 'dimension' },
-     *   { name: 'Displacement', type: 'measure', defAggFn: 'max' },
-     *   { name: 'HorsePower', type: 'measure', defAggFn: 'max' },
-     *   { name: 'Weight_in_lbs', type: 'measure', defAggFn: 'avg',  },
-     *   { name: 'Acceleration', type: 'measure', defAggFn: 'avg' },
-     *   { name: 'Year', type: 'dimension', subtype: 'datetime', format: '%Y' },
-     *   { name: 'Origin' }
-     * ]
-    * ```
-     *
-     * @return {Array} Returns an array of field schema.
+     * @return {Array.<Schema>} Array of fields schema.
+     *      ```
+     *      [
+     *          { name: 'Name', type: 'dimension' },
+     *          { name: 'Miles_per_Gallon', type: 'measure', numberFormat: (val) => `${val} miles / gallon` },
+     *          { name: 'Cylinder', type: 'dimension' },
+     *          { name: 'Displacement', type: 'measure', defAggFn: 'max' },
+     *          { name: 'HorsePower', type: 'measure', defAggFn: 'max' },
+     *          { name: 'Weight_in_lbs', type: 'measure', defAggFn: 'avg',  },
+     *          { name: 'Acceleration', type: 'measure', defAggFn: 'avg' },
+     *          { name: 'Year', type: 'dimension', subtype: 'datetime', format: '%Y' },
+     *          { name: 'Origin' }
+     *      ]
+     *      ```
      */
     getSchema () {
         return this.getFieldspace().fields.map(d => d.schema);
     }
 
     /**
+     * Returns the name of the {@link DataModel} instance. If no name was specified during {@link DataModel}
+     * initialization, then it returns a auto-generated name.
+     *
      * @public
      *
-     * Returns the name of the {@link DataModel} instance. If no name was specified during {@link DataModel} initialization,
-     * then it returns a auto-generated name.
-     *
-     * const data = [
-     *   { profit: 10, sales: 20, city: 'a' },
-     *   { profit: 15, sales: 25, city: 'b' },
-     * ];
-     * const schema = [
-     *   { name: 'profit', type: 'measure' },
-     *   { name: 'sales', type: 'measure' },
-     *   { name: 'city', type: 'dimension' },
-     * ];
-     *
-     * // here no name is specified
-     * const dm = new DataModel(data, schema);
-     * console.log(dm.getName());
-     *
-     * // here a name is specified
-     * const dm = new DataModel(data, schema, { name: 'MyAwesomeDataModel' });
-     * console.log(dm.getName());
-     *
-     * @return {string} Returns the name of the DataModel instance.
+     * @return {string} Name of the DataModel instance.
      */
     getName() {
         return this._fieldStoreName;
     }
 
-    /**
-     * @public
-     *
-     * A DataModel can have multiple operations applied on it, which causes to transform the underlying data and field
-     * schema from its parent DataModel. Every datamodel persists its data and transaction history.
-     * This method retrieves the current status of data, schema and returns that.
-     *
-     * @example
-     * const schema = [
-     *    { name: 'Name', type: 'dimension' },
-     *    { name: 'HorsePower', type: 'measure' },
-     *    { name: "Origin", type: 'dimension' }
-     * ];
-     *
-     * const data = [
-     *    { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
-     *    { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
-     *    { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
-     *    { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
-     * ]
-     *
-     * const dt = new DataModel(schema, data);
-     * const dt2 = dt.project(["Name", "HorsePower"]);
-     *
-     * console.log(dt.getFieldspace().fields)
-     * console.log(dt2.getFieldspace().fields)
-     *
-     * @return {Array} Returns an object containing the fields info.
-     */
     getFieldspace () {
         return this._fieldspace;
     }
@@ -150,18 +98,14 @@ class Relation {
     /**
      * @public
      *
-     * Performs the cross-product operation of the relational algebra between two {@link DataModel} instances and returns
-     * a new {@link DataModel} instance containing the results. This operation is also called theta join.
+     * Performs the cross-product between two {@link DataModel} instances and returns a new {@link DataModel} instance
+     * containing the results. This operation is also called theta join.
      *
      * Refer to the following link for more info about join operation:
      * <Here_put_a_good_resource_link_on_join>
      *
      * It takes an optional function which filters the generated result rows. The argument of this filter function
      * is an object containing the row data of the both datamodel instance in the current iteration state.
-     *
-     * Suppose, there are two {@link DataModel} modelA with 3 columns 2 rows and modelB with 2 columns 2 rows.
-     * So, after cross product between modelA and modelB, the resultant datamodel will have (3 + 2) = 5 columns and
-     * (2 * 2) = 4 rows (if no filter function is provided).
      *
      * @example
      * const data1 = [
@@ -190,8 +134,9 @@ class Relation {
      * // with filter function
      * console.log(dataModel1.join(dataModel2, obj => obj.ModelA.city === obj.ModelB.city).getData());
      *
-     * @param {DataModel} joinWith - The DataModel to be joined with the current DataModel.
-     * @param {Function} filterFn - The function that will filter the result of the crossProduct.
+     * @param {DataModel} joinWith - The DataModel to be joined with the current instance DataModel.
+     * @param {Function} filterFn - The predicate function that will filter the result of the crossProduct.
+     *       
      * @return {DataModel} Returns the new DataModel created after joining.
      */
     join (joinWith, filterFn) {
