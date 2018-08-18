@@ -1,4 +1,55 @@
 ---
   title: "datetime.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__DateTime__"
+    - 
+      type: "markdown-section"
+      content: "Creates new DateTime field instance."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| name | string | The name of the field. |\n| data | Array | An array containing the field data. |\n| schema | Object | The schema for the field. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datetime.js, line 11"
+    - 
+      type: "markdown-section"
+      content: "__DateTime__"
+    - 
+      type: "markdown-section"
+      content: "Creates new DateTime field instance."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| name | string | The name of the field. |\n| data | Array | An array containing the field data. |\n| schema | Object | The schema for the field. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datetime.js, line 20"
+    - 
+      type: "markdown-section"
+      content: "__DateTime#subType() -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "Getter for subType value of the field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Returns subType of the field."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datetime.js, line 31"
+    - 
+      type: "markdown-section"
+      content: "__DateTime#parse(val) -> {number}__"
+    - 
+      type: "markdown-section"
+      content: "A hook which is called for every entry(cell) of the column."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| val | * | The current entry present in the column while iteration. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __number:__ Returns the total timestamps in millisecond."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datetime.js, line 44"

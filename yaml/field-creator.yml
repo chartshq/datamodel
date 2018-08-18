@@ -1,4 +1,34 @@
 ---
   title: "field-creator.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__createUnitField(data, schema) -> {Field}__"
+    - 
+      type: "markdown-section"
+      content: "Creates a field instance according to the provided data and schema."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| data | Array | The field data array. |\n| schema | Object | The field schema object. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Field:__ Returns the newly created field instance."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ field-creator.js, line 13"
+    - 
+      type: "markdown-section"
+      content: "__createFields(dataColumn, schema, headers) -> {Array.<Field>}__"
+    - 
+      type: "markdown-section"
+      content: "Creates the field instances with input data and schema."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| dataColumn | Array | The data array for fields. |\n| schema | Array | The schema array for fields. |\n| headers | Array | The array of header names. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array.<Field>:__ Returns an array of newly created field instances."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ field-creator.js, line 45"

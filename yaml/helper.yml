@@ -1,4 +1,103 @@
 ---
   title: "helper.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__prepareSelectionData(fields, i) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "Prepares the selection data."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ helper.js, line 19"
+    - 
+      type: "markdown-section"
+      content: "__isArray(val) -> {boolean}__"
+    - 
+      type: "markdown-section"
+      content: "Checks whether the value is an array."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| val | * | The value to be checked. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __boolean:__ Returns true if the value is an array otherwise returns false."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ helper.js, line 7"
+    - 
+      type: "markdown-section"
+      content: "__isObject(val) -> {boolean}__"
+    - 
+      type: "markdown-section"
+      content: "Checks whether the value is an object."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| val | * | The value to be checked. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __boolean:__ Returns true if the value is an object otherwise returns false."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ helper.js, line 17"
+    - 
+      type: "markdown-section"
+      content: "__isString(val) -> {boolean}__"
+    - 
+      type: "markdown-section"
+      content: "Checks whether the value is a string value."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| val | * | The value to be checked. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __boolean:__ Returns true if the value is a string value otherwise returns false."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ helper.js, line 27"
+    - 
+      type: "markdown-section"
+      content: "__isCallable(val) -> {boolean}__"
+    - 
+      type: "markdown-section"
+      content: "Checks whether the value is callable."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| val | * | The value to be checked. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __boolean:__ Returns true if the value is callable otherwise returns false."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ helper.js, line 37"
+    - 
+      type: "markdown-section"
+      content: "__uniqueValues(data) -> {Array}__"
+    - 
+      type: "markdown-section"
+      content: "Returns the unique values from the input array."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| data | Array | The input array. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array:__ Returns a new array of unique values."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ helper.js, line 47"
+    - 
+      type: "markdown-section"
+      content: "__isArrEqual(arr1, arr2) -> {boolean}__"
+    - 
+      type: "markdown-section"
+      content: "Checks Whether two arrays have same content."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr1 | Array | The first array. |\n| arr2 | Array | The 2nd array. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __boolean:__ Returns whether two array have same content."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ helper.js, line 58"

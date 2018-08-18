@@ -1,6 +1,4 @@
-/** @public
- * @module Schema
- *
+/**
  * Schema is a used to describe a variable present in data. Schema are different for dimension and measure. The `name`
  * is only property in schema which is mandatory.
  *

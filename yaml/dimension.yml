@@ -1,4 +1,46 @@
 ---
   title: "dimension.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__Dimension#domain() -> {Array}__"
+    - 
+      type: "markdown-section"
+      content: "Returns the domain for the dimension field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array:__ Returns the unique values from dimension values."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ dimension.js, line 17"
+    - 
+      type: "markdown-section"
+      content: "__Dimension#parse(val) -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "A hook which is called for every entry(cell) of the column."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| val | * | The current entry present in the column while iteration. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Returns the string representation of the value."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ dimension.js, line 29"
+    - 
+      type: "markdown-section"
+      content: "__Dimension#parsed(val) -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "Saves the cardinality of the dimensional values after parsing the data."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| val | string | The parsed value. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Returns the input val."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ dimension.js, line 40"

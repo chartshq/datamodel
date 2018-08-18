@@ -1,4 +1,49 @@
 ---
   title: "group-by.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__getFieldArr(dataModel, fieldArr) -> {Array}__"
+    - 
+      type: "markdown-section"
+      content: "This function sanitize the user given field and return a common Array structure field\nlist"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| dataModel | DataModel | the dataModel operating on |\n| fieldArr | Array | user input of field Array |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array:__ arrays of field name"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ group-by.js, line 13"
+    - 
+      type: "markdown-section"
+      content: "__getReducerObj(dataModel, reducers) -> {Object}__"
+    - 
+      type: "markdown-section"
+      content: "This sanitize the reducer provide by the user and create a common type of object.\nuser can give function Also"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| dataModel | DataModel | dataModel to worked on |\n| reducers | Object | reducer provided by the users |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Object:__ object containing reducer function for every measure"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ group-by.js, line 50"
+    - 
+      type: "markdown-section"
+      content: "__groupBy(dataModel, fieldArr, reducers, existingDataModel) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "main function which perform the group-by operations which reduce the measures value is the\nfields are common according to the reducer function provided"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| dataModel | DataModel | the dataModel to worked |\n| fieldArr | Array | fields according to which the groupby should be worked |\n| reducers | Object | reducers function |\n| existingDataModel | DataModel | Existing datamodel instance |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ new dataModel with the group by"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ group-by.js, line 80"

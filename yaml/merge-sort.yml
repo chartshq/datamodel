@@ -1,4 +1,61 @@
 ---
   title: "merge-sort.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__defSortFn(a, b) -> {number}__"
+    - 
+      type: "markdown-section"
+      content: "The default sort function."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| a | * | The first value. |\n| b | * | The second value. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __number:__ Returns the comparison result e.g. 1 or 0 or -1."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ merge-sort.js, line 8"
+    - 
+      type: "markdown-section"
+      content: "__merge(arr, lo, mid, hi, sortFn) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "The helper function for merge sort which creates the sorted array\nfrom the two halves of the input array."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array | The target array which needs to be merged. |\n| lo | number | The starting index of the first array half. |\n| mid | number | The ending index of the first array half. |\n| hi | number | The ending index of the second array half. |\n| sortFn | function | The sort function. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ merge-sort.js, line 30"
+    - 
+      type: "markdown-section"
+      content: "__sort(arr, lo, hi, sortFn) -> {Array}__"
+    - 
+      type: "markdown-section"
+      content: "The helper function for merge sort which would be called\nrecursively for sorting the array halves."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array | The target array which needs to be sorted. |\n| lo | number | The starting index of the array half. |\n| hi | number | The ending index of the array half. |\n| sortFn | function | The sort function. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array:__ Returns the target array itself."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ merge-sort.js, line 66"
+    - 
+      type: "markdown-section"
+      content: "__mergeSort(arr, sortFn) -> {Array}__"
+    - 
+      type: "markdown-section"
+      content: "The implementation of merge sort.\nIt is used in DataModel for stable sorting as it is not sure\nwhat the sorting algorithm used by browsers is stable or not."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array | The target array which needs to be sorted. |\n| sortFn | function | The sort function. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array:__ Returns the input array itself in sorted order."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ merge-sort.js, line 86"

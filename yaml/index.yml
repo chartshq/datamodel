@@ -1,4 +1,31 @@
 ---
   title: "index.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__PROPAGATION__"
+    - 
+      type: "markdown-section"
+      content: "The event name for data propagation."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ index.js, line 4"
+    - 
+      type: "markdown-section"
+      content: "__ROW_ID__"
+    - 
+      type: "markdown-section"
+      content: "The name of the unique row id column in DataModel."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ index.js, line 9"
+    - 
+      type: "markdown-section"
+      content: "__DM_DERIVATIVES__"
+    - 
+      type: "markdown-section"
+      content: "The enums for operation names performed on DataModel."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ index.js, line 14"

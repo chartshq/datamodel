@@ -1,4 +1,139 @@
 ---
   title: "group-by-function.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__sum(arr) -> {number}__"
+    - 
+      type: "markdown-section"
+      content: "reducer function that takes care about the sum aggregation"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array | array of values |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __number:__ sum of the array"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ group-by-function.js, line 6"
+    - 
+      type: "markdown-section"
+      content: "__avg(arr) -> {number}__"
+    - 
+      type: "markdown-section"
+      content: "reducer function that takes care about the mean aggregation"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array | array of values |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __number:__ mean of the array"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ group-by-function.js, line 21"
+    - 
+      type: "markdown-section"
+      content: "__min(arr) -> {number}__"
+    - 
+      type: "markdown-section"
+      content: "reducer function that gives the min value"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array | array of values |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __number:__ min of the array"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ group-by-function.js, line 36"
+    - 
+      type: "markdown-section"
+      content: "__max(arr) -> {number}__"
+    - 
+      type: "markdown-section"
+      content: "reducer function that gives the max value"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array | array of values |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __number:__ max of the array"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ group-by-function.js, line 50"
+    - 
+      type: "markdown-section"
+      content: "__first(arr) -> {number}__"
+    - 
+      type: "markdown-section"
+      content: "reducer function that gives the first value"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array | array of values |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __number:__ first value of the array"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ group-by-function.js, line 64"
+    - 
+      type: "markdown-section"
+      content: "__last(arr) -> {number}__"
+    - 
+      type: "markdown-section"
+      content: "reducer function that gives the last value"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array | array of values |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __number:__ last value of the array"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ group-by-function.js, line 73"
+    - 
+      type: "markdown-section"
+      content: "__count(arr) -> {number}__"
+    - 
+      type: "markdown-section"
+      content: "reducer function that gives the count value"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array | array of values |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __number:__ count of the array"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ group-by-function.js, line 82"
+    - 
+      type: "markdown-section"
+      content: "__variance(arr) -> {number}__"
+    - 
+      type: "markdown-section"
+      content: "Calculates the variance of the input array."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array.<number> | The input array. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __number:__ Returns the variance of the input array."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ group-by-function.js, line 97"
+    - 
+      type: "markdown-section"
+      content: "__std(arr) -> {number}__"
+    - 
+      type: "markdown-section"
+      content: "Calculates the square root of the variance of the input array."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array.<number> | The input array. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __number:__ Returns the square root of the variance."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ group-by-function.js, line 108"

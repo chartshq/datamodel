@@ -1,0 +1,38 @@
+---
+  title: "reducer-store.js"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__ReducerStore#defaultReducer(params) -> {ReducerStore}__"
+    - 
+      type: "markdown-section"
+      content: "Changes the `defaultReducer` globally. For all the fields which does not have `defAggFn` mentioned in schema, the\nvalue of `defaultReducer` is used for aggregation."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| reducer | string | name of the default reducer. It picks up the definition from store by doing nameundefined     lookup. If no name is found then it takes `sum` as the default reducer. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __ReducerStore:__ instance of the singleton store in page."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ reducer-store.js, line 32"
+    - 
+      type: "markdown-section"
+      content: "__ReducerStore#register(name, reducer) -> {function}__"
+    - 
+      type: "markdown-section"
+      content: "Registers a {@link reducer}. A {@link reducer} has to be registered before it is used."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| name | string | formal name for a reducer. If the given name already exists in store it is overridden by newundefined     definition. |\n| reducer | function | definition of {@link reducer} function. |"
+    - 
+      type: "code-section"
+      content: "// find the mean squared value of a given set\n const reducerStore = DataModel.Reducers();\n\n reducers.register('meanSquared', (arr) => {\n     const squaredVal = arr.map(item => item * item);\n     let sum = 0;\n     for (let i = 0, l = squaredVal.length; i < l; i++) {\n         sum += squaredVal[i++];\n     }\n\n     return sum;\n })\n\n // datamodel (dm) is already prepared with cars.json\n const dm1 = dm.groupBy(['origin'], {\n     accleration: 'meanSquared'\n });"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __function:__ function for unregistering the reducer."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ reducer-store.js, line 79"

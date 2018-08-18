@@ -1,4 +1,88 @@
 ---
   title: "partial-field.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__PartialField__"
+    - 
+      type: "markdown-section"
+      content: "Sets basic setups to each Field instance."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| name | string | The name or identifier of the field. |\n| data | Array | The data array. |\n| schema | Object | The schema of the data type. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ partial-field.js, line 7"
+    - 
+      type: "markdown-section"
+      content: "__PartialField__"
+    - 
+      type: "markdown-section"
+      content: "Sets basic setups to each Field instance."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| name | string | The name or identifier of the field. |\n| data | Array | The data array. |\n| schema | Object | The schema of the data type. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ partial-field.js, line 16"
+    - 
+      type: "markdown-section"
+      content: "__PartialField#sanitize() -> {PartialField}__"
+    - 
+      type: "markdown-section"
+      content: "Sanitizes the field data."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __PartialField:__ - Returns the instance of the current context for chaining."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ partial-field.js, line 30"
+    - 
+      type: "markdown-section"
+      content: "__PartialField#parsed(val) -> {*}__"
+    - 
+      type: "markdown-section"
+      content: "The post parsing hook for field instance."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| val | * | The value to be parsed. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __*:__ Returns the parsed value."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ partial-field.js, line 41"
+    - 
+      type: "markdown-section"
+      content: "__PartialField#domain() -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "Generates and returns the domain for the field."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ partial-field.js, line 50"
+    - 
+      type: "markdown-section"
+      content: "__PartialField#parse() -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "Parse the input value before using."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ partial-field.js, line 64"
+    - 
+      type: "markdown-section"
+      content: "__PartialField#clone(data) -> {PartialField}__"
+    - 
+      type: "markdown-section"
+      content: "Creates brand new copy of current field instance. To avoid optimization issue\npass the required data otherwise current data would be copied which might\nbe expensive."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| data | Array | The input data, if provided current data will not be cloned. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __PartialField:__ Returns the cloned field instance."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ partial-field.js, line 76"

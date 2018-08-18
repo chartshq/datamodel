@@ -1,4 +1,19 @@
 ---
   title: "column-major.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__module.exports(store) -> {function}__"
+    - 
+      type: "markdown-section"
+      content: "The utility function to calculate major column."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| store | Object | The store object. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __function:__ Returns the push function."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ column-major.js, line 7"

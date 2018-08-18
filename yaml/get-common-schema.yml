@@ -1,4 +1,19 @@
 ---
   title: "get-common-schema.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__getCommonSchema(fs1, fs2) -> {Array}__"
+    - 
+      type: "markdown-section"
+      content: "The helper function that returns an array of common schema\nfrom two fieldStore instances."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| fs1 | FieldStore | The first FieldStore instance. |\n| fs2 | FieldStore | The second FieldStore instance. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array:__ An array containing the common schema."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ get-common-schema.js, line 9"

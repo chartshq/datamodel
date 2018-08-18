@@ -1,4 +1,64 @@
 ---
   title: "child-iterator.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__childIterator(datamodel, callback, operation) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "iterate the children and call the callback for each"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ child-iterator.js, line 11"
+    - 
+      type: "markdown-section"
+      content: "__selectIterator(datamodel, callback) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "Invokes a callback for every child created by a selection operation on a DataModel."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| datamodel | DataModel | The input DataModel instance. |\n| callback | function | The callback to be invoked on each child. The parametersundefinedprovided to the callback are the child DataModel instance and the selectionundefinedfunction used to create it. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ child-iterator.js, line 57"
+    - 
+      type: "markdown-section"
+      content: "__calculatedVariableIterator(datamodel, callback) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "Invokes a callback for every measure child of a DataModel."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| datamodel | DataModel | The input DataModel instance. |\n| callback | function | The callback to be invoked on each measure child. The parametersundefinedprovided to the callback are the child DataModel instance and the child params. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ child-iterator.js, line 68"
+    - 
+      type: "markdown-section"
+      content: "__projectIterator(datamodel, callback) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "Invokes a callback for every projected child of a DataModel."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| datamodel | DataModel | The input DataModel instance. |\n| callback | function | The callback to be invoked on each projected child. The parametersundefinedprovided to the callback are the child DataModel instance and theundefinedprojection string. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ child-iterator.js, line 80"
+    - 
+      type: "markdown-section"
+      content: "__groupByIterator(datamodel, callback) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "Invokes a callback over the children created by a groupBy\noperation on a DataModel."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| datamodel | DataModel | The input DataModel instance. |\n| callback | function | The callback to be invoked. The parametersundefinedprovided to the callback are the child DataModel instance and the groupBy string used to create it. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ child-iterator.js, line 92"

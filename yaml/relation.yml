@@ -1,4 +1,250 @@
 ---
   title: "relation.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__Relation__"
+    - 
+      type: "markdown-section"
+      content: "Creates a new Relation instance by providing underlying data and schema."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| data | Object | The input tabular data in dsv or json format orundefinedan existing Relation instance object. |\n| schema | Array | An array of data schema. |\n| options | Object | The optional options. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 14"
+    - 
+      type: "markdown-section"
+      content: "__Relation__"
+    - 
+      type: "markdown-section"
+      content: "Creates a new Relation instance by providing underlying data and schema."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| data | Object | The input tabular data in dsv or json format orundefinedan existing Relation instance object. |\n| schema | Array | An array of data schema. |\n| options | Object | The optional options. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 26"
+    - 
+      type: "markdown-section"
+      content: "__Relation#getSchema() -> {Array.<Schema>}__"
+    - 
+      type: "markdown-section"
+      content: "Retrieves the {@link Schema | schema} details for every {@link Field | field} as an array."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array.<Schema>:__ Array of fields schema.\n     ```\n     [\n         { name: 'Name', type: 'dimension' },\n         { name: 'Miles_per_Gallon', type: 'measure', numberFormat: (val) => `${val} miles / gallon` },\n         { name: 'Cylinder', type: 'dimension' },\n         { name: 'Displacement', type: 'measure', defAggFn: 'max' },\n         { name: 'HorsePower', type: 'measure', defAggFn: 'max' },\n         { name: 'Weight_in_lbs', type: 'measure', defAggFn: 'avg',  },\n         { name: 'Acceleration', type: 'measure', defAggFn: 'avg' },\n         { name: 'Year', type: 'dimension', subtype: 'datetime', format: '%Y' },\n         { name: 'Origin' }\n     ]\n     ```"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 68"
+    - 
+      type: "markdown-section"
+      content: "__Relation#getName() -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "Returns the name of the {@link DataModel} instance. If no name was specified during {@link DataModel}\ninitialization, then it returns a auto-generated name."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Name of the DataModel instance."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 80"
+    - 
+      type: "markdown-section"
+      content: "__Relation#join(joinWith, filterFn) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Performs the cross-product between two {@link DataModel} instances and returns a new {@link DataModel} instance\ncontaining the results. This operation is also called theta join.\n\nRefer to the following link for more info about join operation:\n<Here_put_a_good_resource_link_on_join>\n\nIt takes an optional function which filters the generated result rows. The argument of this filter function\nis an object containing the row data of the both datamodel instance in the current iteration state."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| joinWith | DataModel | The DataModel to be joined with the current instance DataModel. |\n| filterFn | JoinFilter | The predicate function that will filter the result of the crossProduct. |"
+    - 
+      type: "code-section"
+      content: "// lets create another dataModels from dm to test join\nlet newDm = dm.project(['Origin','Cylinders'])\nlet anotherNewDm = dm.project(['Name','Miles_per_Gallon','Origin'])\n\n// without filter function\nconsole.log(anotherNewDm.join(newdm).getData());\n\n// with filter function\nconsole.log(anotherNewDm.join(newdm,\nobj => obj.[newdm.getName()].Origin === obj.[anotherNewDm.getName()].Origin).getData());"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Returns the new DataModel created after joining."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 129"
+    - 
+      type: "markdown-section"
+      content: "__Relation#naturalJoin(joinWith) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Performs the natural join operations of the relational algebra between two {@link DataModel} instances\nand returns\na new {@link DataModel} containing the resultant data.\n\nNatural join is a special kind of cross-product join, where a filter function is performed for the common\ncolumns between two {@link DataModel} on the resultant cross-product rows.\nRefer to the following link for more info about naturalJoin:\n<Here_put_a_good_resource_link_on_natural_join>"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| joinWith | DataModel | The DataModel with whom this DataModel will be joined. |"
+    - 
+      type: "code-section"
+      content: "// lets create another dataModels from dm to test join\nlet newDm = dm.project(['Origin','Cylinders'])\nlet anotherNewDm = dm.project(['Name','Miles_per_Gallon','Origin'])\n\nconsole.log(newDm.naturalJoin(anotherNewDm).getData());"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Returns the new DataModel created after joining."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 155"
+    - 
+      type: "markdown-section"
+      content: "__Relation#union(unionWith) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Performs the union operation of the relational algebra between two {@link DataModel} instances and returns\na new {@link DataModel} containing the resultant data.\nThis operation can be termed as vertical joining of all the unique tuples from both the DataModel instances.\nThe requirement is both the {@link DataModel} instances should have same column names and order.\n\nRefer to the following link for more info about union operator:\n<Here_put_a_good_resource_link_on_union>"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| unionWith | DataModel | Another DataModel instance to which unionundefinedoperation is performed. |"
+    - 
+      type: "code-section"
+      content: "const data1 = [\n  { profit: 10, sales: 20, city: 'a' },\n  { profit: 15, sales: 25, city: 'b' },\n];\nconst schema1 = [\n  { name: 'profit', type: 'measure' },\n  { name: 'sales', type: 'measure' },\n  { name: 'city', type: 'dimension' },\n];\nconst data2 = [\n  { population: 200, city: 'a' },\n  { population: 250, city: 'b' },\n];\nconst schema2 = [\n  { name: 'population', type: 'measure' },\n  { name: 'city', type: 'dimension' },\n];\nconst dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });\nconst dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });\n\nconsole.log(dataModel1.union(dataModel2).getData());"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Returns the new DataModel instance after operation."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 197"
+    - 
+      type: "markdown-section"
+      content: "__Relation#difference(differenceWith) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Performs the difference operation of the relational algebra between two {@link DataModel} instances and returns\na new {@link DataModel} containing the resultant data.\nThis operation can be termed as vertical joining of all the tuples those are not in the\nsecond {@link DataModel} instance.\nThe requirement is both the {@link DataModel} instances should have same column names and order.\n\nRefer to the following link for more info about difference operator:\n<Here_put_a_good_resource_link_on_difference>"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| differenceWith | DataModel | Another DataModel instance to which differenceundefinedoperation is performed. |"
+    - 
+      type: "code-section"
+      content: "const data1 = [\n   { profit: 10, sales: 20, city: 'a' },\n   { profit: 15, sales: 25, city: 'b' },\n ];\nconst schema1 = [\n  { name: 'profit', type: 'measure' },\n  { name: 'sales', type: 'measure' },\n  { name: 'city', type: 'dimension' },\n];\nconst data2 = [\n  { population: 200, city: 'a' },\n  { population: 250, city: 'b' },\n];\nconst schema2 = [\n  { name: 'population', type: 'measure' },\n  { name: 'city', type: 'dimension' },\n];\nconst dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });\nconst dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });\n\nconsole.log(dataModel1.difference(dataModel2).getData());"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Returns the new DataModel instance after operation."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 240"
+    - 
+      type: "markdown-section"
+      content: "__Relation#select(selectFn, config) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Performs the selection operation of the relational algebra on the current {@link DataModel} instance according to\nthe specified selection function and returns a new {@link DataModel} instance containing the selected rows.\n\nThe selection operation can be performed on three modes:\n * NORMAL: In this mode, only the selected rows will be returned.\n * INVERSE: In this mode, only the non-selected rows i.e. inverted rows will be returned.\n * ALL: In this mode, both the selected rows and the inverted rows will be returned.\n\nRefer to the following link for more info about select operator:\n<Here_put_a_good_resource_link_on_select>\n\nThe selection function is called for every rows with an object as argument containing each column data for the\ncurrent iteration row."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| selectFn | function | The function which will be looped through all the data,undefinedif it returns true, the row will be selected. |\n| config | Object | The configuration object. |\n| config.mode | string | The mode of the selection. |\n| saveChild | string | It is used while cloning. |"
+    - 
+      type: "code-section"
+      content: "const schema = [\n   { name: 'Name', type: 'dimension' },\n   { name: 'HorsePower', type: 'measure' },\n   { name: \"Origin\", type: 'dimension' }\n];\n\nconst data = [\n   { Name: \"chevrolet chevelle malibu\", Horsepower: 130, Origin: \"USA\" },\n   { Name: \"citroen ds-21 pallas\", Horsepower: 115, Origin: \"Europe\" },\n   { Name: \"datsun pl510\", Horsepower: 88, Origin: \"Japan\" },\n   { Name: \"amc rebel sst\", Horsepower: 150, Origin: \"USA\"},\n]\n\nconst dt = new DataModel(schema, data);\n\n// with selection mode NORMAL:\nconst normDt = dt.select(fields => fields.Origin.value === \"USA\")\nconsole.log(normDt.getData());\n\n// with selection mode INVERSE:\nconst inverDt = dt.select(fields => fields.Origin.value === \"USA\", { mode: DataModel.FilteringMode.INVERSE })\nconsole.log(inverDt.getData());\n\n// with selection mode ALL:\nconst dtArr = dt.select(fields => fields.Origin.value === \"USA\", { mode: DataModel.FilteringMode.ALL })\n// print the selected parts\nconsole.log(dtArr[0].getData());\n// print the inverted parts\nconsole.log(dtArr[1].getData());"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Returns the new DataModel instance(s) after operation."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 300"
+    - 
+      type: "markdown-section"
+      content: "__Relation#isEmpty() -> {Boolean}__"
+    - 
+      type: "markdown-section"
+      content: "Returns whether the current {@link DataModel} instance has no data."
+    - 
+      type: "code-section"
+      content: "const schema = [\n   { name: 'Name', type: 'dimension' },\n   { name: 'HorsePower', type: 'measure' },\n   { name: \"Origin\", type: 'dimension' }\n];\nconst data = [];\n\nconst dt = new DataModel(schema, data);\nconsole.log(dt.isEmpty());"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Boolean:__ Returns true if the datamodel has no data, otherwise returns false."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 354"
+    - 
+      type: "markdown-section"
+      content: "__Relation#clone(saveChild) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Creates a clone from the current DataModel instance with child parent relationship."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| saveChild | boolean | Whether the cloned instance would be recordedundefinedin the parent instance. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ - Returns the newly cloned DataModel instance."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 367"
+    - 
+      type: "markdown-section"
+      content: "__Relation#project(projField, config) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Performs the projection operation of the relational algebra on the current {@link DataModel} instance.\nIt extracts the data for the specified column names from current {@link DataModel} and returns a new\n{@link DataModel} containing those filtered columns and corresponding data.\n\nThe projection operation can be performed on three modes:\n * NORMAL: In this mode, it extracts the data for the input column names.\n * INVERSE: In this mode, it extracts the data for those column names which are not listed in the input array.\n * ALL: In this mode, it extracts data for the both groups of column names.\n\nRefer to the following link for more info about projection operation:\n<Here_put_a_good_resource_link_on_projection>"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| projField | Array.<(string|Regexp)> | An array of column names in string or regular expression. |\n| config | Object | An optional config. |\n| config.mode | string | The mode of the projection. |\n| saveChild | string | It is used while cloning. |"
+    - 
+      type: "code-section"
+      content: "const schema = [\n   { name: 'Name', type: 'dimension' },\n   { name: 'HorsePower', type: 'measure' },\n   { name: \"Origin\", type: 'dimension' }\n];\n\nconst data = [\n   { Name: \"chevrolet chevelle malibu\", Horsepower: 130, Origin: \"USA\" },\n   { Name: \"citroen ds-21 pallas\", Horsepower: 115, Origin: \"Europe\" },\n   { Name: \"datsun pl510\", Horsepower: 88, Origin: \"Japan\" },\n   { Name: \"amc rebel sst\", Horsepower: 150, Origin: \"USA\"},\n]\n\nconst dt = new DataModel(schema, data);\n\n// with projection mode NORMAL:\nconst normDt = dt.project([\"Name\", \"HorsePower\"]);\nconsole.log(normDt.getData());\n\n// with projection mode INVERSE:\nconst inverDt = dt.project([\"Name\", \"HorsePower\"], { mode: DataModel.FilteringMode.INVERSE })\nconsole.log(inverDt.getData());\n\n// with selection mode ALL:\nconst dtArr = dt.project([\"Name\", \"HorsePower\"], { mode: DataModel.FilteringMode.ALL })\n// print the normal parts\nconsole.log(dtArr[0].getData());\n// print the inverted parts\nconsole.log(dtArr[1].getData());"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Returns the new DataModel instance after operation."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 427"
+    - 
+      type: "markdown-section"
+      content: "__Relation#getFieldsConfig() -> {Object}__"
+    - 
+      type: "markdown-section"
+      content: "Returns index and field details in an object where key is the field name."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Object:__ - Returns the field definitions."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 474"
+    - 
+      type: "markdown-section"
+      content: "__Relation#dispose() -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "Frees up the resources associated with the current {@link DataModel} instance and breaks the link between its\nparent and itself."
+    - 
+      type: "code-section"
+      content: "const schema = [\n   { name: 'Name', type: 'dimension' },\n   { name: 'HorsePower', type: 'measure' },\n   { name: \"Origin\", type: 'dimension' }\n];\n\nconst data = [\n   { Name: \"chevrolet chevelle malibu\", Horsepower: 130, Origin: \"USA\" },\n   { Name: \"citroen ds-21 pallas\", Horsepower: 115, Origin: \"Europe\" },\n   { Name: \"datsun pl510\", Horsepower: 88, Origin: \"Japan\" },\n   { Name: \"amc rebel sst\", Horsepower: 150, Origin: \"USA\"},\n]\n\nconst dt = new DataModel(schema, data);\n\nconst dt2 = dt.select(fields => fields.Origin.value === \"USA\")\ndt2.dispose();"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 515"
+    - 
+      type: "markdown-section"
+      content: "__Relation#removeChild(child) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "Removes the specified child {@link DataModel} from the child list of the current {@link DataModel} instance."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| child | DataModel | Delegates the parent to remove this child. |"
+    - 
+      type: "code-section"
+      content: "const schema = [\n   { name: 'Name', type: 'dimension' },\n   { name: 'HorsePower', type: 'measure' },\n   { name: \"Origin\", type: 'dimension' }\n];\n\nconst data = [\n   { Name: \"chevrolet chevelle malibu\", Horsepower: 130, Origin: \"USA\" },\n   { Name: \"citroen ds-21 pallas\", Horsepower: 115, Origin: \"Europe\" },\n   { Name: \"datsun pl510\", Horsepower: 88, Origin: \"Japan\" },\n   { Name: \"amc rebel sst\", Horsepower: 150, Origin: \"USA\"},\n]\n\nconst dt = new DataModel(schema, data);\n\nconst dt2 = dt.select(fields => fields.Origin.value === \"USA\")\ndt.removeChild(dt2);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 546"
+    - 
+      type: "markdown-section"
+      content: "__Relation#addParent(parent, criteriaQueue) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "Adds the specified {@link DataModel} as a parent for the current {@link DataModel} instance.\n\nThe optional criteriaQueue is an array containing the history of transaction performed on parent {@link DataModel}\nto get the current one."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| parent | DataModel | The datamodel instance which will act as parent. |\n| criteriaQueue | Array | Queue contains in-between operation meta-data. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ relation.js, line 560"

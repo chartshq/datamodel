@@ -1,4 +1,64 @@
 ---
   title: "value.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__Value__"
+    - 
+      type: "markdown-section"
+      content: "Creates new Value instance."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| val | * | the primitive value from the field cell. |\n| field | String | The field from which the value belongs. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ value.js, line 7"
+    - 
+      type: "markdown-section"
+      content: "__Value__"
+    - 
+      type: "markdown-section"
+      content: "Creates new Value instance."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| val | * | the primitive value from the field cell. |\n| field | String | The field from which the value belongs. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ value.js, line 15"
+    - 
+      type: "markdown-section"
+      content: "__Value#value__"
+    - 
+      type: "markdown-section"
+      content: "Returns the field value."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __*:__ Returns the current value."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ value.js, line 31"
+    - 
+      type: "markdown-section"
+      content: "__Value#toString() -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "Converts to human readable string."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Returns a human readable string of the field value."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ value.js, line 42"
+    - 
+      type: "markdown-section"
+      content: "__Value#valueOf() -> {*}__"
+    - 
+      type: "markdown-section"
+      content: "Returns the value of the field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __*:__ Returns the field value."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ value.js, line 52"

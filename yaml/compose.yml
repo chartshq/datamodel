@@ -1,4 +1,71 @@
 ---
   title: "compose.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__compose__"
+    - 
+      type: "markdown-section"
+      content: "Compose is a operator that enables you to run multiple operations on a DataModel all at once.\nThe resulting DataModel will be the result of all the operation provided. The operations provided\nwill be executed in a serial manner ie. result of one operation will be the input for the next\noperations.\n\nSuported operations in compose are\n- select\n- project\n- groupBy\n- bin\n- compose"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| operations | Array.<Operations> | : An array of operation that will be applied on theundefineddatatable. |"
+    - 
+      type: "code-section"
+      content: "const data = [\n  { id: 1, netprofit: 100, netsales: 200, _first: 'Hello', _second: 'Jude' },\n  { id: 4, netprofit: 200, netsales: 250, _first: 'Bollo', _second: 'Wood' },\n];\nconst schema = [\n  { name: 'id', type: 'dimension' },\n  { name: 'netprofit', type: 'measure',defAggFn: 'avg' },\n  { name: 'netsales', type: 'measure' },\n  { name: '_first', type: 'dimension' },\n  { name: '_second', type: 'dimension'},\n  ];\n\nlet composedFn = compose(\n   select(fields => fields.netprofit.value <= 15),\n   project(['netprofit', 'netsales']));\n\nconst dataModel = new DataModel(data1, schema1);\n\nlet composedDm = composedFn(dataModel);\n\nThe composed DataModel will contain the result which might me obtained if the two\noperations were run seperately on datamodel."
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ undefined"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ compose.js, line 46"
+    - 
+      type: "markdown-section"
+      content: "__bin__"
+    - 
+      type: "markdown-section"
+      content: "This is compose bin operator.It performs the binning operation"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| : | args | See {@link DataModel} and [DataModel's bin function ]{@link DataModel#bin}. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ compose.js, line 75"
+    - 
+      type: "markdown-section"
+      content: "__select__"
+    - 
+      type: "markdown-section"
+      content: "This is compose select operator.It performs the select operation"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| : | args | See {@link DataModel} and [DataModel's select function ]{@link DataModel#select}. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ compose.js, line 86"
+    - 
+      type: "markdown-section"
+      content: "__project__"
+    - 
+      type: "markdown-section"
+      content: "This is compose project operator.It performs the project operations"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| : | args | See {@link DataModel} and [DataModel's project function ]{@link DataModel#project}. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ compose.js, line 97"
+    - 
+      type: "markdown-section"
+      content: "__groupBy__"
+    - 
+      type: "markdown-section"
+      content: "This is compose groupBy operator.It performs the groupBy operations"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| : | args | See {@link DataModel} and [DataModel's groupBy function ]{@link DataModel#groupBy}. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ compose.js, line 108"

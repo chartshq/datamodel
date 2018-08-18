@@ -1,4 +1,76 @@
 ---
   title: "data-builder.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__getSortFn(dataType, sortType, index) -> {function}__"
+    - 
+      type: "markdown-section"
+      content: "Generates the sorting functions to sort the data of a DataModel instance\naccording to the input data type."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| dataType | string | The data type e.g. 'measure', 'datetime' etc. |\n| sortType | string | The sorting order i.e. 'asc' or 'desc'. |\n| index | integer | The index of the data which will be sorted. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __function:__ Returns the the sorting function."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ data-builder.js, line 15"
+    - 
+      type: "markdown-section"
+      content: "__groupData(data, fieldIndex) -> {Array}__"
+    - 
+      type: "markdown-section"
+      content: "Groups the data according to the specified target field."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| data | Array | The input data array. |\n| fieldIndex | number | The target field index within schema array. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array:__ Returns an array containing the grouped data."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ data-builder.js, line 49"
+    - 
+      type: "markdown-section"
+      content: "__createSortingFnArg(groupedDatum, targetFields, targetFieldDetails) -> {Object}__"
+    - 
+      type: "markdown-section"
+      content: "Creates the argument value used for sorting function when sort is done\nwith another fields."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| groupedDatum | Array | The grouped datum for a single dimension field value. |\n| targetFields | Array | An array of the sorting fields. |\n| targetFieldDetails | Array | An array of the sorting field details in schema. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Object:__ Returns an object containing the value of sorting fields and the target field name."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ data-builder.js, line 75"
+    - 
+      type: "markdown-section"
+      content: "__sortData(dataObj, sortingDetails) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "Sorts the data before return in dataBuilder."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| dataObj | Object | An object containing the data and schema. |\n| sortingDetails | Array | An array containing the sorting configs. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ data-builder.js, line 94"
+    - 
+      type: "markdown-section"
+      content: "__dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, options) -> {Object}__"
+    - 
+      type: "markdown-section"
+      content: "Builds the actual data array."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| fieldStore | Array | An array of field. |\n| rowDiffset | string | A string consisting of which rows to be included eg. '0-2,4,6'; |\n| colIdentifier | string | A string consisting of the details of which columnundefinedto be included eg 'date,sales,profit'; |\n| sortingDetails | Object | An object containing the sorting details of the DataModel instance. |\n| options | Object | The options required to create the type of the data. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Object:__ Returns an object containing the multidimensional array and the relative schema."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ data-builder.js, line 159"

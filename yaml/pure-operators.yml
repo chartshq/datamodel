@@ -1,4 +1,34 @@
 ---
   title: "pure-operators.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__calculateVariable__"
+    - 
+      type: "markdown-section"
+      content: "Wrapper on calculateVariable() method of DataModel to behave\nthe pure-function functionality."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| args | Array | The argument list. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __any:__ Returns the returned value of calling function."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ pure-operators.js, line 8"
+    - 
+      type: "markdown-section"
+      content: "__sort__"
+    - 
+      type: "markdown-section"
+      content: "Wrapper on sort() method of DataModel to behave\nthe pure-function functionality."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| args | Array | The argument list. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __any:__ Returns the returned value of calling function."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ pure-operators.js, line 17"

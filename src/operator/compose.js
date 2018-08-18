@@ -1,7 +1,5 @@
 
 /**
- * @public
- *
  * Compose is a operator that enables you to run multiple operations on a DataModel all at once.
  * The resulting DataModel will be the result of all the operation provided. The operations provided
  * will be executed in a serial manner ie. result of one operation will be the input for the next
@@ -38,6 +36,8 @@
  * The composed DataModel will contain the result which might me obtained if the two
  * operations were run seperately on datamodel.
  *
+ * @public
+ * 
  * @param {Array.<Operations>} operations : An array of operation that will be applied on the
  * datatable.
  *
@@ -65,11 +65,10 @@ export const compose = (...operations) =>
     };
 
 /**
- *
- * @public
- *
  * This is compose bin operator.It performs the binning operation
  *
+ * @public
+ * 
  * @param {args} : See {@link DataModel} and [DataModel's bin function ]{@link DataModel#bin}.
  *
  */
@@ -77,11 +76,10 @@ export const bin = (...args) => dm => dm.bin(...args);
 
 
 /**
- *
- * @public
- *
  * This is compose select operator.It performs the select operation
  *
+ * @public
+ * 
  * @param {args} : See {@link DataModel} and [DataModel's select function ]{@link DataModel#select}.
  *
  */
@@ -89,11 +87,10 @@ export const select = (...args) => dm => dm.select(...args);
 
 
 /**
- *
- * @public
- *
  * This is compose project operator.It performs the project operations
  *
+ * @public
+ * 
  * @param {args} : See {@link DataModel} and [DataModel's project function ]{@link DataModel#project}.
  *
  */
@@ -101,11 +98,10 @@ export const project = (...args) => dm => dm.project(...args);
 
 
 /**
- *
- * @public
- *
  * This is compose groupBy operator.It performs the groupBy operations
  *
+ * @public
+ * 
  * @param {args} : See {@link DataModel} and [DataModel's groupBy function ]{@link DataModel#groupBy}.
  *
  */

@@ -1,4 +1,19 @@
 ---
   title: "discreteMeasure.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__DiscreteMeasure#parse(val) -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "A hook which is called for every entry(cell) of the column."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| val | * | The current entry present in the column while iteration. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Returns the string representation of the value."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ discreteMeasure.js, line 24"

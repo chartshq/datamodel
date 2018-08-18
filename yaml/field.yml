@@ -1,4 +1,52 @@
 ---
   title: "field.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__unit() -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "Getter for unit value of the field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Returns unit of the field."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ field.js, line 110"
+    - 
+      type: "markdown-section"
+      content: "__scale() -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "Getter for scale value of the field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Returns scale of the field."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ field.js, line 119"
+    - 
+      type: "markdown-section"
+      content: "__numberformat() -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "Getter for number format value of the field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Returns number format of the field."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ field.js, line 128"
+    - 
+      type: "markdown-section"
+      content: "__defAggFn() -> {function}__"
+    - 
+      type: "markdown-section"
+      content: "Getter for aggregation function of the field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __function:__ Returns aggregation function of the field."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ field.js, line 137"

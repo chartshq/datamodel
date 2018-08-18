@@ -1,4 +1,19 @@
 ---
   title: "auto-resolver.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__Auto(data, options) -> {Array.<Object>}__"
+    - 
+      type: "markdown-section"
+      content: "Parses the input data and detect the format automatically."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| data | string | The input data. |\n| options | Object | An optional config specific to data format. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array.<Object>:__ Returns an array of headers and column major data."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ auto-resolver.js, line 13"

@@ -1,4 +1,19 @@
 ---
   title: "bucket-creator.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__createBinnedFieldData(field, rowDiffset, config) -> {Array}__"
+    - 
+      type: "markdown-section"
+      content: "Creates bin f from the data and the supplied config."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| data | Array | The input data. |\n| config | Object | The config object. |\n| config.binSize | number | The size of the bin. |\n| config.numOfBins | number | The number of bins to be created. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array:__ Returns an array of created bins."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ bucket-creator.js, line 12"

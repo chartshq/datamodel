@@ -4,25 +4,224 @@
   sections: 
     - 
       type: "markdown-section"
-      content: "___DataModel___"
+      content: "__DataModel__"
     - 
       type: "markdown-section"
-      content: "\n| Param | Type | Description |\n| --- | --- | --- |\n| data | Object.<Array> | in the above mentioned format |\n| schema | Object.<Array> | defination of the variables. The order of the variables in data and order of theundefined     variables in schema has to be same |\n| options | object | optional arguments |\n| options.name | string | name of the datamodel instance. If no name is given an auto generated name isundefined     assigned to the instance. |"
+      content: "Creates a new DataModel instance by providing data and schema. Data could be of the form of\n- Flat JSON\n- DSV String\n- 2D Array\n\nBy default DataModel finds suitable adapter to serialize the data. DataModel also expects a {@link Schema} for\nidentifying the variables present in data."
     - 
       type: "markdown-section"
-      content: "Creates a new DataModel instance by providing data and schema. Data could be of the form of\n- Flat JSON\n- DSV String\n- 2D Array\n\nBy default DataModel finds suitable adapter to serialize the data. DataModel also expects a schema for\nidentifying the variables.\n\nLearn more about schema here."
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| data | Array.<Object> | Input data in any of the above mentioned formats |\n| schema | Array.<Schema> | Defination of the variables. Order of the variables in data and order of theundefined     variables in schema has to be same. |\n| options | object | Optional arguments to specify more settings regarding the creation part |\n| options.name | string | Name of the datamodel instance. If no name is given an auto generated name isundefined     assigned to the instance. |\n| options.fieldSeparator | string | specify field separator type if the data is of type dsv string. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datamodel.js, line 26"
+    - 
+      type: "markdown-section"
+      content: "__DataModel__"
+    - 
+      type: "markdown-section"
+      content: "Creates a new DataModel instance by providing data and schema. Data could be of the form of\n- Flat JSON\n- DSV String\n- 2D Array\n\nBy default DataModel finds suitable adapter to serialize the data. DataModel also expects a {@link Schema} for\nidentifying the variables present in data."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| data | Array.<Object> | Input data in any of the above mentioned formats |\n| schema | Array.<Schema> | Defination of the variables. Order of the variables in data and order of theundefined     variables in schema has to be same. |\n| options | object | Optional arguments to specify more settings regarding the creation part |\n| options.name | string | Name of the datamodel instance. If no name is given an auto generated name isundefined     assigned to the instance. |\n| options.fieldSeparator | string | specify field separator type if the data is of type dsv string. |"
     - 
       type: "code-section"
-      content: "const data = loadData('cars.csv');\nconst schema = [\n     { name: 'Name', type: 'dimension' },\n     { name: 'Miles_per_Gallon', type: 'measure', unit : 'cm', scale: '1000', numberformat: '12-3-3' },\n     { name: 'Cylinders', type: 'dimension' },\n     { name: 'Displacement', type: 'measure' },\n     { name: 'Horsepower', type: 'measure' },\n     { name: 'Weight_in_lbs', type: 'measure' },\n     { name: 'Acceleration', type: 'measure' },\n     { name: 'Year', type: 'dimension' },\n     { name: 'Origin', type: 'dimension' }\n];\nconst dm = new DataModel(data, schema, { name: 'Cars' });\ntable(dm);"
+      content: "const data = loadData('cars.csv');\nconst schema = [\n     { name: 'Name', type: 'dimension' },\n     { name: 'Miles_per_Gallon', type: 'measure', unit : 'cm', scale: '1000', numberformat: val => `${val}G`},\n     { name: 'Cylinders', type: 'dimension' },\n     { name: 'Displacement', type: 'measure' },\n     { name: 'Horsepower', type: 'measure' },\n     { name: 'Weight_in_lbs', type: 'measure' },\n     { name: 'Acceleration', type: 'measure' },\n     { name: 'Year', type: 'dimension', subtype: 'datetime', format: '%Y' },\n     { name: 'Origin', type: 'dimension' }\n];\nconst dm = new DataModel(data, schema, { name: 'Cars' });\ntable(dm);"
+      preamble: ""
     - 
       type: "markdown-section"
-      content: "___DataModel#getData___"
+      content: "__Source:__ datamodel.js, line 63"
     - 
       type: "markdown-section"
-      content: "\n| Param | Type | Description |\n| --- | --- | --- |\n| options | Object | Define how the data need to be returned. |\n| options.order | Object | Define the order of the data: row or column. |\n| options.formatter | Object | An object map containing field specific formatter function. |\n| options.withUid | Object | Whether the data uids will be included or not. |\n| options.sort | Object | The sorting details to sort the data. |"
+      content: "__DataModel.Reducers__"
     - 
       type: "markdown-section"
-      content: "Returns the data after operation in the format of\nmultidimensional array according to the given option value."
+      content: "Reducers are simple functions which reduces an array of value to a representative value.\nLike an array of numbers `[10, 20, 5, 15]` can be reduced to 12.5 if average / mean reducer funciton is\napplied. All the fields in datamodel (variables in data) needs a reducer to handle aggregation."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __ReducerStore:__ Singleton instance of {@link ReducerStore}."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datamodel.js, line 80"
+    - 
+      type: "markdown-section"
+      content: "__DataModel#getData(options) -> {Array}__"
+    - 
+      type: "markdown-section"
+      content: "Returns the data attached to an instance in JSON format."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| options | Object | Options to control how the raw data is to be returned. |\n| options.order | string | Defines if data is retieved in row order or column order. Possible valuesundefined     are `'rows'` and `'columns'` |\n| options.formatter | object | Formats the output data. This expects an object, where the keys areundefined     the name of the variable needs to be formatted. The formatter is a function in the form ofundefined     ```undefined         function (value, rowId, schema) => { ... }undefined     ```undefined     Know more about {@link Fomatter}. |"
     - 
       type: "code-section"
-      content: "// Return data with formatted date value.\nconst options = {\n order: 'row',\n formatter: {\n     birthday: (val, rowId, schema) => {\n         return yourCustomFormatter(val, \"%Y-%m-%d\");\n     }\n }\n}\n\n const dm = new DataModel(data, schema);\n const dataFormatted = dm.getData(options);"
+      content: "// DataModel instance is already prepared and assigned to dm variable\n const data = dm.getData({\n     order: 'column',\n     formatter: {\n         origin: (val) => val === 'European Union' ? 'EU' : val;\n     }\n });\n console.log(data);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array:__ Returns a multidimensional array of the data with schema. The return format looks like\n     ```\n         {\n             data,\n             schema\n         }   \n     ```"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datamodel.js, line 117"
+    - 
+      type: "markdown-section"
+      content: "__DataModel#groupBy(fieldsArr, reducers, config) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Groupby groups the data by using dimensions and reducing measures. It expects a list of dimensions using which it\nprojects the datamodel and perform aggregations to reduce the duplicate tuple to one. Refer this \n{@link link_to_one_example_with_group_by | document} to know the intuition behind groupBy."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| fieldsArr | Array.<string> | Array containing the name of dimensions |\n| reducers | Object | A map whose key is the variable name and value is the name of the reducer. If itsundefined     not passed, or any variable is ommitted, default aggregation function is used from the schema of theundefined     variable. |"
+    - 
+      type: "code-section"
+      content: "const groupedDM = dm.groupBy(['Year'] );\nconsole.log(groupedDm);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Returns a new DataModel instance after performing the groupby."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datamodel.js, line 205"
+    - 
+      type: "markdown-section"
+      content: "__DataModel#sort(sortingDetails) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Performs sorting operation on the current {@link DataModel} instance according to the specified sorting details,\nIt doesn't mutate the current {@link DataModel}, instead returns a new {@link DataModel} instance containing the\nsorted data.\n\nThe `sortingDetails` is an array of individual sorting operations, each individual sorting is a combination of\nthe target field name on which the sorting will be applied and the sorting direction: `ASC` or `DESC` or a\nsorting function.\n\nConsider the following example, where data is sorted by `Origin` field in `DESC` order first and then\nnested sorting is applied by `Acceleration` field in `ASC` order."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| sortingDetails | Array | An array containing the sorting details with column names. |"
+    - 
+      type: "code-section"
+      content: "// here dm is the pre-declared DataModel instance containing the data of 'cars.json' file\nlet sortedDm = dm.sort([\n   [\"Origin\", \"DESC\"]\n   [\"Acceleration\"] // here the default value of sorting order ASC is used\n]);\n\nconsole.log(dm.getData());\nconsole.log(sortedDm.getData());\n\n// Sort with a custom sorting function\nsortedDm = dm.sort([\n   [\"Origin\", \"DESC\"]\n   [\"Acceleration\", (a, b) => a - b] // here used a custom sorting function instead of ASC or DESC\n]);\n\nconsole.log(dm.getData());\nconsole.log(sortedDm.getData());"
+      preamble: ""
+    - 
+      type: "code-section"
+      content: "// here dm is the pre-declared DataModel instance containing the data of 'cars.json' file\nconst sortedDm = dm.sort([\n    ['Origin', ['Acceleration', (a, b) => avg(...a.Acceleration) - avg(...b.Acceleration)]]\n]);\n\nconsole.log(dm.getData());\nconsole.log(sortedDm.getData());"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Returns a new instance of DataModel with sorted data."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datamodel.js, line 279"
+    - 
+      type: "markdown-section"
+      content: "__DataModel#calculateVariable(schema, dependency, config) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Creates a new variable calculated from existing variable. This method expects the defination of the newly created\nvariable and a function which resolves the value of the new variable from existing variables.\n\nCan create a new measure based on existing variables"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| schema: | Schema | Schema of newly defined variable |\n| resolver: | VariableResolver | Resolver format to resolve the current variable |"
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable;\n const newDm = dataModel.calculateVariable({\n     name: 'powerToWeight',\n     type: 'measure'\n }, ['horsepower', 'weight_in_lbs', (hp, weight) => hp / weight ]);\n\n\nCan create a new dimension based on existing variables"
+      preamble: ""
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable;\n const child = dataModel.calculateVariable(\n    {\n      name: 'Efficiency',\n      type: 'dimension'\n    }, ['horsepower', (hp) => {\n     if (hp < 80) { return 'low'; },\n     else if (hp < 120) { return 'moderate'; }\n     else { return 'high' }\n }]);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Instance of DataModel with the new field"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datamodel.js, line 332"
+    - 
+      type: "markdown-section"
+      content: "__DataModel#propagate(identifiers, payload) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Propagates changes across all the connected DataModel instances."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| identifiers | Array | A list of identifiers that were interacted with. |\n| payload | Object | The interaction specific details. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ DataModel instance."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datamodel.js, line 377"
+    - 
+      type: "markdown-section"
+      content: "__DataModel#propagateInterpolatedValues(rangeObj, payload) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "This is a very special method that only applies\nto cross-tab group where propagation of is won't\nwork so we propagate the selected range of the fields\ninstead."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| rangeObj | Object | Object with field names and corresponding selected ranges. |\n| payload | Object | Object with insertion related fields. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ DataModel instance."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datamodel.js, line 405"
+    - 
+      type: "markdown-section"
+      content: "__DataModel#on(eventName, callback) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Associates a callback with an event name."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| eventName | string | The name of the event. |\n| callback | function | The callback to invoke. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Returns this current DataModel instance itself."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datamodel.js, line 420"
+    - 
+      type: "markdown-section"
+      content: "__DataModel#unsubscribe(eventName) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Unsubscribes the callbacks for the provided event name."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| eventName | string | The name of the event to unsubscribe. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Returns the current DataModel instance itself."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datamodel.js, line 437"
+    - 
+      type: "markdown-section"
+      content: "__DataModel#handlePropagation(payload) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "This method is used to invoke the method associated with\npropagation."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| payload | Object | The interaction payload. |\n| identifiers | DataModel | The propagated DataModel. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datamodel.js, line 459"
+    - 
+      type: "markdown-section"
+      content: "__DataModel#bin(measureName, config) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Perfoms binning on a measure field based on a binning configuration. This method does not aggregate the number of\nrows present in DataModel instance after binning, it just adds a new field with the binned value. Refer binning\n{@link example_of_binning | example} to have a intuition of what binning is and the use case.\n\nBinning can be configured by\n- providing custom bin configuration with non uniform buckets\n- providing bin count \n- providing each bin size\n\nWhen custom buckets are provided as part of binning configuration"
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| name | String | Name of measure which will be used to create bin |\n| config | Object | Config required for bin creation |\n| config.bucketObj.stops | Array.<Number> | Defination of bucket ranges. Two subsequent number from arraysundefined     are picked and a range is created. The first number from range is inclusive and the second number from rangeundefined     is exclusive. |\n| config.bucketObj.startAt | Number | Force the start of the bin from a particular number. undefined     If not mentioned, the start of the bin or the lower domain of the data if stops is not mentioned, else its undefined     the first value of the stop. |\n| config.binSize | Number | Bucket size for each bin |\n| config.binCount | Number | Number of bins which will be created |\n| config.name | String | Name of the new binned field to be created |"
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable\n const buckets = {\n     start: 30\n     stops: [80, 100, 110]\n };\n const config = { buckets, name: 'binnedHP' }\n const binDM = dataModel.bin('horsepower', config);\\\n\nWhen `binCount` is defined as part of binning configuration"
+      preamble: ""
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable\n const config = { binCount: 5, name: 'binnedHP' }\n const binDM = dataModel.bin('horsepower', config);\n\nWhen `binSize` is defined as part of binning configuration"
+      preamble: ""
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable\n const config = { binSize: 200, name: 'binnedHorsepower' }\n const binDM = dataModel.bin('horsepower', config);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Instance of new DataModel with the newly created bin."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ datamodel.js, line 512"

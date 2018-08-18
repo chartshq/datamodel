@@ -1,4 +1,31 @@
 ---
   title: "difference.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__difference(dm1, dm2) -> {dm}__"
+    - 
+      type: "markdown-section"
+      content: "Performs the union operation between two dm instances."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| dm1 | dm | The first dm instance. |\n| dm2 | dm | The second dm instance. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __dm:__ Returns the newly created dm after union operation."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ difference.js, line 15"
+    - 
+      type: "markdown-section"
+      content: "__difference~prepareDataHelper(dm, fieldsObj, addData) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "The helper function to create the data."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| dm | dm | The dm instance for which the data is inserted. |\n| fieldsObj | Object | The fieldStore object format. |\n| addData | boolean | If true only tuple will be added to the data. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ difference.js, line 45"

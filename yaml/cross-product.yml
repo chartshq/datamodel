@@ -1,4 +1,31 @@
 ---
   title: "cross-product.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__defaultFilterFn() -> {boolean}__"
+    - 
+      type: "markdown-section"
+      content: "Default filter function for crossProduct."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __boolean:__ Always returns true."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ cross-product.js, line 11"
+    - 
+      type: "markdown-section"
+      content: "__crossProduct(dm1, dm2, filterFn, replaceCommonSchema, jointype) -> {DataModel}__"
+    - 
+      type: "markdown-section"
+      content: "Implementation of cross product operation between two DataModel instances.\nIt internally creates the data and schema for the new DataModel."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| dataModel1 | DataModel | The left DataModel instance. |\n| dataModel2 | DataModel | The right DataModel instance. |\n| filterFn | function | The filter function which is used to filter the tuples. |\n| replaceCommonSchema | boolean | The flag if the common name schema should be there. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __DataModel:__ Returns The newly created DataModel instance from the crossProduct operation."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ cross-product.js, line 23"

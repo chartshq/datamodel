@@ -1,4 +1,19 @@
 ---
   title: "natural-join-filter-function.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__naturalJoinFilter(dm1, dm2) -> {function}__"
+    - 
+      type: "markdown-section"
+      content: "The filter function used in natural join.\nIt generates a function that will have the logic to join two\nDataModel instances by the process of natural join."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| dm1 | DataModel | The left DataModel instance. |\n| dm2 | DataModel | The right DataModel instance. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __function:__ Returns a function that is used in cross-product operation."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ natural-join-filter-function.js, line 12"

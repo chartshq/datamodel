@@ -1,4 +1,103 @@
 ---
   title: "measure.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__Measure__"
+    - 
+      type: "markdown-section"
+      content: "Creates new Measure field instance."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| name | string | The name of the field. |\n| data | Array | An array containing the field data. |\n| schema | Object | The schema for the field. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ measure.js, line 9"
+    - 
+      type: "markdown-section"
+      content: "__Measure__"
+    - 
+      type: "markdown-section"
+      content: "Creates new Measure field instance."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| name | string | The name of the field. |\n| data | Array | An array containing the field data. |\n| schema | Object | The schema for the field. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ measure.js, line 18"
+    - 
+      type: "markdown-section"
+      content: "__Measure#domain() -> {Array}__"
+    - 
+      type: "markdown-section"
+      content: "Returns the domain for the measure field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array:__ Returns min and max values from measure values."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ measure.js, line 32"
+    - 
+      type: "markdown-section"
+      content: "__Measure#parse(val) -> {number, null}__"
+    - 
+      type: "markdown-section"
+      content: "A hook which is called for every entry(cell) of the column."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| val | * | The current entry present in the column while iteration. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __number:__ Returns the parsed number value of content of cell or null."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ measure.js, line 44"
+    - 
+      type: "markdown-section"
+      content: "__Measure#unit() -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "Getter for unit value of the field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Returns unit of the field."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ measure.js, line 54"
+    - 
+      type: "markdown-section"
+      content: "__Measure#scale() -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "Getter for scale value of the field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Returns scale of the field."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ measure.js, line 63"
+    - 
+      type: "markdown-section"
+      content: "__Measure#numberformat() -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "Getter for number format value of the field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Returns number format of the field."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ measure.js, line 72"
+    - 
+      type: "markdown-section"
+      content: "__Measure#defAggFn() -> {function}__"
+    - 
+      type: "markdown-section"
+      content: "Getter for aggregation function of the field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __function:__ Returns aggregation function of the field."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ measure.js, line 81"

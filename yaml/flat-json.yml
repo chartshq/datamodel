@@ -4,13 +4,20 @@
   sections: 
     - 
       type: "markdown-section"
-      content: "___FlatJSON___"
-    - 
-      type: "markdown-section"
-      content: "\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array.<Object> | The input data formatted in JSON. |"
+      content: "__FlatJSON(arr) -> {Array.<Object>}__"
     - 
       type: "markdown-section"
       content: "Parses and converts data formatted in JSON to a manageable internal format."
     - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array.<Object> | The input data formatted in JSON. |"
+    - 
       type: "code-section"
       content: "// Sample input data:\nconst data = [\n   {\n     \"a\": 1,\n     \"b\": 2,\n     \"c\": 3\n   },\n   {\n     \"a\": 4,\n     \"b\": 5,\n     \"c\": 6\n   },\n   {\n     \"a\": 7,\n     \"b\": 8,\n     \"c\": 9\n   }\n];"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array.<Object>:__ Returns an array of headers and column major data."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ flat-json.js, line 29"

@@ -1,4 +1,40 @@
 ---
   title: "categorical.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__Categorical__"
+    - 
+      type: "markdown-section"
+      content: "Creates new Categorical field instance."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| name | string | The name of the field. |\n| data | Array | An array containing the field data. |\n| schema | Object | The schema for the field. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ categorical.js, line 9"
+    - 
+      type: "markdown-section"
+      content: "__Categorical__"
+    - 
+      type: "markdown-section"
+      content: "Creates new Categorical field instance."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| name | string | The name of the field. |\n| data | Array | An array containing the field data. |\n| schema | Object | The schema for the field. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ categorical.js, line 18"
+    - 
+      type: "markdown-section"
+      content: "__Categorical#subType() -> {string}__"
+    - 
+      type: "markdown-section"
+      content: "Getter for subType value of the field."
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __string:__ Returns subType of the field."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ categorical.js, line 28"

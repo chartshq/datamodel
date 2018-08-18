@@ -1,4 +1,31 @@
 ---
   title: "union.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__union(dm1, dm2) -> {dm}__"
+    - 
+      type: "markdown-section"
+      content: "Performs the union operation between two dm instances."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| dm1 | dm | The first dm instance. |\n| dm2 | dm | The second dm instance. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __dm:__ Returns the newly created dm after union operation."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ union.js, line 12"
+    - 
+      type: "markdown-section"
+      content: "__union~prepareDataHelper(dm, fieldsObj) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "The helper function to create the data."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| dm | dm | The dm instance for which the data is inserted. |\n| fieldsObj | Object | The fieldStore object format. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ union.js, line 41"

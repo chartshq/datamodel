@@ -4,13 +4,20 @@
   sections: 
     - 
       type: "markdown-section"
-      content: "___DSVArr___"
-    - 
-      type: "markdown-section"
-      content: "\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array.<Array> | A 2D array containing of the DSV data. |\n| options | Object | Option to control the behaviour of the parsing. |\n| options.firstRowHeader | boolean | Whether the first row of the dsv data is header or not. |"
+      content: "__DSVArr(arr, options) -> {Array}__"
     - 
       type: "markdown-section"
       content: "Parses and converts data formatted in DSV array to a manageable internal format."
     - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| arr | Array.<Array> | A 2D array containing of the DSV data. |\n| options | Object | Option to control the behaviour of the parsing. |\n| options.firstRowHeader | boolean | Whether the first row of the dsv data is header or not. |"
+    - 
       type: "code-section"
       content: "// Sample input data:\nconst data = [\n   [\"a\", \"b\", \"c\"],\n   [1, 2, 3],\n   [4, 5, 6],\n   [7, 8, 9]\n];"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array:__ Returns an array of headers and column major data."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ dsv-arr.js, line 20"

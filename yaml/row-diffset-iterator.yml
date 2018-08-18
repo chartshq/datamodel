@@ -1,4 +1,16 @@
 ---
   title: "row-diffset-iterator.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__rowDiffsetIterator(rowDiffset, callback) -> {null}__"
+    - 
+      type: "markdown-section"
+      content: "Iterates through the diffSet array and call the callback with the current\nindex."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| rowDiffset | string | The row diffset string e.g. '0-4,6,10-13'. |\n| callback | function | The callback function to be called with every index. |"
+    - 
+      type: "markdown-section"
+      content: "__Source:__ row-diffset-iterator.js, line 8"

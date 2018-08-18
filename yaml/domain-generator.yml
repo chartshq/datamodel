@@ -1,4 +1,19 @@
 ---
   title: "domain-generator.js"
   description: "Documented Methods"
-  sections: []
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "__module.exports(data) -> {Array}__"
+    - 
+      type: "markdown-section"
+      content: "Generates domain for measure field."
+    - 
+      type: "markdown-section"
+      content: "__Parameters:__\n\n| Param | Type | Description |\n| --- | --- | --- |\n| data | Array | The array of data. |"
+    - 
+      type: "markdown-section"
+      content: "__Return Value__ \n\n __Array:__ Returns the measure domain."
+    - 
+      type: "markdown-section"
+      content: "__Source:__ domain-generator.js, line 7"
