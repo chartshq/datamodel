@@ -1,8 +1,4 @@
 /**
- * @public
- * @module JoinFilter
- * @type FormatSpec
- *
  * A format of specifying the filter function for various join operation.
  * The format is similiar to the ANSI SQL join conditions as follows:
  *
@@ -18,4 +14,6 @@
  * we specify the field on which the conditional operator will be applied
  * then we give condition operator and the same is done in RHS for the another field of another
  * datamodel.
+ * 
+ * @public
  */

@@ -1,6 +1,4 @@
-/** @public
- * @module Formatter
- *
+/**
  * Formatter function is used to format data when DataModel is deserialized. This function is called for every row of
  * the data model with the value, rowId and schema. This function is expected to return a single value for each row of a
  * variable. This formatter function is only used for output purpose.

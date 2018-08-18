@@ -13,20 +13,18 @@ import Relation from './relation';
 import reducerStore from './utils/reducer-store';
 import createFields from './field-creator';
 
-/** @public
- *
+/** 
  * DataModel is an in-browser representation of tabular data. It supports relational algebra operators as well as
  * generic data processing opearators.
  * DataModel extends {@link Relation} which defines all the relational algebra opreators. DataModel gives definition of
  * generic data processing operators which are not relational algebra complient.
- *
+ * 
+ * @public
  * @class
  * @extends Relation
  */
 class DataModel extends Relation {
-
-    /** @public
-     *
+    /**
      * Creates a new DataModel instance by providing data and schema. Data could be of the form of
      * - Flat JSON
      * - DSV String
@@ -50,6 +48,8 @@ class DataModel extends Relation {
      * ];
      * const dm = new DataModel(data, schema, { name: 'Cars' });
      * table(dm);
+     * 
+     * @public
      *
      * @param {Array.<Object> | string | Array.<Array>} data Input data in any of the above mentioned formats
      * @param {Array.<Schema>} schema Defination of the variables. Order of the variables in data and order of the
@@ -66,20 +66,20 @@ class DataModel extends Relation {
         this._sortingDetails = [];
     }
 
-    /** @public
-     *
+    /**
      * Reducers are simple functions which reduces an array of value to a representative value.
      * Like an array of numbers `[10, 20, 5, 15]` can be reduced to 12.5 if average / mean reducer funciton is
      * applied. All the fields in datamodel (variables in data) needs a reducer to handle aggregation.
-     *
+     * 
+     * @public
+     * 
      * @return {ReducerStore} Singleton instance of {@link ReducerStore}.
      */
     static get Reducers () {
         return reducerStore;
     }
 
-    /** @public
-     *
+    /**
      * Returns the data attached to an instance in JSON format.
      *
      * @example
@@ -91,7 +91,8 @@ class DataModel extends Relation {
      *      }
      *  });
      *  console.log(data);
-     *
+     * 
+     * @public
      *
      * @param {Object} [options] Options to control how the raw data is to be returned.
      * @param {string} [options.order='row'] Defines if data is retieved in row order or column order. Possible values
@@ -181,8 +182,7 @@ class DataModel extends Relation {
         return dataGenerated;
     }
 
-    /** @public
-     *
+    /**
      * Groupby groups the data by using dimensions and reducing measures. It expects a list of dimensions using which it
      * projects the datamodel and perform aggregations to reduce the duplicate tuple to one. Refer this 
      * {@link link_to_one_example_with_group_by | document} to know the intuition behind groupBy.
@@ -190,7 +190,9 @@ class DataModel extends Relation {
      * @example
      * const groupedDM = dm.groupBy(['Year'] );
      * console.log(groupedDm);
-     *
+     * 
+     * @public
+     * 
      * @param {Array.<string>} fieldsArr - Array containing the name of dimensions 
      * @param {Object} [reducers={}] - A map whose key is the variable name and value is the name of the reducer. If its
      *      not passed, or any variable is ommitted, default aggregation function is used from the schema of the
@@ -218,8 +220,6 @@ class DataModel extends Relation {
     }
 
     /**
-     * @public
-     *
      * Performs sorting operation on the current {@link DataModel} instance according to the specified sorting details,
      * It doesn't mutate the current {@link DataModel}, instead returns a new {@link DataModel} instance containing the
      * sorted data.
@@ -268,6 +268,8 @@ class DataModel extends Relation {
      * console.log(dm.getData());
      * console.log(sortedDm.getData());
      * @end
+     * 
+     * @public
      *
      * @param {Array} sortingDetails - An array containing the sorting details with column names.
      * @return {DataModel} Returns a new instance of DataModel with sorted data.
@@ -293,8 +295,6 @@ class DataModel extends Relation {
     }
 
      /**
-     * @public
-     *
      * Creates a new variable calculated from existing variable. This method expects the defination of the newly created
      * variable and a function which resolves the value of the new variable from existing variables.
      * 
@@ -320,6 +320,7 @@ class DataModel extends Relation {
      *      else { return 'high' }
      *  }]);
      *
+     * @public
      *
      * @param {Schema} schema: Schema of newly defined variable
      * @param {VariableResolver} resolver: Resolver format to resolve the current variable
@@ -427,6 +428,7 @@ class DataModel extends Relation {
      * Unsubscribes the callbacks for the provided event name.
      *
      * @public
+     * 
      * @param {string} eventName - The name of the event to unsubscribe.
      * @return {DataModel} Returns the current DataModel instance itself.
      */
@@ -447,6 +449,7 @@ class DataModel extends Relation {
      * @todo Fix whether this method would be public or not.
      *
      * @private
+     * 
      * @param {Object} payload The interaction payload.
      * @param {DataModel} identifiers The propagated DataModel.
      * @memberof DataModel
@@ -457,8 +460,6 @@ class DataModel extends Relation {
     }
 
     /**
-     * @public
-     *
      * Perfoms binning on a measure field based on a binning configuration. This method does not aggregate the number of
      * rows present in DataModel instance after binning, it just adds a new field with the binned value. Refer binning
      * {@link example_of_binning | example} to have a intuition of what binning is and the use case.
@@ -489,7 +490,9 @@ class DataModel extends Relation {
      *  // DataModel already prepared and assigned to dm vairable
      *  const config = { binSize: 200, name: 'binnedHorsepower' }
      *  const binDM = dataModel.bin('horsepower', config);
-     *
+     * 
+     * @public
+     * 
      * @param {String} name Name of measure which will be used to create bin
      * @param {Object} config Config required for bin creation
      * @param {Array.<Number>} config.bucketObj.stops Defination of bucket ranges. Two subsequent number from arrays

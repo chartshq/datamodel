@@ -1,7 +1,4 @@
 /**
- * @public
- * @module Field
- *
  * In relational table, a Field is a data structure for a single piece of data. Fields are organized into records,
  * which contain all the information within the table relevant to a specific entity.
  *

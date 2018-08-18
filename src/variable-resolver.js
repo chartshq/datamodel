@@ -1,10 +1,6 @@
 /**
- * @public
- * @module VariableResolver
- * @type FormatSpec
- *
- * A format of specifying resolve criterial of a new variable from existing variable. The variables
- * could be Measure or Dimension.
+ * A format of specifying resolve criterial of a new variable from existing variable. The variables could be Measure or
+ * Dimension.
  * The format for resolver is intuitive. It needs all the existing variable which is dependency of the new variable
  * listed adjacently followed by the resolving function in a single array.
  *
@@ -15,4 +11,8 @@
  *      return acceleration / horsepower
  *  }]
  * ```
+ *
+ * @public
+ * @module VariableResolver
+ *
  */
