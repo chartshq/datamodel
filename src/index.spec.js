@@ -684,7 +684,8 @@ describe('DataModel', () => {
                 ],
                 uids: [0, 1, 2, 3]
             });
-            expect((dataModel1.join(dataModel2, obj => obj.ModelA.city === obj.ModelB.city))
+            expect((dataModel1.join(dataModel2,
+                (dmFields1, dmFields2) => dmFields1.city.value === dmFields2.city.value))
                             .getData()).to.deep.equal({
                                 schema: [
                         { name: 'profit', type: 'measure' },

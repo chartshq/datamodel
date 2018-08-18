@@ -12,15 +12,15 @@ import { getCommonSchema } from './get-common-schema';
 export function naturalJoinFilter (dm1, dm2) {
     const dm1FieldStore = dm1.getFieldspace();
     const dm2FieldStore = dm2.getFieldspace();
-    const dm1FieldStoreName = dm1FieldStore.name;
-    const dm2FieldStoreName = dm2FieldStore.name;
+    // const dm1FieldStoreName = dm1FieldStore.name;
+    // const dm2FieldStoreName = dm2FieldStore.name;
     const commonSchemaArr = getCommonSchema(dm1FieldStore, dm2FieldStore);
 
-    return (obj) => {
+    return (dm1Fields, dm2Fields) => {
         let retainTuple = true;
         commonSchemaArr.forEach((fieldName) => {
-            if (obj[dm1FieldStoreName][fieldName] ===
-                obj[dm2FieldStoreName][fieldName] && retainTuple) {
+            if (dm1Fields[fieldName].value ===
+                dm2Fields[fieldName].value && retainTuple) {
                 retainTuple = true;
             } else {
                 retainTuple = false;

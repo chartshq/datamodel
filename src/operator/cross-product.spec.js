@@ -50,7 +50,7 @@ describe('CrossProduct Functionality', () => {
             const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
             const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
             const crossDataModel = crossProduct(dataModel1, dataModel2,
-                                                    obj => obj.ModelA.city === obj.ModelB.city, true);
+                (dmFields1, dmFields2) => dmFields1.city.value === dmFields2.city.value, true);
 
             expect(crossDataModel.getData()).to.deep.equal({
                 schema: [

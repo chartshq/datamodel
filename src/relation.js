@@ -133,8 +133,7 @@ class Relation {
      * @public
      *
      * Performs the natural join operations of the relational algebra between two {@link DataModel} instances
-     * and returns
-     * a new {@link DataModel} containing the resultant data.
+     * and returns a new {@link DataModel} containing the resultant data.
      *
      * Natural join is a special kind of cross-product join, where a filter function is performed for the common
      * columns between two {@link DataModel} on the resultant cross-product rows.
@@ -167,27 +166,11 @@ class Relation {
      * <Here_put_a_good_resource_link_on_union>
      *
      * @example
-     * const data1 = [
-     *   { profit: 10, sales: 20, city: 'a' },
-     *   { profit: 15, sales: 25, city: 'b' },
-     * ];
-     * const schema1 = [
-     *   { name: 'profit', type: 'measure' },
-     *   { name: 'sales', type: 'measure' },
-     *   { name: 'city', type: 'dimension' },
-     * ];
-     * const data2 = [
-     *   { population: 200, city: 'a' },
-     *   { population: 250, city: 'b' },
-     * ];
-     * const schema2 = [
-     *   { name: 'population', type: 'measure' },
-     *   { name: 'city', type: 'dimension' },
-     * ];
-     * const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
-     * const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
+     * // lets create another dataModels from dm to test join
+     * let newDm = dm.select(fields => fields.Cylinders < 4 )
+     * let anotherNewDm = dm.select(fields => fields.Cylinders > 6 )
      *
-     * console.log(dataModel1.union(dataModel2).getData());
+     * console.log(newDm.union(anotherNewDm).getData());
      *
      * @param {DataModel} unionWith - Another DataModel instance to which union
      * operation is performed.
@@ -210,27 +193,10 @@ class Relation {
      * <Here_put_a_good_resource_link_on_difference>
      *
      * @example
-     * const data1 = [
-     *    { profit: 10, sales: 20, city: 'a' },
-     *    { profit: 15, sales: 25, city: 'b' },
-     *  ];
-     * const schema1 = [
-     *   { name: 'profit', type: 'measure' },
-     *   { name: 'sales', type: 'measure' },
-     *   { name: 'city', type: 'dimension' },
-     * ];
-     * const data2 = [
-     *   { population: 200, city: 'a' },
-     *   { population: 250, city: 'b' },
-     * ];
-     * const schema2 = [
-     *   { name: 'population', type: 'measure' },
-     *   { name: 'city', type: 'dimension' },
-     * ];
-     * const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
-     * const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
+     * // lets create another dataModels from dm to test join
+     * let newDm = dm.select(fields => fields.Cylinders < 4 )
      *
-     * console.log(dataModel1.difference(dataModel2).getData());
+     * console.log(dm.difference(newDm).getData());
      *
      * @param {DataModel} differenceWith - Another DataModel instance to which difference
      * operation is performed.
