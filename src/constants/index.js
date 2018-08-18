@@ -1,3 +1,4 @@
+export { DataFormat, FilteringMode } from 'muze-utils';
 /**
  * The event name for data propagation.
  */
