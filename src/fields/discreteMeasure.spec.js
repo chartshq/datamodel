@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { FieldType } from 'muze-utils';
+import { FieldType } from '../enums';
 import DiscreteMeasure from './discreteMeasure';
 
 describe('Measure Field Subtype', () => {

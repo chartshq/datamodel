@@ -7,4 +7,6 @@ DataModel.Operators = Operators;
 DataModel.Stats = Stats;
 DataModel.version = pkg.version;
 
+export * from './enums';
+export { DateTimeFormatter } from './utils';
 export default DataModel;

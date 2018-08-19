@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { DimensionSubtype } from 'muze-utils';
+import { DimensionSubtype } from '../enums';
 import Categorical from './categorical';
 
 describe('Categorical Field Type', () => {

@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { FieldType } from 'muze-utils';
+import { FieldType } from '../enums';
 import PartialField from './partial-field';
 
 describe('Partial Field Type', () => {

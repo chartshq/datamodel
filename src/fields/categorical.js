@@ -1,4 +1,4 @@
-import { DimensionSubtype } from 'muze-utils';
+import { DimensionSubtype } from '../enums';
 import Dimension from './dimension';
 
 /**
