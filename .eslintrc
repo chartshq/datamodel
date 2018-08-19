@@ -17,6 +17,7 @@
     "import/prefer-default-export": "off",
     "comma-dangle": "off",
     "no-underscore-dangle": 0,
+    "no-continue": "off",
     "no-mixed-operators" : 0,
     "brace-style": "off",
     "no-param-reassign": "off",

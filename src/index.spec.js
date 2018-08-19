@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { FilteringMode, assembleModelFromIdentifiers } from 'muze-utils';
+import { FilteringMode } from './enums';
 import DataModel from './index';
 import pkg from '../package.json';
 
@@ -976,11 +976,18 @@ describe('DataModel', () => {
                 groupByFlag = true;
             });
 
-            const identifiers = assembleModelFromIdentifiers(dataModel, [
-                ['first', 'second'],
-                ['Hey', 'Jude']
-            ]);
-            dataModel.propagate(identifiers, {
+            const propModel = new DataModel([{
+                first: 'Hey',
+                second: 'Jude'
+            }], [{
+                name: 'first',
+                type: 'dimension'
+            }, {
+                name: 'second',
+                type: 'dimension'
+            }]);
+
+            dataModel.propagate(propModel, {
                 action: 'reaction'
             });
             expect(

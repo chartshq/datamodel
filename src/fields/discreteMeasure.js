@@ -1,4 +1,3 @@
-// import { DimensionSubtype } from 'muze-utils';
 import Measure from './measure';
 
 /**

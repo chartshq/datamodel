@@ -1,8 +1,8 @@
 /* global describe, it, beforeEach */
 /* eslint-disable no-unused-expressions */
-import { DimensionSubtype, FieldType } from 'muze-utils';
 import { expect } from 'chai';
 
+import { DimensionSubtype, FieldType } from '../enums';
 import Field from './field';
 import PartialField from './partial-field';
 import Measure from './measure';

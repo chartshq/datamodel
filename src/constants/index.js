@@ -27,3 +27,8 @@ export const JOINS = {
     NATURAL: 'natural',
     FULLOUTER: 'fullOuter'
 };
+
+export const LOGICAL_OPERATORS = {
+    AND: 'and',
+    OR: 'or'
+};

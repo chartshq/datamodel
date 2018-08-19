@@ -1,6 +1,6 @@
 /* eslint-disable default-case */
 
-import { FieldType } from 'muze-utils';
+import { FieldType } from './enums';
 import {
     persistDerivation,
     getRootGroupByModel,

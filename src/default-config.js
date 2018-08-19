@@ -1,4 +1,4 @@
-import { DataFormat } from 'muze-utils';
+import { DataFormat } from './enums';
 
 export default {
     dataFormat: DataFormat.AUTO
