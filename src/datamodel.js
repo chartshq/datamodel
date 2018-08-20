@@ -285,18 +285,20 @@ class DataModel extends Relation {
             propagationSourceId
         });
 
-
         if (isMutableAction) {
             propagateImmutableActions(propagationNameSpace, rootModels, propagationSourceId);
         }
         return this;
     }
 
-    addToPropNamespace (sourceId, payload, criteria, isMutableAction) {
+    addToPropNamespace (sourceId, config = {}) {
         let sourceNamespace;
-        const action = payload.action;
+        const actionName = config.actionName;
+        const payload = config.payload;
+        const isMutableAction = config.isMutableAction;
         const rootModel = getRootDataModel(this);
         const propagationNameSpace = rootModel._propagationNameSpace;
+        const criteria = config.criteria;
 
         if (isMutableAction) {
             !propagationNameSpace.mutableActions[sourceId] && (propagationNameSpace.mutableActions[sourceId] = {});
@@ -307,9 +309,9 @@ class DataModel extends Relation {
         }
 
         if (criteria === null) {
-            delete sourceNamespace[action];
+            delete sourceNamespace[actionName];
         } else {
-            sourceNamespace[action] = {
+            sourceNamespace[actionName] = {
                 criteria,
                 payload
             };
