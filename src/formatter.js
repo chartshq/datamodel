@@ -11,8 +11,8 @@
  *
  *  const data = dm.getData({
  *      formatter: {
- *          shippingDate: dateFormatter 
- *      }      
+ *          shippingDate: dateFormatter
+ *      }
  *  });
  *
  *  console.log(data);

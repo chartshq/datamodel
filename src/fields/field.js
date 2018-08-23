@@ -16,7 +16,7 @@ import { rowDiffsetIterator } from '../operator/row-diffset-iterator';
  * In short a dimension is the lens through which you are looking at your measure data.
  *
  * Refer to {@link Schema} to get info about possible field attributes.
- * 
+ *
  * @public
  * @class
  */

@@ -14,6 +14,6 @@
  * we specify the field on which the conditional operator will be applied
  * then we give condition operator and the same is done in RHS for the another field of another
  * datamodel.
- * 
+ *
  * @public
  */

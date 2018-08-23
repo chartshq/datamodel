@@ -37,7 +37,7 @@
  * operations were run seperately on datamodel.
  *
  * @public
- * 
+ *
  * @param {Array.<Operations>} operations : An array of operation that will be applied on the
  * datatable.
  *
@@ -68,7 +68,7 @@ export const compose = (...operations) =>
  * This is compose bin operator.It performs the binning operation
  *
  * @public
- * 
+ *
  * @param {args} : See {@link DataModel} and [DataModel's bin function ]{@link DataModel#bin}.
  *
  */
@@ -79,7 +79,7 @@ export const bin = (...args) => dm => dm.bin(...args);
  * This is compose select operator.It performs the select operation
  *
  * @public
- * 
+ *
  * @param {args} : See {@link DataModel} and [DataModel's select function ]{@link DataModel#select}.
  *
  */
@@ -90,7 +90,7 @@ export const select = (...args) => dm => dm.select(...args);
  * This is compose project operator.It performs the project operations
  *
  * @public
- * 
+ *
  * @param {args} : See {@link DataModel} and [DataModel's project function ]{@link DataModel#project}.
  *
  */
@@ -101,7 +101,7 @@ export const project = (...args) => dm => dm.project(...args);
  * This is compose groupBy operator.It performs the groupBy operations
  *
  * @public
- * 
+ *
  * @param {args} : See {@link DataModel} and [DataModel's groupBy function ]{@link DataModel#groupBy}.
  *
  */

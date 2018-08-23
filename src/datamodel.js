@@ -13,14 +13,15 @@ import Relation from './relation';
 import reducerStore from './utils/reducer-store';
 import createFields from './field-creator';
 
-/** 
+/**
  * DataModel is an in-browser representation of tabular data. It supports relational algebra operators as well as
  * generic data processing opearators.
  * DataModel extends {@link Relation} which defines all the relational algebra opreators. DataModel gives definition of
  * generic data processing operators which are not relational algebra complient.
- * 
+ *
  * @public
  * @class
+ * @namespace DataModel
  * @extends Relation
  */
 class DataModel extends Relation {
@@ -48,7 +49,7 @@ class DataModel extends Relation {
      * ];
      * const dm = new DataModel(data, schema, { name: 'Cars' });
      * table(dm);
-     * 
+     *
      * @public
      *
      * @param {Array.<Object> | string | Array.<Array>} data Input data in any of the above mentioned formats
@@ -67,12 +68,12 @@ class DataModel extends Relation {
     }
 
     /**
-     * Reducers are simple functions which reduces an array of value to a representative value.
+     * Reducers are simple functions which reduces an array of value to a representative value of the set.
      * Like an array of numbers `[10, 20, 5, 15]` can be reduced to 12.5 if average / mean reducer funciton is
-     * applied. All the fields in datamodel (variables in data) needs a reducer to handle aggregation.
-     * 
+     * applied. All the measure fields in datamodel (variables in data) needs a reducer to handle aggregation.
+     *
      * @public
-     * 
+     *
      * @return {ReducerStore} Singleton instance of {@link ReducerStore}.
      */
     static get Reducers () {
@@ -80,7 +81,7 @@ class DataModel extends Relation {
     }
 
     /**
-     * Returns the data attached to an instance in JSON format.
+     * Retrieve the data attached to an instance in JSON format.
      *
      * @example
      * // DataModel instance is already prepared and assigned to dm variable
@@ -91,14 +92,15 @@ class DataModel extends Relation {
      *      }
      *  });
      *  console.log(data);
-     * 
+     *
      * @public
      *
      * @param {Object} [options] Options to control how the raw data is to be returned.
      * @param {string} [options.order='row'] Defines if data is retieved in row order or column order. Possible values
      *      are `'rows'` and `'columns'`
-     * @param {object} [options.formatter=null] Formats the output data. This expects an object, where the keys are
-     *      the name of the variable needs to be formatted. The formatter is a function in the form of
+     * @param {Function} [options.formatter=null] Formats the output data. This expects an object, where the keys are
+     *      the name of the variable needs to be formatted. The formatter function is called for each row passing the
+     *      value of the cell for a particular row as arguments. The formatter is a function in the form of
      *      ```
      *          function (value, rowId, schema) => { ... }
      *      ```
@@ -109,8 +111,8 @@ class DataModel extends Relation {
      *          {
      *              data,
      *              schema
-     *          }   
-     *      ``` 
+     *          }
+     *      ```
      */
     getData (options) {
         const defOptions = {
@@ -183,20 +185,26 @@ class DataModel extends Relation {
     }
 
     /**
-     * Groupby groups the data by using dimensions and reducing measures. It expects a list of dimensions using which it
-     * projects the datamodel and perform aggregations to reduce the duplicate tuple to one. Refer this 
+     * Groups the data by using dimensions and reducing measures. It expects a list of dimensions using which it
+     * projects the datamodel and perform aggregations to reduce the duplicate tuple to one. Refer this
      * {@link link_to_one_example_with_group_by | document} to know the intuition behind groupBy.
      *
+     * DataModel by default provides definition of few {@link system_defined_reducer | Reducers}. {@link ReducerStore |
+     * User defined reducers} can also be registered.
+     *
+     * This is the chained implementation of `groupBy`. `groupBy` also supports {@link link_to_compose_groupBy |
+     * composability}
+     *
      * @example
-     * const groupedDM = dm.groupBy(['Year'] );
+     * const groupedDM = dm.groupBy(['Year'], { horsepower: 'max' } );
      * console.log(groupedDm);
-     * 
+     *
      * @public
-     * 
-     * @param {Array.<string>} fieldsArr - Array containing the name of dimensions 
+     *
+     * @param {Array.<string>} fieldsArr - Array containing the name of dimensions
      * @param {Object} [reducers={}] - A map whose key is the variable name and value is the name of the reducer. If its
-     *      not passed, or any variable is ommitted, default aggregation function is used from the schema of the
-     *      variable.
+     *      not passed, or any variable is ommitted from the object, default aggregation function is used from the
+     *      schema of the variable.
      *
      * @return {DataModel} Returns a new DataModel instance after performing the groupby.
      */
@@ -221,21 +229,20 @@ class DataModel extends Relation {
 
     /**
      * Performs sorting operation on the current {@link DataModel} instance according to the specified sorting details,
-     * It doesn't mutate the current {@link DataModel}, instead returns a new {@link DataModel} instance containing the
-     * sorted data.
+     * Like every other operator it doesn't mutate the current DataModel instance on which it was called, instead
+     * returns a new DataModel instance containing the sorted data.
      *
-     * The `sortingDetails` is an array of individual sorting operations, each individual sorting is a combination of
-     * the target field name on which the sorting will be applied and the sorting direction: `ASC` or `DESC` or a
-     * sorting function.
+     * DataModel support multi level sorting by listing the variables using which sorting needs to be performed and
+     * the type of sorting `ASC` or `DESC`.
      *
-     * Consider the following example, where data is sorted by `Origin` field in `DESC` order first and then
-     * nested sorting is applied by `Acceleration` field in `ASC` order.
+     * In the following example data is sorted by `Origin` field in `DESC` order in first level followed by another
+     * level of sorting by `Acceleration` in `ASC` order.
      *
      * @example
      * // here dm is the pre-declared DataModel instance containing the data of 'cars.json' file
      * let sortedDm = dm.sort([
      *    ["Origin", "DESC"]
-     *    ["Acceleration"] // here the default value of sorting order ASC is used
+     *    ["Acceleration"] // Default value is ASC
      * ]);
      *
      * console.log(dm.getData());
@@ -244,20 +251,18 @@ class DataModel extends Relation {
      * // Sort with a custom sorting function
      * sortedDm = dm.sort([
      *    ["Origin", "DESC"]
-     *    ["Acceleration", (a, b) => a - b] // here used a custom sorting function instead of ASC or DESC
+     *    ["Acceleration", (a, b) => a - b] // Custom sorting function
      * ]);
      *
      * console.log(dm.getData());
      * console.log(sortedDm.getData());
-     * @end
      *
-     * Addition to this normal sorting, the data can also be sorted by the related field instead of the target field.
-     * Suppose a DataModel named `cars` contains three fields `Origin`, `Name` and `Acceleration`. Now, the data in this
-     * model can be sorted by `Origin` field according to the average value of all `Acceleration` values for a
+     * @text
+     * DataModel also provides another sorting mechanism out of the box where sort is applied to a variable using
+     * another variable which determines the order.
+     * Like the above DataModel contains three fields `Origin`, `Name` and `Acceleration`. Now, the data in this
+     * model can be sorted by `Origin` field according to the average value of all `Acceleration` for a
      * particular `Origin` value.
-     *
-     * Consider the following example, where the DataModel is sorted by `Origin` according to the average value of
-     * `Acceleration` field.
      *
      * @example
      * // here dm is the pre-declared DataModel instance containing the data of 'cars.json' file
@@ -267,11 +272,10 @@ class DataModel extends Relation {
      *
      * console.log(dm.getData());
      * console.log(sortedDm.getData());
-     * @end
-     * 
+     *
      * @public
      *
-     * @param {Array} sortingDetails - An array containing the sorting details with column names.
+     * @param {Array.<Array>} sortingDetails - Sorting details based on which the sorting will be performed.
      * @return {DataModel} Returns a new instance of DataModel with sorted data.
      */
     sort (sortingDetails) {
@@ -297,7 +301,7 @@ class DataModel extends Relation {
      /**
      * Creates a new variable calculated from existing variable. This method expects the defination of the newly created
      * variable and a function which resolves the value of the new variable from existing variables.
-     * 
+     *
      * Can create a new measure based on existing variables
      * @example
      *  // DataModel already prepared and assigned to dm vairable;
@@ -305,7 +309,7 @@ class DataModel extends Relation {
      *      name: 'powerToWeight',
      *      type: 'measure'
      *  }, ['horsepower', 'weight_in_lbs', (hp, weight) => hp / weight ]);
-     * 
+     *
      *
      * Can create a new dimension based on existing variables
      * @example
@@ -386,19 +390,13 @@ class DataModel extends Relation {
     }
 
     /**
-     * This is a very special method that only applies
-     * to cross-tab group where propagation of is won't
-     * work so we propagate the selected range of the fields
-     * instead.
+     * This is a very special method that only applies to cross-tab group where propagation of is won't work so we
+     * propagate the selected range of the fields instead.
      *
-     * @todo Need to check whether it is private or public API.
-     *
-     * @private
      * @param {Object} rangeObj Object with field names and corresponding selected ranges.
      * @param {Object} payload Object with insertion related fields.
      *
      * @return {DataModel} DataModel instance.
-     * @memberof DataModel
      */
     propagateInterpolatedValues (rangeObj, payload) {
         propagateRange(this, rangeObj, {
@@ -428,7 +426,7 @@ class DataModel extends Relation {
      * Unsubscribes the callbacks for the provided event name.
      *
      * @public
-     * 
+     *
      * @param {string} eventName - The name of the event to unsubscribe.
      * @return {DataModel} Returns the current DataModel instance itself.
      */
@@ -443,13 +441,8 @@ class DataModel extends Relation {
     }
 
     /**
-     * This method is used to invoke the method associated with
-     * propagation.
+     * This method is used to invoke the method associated with propagation.
      *
-     * @todo Fix whether this method would be public or not.
-     *
-     * @private
-     * 
      * @param {Object} payload The interaction payload.
      * @param {DataModel} identifiers The propagated DataModel.
      * @memberof DataModel
@@ -463,10 +456,10 @@ class DataModel extends Relation {
      * Perfoms binning on a measure field based on a binning configuration. This method does not aggregate the number of
      * rows present in DataModel instance after binning, it just adds a new field with the binned value. Refer binning
      * {@link example_of_binning | example} to have a intuition of what binning is and the use case.
-     * 
+     *
      * Binning can be configured by
      * - providing custom bin configuration with non uniform buckets
-     * - providing bin count 
+     * - providing bin count
      * - providing each bin size
      *
      * When custom buckets are provided as part of binning configuration
@@ -490,16 +483,16 @@ class DataModel extends Relation {
      *  // DataModel already prepared and assigned to dm vairable
      *  const config = { binSize: 200, name: 'binnedHorsepower' }
      *  const binDM = dataModel.bin('horsepower', config);
-     * 
+     *
      * @public
-     * 
+     *
      * @param {String} name Name of measure which will be used to create bin
      * @param {Object} config Config required for bin creation
      * @param {Array.<Number>} config.bucketObj.stops Defination of bucket ranges. Two subsequent number from arrays
      *      are picked and a range is created. The first number from range is inclusive and the second number from range
      *      is exclusive.
-     * @param {Number} [config.bucketObj.startAt] Force the start of the bin from a particular number. 
-     *      If not mentioned, the start of the bin or the lower domain of the data if stops is not mentioned, else its 
+     * @param {Number} [config.bucketObj.startAt] Force the start of the bin from a particular number.
+     *      If not mentioned, the start of the bin or the lower domain of the data if stops is not mentioned, else its
      *      the first value of the stop.
      * @param {Number} config.binSize Bucket size for each bin
      * @param {Number} config.binCount Number of bins which will be created
