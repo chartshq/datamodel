@@ -1,17 +1,16 @@
 /**
- * Schema is a used to describe a variable present in data. Schema are different for dimension and measure. The `name`
- * is only property in schema which is mandatory.
+ * Schema is used to describe a variable present in data. Definition of schema is different for
+ * {@link link_to_dimension_concept |dimensions and measures}.
  *
- * Following properties are available on the schema object both for measure and dimension
- *
- * - `name`: name of the field. The variable must exist in the data,
- * - `type`: type of the field. The options are `'measure'` and `'dimension'`. Default is `'dimension'`.
- * - `description`: additional explanation about the variable what a name does not convey
+ * Following properties are available on the schema object both for measure and dimension.
+ * - `name`: name of the variable. The variable must exist in the data. Its the only mandatory property in schema.
+ * - `type`: type of the variable. The options are `'measure'` and `'dimension'`. Default is `'dimension'`.
+ * - `description`: additional explanation about the variable
  *
  * For a dimension the following fields are available on schema object
- * - `subtype`: specifies what kind of dimension it is. Currently the options are `'categorical'`, `'datetime'`. Default
- *      is `'categorical'`
- * - `format`: if the the type of dimension is `'datetime'` then format is used to parse the date format. Read more
+ * - `subtype`: specifies what kind of dimension it is. Currently the options are `'categorical'` and `'datetime'`.
+ *      Default is `'categorical'`
+ * - `format`: if the the subtype of dimension is `'datetime'` then `format` is used to parse the date format. Read more
  *      about {@link DateFormat}.
  *
  * For a measure the following fields are available on schema object
@@ -39,4 +38,7 @@
  *      { name: 'Year', type: 'dimension', subtype: 'datetime', format: '%Y' },
  *      { name: 'Origin' }
  *  ]
+ *
+ * @public
+ * @namespace DataModel
  */

@@ -1,12 +1,12 @@
 import { defReducer, fnList } from '../operator';
 
 /**
- *
- *
- * A page level source which stores, registers, unregisters reducers for all the datamodel instances. There is only one
- * reducer store available in a page. All the datamodel instances receive same instance of reducer store.
+ * A page level storage which stores, registers, unregisters reducers for all the datamodel instances. There is only one
+ * reducer store available in a page. All the datamodel instances receive same instance of reducer store. DataModel
+ * out of the box provides handful of {@link reducer | reducers} which can be used as reducer funciton.
  *
  * @public
+ * @namespace DataModel
  */
 class ReducerStore {
     constructor () {
@@ -47,7 +47,8 @@ class ReducerStore {
 
     /**
      *
-     * Registers a {@link reducer}. A {@link reducer} has to be registered before it is used.
+     * Registers a {@link reducer | reducer}.
+     * A {@link reducer | reducer} has to be registered before it is used.
      *
      * @example
      *  // find the mean squared value of a given set

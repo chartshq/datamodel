@@ -1,5 +1,5 @@
 /**
- * reducer function that takes care about the sum aggregation
+ * Reducer function that takes care about the sum aggregation
  * @param  {Array} arr array of values
  * @return {number}     sum of the array
  */

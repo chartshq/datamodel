@@ -9,6 +9,7 @@ import { DM_DERIVATIVES } from './constants';
  *
  * It is extended by {@link DataModel} to inherit the functionalities of relational algebra concept.
  *
+ * @class
  * @public
  * @module Relation
  * @namespace DataModel
@@ -116,12 +117,11 @@ class Relation {
      *  console.log(carsDM.join(originDM,
      *      obj => obj.[originDM.getName()].Origin === obj.[carsDM.getName()].Origin));
      *
-     *
-     *
-     * @public
-     *
+     * @text
      * This is chained version of `join` operator. `join` can also be used as {@link link_to_join_op | functional
      * operator}.
+     *
+     * @public
      *
      * @param {DataModel} joinWith - The DataModel to be joined with the current instance DataModel.
      * @param {JoinFilter} filterFn - The predicate function that will filter the result of the crossProduct.
@@ -142,10 +142,11 @@ class Relation {
      *
      *  console.log(carsDM.naturalJoin(originDM));
      *
-     * @public
-     *
+     * @text
      * This is chained version of `naturalJoin` operator. `naturalJoin` can also be used as {@link link_to_join_op |
      * functional operator}.
+     *
+     * @public
      *
      * @param {DataModel} joinWith - The DataModel with which the current instance of DataModel on which the method is
      *      called will be joined.
@@ -162,10 +163,11 @@ class Relation {
      * @example
      * console.log(EuropeanMakerDM.union(USAMakerDM));
      *
-     * @public
-     *
+     * @text
      * This is chained version of `naturalJoin` operator. `naturalJoin` can also be used as {@link link_to_join_op |
      * functional operator}.
+     *
+     * @public
      *
      * @param {DataModel} unionWith - DataModel instance for which union has to be applied with the instance on which
      *      the method is called
@@ -183,10 +185,11 @@ class Relation {
      * @example
      * console.log(highPowerDM.difference(highExpensiveDM));
      *
-     * @public
-     *
+     * @text
      * This is chained version of `naturalJoin` operator. `naturalJoin` can also be used as {@link link_to_join_op |
      * functional operator}.
+     *
+     * @public
      *
      * @param {DataModel} differenceWith - DataModel instance for which difference has to be applied with the instance
      *      on which the method is called
@@ -228,10 +231,11 @@ class Relation {
      * // print the inverted parts
      * console.log(dtArr[1]);
      *
-     * @public
-     *
+     * @text
      * This is chained version of `select` operator. `select` can also be used as {@link link_to_join_op |
      * functional operator}.
+     *
+     * @public
      *
      * @param {SelectionPredicate} selectFn - Predicate funciton which is called for each row with the current row
      *      ```
@@ -347,10 +351,11 @@ class Relation {
      *  // print the inverted parts
      *  console.log(dtArr[1].getData());
      *
-     * @public
-     *
+     * @text
      * This is chained version of `select` operator. `select` can also be used as {@link link_to_join_op |
      * functional operator}.
+     *
+     * @public
      *
      * @param {Array.<string | Regexp>} projField - An array of column names in string or regular expression.
      * @param {Object} [config] - An optional config to control the creation of new DataModel

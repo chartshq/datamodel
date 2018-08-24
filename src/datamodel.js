@@ -1,5 +1,7 @@
 /* eslint-disable default-case */
-
+/**
+ * @namespace Datamodel
+ */
 import { FieldType } from 'muze-utils';
 import { persistDerivation, propagateIdentifiers, propagateRange, assembleModelFromIdentifiers } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
@@ -14,26 +16,28 @@ import reducerStore from './utils/reducer-store';
 import createFields from './field-creator';
 
 /**
- * DataModel is an in-browser representation of tabular data. It supports relational algebra operators as well as
- * generic data processing opearators.
- * DataModel extends {@link Relation} which defines all the relational algebra opreators. DataModel gives definition of
- * generic data processing operators which are not relational algebra complient.
+ * DataModel is an in-browser representation of tabular data. It supports
+ * {@link https://en.wikipedia.org/wiki/Relational_algebra | relational algebra} operators as well as generic data
+ * processing opearators.
+ * DataModel extends {@link Relation} class which defines all the relational algebra opreators. DataModel gives
+ * definition of generic data processing operators which are not relational algebra complient.
  *
  * @public
  * @class
- * @namespace DataModel
  * @extends Relation
+ * @memberof Datamodel
  */
 class DataModel extends Relation {
     /**
-     * Creates a new DataModel instance by providing data and schema. Data could be of the form of
+     * Creates a new DataModel instance by providing data and schema. Data could be in the form of
      * - Flat JSON
      * - DSV String
      * - 2D Array
      *
-     * By default DataModel finds suitable adapter to serialize the data. DataModel also expects a {@link Schema} for
-     * identifying the variables present in data.
+     * By default DataModel finds suitable adapter to serialize the data. DataModel also expects a
+     * {@link Schema | schema} for identifying the variables present in data.
      *
+     * @constructor
      * @example
      * const data = loadData('cars.csv');
      * const schema = [
@@ -52,7 +56,7 @@ class DataModel extends Relation {
      *
      * @public
      *
-     * @param {Array.<Object> | string | Array.<Array>} data Input data in any of the above mentioned formats
+     * @param {Array.<Object> | string | Array.<Array>} data Input data in any of the mentioned formats
      * @param {Array.<Schema>} schema Defination of the variables. Order of the variables in data and order of the
      *      variables in schema has to be same.
      * @param {object} [options] Optional arguments to specify more settings regarding the creation part
@@ -68,8 +72,8 @@ class DataModel extends Relation {
     }
 
     /**
-     * Reducers are simple functions which reduces an array of value to a representative value of the set.
-     * Like an array of numbers `[10, 20, 5, 15]` can be reduced to 12.5 if average / mean reducer funciton is
+     * Reducers are simple functions which reduces an array of numbers to a representative number of the set.
+     * Like an array of numbers `[10, 20, 5, 15]` can be reduced to `12.5` if average / mean reducer function is
      * applied. All the measure fields in datamodel (variables in data) needs a reducer to handle aggregation.
      *
      * @public
@@ -101,9 +105,7 @@ class DataModel extends Relation {
      * @param {Function} [options.formatter=null] Formats the output data. This expects an object, where the keys are
      *      the name of the variable needs to be formatted. The formatter function is called for each row passing the
      *      value of the cell for a particular row as arguments. The formatter is a function in the form of
-     *      ```
-     *          function (value, rowId, schema) => { ... }
-     *      ```
+     *      `function (value, rowId, schema) => { ... }`
      *      Know more about {@link Fomatter}.
      *
      * @return {Array} Returns a multidimensional array of the data with schema. The return format looks like
@@ -185,15 +187,15 @@ class DataModel extends Relation {
     }
 
     /**
-     * Groups the data by using dimensions and reducing measures. It expects a list of dimensions using which it
-     * projects the datamodel and perform aggregations to reduce the duplicate tuple to one. Refer this
+     * Groups the data using particular dimensions and by reducing measures. It expects a list of dimensions using which
+     * it projects the datamodel and perform aggregations to reduce the duplicate tuples. Refer this
      * {@link link_to_one_example_with_group_by | document} to know the intuition behind groupBy.
      *
-     * DataModel by default provides definition of few {@link system_defined_reducer | Reducers}. {@link ReducerStore |
-     * User defined reducers} can also be registered.
+     * DataModel by default provides definition of few {@link reducer | Reducers}.
+     * {@link ReducerStore | User defined reducers} can also be registered.
      *
-     * This is the chained implementation of `groupBy`. `groupBy` also supports {@link link_to_compose_groupBy |
-     * composability}
+     * This is the chained implementation of `groupBy`.
+     * `groupBy` also supports {@link link_to_compose_groupBy | composability}
      *
      * @example
      * const groupedDM = dm.groupBy(['Year'], { horsepower: 'max' } );
@@ -228,14 +230,14 @@ class DataModel extends Relation {
     }
 
     /**
-     * Performs sorting operation on the current {@link DataModel} instance according to the specified sorting details,
+     * Performs sorting operation on the current {@link DataModel} instance according to the specified sorting details.
      * Like every other operator it doesn't mutate the current DataModel instance on which it was called, instead
      * returns a new DataModel instance containing the sorted data.
      *
      * DataModel support multi level sorting by listing the variables using which sorting needs to be performed and
      * the type of sorting `ASC` or `DESC`.
      *
-     * In the following example data is sorted by `Origin` field in `DESC` order in first level followed by another
+     * In the following example, data is sorted by `Origin` field in `DESC` order in first level followed by another
      * level of sorting by `Acceleration` in `ASC` order.
      *
      * @example
@@ -335,7 +337,6 @@ class DataModel extends Relation {
         const fieldsConfig = this.getFieldsConfig();
         const depVars = dependency.slice(0, dependency.length - 1);
         const retrieveFn = dependency[dependency.length - 1];
-
         if (fieldsConfig[schema.name]) {
             throw new Error(`${schema.name} field already exists in model.`);
         }
@@ -425,8 +426,6 @@ class DataModel extends Relation {
     /**
      * Unsubscribes the callbacks for the provided event name.
      *
-     * @public
-     *
      * @param {string} eventName - The name of the event to unsubscribe.
      * @return {DataModel} Returns the current DataModel instance itself.
      */
@@ -472,12 +471,14 @@ class DataModel extends Relation {
      *  const config = { buckets, name: 'binnedHP' }
      *  const binDM = dataModel.bin('horsepower', config);\
      *
+     * @text
      * When `binCount` is defined as part of binning configuration
      * @example
      *  // DataModel already prepared and assigned to dm vairable
      *  const config = { binCount: 5, name: 'binnedHP' }
      *  const binDM = dataModel.bin('horsepower', config);
      *
+     * @text
      * When `binSize` is defined as part of binning configuration
      * @example
      *  // DataModel already prepared and assigned to dm vairable

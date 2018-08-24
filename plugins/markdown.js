@@ -1,65 +1,108 @@
 const fs = require('fs');
+const marked = require('marked');
 const converter = require('json2yaml');
 const config = require('../jsdoc.conf.json');
 
-// template for markdown table
-const tableTemplate = `
-| Param | Type | Description |
-| --- | --- | --- |`;
+const NAMESPACES = ['muze', 'utils', 'datamodel'];
 
 /**
- * This function creates a string formatted to be a row
- * in a markdown table used to show function parameters.
- *
- * @param {String} name The name of the paramter
- * @param {String} type The type of the variable.
- * @param {String} description The description of the parameters.
- * @returns {String} String representation of markdown table.
+ * This method generates a nested hashmap for the parameters table
+ * @param {Object} objArray the Array structure containing the parameters
  */
-function createRow(name, type, description) {
-    return `| ${name} | ${type} | ${description} |`;
+function generateNestedMap(objArray) {
+    let mainMap = new Map();
+    objArray.forEach((obj) => {
+        let params = obj.name.split('.');
+        let i = 0;
+        let k = mainMap;
+
+        while (k.has(params[i])) {
+            k = k.get(params[i]);
+            i++;
+        }
+        let kk = new Map();
+        kk.set('value', obj.description.replace(/(\r\n|\n|\r)/gm, ' '));
+        kk.set('type', obj.type.names.join('\n\n').replace(/</gi, '&lt;').replace(/>/gi, '&gt;').replace(/\./gi, ''));
+        k.set(params[i], kk);
+    });
+    return mainMap;
 }
 
 /**
- * This function creates the string representation of the markdown
- * table used to showcase function parameters.
- *
- * @param {Array<String>} rows Array of strings representing rows.
- * @returns {String} String representing table in markown.
+ * This method replaces {@link Link} to markdown
+ * @param {*} matched the matched string
+ * @param {*} index index of matched string
+ * @param {*} original the original string
  */
-function createParamsTable(rows) {
-    const rowString = rows.reduce((accum, value) => `${accum}\n${value}`, '');
-    return `${tableTemplate}${rowString}`;
+function replaceLink(matched, index, original) {
+    if (matched.includes('|')) {
+        matched = matched.split('|');
+        matched[0] = matched[0].replace(/[^\w\s]/gi, '').split(' ')[1].trim();
+        matched[1] = matched[1].replace(/[^\w\s]/gi, '').trim();
+        return `[${matched[1]}](${matched[0]})`;
+    }
+	const matchedString = matched.match(/\s.+\b/, matched)[0].trim();
+    return `[${matchedString}](${matchedString})`;
 }
 
 /**
- * This function creates a html table from the nested data object
- * @param {Object} rowdata object with properties
- * @param {string} rowdata.name property name
- * @param {string} rowdata.type property type
- * @param {string} rowdata.description property description
- * @return {string} table element wrapped in a string
+ * 
+ * @param {string} value
+ * @param {*} blockquote boolean
  */
-function createHtmlTable(rowdata) {
-    const tableHead = `
-    <thead>
-        <tr>
-            <td>__Name__</td>
-            <td>__Type__</td>
-            <td>__Description__</td>
-        </tr>
-    </thead>`;
-    const tableRows = rowdata.map(row => (
-            `<tr>
-                <td>${row.name}</td>
-                <td>${row.type}</td>
-                <td>${row.description}</td>
-            </tr>`
-        ));
-    return `<br/><br/>
-            __Properties__
-            <table>${tableHead}${tableRows.join('')}</table>
-    `;
+function createTableItem(value, blockquote) {
+    if (blockquote) {
+        return `<td class="param-name">${value.replace(/{@link\s(.)*}/gi, replaceLink).replace(/\s\s+/g, ' ').replace(/[^\w\s]/gi, '')
+    }</td>`;
+    }
+    return `<td>${marked(value.replace(/{@link\s(.)*}/gi, replaceLink).replace(/(null)/gi, '')).replace(/(\r\n|\n|\r)/gm, ' ')}</td>`;
+}
+
+function createTableHeader() {
+    return '<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>';
+}
+
+function createTableRow(name, type, description) {
+    return `<tr>
+                ${name && name.length ? createTableItem(name, true) : ''}
+                ${type ? createTableItem(type) : ''}
+                ${description ? createTableItem(description) : ''}
+            </tr>`.trim();
+}
+
+function createTable (oldkey, map) {
+    let description = null;
+    let type = null;
+    let childTableRows = null;
+    let table = '';
+    let c = 0;
+
+    if (map.has('value')) {
+        description = map.get('value');
+    }
+    if (map.has('type')) {
+        type = map.get('type');
+    }
+    for (let [key, data] of map) {
+        if (key === 'value' || key === 'type') {
+            c++;
+            continue;
+        } else {
+            childTableRows = childTableRows || createTableHeader();
+            childTableRows = `${childTableRows}\n${createTable(key, data)}`;
+            c++;
+        }
+        if (c === map.size) {
+            childTableRows = childTableRows ? `${childTableRows}</table>` : '';
+        }
+    }
+
+    if (oldkey === '' && type == null) {
+        table = childTableRows;
+    } else {
+        table = createTableRow(oldkey, type, `${description}${childTableRows}`);
+    }
+    return table;
 }
 
 /**
@@ -68,124 +111,162 @@ function createHtmlTable(rowdata) {
  * used to showcase samples.
  *
  * @param {Object} doclet JSDOC doclet.
- * @param {Object} paramObject the param object
  * @returns {Array} Array that follows the Proptypes of the Editor component.
  */
-function parseDoclet(doclet, paramObject) {
-    const fileName = doclet.meta.filename;          // name of the source file
-    let name = doclet.longname;                         // name of current jsdoc item
-    let description = doclet.description;           // jsdoc description
+function parseDoclet(doclet, namespace) {
+    let name = doclet.name;                         // name of current jsdoc item
+    let classDescription = doclet.classdesc;        // descrption about the class (if any)
+    const accessSpecifier = doclet.access;          // access specifier of the code block
+    let itemDescription = doclet.description;       // jsdoc description
     let { kind } = doclet;                          // kind of item
+    let { scope } = doclet;
     let examples = doclet.examples;                 // captures @examples from jsdoc snippet
     let params = doclet.params;                     // captures @param from jsdoc snippet
     let returnValue = doclet.returns;               // captures @return from jsdoc snippet
-    const lineNumber = doclet.meta.lineno;          // captures line number of the method from source file
     let returnType = null;
     let sections = [];                              // master array to store all sections
-    let nestedProperties = {
-        parentProperty: null,
-        properties: [],
-    };
+    let textTags = [];
+    let docletTags = doclet.tags;
+    let { memberof } = doclet;
+    let extendsItem = doclet.extends;
+    const invalidLinks = [null, ]
 
-    // Check if snippet returns a value, if it does assign it to a variable
-    if (returnValue) {
-        returnType = returnValue.map(value => value.type.names.join(', '));
+
+    if (Array.isArray(extendsItem) && extendsItem.length > 0) {
+        extendsItem = extendsItem[0];
     }
-    /**
-     * If snippet item is a function, append it to item's name with parameters and return type
-     * The result will be -> functionName(param1, param2) -> {Return Type}
-     */
-    if (kind === 'function') {
-        let { paramnames } = doclet.meta.code;
-        paramnames = paramnames.join(', ');
-        name = `${name}(${paramnames}) -> {${returnType}}`;
+
+    if (memberof && NAMESPACES.includes(memberof.toLowerCase())) {
+        namespace.memberof = memberof.toLowerCase();
     }
-    // Append name property
-    sections.push({
-        type: 'markdown-section',
-        content: `__${name}__`,
-    });
 
-    if (description) {
-        // Append description property
-        sections.push({
-            type: 'markdown-section',
-            content: `${description}`,
-        });
-
-        let paramString = '';
-        // add parameters as a table
-        if (params && params.length) {
-            const rows = params.filter((param) => {
-                const type = param.type.names[0] || '';
-                let fieldName = param.name || '';
-                const fieldDescription = param.description;
-
-                if (fieldDescription) {
-                    if (!fieldName.includes('.') && doclet.meta.code.paramnames && doclet.meta.code.paramnames.includes(fieldName)) {
-                        paramObject = {
-                            name: fieldName,
-                            description: fieldDescription,
-                        };
-                    }
-                    else if (type === 'Object' && paramObject && fieldName.includes(paramObject.name)) {
-                        nestedProperties.parentProperty = fieldName.slice(0, fieldName.indexOf('.')).trim();
-                        fieldName = fieldName.slice(fieldName.indexOf('.') + 1).trim();
-                        nestedProperties.properties.push({ name: fieldName, type, description: fieldDescription.replace(/\r?\n|\r/g) });
-                        return false;
-                    }
-                    return true;
-                }
-                return 0;
-            });
-            const paramData = rows.map((row) => {
-                /* If the current row is a parent of nested elements
-                add the nested elements as a table to description */
-                if (row.name === nestedProperties.parentProperty) {
-                    const nestedTable = createHtmlTable(nestedProperties.properties);
-                    row.description += nestedTable.replace(/\s+/g, ' ');
-                }
-                return createRow(row.name, row.type.names[0], row.description.replace(/\r?\n|\r/g));
-            });
-            paramString = `__Parameters:__\n${createParamsTable(paramData)}`;
+    // Append @text block
+    if (docletTags) {
+        textTags = docletTags.filter(textTag => textTag.title === 'text');
+    }
+    // Only consider snippets with @public access specifier
+    if (accessSpecifier === 'public') {
+        // Check if snippet returns a value, if it does assign it to a variable
+        if (returnValue) {
+            returnType = returnValue.map(value => value.type.names.join(', '));
         }
-        if (paramString) {
-            sections.push({
-                type: 'markdown-section',
-                content: paramString,
-            });
+        if (doclet.comment.includes('@constructor')) {
+            name = '### <a name="constructor"></a> constructor';
+        }
+        if (classDescription) {
+            name = `## <a name=${name}></a> Class: ${name}`;
+        }
+        /**
+         * If snippet item is a function, append it to item's name with parameters and return type
+         * The result will be -> functionName(param1, param2) -> {Return Type}
+         */
+        if (kind === 'function') {
+            let { paramnames } = doclet.meta.code;
+            paramnames = paramnames.join(', ').replace(/</gi, '&lt;').replace(/>/gi, '&gt;').replace(/\./gi, ' ');
+            if (returnType) {
+                returnType = returnType.join(' ').replace(/</gi, '&lt;').replace(/>/gi, '&gt;').replace(/\./gi, ' ');
+                returnType = `[${returnType}](${returnType})`;
+                name = `### <a name=${name}></a> ${name}(${paramnames}) → {${returnType}}`;
+            } else {
+                name = `### <a name=${name}></a> ${name}(${paramnames})`;
+            }
+        }
+        if (kind === 'member' && scope && scope === 'static') {
+            name = `### <a name=${name}></a> static ${name}`;
         }
 
-        // Append code block
-        if (examples && examples.length) {
-            examples.map((example) => {
+        const description = classDescription || itemDescription;
+        if (description) {
+            if (extendsItem) {
                 sections.push({
-                    type: 'code-section',
-                    content: example,
-                    preamble: '',
+                    type: 'markdown-section',
+                    content: `${name}\n\n${description.replace(/{@link\s(.)*}/gi, replaceLink)}\n\n<span class="sub-header">Extends: [${extendsItem}](${extendsItem})</span>`,
                 });
-            });
-        }
+            } else {
+                // Append description property
+                sections.push({
+                    type: 'markdown-section',
+                    content: `${name}\n\n${description.replace(/{@link\s(.)*}/gi, replaceLink)}`,
+                });
+            }
 
-        // Append return value type and description
-        if (returnValue && returnValue.length) {
-            const returnVal =
-            `__Return Value__ \n\n __${returnValue[0].type.names[0]}:__ ${returnValue[0].description}`;
-            sections.push({
-                type: 'markdown-section',
-                content: returnVal,
-            });
-        }
+            let paramString = '';
 
-        // Append source file and line number
-        sections.push({
-            type: 'markdown-section',
-            content: `__Source:__ ${fileName}, line ${lineNumber}`,
-        });
-        return sections;
+            // add parameters as a table
+            if (!classDescription && params && params.length) {
+                const paramsTree = generateNestedMap(params);
+                const paramTable = createTable('', paramsTree);
+                paramString = `<p class="sub-header">Parameters:</p>\n${paramTable}`;
+            }
+            if (paramString) {
+                sections.push({
+                    type: 'markdown-section',
+                    content: paramString,
+                });
+            }
+
+            // Append code block
+            if (examples && examples.length) {
+                examples.map((example) => {
+                    sections.push({
+                        type: 'code-section',
+                        content: example,
+                        preamble: '',
+                    });
+                });
+            }
+
+            if (textTags.length) {
+                textTags.map((textTag) => {
+                    const text = textTag.value;
+                    if (text) {
+                        sections.push({
+                            type: 'markdown-section',
+                            content: text.replace(/{@link\s(.)*}/gi, replaceLink),
+                        });
+                    }
+                });
+            }
+
+            // Append return value type and description
+            if (returnValue && returnValue.length) {
+                let desc = returnValue[0].description;
+                if (desc) {
+                    let matchedArr = desc.match(/(```)([\s\S]*?)(```)/gm);
+                    let matched = null;
+                    if (matchedArr && matchedArr.length) {
+                        matched = matchedArr[0];
+                    }
+                    let backTickText = null;
+                    if (matched) {
+                        backTickText = marked(matched);
+                        desc = desc.replace(/(```)([\s\S]*?)(```)/gm, backTickText);
+                    }
+                }
+                let returnVal =
+                `<a name=${returnValue[0].type.names[0]}></a><p class="sub-header">Returns:</p>\n\n <span style="font-family: 'Source Code Pro';">${returnValue[0].type.names.join(' ').replace(/</gi, '&lt;').replace(/>/gi, '&gt;').replace(/\./gi, '')}:</span>`;
+                if (desc) {
+                    returnVal = `${returnVal}${desc}`;
+                }
+                sections.push({
+                    type: 'markdown-section',
+                    content: returnVal.replace(/{@link\s(.)*}/gi, replaceLink),
+                });
+            }
+            return sections;
+        }
     }
     return null;
 }
+
+exports.defineTags = (dictionary) => {
+    dictionary.defineTag('extends', {
+        onTagged: (doclet, tag) => {
+            doclet.extends = doclet.extends || [];
+            doclet.extends.push(tag.value);
+        }
+    });
+};
 
 exports.handlers = {
     /**
@@ -212,16 +293,18 @@ exports.handlers = {
 
             // Filter out the doclets with no description
             const filteredDoclets = perFileDoclets.filter(doclet => (doclet.description ? doclet : null));
-
             // Object to store object parameters which may have nested keys
-            let paramObject = null;
+            let namespace = {};
 
-            let parsed = filteredDoclets.map(doclet => parseDoclet(doclet, paramObject)).filter(item => item);
+            let parsed = filteredDoclets.map(doclet => parseDoclet(doclet, namespace)).filter(item => item);
             parsed = parsed.reduce((accum, value) => [...accum, ...value], []);
+
+            let documentName = fileName.split('.')[0];
+            documentName = documentName[0].toUpperCase() + documentName.slice(1);
 
             // Create master section to be converted to a YAML file
             const fileDump = {
-                title: fileName,
+                title: documentName,
                 description: 'Documented Methods',
                 sections: parsed,
             };
@@ -229,10 +312,14 @@ exports.handlers = {
             const yml = converter.stringify(fileDump);
 
             // get the path directory path where files will be written
-            const destination = config.opts.yaml;
+            let destination = config.opts.yaml;
             let temp = fileName.split('.');
             temp[temp.length - 1] = 'yml';
             const ymlFileName = temp.join('.');
+            // If file is memberof a namespace, store it inside the appropriate namespace folder
+            // if (namespace.memberof) {
+            //     destination = `${destination}${namespace.memberof}`;
+            // }
             // write the file
             fs.writeFile(`${destination}${ymlFileName}`, yml, (err) => {
                 if (err) {
