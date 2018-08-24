@@ -25,6 +25,7 @@ class ReducerStore {
 
         return this.store.get('defReducer');
     }
+
     register (name, reducer) {
         if (typeof name === 'string' && typeof reducer === 'function') {
             this.store.set(name, reducer);
