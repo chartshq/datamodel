@@ -83,13 +83,24 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
             const dataObj = dataModel.getData();
             const schema = dataObj.schema;
             const fieldsConfig = dataModel.getFieldsConfig();
+            const fieldsSpace = dataModel.getFieldspace().fieldsObj();
             const data = dataObj.data;
+            const domain = Object.values(fieldsConfig).reduce((acc, v) => {
+                acc[v.def.name] = fieldsSpace[v.def.name].domain();
+                return acc;
+            }, {});
+
             return (fields) => {
                 const include = !data.length ? false : data.some(row => schema.every((propField) => {
                     if (!(propField.name in fields)) {
                         return true;
                     }
-                    if (!filterByMeasure && propField.type !== FieldType.DIMENSION) {
+                    const value = fields[propField.name].valueOf();
+                    if (filterByMeasure && propField.type === FieldType.MEASURE) {
+                        return value >= domain[propField.name][0] && value <= domain[propField.name][1];
+                    }
+
+                    if (propField.type !== FieldType.DIMENSION) {
                         return true;
                     }
                     const idx = fieldsConfig[propField.name].index;
