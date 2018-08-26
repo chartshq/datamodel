@@ -1186,13 +1186,13 @@ describe('DataModel', () => {
                 DataModel.Reducers.defaultReducer('min');
                 const grouped = dataModel.groupBy(['first']);
                 const childData = grouped.getData().data;
-                expect(childData[0][1]).to.equal(20);
+                expect(childData[0][1]).to.equal(45);
             });
             it('should group properly if def aggregation function is changed from first to min', () => {
                 DataModel.Reducers.defaultReducer('min');
                 const grouped = dataModel.groupBy(['first']);
                 const childData = grouped.getData().data;
-                expect(childData[0][1]).to.equal(20);
+                expect(childData[0][1]).to.equal(45);
             });
             it('should group properly if def aggregation function is changed from min to first', () => {
                 DataModel.Reducers.defaultReducer('min');
@@ -1299,11 +1299,6 @@ describe('DataModel', () => {
         describe('#sum', () => {
             it('should return sum for 1D array', () => {
                 expect(DataModel.Stats.sum([10, 12, 17])).to.equal(39);
-            });
-        });
-        describe('#sum', () => {
-            it('should return sum for 2D Array', () => {
-                expect(DataModel.Stats.sum([[10, 20], [12, 22], [27, 17]])).to.deep.equal([49, 59]);
             });
         });
         describe('#svg', () => {

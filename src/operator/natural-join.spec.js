@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import DataModel from '../datamodel'
+import DataModel from '../index'
 ;
 import { naturalJoin } from './natural-join';
 

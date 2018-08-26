@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { union } from './union';
-import DataModel from '../datamodel';
+import DataModel from '../index';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a', state: 'aa' },

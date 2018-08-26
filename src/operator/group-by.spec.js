@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { getFieldArr, getReducerObj, groupBy } from './group-by';
-import DataModel from '../datamodel';
+import DataModel from '../index';
 import { defReducer, fnList } from './group-by-function';
 
 const data1 = [
