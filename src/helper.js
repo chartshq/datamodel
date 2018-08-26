@@ -25,6 +25,12 @@ function prepareSelectionData (fields, i) {
     return resp;
 }
 
+export function prepareJoinData (fields) {
+    const resp = {};
+    Object.keys(fields).forEach((key) => { resp[key] = new Value(fields[key], key); });
+    return resp;
+}
+
 export const updateFields = ([rowDiffset, colIdentifier], partialFieldspace, fieldStoreName) => {
     let collID = colIdentifier.length ? colIdentifier.split(',') : [];
     let partialFieldMap = partialFieldspace.fieldsObj();

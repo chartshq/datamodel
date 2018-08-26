@@ -1,5 +1,13 @@
 import { defReducer, fnList } from '../operator';
 
+/**
+ * A page level storage which stores, registers, unregisters reducers for all the datamodel instances. There is only one
+ * reducer store available in a page. All the datamodel instances receive same instance of reducer store. DataModel
+ * out of the box provides handful of {@link reducer | reducers} which can be used as reducer funciton.
+ *
+ * @public
+ * @namespace DataModel
+ */
 class ReducerStore {
     constructor () {
         this.store = new Map();
@@ -10,6 +18,17 @@ class ReducerStore {
         });
     }
 
+    /**
+     * Changes the `defaultReducer` globally. For all the fields which does not have `defAggFn` mentioned in schema, the
+     * value of `defaultReducer` is used for aggregation.
+     *
+     * @public
+     *
+     * @param {string} [reducer='sum'] name of the default reducer. It picks up the definition from store by doing name
+     *      lookup. If no name is found then it takes `sum` as the default reducer.
+     *
+     * @return {ReducerStore} instance of the singleton store in page.
+     */
     defaultReducer (...params) {
         if (params.length) {
             let reducer = params[0];
@@ -26,6 +45,38 @@ class ReducerStore {
         return this.store.get('defReducer');
     }
 
+    /**
+     *
+     * Registers a {@link reducer | reducer}.
+     * A {@link reducer | reducer} has to be registered before it is used.
+     *
+     * @example
+     *  // find the mean squared value of a given set
+     *  const reducerStore = DataModel.Reducers();
+     *
+     *  reducers.register('meanSquared', (arr) => {
+     *      const squaredVal = arr.map(item => item * item);
+     *      let sum = 0;
+     *      for (let i = 0, l = squaredVal.length; i < l; i++) {
+     *          sum += squaredVal[i++];
+     *      }
+     *
+     *      return sum;
+     *  })
+     *
+     *  // datamodel (dm) is already prepared with cars.json
+     *  const dm1 = dm.groupBy(['origin'], {
+     *      accleration: 'meanSquared'
+     *  });
+     *
+     * @public
+     *
+     * @param {string} name formal name for a reducer. If the given name already exists in store it is overridden by new
+     *      definition.
+     * @param {Function} reducer definition of {@link reducer} function.
+     *
+     * @return {Function} function for unregistering the reducer.
+     */
     register (name, reducer) {
         if (typeof name === 'string' && typeof reducer === 'function') {
             this.store.set(name, reducer);
@@ -48,7 +99,7 @@ class ReducerStore {
     }
 }
 
-const reducerStore = (function() {
+const reducerStore = (function () {
     let store = null;
 
     function getStore () {

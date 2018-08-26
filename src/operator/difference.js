@@ -62,6 +62,6 @@ export function difference (dm1, dm2) {
     prepareDataHelper(dm2, dm2FieldStoreFieldObj, false);
     prepareDataHelper(dm1, dm1FieldStoreFieldObj, true);
 
-    return new DataModel(data, schema, name);
+    return new DataModel(data, schema, { name });
 }
 

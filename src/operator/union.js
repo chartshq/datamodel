@@ -1,4 +1,4 @@
-import DataModel from '../datamodel';
+import DataModel from '../export';
 import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import { isArrEqual } from '../utils/helper';
@@ -58,5 +58,5 @@ export function union (dm1, dm2) {
     prepareDataHelper(dm1, dm1FieldStoreFieldObj);
     prepareDataHelper(dm2, dm2FieldStoreFieldObj);
 
-    return new DataModel(data, schema, name);
+    return new DataModel(data, schema, { name });
 }

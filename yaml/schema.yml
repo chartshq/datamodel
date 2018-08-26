@@ -1,0 +1,11 @@
+---
+  title: "Schema"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "DataModel\n\nSchema is used to describe a variable present in data. Definition of schema is different for\n[dimensions and measures](link_to_dimension_concept).\n\nFollowing properties are available on the schema object both for measure and dimension.\n- `name`: name of the variable. The variable must exist in the data. Its the only mandatory property in schema.\n- `type`: type of the variable. The options are `'measure'` and `'dimension'`. Default is `'dimension'`.\n- `description`: additional explanation about the variable\n\nFor a dimension the following fields are available on schema object\n- `subtype`: specifies what kind of dimension it is. Currently the options are `'categorical'` and `'datetime'`.\n     Default is `'categorical'`\n- `format`: if the the subtype of dimension is `'datetime'` then `format` is used to parse the date format. Read more\n     about [DateFormat](DateFormat).\n\nFor a measure the following fields are available on schema object\n- `defAggFn`: reducer function to be used when variable is aggregated. Learn more about [Reducer](Reducer).\n- `unit`: unit of the measures in string\n- `numberformat`: a function which returns the formatted value of a variable, this is only for output purpose.\n\nFor a data\n```\nName,Miles_per_Gallon,Cylinders,Displacement,Horsepower,Weight_in_lbs,Acceleration,Year,Origin\nchevrolet chevelle malibu,18,8,307,130,3504,12,1970,USA\nbuick skylark 320,15,8,350,165,3693,11.5,1970,USA\nplymouth satellite,18,8,318,150,3436,11,1970,USA\n```\nThe schema would be something like"
+    - 
+      type: "code-section"
+      content: "const schema = [\n     { name: 'Name', type: 'dimension' },\n     { name: 'Miles_per_Gallon', type: 'measure', numberFormat: (val) => `${val} miles / gallon` },\n     { name: 'Cylinder', type: 'dimension' },\n     { name: 'Displacement', type: 'measure', defAggFn: 'max' },\n     { name: 'HorsePower', type: 'measure', defAggFn: 'max' },\n     { name: 'Weight_in_lbs', type: 'measure', defAggFn: 'avg',  },\n     { name: 'Acceleration', type: 'measure', defAggFn: 'avg' },\n     { name: 'Year', type: 'dimension', subtype: 'datetime', format: '%Y' },\n     { name: 'Origin' }\n ]"
+      preamble: ""

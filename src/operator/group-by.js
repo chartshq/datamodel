@@ -1,6 +1,6 @@
 import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
-import DataModel from '../datamodel';
+import DataModel from '../export';
 import reducerStore from '../utils/reducer-store';
 
 /**
@@ -135,7 +135,7 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
         newDataModel = existingDataModel;
     }
     else {
-        newDataModel = new DataModel(data, schema, dbName);
+        newDataModel = new DataModel(data, schema, { name: dbName });
     }
     return newDataModel;
 }

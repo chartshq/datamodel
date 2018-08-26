@@ -1,3 +1,4 @@
+export { DataFormat, FilteringMode } from '../enums';
 /**
  * The event name for data propagation.
  */

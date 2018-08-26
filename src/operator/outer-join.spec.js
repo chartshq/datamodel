@@ -171,7 +171,8 @@ describe('Testing Outer Join', () => {
                     3
                 ]
             };
-            expect(leftOuterJoin(data23, data24, obj => obj.ModelA.id === obj.ModelB.id).getData())
+            expect(leftOuterJoin(data23, data24,
+                (dmFields1, dmFields2) => dmFields1.id.value === dmFields2.id.value).getData())
                             .to.deep.equal(expectedResult);
         });
     });
@@ -253,7 +254,8 @@ describe('Testing Outer Join', () => {
                     1
                 ]
             };
-            expect(rightOuterJoin(data23, data24, obj => obj.ModelA.id === obj.ModelB.id).getData())
+            expect(rightOuterJoin(data23, data24,
+                (dmFields1, dmFields2) => dmFields1.id.value === dmFields2.id.value).getData())
                             .to.deep.equal(expectedResult);
         });
     });
@@ -363,7 +365,8 @@ describe('Testing Outer Join', () => {
                 ]
             };
 
-            expect(fullOuterJoin(data23, data24, obj => obj.ModelA.id === obj.ModelB.id).getData())
+            expect(fullOuterJoin(data23, data24,
+                (dmFields1, dmFields2) => dmFields1.id.value === dmFields2.id.value).getData())
                             .to.deep.equal(expectedResult);
         });
     });

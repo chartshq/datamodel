@@ -29,8 +29,8 @@ const schema2 = [
 describe('Testing union', () => {
     describe('#union', () => {
         it('should perform basic union', () => {
-            const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
-            const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'state']);
+            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' })).project(['city', 'state']);
+            const dataModel2 = (new DataModel(data2, schema2, { name: 'ModelB' })).project(['city', 'state']);
             const unionDataModel = union(dataModel1, dataModel2);
             expect(unionDataModel.getData()).to.deep.equal({
                 schema: [
@@ -47,8 +47,8 @@ describe('Testing union', () => {
             });
         });
         it('should not perform union if fields are not same', () => {
-            const dataModel1 = (new DataModel(data1, schema1, 'ModelA')).project(['city', 'state']);
-            const dataModel2 = (new DataModel(data2, schema2, 'ModelB')).project(['city', 'profit']);
+            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' })).project(['city', 'state']);
+            const dataModel2 = (new DataModel(data2, schema2, { name: 'ModelB' })).project(['city', 'profit']);
             const unionDataModel = union(dataModel1, dataModel2);
             expect(unionDataModel).to.equal(null);
         });

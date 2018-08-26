@@ -1,0 +1,104 @@
+---
+  title: "Datamodel"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "## <a name=DataModel></a> Class: DataModel\n\nDataModel is an in-browser representation of tabular data. It supports\n[relational algebra](httpsenwikipediaorgwikiRelational_algebra) operators as well as generic data\nprocessing opearators.\nDataModel extends [Relation](Relation) class which defines all the relational algebra opreators. DataModel gives\ndefinition of generic data processing operators which are not relational algebra complient."
+    - 
+      type: "markdown-section"
+      content: "### <a name=\"constructor\"></a> constructor\n\nCreates a new DataModel instance by providing data and schema. Data could be in the form of\n- Flat JSON\n- DSV String\n- 2D Array\n\nBy default DataModel finds suitable adapter to serialize the data. DataModel also expects a\n[schema](Schema) for identifying the variables present in data."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">data</td>\n                <td><p>Array of Object</p> <p>string</p> <p>Array of Array</p> </td>\n                <td><p>Input data in any of the mentioned formats</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">schema</td>\n                <td><p>Array of Schema</p> </td>\n                <td><p>Defination of the variables. Order of the variables in data and order of the      variables in schema has to be same.</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">options</td>\n                <td><p>object</p> </td>\n                <td><p>Optional arguments to specify more settings regarding the creation part<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <tr>                 <td class=\"param-name\">name</td>                 <td><p>string</p> </td>                 <td><p>Name of the datamodel instance. If no name is given an auto generated name is      assigned to the instance.</p> </td>             </tr> <tr>                 <td class=\"param-name\">fieldSeparator</td>                 <td><p>string</p> </td>                 <td><p>specify field separator type if the data is of type dsv string.</p> </td>             </tr></table></td>\n            </tr></table>"
+    - 
+      type: "code-section"
+      content: "const data = loadData('cars.csv');\nconst schema = [\n     { name: 'Name', type: 'dimension' },\n     { name: 'Miles_per_Gallon', type: 'measure', unit : 'cm', scale: '1000', numberformat: val => `${val}G`},\n     { name: 'Cylinders', type: 'dimension' },\n     { name: 'Displacement', type: 'measure' },\n     { name: 'Horsepower', type: 'measure' },\n     { name: 'Weight_in_lbs', type: 'measure' },\n     { name: 'Acceleration', type: 'measure' },\n     { name: 'Year', type: 'dimension', subtype: 'datetime', format: '%Y' },\n     { name: 'Origin', type: 'dimension' }\n];\nconst dm = new DataModel(data, schema, { name: 'Cars' });\ntable(dm);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "### <a name=Reducers></a> static Reducers\n\nReducers are simple functions which reduces an array of numbers to a representative number of the set.\nLike an array of numbers `[10, 20, 5, 15]` can be reduced to `12.5` if average / mean reducer function is\napplied. All the measure fields in datamodel (variables in data) needs a reducer to handle aggregation."
+    - 
+      type: "markdown-section"
+      content: "<a name=ReducerStore></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">ReducerStore:</span>Singleton instance of [ReducerStore](ReducerStore)."
+    - 
+      type: "markdown-section"
+      content: "### <a name=getData></a> getData(options) → {[Array](Array)}\n\nRetrieve the data attached to an instance in JSON format."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">options</td>\n                <td><p>Object</p> </td>\n                <td><p>Options to control how the raw data is to be returned.<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <tr>                 <td class=\"param-name\">order</td>                 <td><p>string</p> </td>                 <td><p>Defines if data is retieved in row order or column order. Possible values      are <code>&#39;rows&#39;</code> and <code>&#39;columns&#39;</code></p> </td>             </tr> <tr>                 <td class=\"param-name\">formatter</td>                 <td><p>function</p> </td>                 <td><p>Formats the output data. This expects an object, where the keys are      the name of the variable needs to be formatted. The formatter function is called for each row passing the      value of the cell for a particular row as arguments. The formatter is a function in the form of      <code>function (value, rowId, schema) =&gt; { ... }</code>      Know more about <a href=\"Fomatter\">Fomatter</a>.</p> </td>             </tr></table></td>\n            </tr></table>"
+    - 
+      type: "code-section"
+      content: "// DataModel instance is already prepared and assigned to dm variable\n const data = dm.getData({\n     order: 'column',\n     formatter: {\n         origin: (val) => val === 'European Union' ? 'EU' : val;\n     }\n });\n console.log(data);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "<a name=Array></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">Array:</span>Returns a multidimensional array of the data with schema. The return format looks like\n     <pre><code>         {\n             data,\n             schema\n         }</code></pre>"
+    - 
+      type: "markdown-section"
+      content: "### <a name=groupBy></a> groupBy(fieldsArr, reducers, config) → {[DataModel](DataModel)}\n\nGroups the data using particular dimensions and by reducing measures. It expects a list of dimensions using which\nit projects the datamodel and perform aggregations to reduce the duplicate tuples. Refer this\n[document](link_to_one_example_with_group_by) to know the intuition behind groupBy.\n\nDataModel by default provides definition of few [Reducers](reducer).\n[User defined reducers](ReducerStore) can also be registered.\n\nThis is the chained implementation of `groupBy`.\n`groupBy` also supports [composability](link_to_compose_groupBy)"
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">fieldsArr</td>\n                <td><p>Array of string</p> </td>\n                <td><p>Array containing the name of dimensions</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">reducers</td>\n                <td><p>Object</p> </td>\n                <td><p>A map whose key is the variable name and value is the name of the reducer. If its      not passed, or any variable is ommitted from the object, default aggregation function is used from the      schema of the variable.</p> </td>\n            </tr></table>"
+    - 
+      type: "code-section"
+      content: "const groupedDM = dm.groupBy(['Year'], { horsepower: 'max' } );\nconsole.log(groupedDm);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "<a name=DataModel></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">DataModel:</span>Returns a new DataModel instance after performing the groupby."
+    - 
+      type: "markdown-section"
+      content: "### <a name=sort></a> sort(sortingDetails) → {[DataModel](DataModel)}\n\nPerforms sorting operation on the current [DataModel](DataModel) instance according to the specified sorting details.\nLike every other operator it doesn't mutate the current DataModel instance on which it was called, instead\nreturns a new DataModel instance containing the sorted data.\n\nDataModel support multi level sorting by listing the variables using which sorting needs to be performed and\nthe type of sorting `ASC` or `DESC`.\n\nIn the following example, data is sorted by `Origin` field in `DESC` order in first level followed by another\nlevel of sorting by `Acceleration` in `ASC` order."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">sortingDetails</td>\n                <td><p>Array of Array</p> </td>\n                <td><p>Sorting details based on which the sorting will be performed.</p> </td>\n            </tr></table>"
+    - 
+      type: "code-section"
+      content: "// here dm is the pre-declared DataModel instance containing the data of 'cars.json' file\nlet sortedDm = dm.sort([\n   [\"Origin\", \"DESC\"]\n   [\"Acceleration\"] // Default value is ASC\n]);\n\nconsole.log(dm.getData());\nconsole.log(sortedDm.getData());\n\n// Sort with a custom sorting function\nsortedDm = dm.sort([\n   [\"Origin\", \"DESC\"]\n   [\"Acceleration\", (a, b) => a - b] // Custom sorting function\n]);\n\nconsole.log(dm.getData());\nconsole.log(sortedDm.getData());"
+      preamble: ""
+    - 
+      type: "code-section"
+      content: "// here dm is the pre-declared DataModel instance containing the data of 'cars.json' file\nconst sortedDm = dm.sort([\n    ['Origin', ['Acceleration', (a, b) => avg(...a.Acceleration) - avg(...b.Acceleration)]]\n]);\n\nconsole.log(dm.getData());\nconsole.log(sortedDm.getData());"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "<a name=DataModel></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">DataModel:</span>Returns a new instance of DataModel with sorted data."
+    - 
+      type: "markdown-section"
+      content: "### <a name=calculateVariable></a> calculateVariable(schema, dependency, config) → {[DataModel](DataModel)}\n\nCreates a new variable calculated from existing variable. This method expects the defination of the newly created\nvariable and a function which resolves the value of the new variable from existing variables.\n\nCan create a new measure based on existing variables"
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">schema</td>\n                <td><p>Schema</p> </td>\n                <td><p>Schema of newly defined variable</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">resolver</td>\n                <td><p>VariableResolver</p> </td>\n                <td><p>Resolver format to resolve the current variable</p> </td>\n            </tr></table>"
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable;\n const newDm = dataModel.calculateVariable({\n     name: 'powerToWeight',\n     type: 'measure'\n }, ['horsepower', 'weight_in_lbs', (hp, weight) => hp / weight ]);\n\n\nCan create a new dimension based on existing variables"
+      preamble: ""
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable;\n const child = dataModel.calculateVariable(\n    {\n      name: 'Efficiency',\n      type: 'dimension'\n    }, ['horsepower', (hp) => {\n     if (hp < 80) { return 'low'; },\n     else if (hp < 120) { return 'moderate'; }\n     else { return 'high' }\n }]);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "<a name=DataModel></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">DataModel:</span>Instance of DataModel with the new field"
+    - 
+      type: "markdown-section"
+      content: "### <a name=bin></a> bin(measureName, config) → {[DataModel](DataModel)}\n\nPerfoms binning on a measure field based on a binning configuration. This method does not aggregate the number of\nrows present in DataModel instance after binning, it just adds a new field with the binned value. Refer binning\n[example](example_of_binning) to have a intuition of what binning is and the use case.\n\nBinning can be configured by\n- providing custom bin configuration with non uniform buckets\n- providing bin count\n- providing each bin size\n\nWhen custom buckets are provided as part of binning configuration"
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">name</td>\n                <td><p>String</p> </td>\n                <td><p>Name of measure which will be used to create bin</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">config</td>\n                <td><p>Object</p> </td>\n                <td><p>Config required for bin creation<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <tr>                 <td class=\"param-name\">bucketObj</td>                 <td><p>Array of Number</p> </td>                 <td><p>Defination of bucket ranges. Two subsequent number from arrays      are picked and a range is created. The first number from range is inclusive and the second number from range      is exclusive.<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <tr>                 <td class=\"param-name\">startAt</td>                 <td><p>Number</p> </td>                 <td><p>Force the start of the bin from a particular number.      If not mentioned, the start of the bin or the lower domain of the data if stops is not mentioned, else its      the first value of the stop.</p> </td>             </tr></table></td>             </tr> <tr>                 <td class=\"param-name\">binSize</td>                 <td><p>Number</p> </td>                 <td><p>Bucket size for each bin</p> </td>             </tr> <tr>                 <td class=\"param-name\">binCount</td>                 <td><p>Number</p> </td>                 <td><p>Number of bins which will be created</p> </td>             </tr> <tr>                 <td class=\"param-name\">name</td>                 <td><p>String</p> </td>                 <td><p>Name of the new binned field to be created</p> </td>             </tr></table></td>\n            </tr></table>"
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable\n const buckets = {\n     start: 30\n     stops: [80, 100, 110]\n };\n const config = { buckets, name: 'binnedHP' }\n const binDM = dataModel.bin('horsepower', config);\\"
+      preamble: ""
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable\n const config = { binCount: 5, name: 'binnedHP' }\n const binDM = dataModel.bin('horsepower', config);"
+      preamble: ""
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable\n const config = { binSize: 200, name: 'binnedHorsepower' }\n const binDM = dataModel.bin('horsepower', config);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "<a name=DataModel></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">DataModel:</span>Instance of new DataModel with the newly created bin."

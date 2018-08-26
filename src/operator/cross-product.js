@@ -3,6 +3,7 @@ import { extend2 } from '../utils';
 import { getCommonSchema } from './get-common-schema';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import { JOINS } from '../constants';
+import { prepareJoinData } from '../helper';
 /**
  * Default filter function for crossProduct.
  *
@@ -73,7 +74,9 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
                 }
                 userArg[dm2FieldStoreName][field.name] = field.data[ii];
             });
-            if (applicableFilterFn(userArg)) {
+            const dm1Fields = prepareJoinData(userArg[dm1FieldStoreName]);
+            const dm2Fields = prepareJoinData(userArg[dm2FieldStoreName]);
+            if (applicableFilterFn(dm1Fields, dm2Fields)) {
                 const tupleObj = {};
                 tuple.forEach((cellVal, iii) => {
                     tupleObj[schema[iii].name] = cellVal;
@@ -105,5 +108,5 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
         });
     });
 
-    return new DataModel(data, schema, name);
+    return new DataModel(data, schema, { name });
 }
