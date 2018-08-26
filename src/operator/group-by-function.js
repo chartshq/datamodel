@@ -124,7 +124,10 @@ const fnList = {
     std
 };
 
+const defaultReducerName = 'sum';
+
 export {
+    defaultReducerName,
     sum as defReducer,
     fnList,
 };

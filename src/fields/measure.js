@@ -1,6 +1,6 @@
 import PartialField from './partial-field';
 import { generateMeasureDomain, formatNumber } from '../utils';
-import reducerStore from '../utils/reducer-store';
+import { defaultReducerName } from '../operator/group-by-function';
 
 /**
  * Represents measure field type.
@@ -20,7 +20,7 @@ class Measure extends PartialField {
         super(name, data, schema);
         this.fieldUnit = schema.unit;
         this.fieldScale = schema.scale;
-        this.fieldDefAggFn = schema.defAggFn || reducerStore.defaultReducer().name;
+        this.fieldDefAggFn = schema.defAggFn || defaultReducerName;
         this.fieldNumberformat = schema.numberFormat instanceof Function ? schema.numberFormat : formatNumber;
     }
 
