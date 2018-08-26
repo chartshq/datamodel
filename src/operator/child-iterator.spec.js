@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { calculatedVariableIterator } from './child-iterator';
-import DataModel from '../datamodel';
+import DataModel from '../index';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a' },

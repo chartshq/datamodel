@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { fullOuterJoin, leftOuterJoin, rightOuterJoin } from './outer-join';
-import DataModel from '../datamodel'
+import DataModel from '../index'
 ;
 
 describe('Testing Outer Join', () => {
