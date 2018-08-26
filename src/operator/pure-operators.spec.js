@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { calculateVariable, sort } from './pure-operators';
-import DataModel from '../index';
+import DataModel from '../datamodel';
 
 describe('Testing pure operators', () => {
     describe('#calculateVariable', () => {
