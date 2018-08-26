@@ -37,7 +37,6 @@ function avg (arr) {
  * @return {number}     min of the array
  */
 function min (arr) {
-    console.log(arr);
     const isNestedArray = arr[0] instanceof Array;
     if (isNestedArray) {
         return arr.reduce((carry, a) => carry.map((x, i) => Math.min(x, a[i])),
