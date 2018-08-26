@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { difference } from './difference';
-import DataModel from '../index';
+import DataModel from '../datamodel';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a', state: 'aa' },

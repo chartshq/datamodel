@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { crossProduct } from './cross-product';
-import DataModel from '../index';
+import DataModel from '../datamodel';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a' },

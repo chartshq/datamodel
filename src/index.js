@@ -1,12 +1,3 @@
-import DataModel from './datamodel';
-import * as Operators from './operator';
-import * as Stats from './stats';
-import pkg from '../package.json';
+const DataModel = require('./export');
 
-DataModel.Operators = Operators;
-DataModel.Stats = Stats;
-DataModel.version = pkg.version;
-
-export * from './enums';
-export { DateTimeFormatter } from './utils';
-export default DataModel;
+module.exports = DataModel.default ? DataModel.default : DataModel;
