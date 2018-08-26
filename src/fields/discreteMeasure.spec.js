@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { FieldType } from 'muze-utils';
+import { FieldType } from '../enums';
 import DiscreteMeasure from './discreteMeasure';
 
 describe('Measure Field Subtype', () => {
@@ -12,7 +12,7 @@ describe('Measure Field Subtype', () => {
         subtype: 'discrete',
         unit: 'cm',
         scale: '1000',
-        numberformat: '12-3-3',
+        numberFormat: '12-3-3',
         description: 'This is description',
         defAggFn: () => {}
     };

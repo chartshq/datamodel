@@ -6,3 +6,9 @@
  * - `INVERSE`: Only entries from rejection set are included in the resulatant DataModel instance
  * - ALL: Both the entries from selection and rejection set are returned in two different DataModel instance
  */
+
+export { default as DataFormat } from './data-format';
+export { default as DimensionSubtype } from './dimension-subtype';
+export { default as MeasureSubtype } from './measure-subtype';
+export { default as FieldType } from './field-type';
+export { default as FilteringMode } from './filtering-mode';

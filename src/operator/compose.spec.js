@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions,no-unused-vars */
 
 import { expect } from 'chai';
-import DataModel from '../datamodel';
+import DataModel from '../index';
 import { compose, project, select, groupBy, bin } from './compose';
 
 describe('Testing compose functionality', () => {

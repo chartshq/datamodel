@@ -1,0 +1,10 @@
+---
+  title: "Selection-predicate"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "SelecitonPredicate\n\nA simple predicate which decides if a row is selected for a given condition or not. If this predicate returns true\nthe current row is labeled as a member of selection set. Similarly if returns false, the current row is labeled as\na memeber of rejection set.\n\nNote: This funciton does not directly decides whether the row should be present in the final resultant DataModel.\nBased on selection set and rejection set which predicate function helps to decide, MODE determine which row should\nbe present in the final DataModel."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">rowInf</td>\n                <td><p>object</p> </td>\n                <td><p>Particular row information presented as object.      When rows are iterated by a operator, all the fields <a href=\"Value\">value</a> present in a row, are combined in a      object. The key of the object is name of field and value is <a href=\"Value\">value</a> of field for that current row.      A typical value of a row is represented by       <code>{          origin: Value,          horsepower: Value          ...      }</code></p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">rowIndex</td>\n                <td><p>Number</p> </td>\n                <td><p>Index of current iteration of row</p> </td>\n            </tr></table>"

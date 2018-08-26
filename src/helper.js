@@ -1,4 +1,4 @@
-import { FieldType, FilteringMode } from 'muze-utils';
+import { FieldType, FilteringMode } from './enums';
 import Field from './fields/field';
 import fieldStore from './field-store';
 import Value from './value';
@@ -6,9 +6,10 @@ import {
     rowDiffsetIterator,
     groupByIterator,
     projectIterator,
-    selectIterator
+    selectIterator,
+    calculatedVariableIterator
 } from './operator';
-import { DM_DERIVATIVES, ROW_ID } from './constants';
+import { DM_DERIVATIVES, LOGICAL_OPERATORS } from './constants';
 import createFields from './field-creator';
 import defaultConfig from './default-config';
 import * as converter from './converter';
@@ -77,78 +78,57 @@ export const selectHelper = (rowDiffset, fields, selectFn, config) => {
     return newRowDiffSet.join(',');
 };
 
-export const assembleModelFromIdentifiers = (model, identifiers) => {
-    let schema = [];
-    let data;
-    let fieldMap = model.getFieldsConfig();
-    if (identifiers.length) {
-        let fields = identifiers[0];
-        let len = fields.length;
-        for (let i = 0; i < len; i++) {
-            let field = fields[i];
-            let fieldObj;
-            if (field === ROW_ID) {
-                fieldObj = {
-                    name: field,
-                    type: FieldType.DIMENSION
-                };
-            }
-            else {
-                fieldObj = fieldMap[field] && Object.assign({}, fieldMap[field].def);
-            }
-            if (fieldObj) {
-                schema.push(Object.assign(fieldObj));
-            }
-        }
-        // format the data
-        // @TODO: no documentation on how CSV_ARR data format works.
-        data = [];
-        const header = identifiers[0];
-        for (let i = 1; i < identifiers.length; i += 1) {
-            const vals = identifiers[i];
-            const temp = {};
-            vals.forEach((fieldVal, cIdx) => {
-                temp[header[cIdx]] = fieldVal;
-            });
-            data.push(temp);
-        }
-    }
-    else {
-        data = [];
-        schema = [];
-    }
-    return new model.constructor(data, schema);
-};
+export const filterPropagationModel = (model, propModels, config = {}) => {
+    const operation = config.operation || LOGICAL_OPERATORS.AND;
+    const filterByMeasure = config.filterByMeasure || false;
+    let fns = [];
+    if (propModels === null) {
+        fns = [() => false];
+    } else {
+        fns = propModels.map(propModel => ((dataModel) => {
+            const dataObj = dataModel.getData();
+            const schema = dataObj.schema;
+            const fieldsConfig = dataModel.getFieldsConfig();
+            const fieldsSpace = dataModel.getFieldspace().fieldsObj();
+            const data = dataObj.data;
+            const domain = Object.values(fieldsConfig).reduce((acc, v) => {
+                acc[v.def.name] = fieldsSpace[v.def.name].domain();
+                return acc;
+            }, {});
 
-export const filterPropagationModel = (model, propModel, filterByMeasure) => {
-    const { data, schema } = propModel.getData();
-    let filteredModel;
-    if (schema.length) {
-        if (schema[0].name === ROW_ID) {
-            // iterate over data and create occurence map
-            const occMap = {};
-            data.forEach((val) => {
-                occMap[val[0]] = true;
-            });
-            filteredModel = model.select((fields, rIdx) => occMap[rIdx], {
-                saveChild: false
-            });
-        } else {
-            let fieldMap = model.getFieldsConfig();
-            let filteredSchema = schema.filter(d => d.name in fieldMap &&
-                (filterByMeasure ? true : d.type === FieldType.DIMENSION));
-            filteredModel = model.select((fields) => {
-                let include = data.some(row => filteredSchema.every((propField, idx) =>
-                    row[idx] === fields[propField.name].valueOf()));
+            return (fields) => {
+                const include = !data.length ? false : data.some(row => schema.every((propField) => {
+                    if (!(propField.name in fields)) {
+                        return true;
+                    }
+                    const value = fields[propField.name].valueOf();
+                    if (filterByMeasure && propField.type === FieldType.MEASURE) {
+                        return value >= domain[propField.name][0] && value <= domain[propField.name][1];
+                    }
 
+                    if (propField.type !== FieldType.DIMENSION) {
+                        return true;
+                    }
+                    const idx = fieldsConfig[propField.name].index;
+                    return row[idx] === fields[propField.name].valueOf();
+                }));
                 return include;
-            }, {
-                saveChild: false
-            });
-        }
+            };
+        })(propModel));
     }
-    else {
-        filteredModel = propModel;
+
+    let filteredModel;
+    if (operation === LOGICAL_OPERATORS.AND) {
+        const clonedModel = model.clone(false, false);
+        filteredModel = clonedModel.select(fields => fns.every(fn => fn(fields)), {
+            saveChild: false,
+            mode: FilteringMode.ALL
+        });
+    } else {
+        filteredModel = model.clone(false, false).select(fields => fns.some(fn => fn(fields)), {
+            mode: FilteringMode.ALL,
+            saveChild: false
+        });
     }
 
     return filteredModel;
@@ -229,137 +209,147 @@ export const fieldInSchema = (schema, field) => {
     return null;
 };
 
-export const propagateIdentifiers = (dataModel, propModel, config = {}, source) => {
-    let payload = config.payload;
-    let sourceIdentifiers = config.sourceIdentifiers;
-    let grouped = config.grouped;
-
-    if (sourceIdentifiers === undefined) {
-        config.sourceIdentifiers = sourceIdentifiers = propModel;
-    }
-    const selectionModel = grouped ? propModel : filterPropagationModel(dataModel, propModel, true);
-
-    source = source || dataModel;
+export const propagateIdentifiers = (dataModel, propModel, config = {}, nonTraversingModel, grouped) => {
     // function to propagate to target the DataModel instance.
-    const forwardPropagation = (targetDM, propagationData, group) => {
-        targetDM.handlePropagation({
-            payload,
-            data: propagationData,
-            sourceIdentifiers
-        });
-        propagateIdentifiers(targetDM, propagationData, {
-            payload,
-            sourceIdentifiers,
-            grouped: group
-        }, dataModel);
+    const forwardPropagation = (targetDM, propagationData, hasGrouped) => {
+        propagateIdentifiers(targetDM, propagationData, config, nonTraversingModel, hasGrouped);
     };
+
+    dataModel !== nonTraversingModel && dataModel.handlePropagation({
+        payload: config.payload,
+        data: propModel,
+        sourceIdentifiers: config.sourceIdentifiers,
+        sourceId: config.propagationSourceId,
+        groupedPropModel: !!grouped
+    });
+
     // propagate to children created by SELECT operation
     selectIterator(dataModel, (targetDM, criteria) => {
-        if (targetDM !== source) {
-            const selectedModel = selectionModel.select(criteria);
-            forwardPropagation(targetDM, selectedModel, grouped);
+        if (targetDM !== nonTraversingModel) {
+            const selectionModel = propModel[0].select(criteria, {
+                saveChild: false
+            });
+            const rejectionModel = propModel[1].select(criteria, {
+                saveChild: false
+            });
+
+            forwardPropagation(targetDM, [selectionModel, rejectionModel], grouped);
         }
     });
     // propagate to children created by PROJECT operation
     projectIterator(dataModel, (targetDM, projField) => {
-        if (targetDM !== source) {
-            // pass al the props cause it won't make a difference
-            const projModel = selectionModel.project(projField);
-            forwardPropagation(targetDM, projModel, grouped);
+        if (targetDM !== nonTraversingModel) {
+            const projModel = propModel[0].project(projField, {
+                saveChild: false
+            });
+            const rejectionProjModel = propModel[1].project(projField, {
+                saveChild: false
+            });
+
+            forwardPropagation(targetDM, [projModel, rejectionProjModel], grouped);
         }
     });
-    let filteredModel;
+
     // propagate to children created by groupBy operation
     groupByIterator(dataModel, (targetDM, conf) => {
-        if (targetDM !== source) {
+        if (targetDM !== nonTraversingModel) {
             const {
-                reducer,
-                groupByString,
-            } = conf;
-            filteredModel = grouped ? propModel : filteredModel || filterPropagationModel(dataModel, propModel);
-            // group the filtered model based on groupBy string of target
-            const groupedPropModel = filteredModel.groupBy(groupByString.split(','), reducer, {
+                    reducer,
+                    groupByString
+                } = conf;
+                // group the filtered model based on groupBy string of target
+            const selectionGroupedModel = propModel[0].groupBy(groupByString.split(','), reducer, {
                 saveChild: false
             });
-            forwardPropagation(targetDM, groupedPropModel, true);
+            const rejectionGroupedModel = propModel[1].groupBy(groupByString.split(','), reducer, {
+                saveChild: false
+            });
+            forwardPropagation(targetDM, [selectionGroupedModel, rejectionGroupedModel], true);
         }
     });
-    // propagate to parent if parent is not source
-    if (dataModel._parent && source !== dataModel._parent) {
-        forwardPropagation(dataModel._parent, propModel, grouped);
-    }
+
+    calculatedVariableIterator(dataModel, (targetDM, ...params) => {
+        if (targetDM !== nonTraversingModel) {
+            const entryModel = propModel[0].clone(false, false).calculateVariable(...params, {
+                saveChild: false,
+                replaceVar: true
+            });
+            const exitModel = propModel[1].clone(false, false).calculateVariable(...params, {
+                saveChild: false,
+                replaceVar: true
+            });
+            forwardPropagation(targetDM, [entryModel, exitModel], grouped);
+        }
+    });
 };
 
-export const propagateRange = (dataModel, rangeObj, config = {}, source) => {
-    let payload = config.payload;
-    let sourceIdentifiers = config.sourceIdentifiers;
-    let propModel = rangeObj;
-    if (!(propModel.constructor.name === 'DataModel')) {
-        const measures = Object.keys(rangeObj);
-        propModel = dataModel.select((fields) => {
-            let include = true;
-            measures.forEach((fieldName) => {
-                const domain = propModel[fieldName];
-                include = include && fields[fieldName] >= domain[0];
-                include = include && fields[fieldName] <= domain[1];
-            });
-            return include;
-        }, {
-            saveChild: false
-        });
+export const getRootGroupByModel = (model) => {
+    if (model._parent && model._derivation.find(d => d.op !== 'group')) {
+        return getRootGroupByModel(model._parent);
     }
-    source = source || dataModel;
+    return model;
+};
 
-    if (sourceIdentifiers === undefined) {
-        config.sourceIdentifiers = sourceIdentifiers = propModel;
+export const getRootDataModel = (model) => {
+    if (model._parent) {
+        return getRootDataModel(model._parent);
+    }
+    return model;
+};
+
+export const propagateToAllDataModels = (identifiers, rootModels, config) => {
+    let criteria;
+    let propModel;
+    const propagationNameSpace = config.propagationNameSpace;
+    const payload = config.payload;
+    const propagationSourceId = config.propagationSourceId;
+
+    if (identifiers === null) {
+        criteria = null;
+    } else {
+        const filteredCriteria = Object.entries(propagationNameSpace.mutableActions)
+            .filter(d => d[0] !== propagationSourceId)
+            .map(d => Object.values(d[1]).map(action => action.criteria));
+        criteria = [].concat(...[...filteredCriteria, identifiers]);
     }
 
-    const forward = (targetDM, propagationModel, isParent) => {
-        targetDM.handlePropagation({
-            payload,
-            data: propagationModel,
-            sourceIdentifiers
-        });
-        propagateRange(targetDM, isParent ? rangeObj : propagationModel, {
-            payload,
-            sourceIdentifiers
-        }, dataModel);
+    const rootGroupByModel = rootModels.groupByModel;
+    const rootModel = rootModels.model;
+    const propConfig = {
+        payload,
+        propagationSourceId,
+        sourceIdentifiers: identifiers
     };
 
+    if (rootGroupByModel) {
+        propModel = filterPropagationModel(rootGroupByModel, criteria, {
+            filterByMeasure: true
+        });
+        propagateIdentifiers(rootGroupByModel, propModel, propConfig);
+    }
 
-    // propagate to children created by SELECT operation
-    selectIterator(dataModel, (targetDM, fn) => {
-        if (targetDM !== source) {
-            const selectModel = propModel.select(fn, {
-                saveChild: false
+    propModel = filterPropagationModel(rootModel, criteria, {
+        filterByMeasure: !rootGroupByModel
+    });
+    propagateIdentifiers(rootModel, propModel, propConfig, rootGroupByModel);
+};
+
+export const propagateImmutableActions = (propagationNameSpace, rootModels, propagationSourceId) => {
+    const rootGroupByModel = rootModels.groupByModel;
+    const rootModel = rootModels.model;
+    const immutableActions = propagationNameSpace.immutableActions;
+    for (const sourceId in immutableActions) {
+        const actions = immutableActions[sourceId];
+        for (const action in actions) {
+            const criteriaModel = actions[action].criteria;
+            propagateToAllDataModels(criteriaModel, {
+                groupByModel: rootGroupByModel,
+                model: rootModel
+            }, {
+                propagationNameSpace,
+                payload: actions[action].payload,
+                propagationSourceId
             });
-            forward(targetDM, selectModel);
         }
-    });
-    // propagate to children created by PROJECT operation
-    projectIterator(dataModel, (targetDM) => {
-        if (targetDM !== source) {
-            forward(targetDM, propModel);
-        }
-    });
-
-    // propagate to children created by GROUPBY operation
-    groupByIterator(dataModel, (targetDM, conf) => {
-        if (targetDM !== source) {
-            const {
-                reducer,
-                groupByString,
-            } = conf;
-            // group the filtered model based on groupBy string of target
-            const groupedPropModel = propModel.groupBy(groupByString.split(','), reducer, {
-                saveChild: false
-            });
-            forward(targetDM, groupedPropModel);
-        }
-    });
-
-    // propagate to parent if parent is not source
-    if (dataModel._parent && source !== dataModel._parent) {
-        forward(dataModel._parent, propModel, true);
     }
 };

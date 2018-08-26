@@ -1,4 +1,4 @@
-import { DimensionSubtype } from 'muze-utils';
+import { DimensionSubtype } from '../enums';
 import { rowDiffsetIterator } from '../operator/row-diffset-iterator';
 
 /**
@@ -118,15 +118,6 @@ export default class Field {
      */
     scale() {
         return this._ref.scale();
-    }
-
-    /**
-     * Getter for number format value of the field.
-     *
-     * @return {string} Returns number format of the field.
-     */
-    numberformat() {
-        return this._ref.numberformat();
     }
 
     /**

@@ -1,4 +1,4 @@
-import DataModel from '../index';
+import DataModel from '../export';
 import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import { isArrEqual } from '../utils/helper';

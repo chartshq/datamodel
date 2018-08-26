@@ -1,8 +1,8 @@
 /* global describe, it, beforeEach */
 /* eslint-disable no-unused-expressions */
-import { DimensionSubtype, FieldType } from 'muze-utils';
 import { expect } from 'chai';
 
+import { DimensionSubtype, FieldType } from '../enums';
 import Field from './field';
 import PartialField from './partial-field';
 import Measure from './measure';
@@ -80,7 +80,6 @@ describe('Field Type', () => {
             type: FieldType.MEASURE,
             unit: 'cm',
             scale: '1000',
-            numberformat: '12-3-3',
             description: 'This is description',
             defAggFn: () => {}
         };
@@ -102,12 +101,6 @@ describe('Field Type', () => {
         describe('#scale', () => {
             it('should implement scale getter methods', () => {
                 expect(field3.scale()).to.equal(schema3.scale);
-            });
-        });
-
-        describe('#numberformat', () => {
-            it('should implement numberformat getter methods', () => {
-                expect(field3.numberformat()).to.equal(schema3.numberformat);
             });
         });
 
@@ -195,7 +188,7 @@ describe('Field Type', () => {
             type: FieldType.MEASURE,
             unit: 'cm',
             scale: '1000',
-            numberformat: '12-3-3',
+            numberFormat: '12-3-3',
             description: 'This is description',
             defAggFn: () => {}
         };

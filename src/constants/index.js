@@ -1,4 +1,4 @@
-export { DataFormat, FilteringMode } from 'muze-utils';
+export { DataFormat, FilteringMode } from '../enums';
 /**
  * The event name for data propagation.
  */
@@ -27,4 +27,9 @@ export const JOINS = {
     RIGHTOUTER: 'rightOuter',
     NATURAL: 'natural',
     FULLOUTER: 'fullOuter'
+};
+
+export const LOGICAL_OPERATORS = {
+    AND: 'and',
+    OR: 'or'
 };

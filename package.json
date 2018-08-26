@@ -37,8 +37,7 @@
     }
   ],
   "dependencies": {
-    "d3-dsv": "^1.0.8",
-    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop"
+    "d3-dsv": "^1.0.8"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
@@ -81,6 +80,7 @@
     "build": "webpack --mode production",
     "start": "webpack-dev-server --config webpack.config.dev.js --mode development --open",
     "lint": "eslint ./src",
+    "lint-errors": "eslint --quiet ./src",
     "docs": "rm -rf yaml && mkdir yaml && jsdoc -c jsdoc.conf.json"
   }
 }

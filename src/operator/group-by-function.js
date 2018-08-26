@@ -4,13 +4,16 @@
  * @return {number}     sum of the array
  */
 function sum (arr) {
+    let allNulls = true;
     const isNestedArray = arr[0] instanceof Array;
-    return arr.reduce((carry, a) => {
+    const sumVal = arr.reduce((carry, a) => {
         if (isNestedArray) {
             return carry.map((x, i) => x + a[i]);
         }
+        allNulls = allNulls && (a === null);
         return carry + a;
     }, isNestedArray ? Array(...Array(arr[0].length)).map(() => 0) : 0);
+    return allNulls ? null : sumVal;
 }
 
 /**
@@ -25,7 +28,7 @@ function avg (arr) {
     if (isNestedArray) {
         return arrSum.map(x => x / len);
     }
-    return arrSum / len;
+    return arrSum === null ? null : arrSum / len;
 }
 
 /**
@@ -39,7 +42,7 @@ function min (arr) {
         return arr.reduce((carry, a) => carry.map((x, i) => Math.min(x, a[i])),
         Array(...Array(arr[0].length)).map(() => Infinity));
     }
-    return Math.min(...arr);
+    return arr.every(d => d === null) ? null : Math.min(...arr);
 }
 
 /**
@@ -53,7 +56,7 @@ function max (arr) {
         return arr.reduce((carry, a) => carry.map((x, i) => Math.max(x, a[i])),
         Array(...Array(arr[0].length)).map(() => -Infinity));
     }
-    return Math.max(...arr);
+    return arr.every(d => d === null) ? null : Math.max(...arr);
 }
 
 /**
@@ -121,7 +124,10 @@ const fnList = {
     std
 };
 
+const defaultReducerName = 'sum';
+
 export {
+    defaultReducerName,
     sum as defReducer,
     fnList,
 };

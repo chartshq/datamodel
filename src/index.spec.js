@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { FilteringMode } from 'muze-utils';
+import { FilteringMode } from './enums';
 import DataModel from './index';
 import pkg from '../package.json';
 
@@ -977,56 +977,22 @@ describe('DataModel', () => {
                 groupByFlag = true;
             });
 
-            const identifiers = [
-                ['first', 'second'],
-                ['Hey', 'Jude']
-            ];
-            dataModel.propagate(identifiers, {
+            const propModel = new DataModel([{
+                first: 'Hey',
+                second: 'Jude'
+            }], [{
+                name: 'first',
+                type: 'dimension'
+            }, {
+                name: 'second',
+                type: 'dimension'
+            }]);
+
+            dataModel.propagate(propModel, {
                 action: 'reaction'
             });
             expect(
                 projetionFlag && selectionFlag && groupByFlag
-            ).to.be.true;
-        });
-
-        it('should do an interpolated propagation', () => {
-            const data1 = [
-                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-                { profit: 15, sales: 25, first: 'White', second: 'walls' },
-            ];
-            const schema1 = [
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
-                { name: 'first', type: 'dimension' },
-                { name: 'second', type: 'dimension' },
-            ];
-            let inProjetionFlag = false;
-            let inSelectionFlag = false;
-            let inGroupByFlag = false;
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
-            const projected = dataModel.project(['profit']);
-            const selected = dataModel.select(fields => fields.profit.value > 10);
-            const grouped = dataModel.groupBy(['sales']);
-            // interpolated propagation handlers
-            projected.on('propagation', () => {
-                inProjetionFlag = true;
-            });
-            selected.on('propagation', () => {
-                inSelectionFlag = true;
-            });
-            grouped.on('propagation', () => {
-                inGroupByFlag = true;
-            });
-            dataModel.propagateInterpolatedValues({
-                profit: [2, 12],
-                sales: [18, 30]
-            }, {
-                action: 'reaction'
-            });
-            expect(
-                inProjetionFlag && inSelectionFlag && inGroupByFlag
             ).to.be.true;
         });
     });
@@ -1221,13 +1187,13 @@ describe('DataModel', () => {
                 DataModel.Reducers.defaultReducer('min');
                 const grouped = dataModel.groupBy(['first']);
                 const childData = grouped.getData().data;
-                expect(childData[0][1]).to.equal(20);
+                expect(childData[0][1]).to.equal(45);
             });
             it('should group properly if def aggregation function is changed from first to min', () => {
                 DataModel.Reducers.defaultReducer('min');
                 const grouped = dataModel.groupBy(['first']);
                 const childData = grouped.getData().data;
-                expect(childData[0][1]).to.equal(20);
+                expect(childData[0][1]).to.equal(45);
             });
             it('should group properly if def aggregation function is changed from min to first', () => {
                 DataModel.Reducers.defaultReducer('min');
@@ -1334,11 +1300,6 @@ describe('DataModel', () => {
         describe('#sum', () => {
             it('should return sum for 1D array', () => {
                 expect(DataModel.Stats.sum([10, 12, 17])).to.equal(39);
-            });
-        });
-        describe('#sum', () => {
-            it('should return sum for 2D Array', () => {
-                expect(DataModel.Stats.sum([[10, 20], [12, 22], [27, 17]])).to.deep.equal([49, 59]);
             });
         });
         describe('#svg', () => {

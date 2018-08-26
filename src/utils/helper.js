@@ -48,6 +48,36 @@ export function uniqueValues (data) {
     return [...new Set(data)];
 }
 
+export const getUniqueId = () => `id-${new Date().getTime()}${Math.round(Math.random() * 10000)}`;
+
+const unique = arr => ([...new Set(arr)]);
+
+/**
+ * Gets the minimum difference between two consecutive numbers  in an array.
+ * @param {Array} arr Array of numbers
+ * @param {number} index index of the value
+ * @return {number} minimum difference between values
+ */
+export const getMinDiff = (arr, index) => {
+    let diff;
+    let uniqueVals;
+    if (index !== undefined) {
+        uniqueVals = unique(arr.map(d => d[index]));
+    } else {
+        uniqueVals = unique(arr);
+    }
+    if (uniqueVals.length > 1) {
+        diff = Math.abs(uniqueVals[1] - uniqueVals[0]);
+        for (let i = 2, len = uniqueVals.length; i < len; i++) {
+            diff = Math.min(diff, Math.abs(uniqueVals[i] - uniqueVals[i - 1]));
+        }
+    } else {
+        diff = uniqueVals[0];
+    }
+
+    return diff;
+};
+
 /**
  * Checks Whether two arrays have same content.
  *
@@ -71,4 +101,15 @@ export function isArrEqual(arr1, arr2) {
     }
 
     return true;
+}
+
+/**
+ * Checks Whether two arrays have same content.
+ *
+ * @param {Array} arr1 - The first array.
+ * @param {Array} arr2 - The 2nd array.
+ * @return {boolean} Returns whether two array have same content.
+ */
+export function formatNumber(val) {
+    return val;
 }

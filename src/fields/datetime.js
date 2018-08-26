@@ -1,6 +1,6 @@
-import { DimensionSubtype, getMinDiff } from 'muze-utils';
+import { DimensionSubtype } from '../enums';
 import Dimension from './dimension';
-import { DateTimeFormatter } from '../utils';
+import { DateTimeFormatter, getMinDiff } from '../utils';
 
 
 /**

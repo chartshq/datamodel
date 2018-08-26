@@ -1,9 +1,13 @@
 /* eslint-disable default-case */
-/**
- * @namespace Datamodel
- */
-import { FieldType } from 'muze-utils';
-import { persistDerivation, propagateIdentifiers, propagateRange, assembleModelFromIdentifiers } from './helper';
+
+import { FieldType } from './enums';
+import {
+    persistDerivation,
+    getRootGroupByModel,
+    propagateToAllDataModels,
+    getRootDataModel,
+    propagateImmutableActions
+} from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {
     dataBuilder,
@@ -121,15 +125,17 @@ class DataModel extends Relation {
             order: 'row',
             formatter: null,
             withUid: false,
+            getAllFields: false,
             sort: []
         };
         options = Object.assign({}, defOptions, options);
+        const fields = this.getPartialFieldspace().fields;
 
         const dataGenerated = dataBuilder.call(
             this,
             this.getPartialFieldspace().fields,
             this._rowDiffset,
-            this._colIdentifier,
+            options.getAllFields ? fields.map(d => d.name).join() : this._colIdentifier,
             options.sort,
             {
                 columnWise: options.order === 'column',
@@ -294,8 +300,17 @@ class DataModel extends Relation {
     }
 
     addField (field) {
-        this._colIdentifier += `,${field.fieldName()}`;
-        this._partialFieldspace.fields.push(field);
+        const fieldName = field.fieldName();
+        this._colIdentifier += `,${fieldName}`;
+        const partialFieldspace = this._partialFieldspace;
+
+        if (!partialFieldspace.fieldsObj()[field.fieldName()]) {
+            partialFieldspace.fields.push(field);
+        } else {
+            const fieldIndex = partialFieldspace.fields.findIndex(fieldinst => fieldinst.name === fieldName);
+            fieldIndex >= 0 && (partialFieldspace.fields[fieldIndex] = field);
+        }
+
         this.__calculateFieldspace().calculateFieldsConfig();
         return this;
     }
@@ -333,11 +348,12 @@ class DataModel extends Relation {
      *
      * @return {DataModel} Instance of DataModel with the new field
      */
-    calculateVariable (schema, dependency, config = { saveChild: true }) {
+    calculateVariable (schema, dependency, config = { saveChild: true, replaceVar: false }) {
         const fieldsConfig = this.getFieldsConfig();
         const depVars = dependency.slice(0, dependency.length - 1);
         const retrieveFn = dependency[dependency.length - 1];
-        if (fieldsConfig[schema.name]) {
+
+        if (fieldsConfig[schema.name] && !config.replaceVar) {
             throw new Error(`${schema.name} field already exists in model.`);
         }
         const depFieldIndices = depVars.map((field) => {
@@ -377,33 +393,55 @@ class DataModel extends Relation {
      *
      * @return {DataModel} DataModel instance.
      */
-    propagate (identifiers, payload) {
-        let propModel = identifiers;
-        if (!(identifiers && identifiers instanceof DataModel)) {
-            propModel = assembleModelFromIdentifiers(this, identifiers);
-        }
+    propagate (identifiers, payload, config = {}) {
+        const isMutableAction = config.isMutableAction;
+        const propagationSourceId = config.sourceId;
+        const rootModel = getRootDataModel(this);
+        const propagationNameSpace = rootModel._propagationNameSpace;
+        const rootGroupByModel = getRootGroupByModel(this);
+        const rootModels = {
+            groupByModel: rootGroupByModel,
+            model: rootModel
+        };
 
-        propagateIdentifiers(this, propModel, {
-            grouped: false,
-            payload
+        propagateToAllDataModels(identifiers, rootModels, {
+            propagationNameSpace,
+            payload,
+            propagationSourceId
         });
+
+        if (isMutableAction) {
+            propagateImmutableActions(propagationNameSpace, rootModels, propagationSourceId);
+        }
         return this;
     }
 
-    /**
-     * This is a very special method that only applies to cross-tab group where propagation of is won't work so we
-     * propagate the selected range of the fields instead.
-     *
-     * @param {Object} rangeObj Object with field names and corresponding selected ranges.
-     * @param {Object} payload Object with insertion related fields.
-     *
-     * @return {DataModel} DataModel instance.
-     */
-    propagateInterpolatedValues (rangeObj, payload) {
-        propagateRange(this, rangeObj, {
-            payload,
-            grouped: false
-        });
+    addToPropNamespace (sourceId, config = {}) {
+        let sourceNamespace;
+        const actionName = config.actionName;
+        const payload = config.payload;
+        const isMutableAction = config.isMutableAction;
+        const rootModel = getRootDataModel(this);
+        const propagationNameSpace = rootModel._propagationNameSpace;
+        const criteria = config.criteria;
+
+        if (isMutableAction) {
+            !propagationNameSpace.mutableActions[sourceId] && (propagationNameSpace.mutableActions[sourceId] = {});
+            sourceNamespace = propagationNameSpace.mutableActions[sourceId];
+        } else {
+            !propagationNameSpace.immutableActions[sourceId] && (propagationNameSpace.immutableActions[sourceId] = {});
+            sourceNamespace = propagationNameSpace.immutableActions[sourceId];
+        }
+
+        if (criteria === null) {
+            delete sourceNamespace[actionName];
+        } else {
+            sourceNamespace[actionName] = {
+                criteria,
+                payload
+            };
+        }
+
         return this;
     }
 

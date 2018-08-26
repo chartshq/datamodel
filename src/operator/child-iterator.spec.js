@@ -24,11 +24,11 @@ describe('Testing Child Iterator', () => {
         name: 'Efficiency'
     }, ['profit', 'sales', createdCallBack]);
 
-    let callback = (model, params) => {
+    let callback = (model, ...params) => {
         if (dm._children.find(childElm => childElm === model)) {
             hasSameChild = true;
         }
-        if (params.callback === createdCallBack) {
+        if (params[1][1] === createdCallBack) {
             hasSameFunction = true;
         }
     };
