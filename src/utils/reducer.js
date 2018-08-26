@@ -2,7 +2,6 @@
  * Reducer is just a simple function which takes an array of real numbers and returns a representative number by
  * reducing the array. A reducer can only be applied on a measure.
  *
- * @text
  * DataModel provided reducers which can be used out of the box
  *  <table>
  *      <tr>

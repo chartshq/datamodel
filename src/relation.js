@@ -4,8 +4,8 @@ import { crossProduct, difference, naturalJoinFilter, union } from './operator';
 import { DM_DERIVATIVES } from './constants';
 
 /**
- * Relation class exposes its purpose from its nomenclature. It provides the definitions of basic operators of
- * relational algebra like selection, projection, union, difference etc.
+ * Relation provides the definitions of basic operators of relational algebra like *selection*, *projection*, *union*,
+ * *difference* etc.
  *
  * It is extended by {@link DataModel} to inherit the functionalities of relational algebra concept.
  *
@@ -99,14 +99,14 @@ class Relation {
     }
 
     /**
-     * Performs the {@link link_of_cross_product | cross-product} between two {@link DataModel} instances and returns a
+     * Performs {@link link_of_cross_product | cross-product} between two {@link DataModel} instances and returns a
      * new {@link DataModel} instance containing the results. This operation is also called theta join.
      *
      * Cross product takes two set and create one set where each value of one set is paired with each value of another
      * set.
      *
-     * This method takes an optional predicate which filters the generated result rows. If the predicate
-     * returns true the combined row is included in the resulatant table.
+     * This method takes an optional predicate which filters the generated result rows. If the predicate returns true
+     * the combined row is included in the resulatant table.
      *
      * @example
      *  let originDM = dm.project(['Origin','Origin_Formal_Name']);
@@ -118,13 +118,13 @@ class Relation {
      *      obj => obj.[originDM.getName()].Origin === obj.[carsDM.getName()].Origin));
      *
      * @text
-     * This is chained version of `join` operator. `join` can also be used as {@link link_to_join_op | functional
-     * operator}.
+     * This is chained version of `join` operator. `join` can also be used as
+     * {@link link_to_join_op | functional operator}.
      *
      * @public
      *
      * @param {DataModel} joinWith - The DataModel to be joined with the current instance DataModel.
-     * @param {JoinFilter} filterFn - The predicate function that will filter the result of the crossProduct.
+     * @param {SelectionPredicate} filterFn - The predicate function that will filter the result of the crossProduct.
      *
      * @return {DataModel} New DataModel instance created after joining.
      */
@@ -143,8 +143,8 @@ class Relation {
      *  console.log(carsDM.naturalJoin(originDM));
      *
      * @text
-     * This is chained version of `naturalJoin` operator. `naturalJoin` can also be used as {@link link_to_join_op |
-     * functional operator}.
+     * This is chained version of `naturalJoin` operator. `naturalJoin` can also be used as
+     * {@link link_to_join_op | functional operator}.
      *
      * @public
      *
@@ -164,8 +164,8 @@ class Relation {
      * console.log(EuropeanMakerDM.union(USAMakerDM));
      *
      * @text
-     * This is chained version of `naturalJoin` operator. `naturalJoin` can also be used as {@link link_to_join_op |
-     * functional operator}.
+     * This is chained version of `naturalJoin` operator. `naturalJoin` can also be used as
+     * {@link link_to_join_op | functional operator}.
      *
      * @public
      *
@@ -186,8 +186,8 @@ class Relation {
      * console.log(highPowerDM.difference(highExpensiveDM));
      *
      * @text
-     * This is chained version of `naturalJoin` operator. `naturalJoin` can also be used as {@link link_to_join_op |
-     * functional operator}.
+     * This is chained version of `naturalJoin` operator. `naturalJoin` can also be used as
+     * {@link link_to_join_op | functional operator}.
      *
      * @public
      *
@@ -232,8 +232,8 @@ class Relation {
      * console.log(dtArr[1]);
      *
      * @text
-     * This is chained version of `select` operator. `select` can also be used as {@link link_to_join_op |
-     * functional operator}.
+     * This is chained version of `select` operator. `select` can also be used as
+     * {@link link_to_join_op | functional operator}.
      *
      * @public
      *
@@ -352,8 +352,8 @@ class Relation {
      *  console.log(dtArr[1].getData());
      *
      * @text
-     * This is chained version of `select` operator. `select` can also be used as {@link link_to_join_op |
-     * functional operator}.
+     * This is chained version of `select` operator. `select` can also be used as
+     * {@link link_to_join_op | functional operator}.
      *
      * @public
      *

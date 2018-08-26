@@ -204,25 +204,44 @@ function parseDoclet(doclet, namespace) {
 
             // Append code block
             if (examples && examples.length) {
-                examples.map((example) => {
-                    sections.push({
-                        type: 'code-section',
-                        content: example,
-                        preamble: '',
+                const text = doclet.text;
+                if (text) {
+                    examples.map((example) => {
+                        let textMatch = example.match(/\[([^]+)\]/);
+                        if (textMatch) {
+                            textMatch = textMatch[1];
+                            text.forEach((textItem) => {
+                                if (textItem.value && textItem.value.includes(textMatch)) {
+                                    textItem.value.replace(/\[([^]+)\]/, '');
+                                    example.replace(/\[([^]+)\]/, textItem);
+                                    sections.push({
+                                        type: 'code-section',
+                                        content: example,
+                                        preamble: '',
+                                    });
+                                    sections.push({
+                                        type: 'markdown-section',
+                                        content: textItem,
+                                    });
+                                }
+                            });
+                        } else {
+                            sections.push({
+                                type: 'code-section',
+                                content: example,
+                                preamble: '',
+                            });
+                        }
                     });
-                });
-            }
-
-            if (textTags.length) {
-                textTags.map((textTag) => {
-                    const text = textTag.value;
-                    if (text) {
+                } else {
+                    examples.map((example) => {
                         sections.push({
-                            type: 'markdown-section',
-                            content: text.replace(/{@link\s(.)*}/gi, replaceLink),
+                            type: 'code-section',
+                            content: example,
+                            preamble: '',
                         });
-                    }
-                });
+                    });
+                }
             }
 
             // Append return value type and description
