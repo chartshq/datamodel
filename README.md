@@ -2,7 +2,7 @@
   <br />
   <br />
   <a href="https://github.com/chartshq/datamodel">
-    <img src="https://github.com/chartshq/datamodel/raw/master/logo.svg" alt="datamodel" title="datamodel" />
+    <img src="https://github.com/chartshq/datamodel/raw/develop/logo.svg" alt="datamodel" title="datamodel" />
   </a>
 </h3>
 <br />
