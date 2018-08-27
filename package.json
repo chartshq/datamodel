@@ -4,7 +4,7 @@
   "homepage": "https://github.com/chartshq/datamodel",
   "version": "1.0.0",
   "license": "MIT",
-  "main": "src/index.js",
+  "main": "dist/datamodel.js",
   "author": "Charts.com <support@charts.com>",
   "keywords": [
     "datamodel",
