@@ -1,6 +1,6 @@
 {
   "name": "datamodel",
-  "description": "A model which has been built on the concept of relational algebra",
+  "description": "Relational algebra compliant in-memory tabular data store",
   "homepage": "https://github.com/chartshq/datamodel",
   "version": "1.0.0",
   "license": "MIT",
@@ -11,7 +11,12 @@
     "data",
     "relational",
     "algebra",
-    "model"
+    "model",
+    "muze",
+    "fusioncharts",
+    "table",
+    "tabular",
+    "operation"
   ],
   "repository": {
     "type": "git",

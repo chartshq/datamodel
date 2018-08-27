@@ -1,8 +1,8 @@
 <h3 align="center">
   <br />
   <br />
-  <a href="https://github.com/chartshq/ ">
-    <img src="https://github.com/rousan/public-server/raw/master/5.png" alt="datamodel" title="datamodel" />
+  <a href="https://github.com/chartshq/datamodel">
+    <img src="https://github.com/chartshq/datamodel/raw/master/logo.svg" alt="datamodel" title="datamodel" />
   </a>
 </h3>
 <br />
@@ -139,22 +139,7 @@ console.log(projectDm.getData().schema);
 
 ## Documentation
 
-Find detailed documentation and API reference at [charts.com/muze/docs](https://charts.com/muze/docs/introduction-to-datamodel).
-
-## Support
-
-Please raise a [Github issue](https://github.com/chartshq/datamodel/issues/new), or contact us at [muze@charts.com](mailto:muze@charts.com).
-
-## Roadmap
-
-Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap][https://feedback.muze.charts.com]
-
-## Community
-
-All feedback and suggestions are welcome!
-
-* 💬 Join the community on [Spectrum](https://spectrum.chat/muze)
-* 📣 Stay up to date on new features and announcements on [@muze](https://twitter.com/muze)
+Find detailed documentation and API reference from [here](https://charts.com/muze/docs/introduction-to-datamodel).
 
 ## Contributing
 
