@@ -38,9 +38,6 @@ develop/docs/attr-*
 #   accepted source of config.
 .jshintrc
 
-# - Prevent CI output files from being Added
-/dist/
-
 # - Prevent Modular build template files from being Added
 develop/template/modular
 

@@ -1,39 +1,44 @@
 {
   "name": "datamodel",
-  "description": "A model which has been built on the concept of relational algebra",
-  "homepage": "https://bitbucket.org/fusioncharts/datamodel",
+  "description": "Relational algebra compliant in-memory tabular data store",
+  "homepage": "https://github.com/chartshq/datamodel",
   "version": "1.0.0",
-  "license": "ISC",
-  "main": "src/index.js",
-  "author": "FusionCharts Technologies <support@fusioncharts.com> (https://fusioncharts.com)",
+  "license": "MIT",
+  "main": "dist/datamodel.js",
+  "author": "Charts.com <support@charts.com>",
   "keywords": [
     "datamodel",
     "data",
     "relational",
     "algebra",
-    "model"
+    "model",
+    "muze",
+    "fusioncharts",
+    "table",
+    "tabular",
+    "operation"
   ],
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/fusioncharts/datamodel.git"
+    "url": "https://github.com/chartshq/datamodel.git"
   },
   "contributors": [
     {
       "name": "Akash Goswami",
-      "email": "akash@fusioncharts.com"
+      "email": "akash@charts.com"
     },
     {
       "name": "Subhash Haldar",
-      "email": "subhash@fusioncharts.com"
+      "email": "subhash@charts.com"
     },
     {
       "name": "Rousan Ali",
-      "email": "rousan@fusioncharts.com",
+      "email": "rousan@charts.com",
       "url": "https://rousan.io"
     },
     {
       "name": "Ujjal Kumar Dutta",
-      "email": "ujjal@fusioncharts.com"
+      "email": "ujjal@charts.com"
     }
   ],
   "dependencies": {
