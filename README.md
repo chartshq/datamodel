@@ -1,13 +1,13 @@
-<h3 align="center">
+<!-- <h3 align="center">
   <br />
   <br />
   <a href="https://github.com/chartshq/datamodel">
-    <img src="https://github.com/chartshq/datamodel/raw/develop/logo.svg" alt="datamodel" title="datamodel" />
+    <img src="https://github.com/chartshq/datamodel/raw/master/logo.svg" alt="datamodel" title="datamodel" />
   </a>
 </h3>
 <br />
 <br />
-<br />
+<br /> -->
 
 [![NPM version](https://img.shields.io/npm/v/datamodel.svg)](https://www.npmjs.com/package/datamodel)
 [![NPM total downloads](https://img.shields.io/npm/dt/datamodel.svg)](https://www.npmjs.com/package/datamodel)
