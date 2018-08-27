@@ -2,7 +2,7 @@
   "name": "datamodel",
   "description": "A model which has been built on the concept of relational algebra",
   "homepage": "https://bitbucket.org/fusioncharts/datamodel",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0",
   "license": "ISC",
   "main": "src/index.js",
   "author": "FusionCharts Technologies <support@fusioncharts.com> (https://fusioncharts.com)",

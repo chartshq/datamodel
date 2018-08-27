@@ -1,14 +1,47 @@
 import DataModel from './datamodel';
-import * as Operators from './operator';
+import {
+  compose,
+  bin,
+  select,
+  project,
+  groupby as groupBy,
+  calculateVariable,
+  sort,
+  crossProduct,
+  difference,
+  naturalJoin,
+  leftOuterJoin,
+  rightOuterJoin,
+  fullOuterJoin,
+  union
+} from './operator';
 import * as Stats from './stats';
 import * as enums from './enums';
 import { DateTimeFormatter } from './utils';
+import { DataFormat, FilteringMode } from './constants';
 import pkg from '../package.json';
 
-DataModel.Operators = Operators;
+DataModel.Operators = {
+    compose,
+    bin,
+    select,
+    project,
+    groupBy,
+    calculateVariable,
+    sort,
+    crossProduct,
+    difference,
+    naturalJoin,
+    leftOuterJoin,
+    rightOuterJoin,
+    fullOuterJoin,
+    union
+};
 DataModel.Stats = Stats;
-DataModel.version = pkg.version;
 Object.assign(DataModel, enums);
 DataModel.DateTimeFormatter = DateTimeFormatter;
+DataModel.DataFormat = DataFormat;
+DataModel.FilteringMode = FilteringMode;
+DataModel.version = pkg.version;
 
 export default DataModel;
