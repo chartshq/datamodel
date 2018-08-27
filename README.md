@@ -139,7 +139,7 @@ console.log(projectDm.getData().schema);
 
 ## Documentation
 
-Find detailed documentation and API reference from [here](https://charts.com/muze/docs/introduction-to-datamodel).
+Find detailed documentation and API reference from [here](https://www.charts.com/muze/docs/introduction-to-datamodel).
 
 ## Contributing
 
