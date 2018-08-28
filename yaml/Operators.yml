@@ -1,0 +1,76 @@
+---
+  title: "Compose"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "DataModel\n\nDataModel's opearators are exposed as composable functional operators as well as chainable operators. Chainable\noperators are called on the instances of [Datamodel](Datamodel) and [Relation](Relation) class.\n\nThose same operators can be used as composable operators from `DataModel.Operators` namespace.\n\nAll these operators have similar behaviour. All these operators when called with the argument returns a function\nwhich expects a DataModel instance."
+    - 
+      type: "markdown-section"
+      content: "Operators\n\nThis is functional version of selection operator. [Selection](link_to_selection) is a row filtering operation.\nIt takes [predicate](SelectionPredicate) for filtering criteria and returns a function.\nThe returned function is called with the DataModel instance on which the action needs to be performed.\n\n[SelectionPredicate](SelectionPredicate) is a function which returns a boolean value. For selection opearation the selection\nfunction is called for each row of DataModel instance with the current row passed as argument.\n\nAfter executing [SelectionPredicate](SelectionPredicate) the rows are labeled as either an entry of selection set or an entry\nof rejection set.\n\n[FilteringMode](FilteringMode) operates on the selection and rejection set to determine which one would reflect in the\nresulatant datamodel."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">selectFn</td>\n                <td><p>SelectionPredicate</p> </td>\n                <td><p>Predicate funciton which is called for each row with the current row      <code>function (row, i)  { ... }</code></p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">config</td>\n                <td><p>Object</p> </td>\n                <td><p>The configuration object to control the inclusion exclusion of a row in resultant      DataModel instance<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <tr>                 <td class=\"param-name\">mode</td>                 <td><p>FilteringMode</p> </td>                 <td><p>The mode of the selection</p> </td>             </tr></table></td>\n            </tr></table>"
+    - 
+      type: "code-section"
+      content: "const select = DataModel.Operators.select;\nusaCarsFn = select(fields => fields.Origin.value === 'USA');\nusaCarsDm = usaCarsFn(dm);\nconsole.log(usaCarsDm);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "<a name=PreparatorFunction></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">PreparatorFunction:</span>Function which expects an instance of DataModel on which the operator needs to be\n     applied."
+    - 
+      type: "markdown-section"
+      content: "Operators\n\nThis is functional version of projection operator. [Projection](link_to_projection) is a column filtering\noperation.It expects list of fields name and either include those or exclude those based on [FilteringMode](FilteringMode) on\nthe  resultant variable.It returns a function which is called with the DataModel instance on which the action needs\nto be performed.\n\nProjection expects array of fields name based on which it creates the selection and rejection set. All the field\nwhose name is present in array goes in selection set and rest of the fields goes in rejection set.\n\n[FilteringMode](FilteringMode) operates on the selection and rejection set to determine which one would reflect in the\nresulatant datamodel."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">projField</td>\n                <td><p>Array&lt;(string|Regexp)&gt;</p> </td>\n                <td><p>An array of column names in string or regular expression.</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">config</td>\n                <td><p>Object</p> </td>\n                <td><p>An optional config to control the creation of new DataModel<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <tr>                 <td class=\"param-name\">mode</td>                 <td><p>FilteringMode</p> </td>                 <td><p>Mode of the projection</p> </td>             </tr></table></td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=PreparatorFunction></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">PreparatorFunction:</span>Function which expects an instance of DataModel on which the operator needs to be\n     applied."
+    - 
+      type: "markdown-section"
+      content: "Operators\n\nThis is functional version of binnig operator. Binning happens on a measure field based on a binning configuration.\nBinning in DataModel does not aggregate the number of rows present in DataModel instance after binning, it just adds\na new field with the binned value. Refer binning [example](example_of_binning) to have a intuition of what\nbinning is and the use case.\n\nBinning can be configured by\n- providing custom bin configuration with non uniform buckets\n- providing bin count\n- providing each bin size\n\nWhen custom buckets are provided as part of binning configuration"
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">name</td>\n                <td><p>String</p> </td>\n                <td><p>Name of measure which will be used to create bin</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">config</td>\n                <td><p>Object</p> </td>\n                <td><p>Config required for bin creation<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <tr>                 <td class=\"param-name\">bucketObj</td>                 <td><p>Array of Number</p> </td>                 <td><p>Defination of bucket ranges. Two subsequent number from arrays      are picked and a range is created. The first number from range is inclusive and the second number from range      is exclusive.<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <tr>                 <td class=\"param-name\">startAt</td>                 <td><p>Number</p> </td>                 <td><p>Force the start of the bin from a particular number.      If not mentioned, the start of the bin or the lower domain of the data if stops is not mentioned, else its      the first value of the stop.</p> </td>             </tr></table></td>             </tr> <tr>                 <td class=\"param-name\">binSize</td>                 <td><p>Number</p> </td>                 <td><p>Bucket size for each bin</p> </td>             </tr> <tr>                 <td class=\"param-name\">binCount</td>                 <td><p>Number</p> </td>                 <td><p>Number of bins which will be created</p> </td>             </tr> <tr>                 <td class=\"param-name\">name</td>                 <td><p>String</p> </td>                 <td><p>Name of the new binned field to be created</p> </td>             </tr></table></td>\n            </tr></table>"
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable\n const buckets = {\n     start: 30\n     stops: [80, 100, 110]\n };\n const config = { buckets, name: 'binnedHP' }\n const binFn = bin('horsepower', config);\n const binnedDm = binFn(dm);"
+      preamble: ""
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable\n const config = { binCount: 5, name: 'binnedHP' }\n const binFn = bin('horsepower', config);\n const binnedDm = binFn(Dm);"
+      preamble: ""
+    - 
+      type: "code-section"
+      content: "// DataModel already prepared and assigned to dm vairable\n const config = { binSize: 200, name: 'binnedHorsepower' }\n const binnedDm = dataModel.bin('horsepower', config);\n const binnedDm = binFn(Dm);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "<a name=PreparatorFunction></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">PreparatorFunction:</span>Function which expects an instance of DataModel on which the operator needs to be\n     applied."
+    - 
+      type: "markdown-section"
+      content: "groupBy\n\nThis is functional version of `groupBy` operator.Groups the data using particular dimensions and by reducing\nmeasures. It expects a list of dimensions using which it projects the datamodel and perform aggregations to reduce\nthe duplicate tuples. Refer this [document](link_to_one_example_with_group_by) to know the intuition behind\ngroupBy.\n\nDataModel by default provides definition of few [Reducers](reducer).\n[User defined reducers](ReducerStore) can also be registered.\n\nThis is the chained implementation of `groupBy`.\n`groupBy` also supports [composability](link_to_compose_groupBy)"
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">fieldsArr</td>\n                <td><p>Array of string</p> </td>\n                <td><p>Array containing the name of dimensions</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">reducers</td>\n                <td><p>Object</p> </td>\n                <td><p>A map whose key is the variable name and value is the name of the reducer. If its      not passed, or any variable is ommitted from the object, default aggregation function is used from the      schema of the variable.</p> </td>\n            </tr></table>"
+    - 
+      type: "code-section"
+      content: "const groupBy = DataModel.Operators.groupBy;\nconst groupedFn = groupBy(['Year'], { horsepower: 'max' } );\ngroupedDM = groupByFn(dm);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "<a name=PreparatorFunction></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">PreparatorFunction:</span>Function which expects an instance of DataModel on which the operator needs to be\n     applied."
+    - 
+      type: "markdown-section"
+      content: "Operators\n\nEnables composing operators to run multiple operations and save group of operataion as named opration on a DataModel.\nThe resulting DataModel will be the result of all the operation provided. The operations provided will be executed in\na serial manner ie. result of one operation will be the input for the next operations (like pipe operator in unix).\n\nSuported operations in compose are\n- `select`\n- `project`\n- `groupBy`\n- `bin`\n- `compose`"
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">operators</td>\n                <td><p>Array of Operators</p> </td>\n                <td><p>An array of operation that will be applied on the datatable.</p> </td>\n            </tr></table>"
+    - 
+      type: "code-section"
+      content: "const compose = DataModel.Operators.compose;\nconst select = DataModel.Operators.select;\nconst project = DataModel.Operators.project;\n\nlet composedFn = compose(\n   select(fields => fields.netprofit.value <= 15),\n   project(['netprofit', 'netsales']));\n\nconst dataModel = new DataModel(data1, schema1);\n\nlet composedDm = composedFn(dataModel);"
+      preamble: ""
+    - 
+      type: "markdown-section"
+      content: "<a name=DataModel></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">DataModel:</span>Instance of resultant DataModel"

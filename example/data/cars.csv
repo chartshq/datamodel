@@ -1,0 +1,51 @@
+Name,Miles_per_Gallon,Cylinders,Displacement,Horsepower,Weight_in_lbs,Acceleration,Year,Origin
+plymouth fury iii,14,8,440,215,4312,8.5,1970,USA
+pontiac catalina,14,8,455,225,4425,10,1970,USA
+amc ambassador dpl,15,8,390,190,3850,8.5,1970,USA
+citroen ds-21 pallas,null,4,133,115,3090,17.5,1970,Europe
+toyota corona mark ii,24,4,113,95,2372,15,1970,Japan
+datsun pl510,27,4,97,88,2130,14.5,1970,Japan
+volkswagen 1131 deluxe sedan,26,4,97,46,1835,20.5,1970,Europe
+peugeot 504,25,4,110,87,2672,17.5,1970,Europe
+audi 100 ls,24,4,107,90,2430,14.5,1970,Europe
+peugeot 304,30,4,79,70,2074,19.5,1971,Europe
+fiat 124b,30,4,88,76,2065,14.5,1971,Europe
+toyota corolla 1200,31,4,71,65,1773,19,1971,Japan
+datsun 1200,35,4,72,69,1613,18,1971,Japan
+volkswagen model 111,27,4,97,60,1834,19,1971,Europe
+plymouth cricket,26,4,91,70,1955,20.5,1971,USA
+toyota corona hardtop,24,4,113,95,2278,15.5,1972,Japan
+dodge colt hardtop,25,4,97.5,80,2126,17,1972,USA
+chevrolet chevelle concours (sw),13,8,307,130,4098,14,1972,USA
+ford gran torino (sw),13,8,302,140,4294,16,1972,USA
+plymouth satellite custom (sw),14,8,318,150,4077,14,1972,USA
+volvo 145e (sw),18,4,121,112,2933,14.5,1972,Europe
+toyouta corona mark ii (sw),23,4,120,97,2506,14.5,1972,Japan
+dodge colt (sw),28,4,98,80,2164,15,1972,USA
+pontiac lemans v6,21.5,6,231,115,3245,15.4,1979,USA
+mercury zephyr 6,19.8,6,200,85,2990,18.2,1979,USA
+ford fairmont 4,22.3,4,140,88,2890,17.3,1979,USA
+mercury grand marquis,16.5,8,351,138,3955,13.2,1979,USA
+dodge st. regis,18.2,8,318,135,3830,15.2,1979,USA
+buick estate wagon (sw),16.9,8,350,155,4360,14.9,1979,USA
+ford country squire (sw),15.5,8,351,142,4054,14.3,1979,USA
+chevrolet malibu classic (sw),19.2,8,267,125,3605,15,1979,USA
+chrysler lebaron town @ country (sw),18.5,8,360,150,3940,13,1979,USA
+vw rabbit custom,31.9,4,89,71,1925,14,1979,Europe
+maxda glc deluxe,34.1,4,86,65,1975,15.2,1979,Japan
+dodge colt hatchback custom,35.7,4,98,80,1915,14.4,1979,USA
+amc spirit dl,27.4,4,121,80,2670,15,1979,USA
+mercedes benz 300d,25.4,5,183,77,3530,20.1,1979,Europe
+cadillac eldorado,23,8,350,125,3900,17.4,1979,USA
+peugeot 504,27.2,4,141,71,3190,24.8,1979,Europe
+oldsmobile cutlass salon brougham,23.9,8,260,90,3420,22.2,1979,USA
+plymouth horizon,34.2,4,105,70,2200,13.2,1979,USA
+plymouth horizon tc3,34.5,4,105,70,2150,14.9,1979,USA
+datsun 210,31.8,4,85,65,2020,19.2,1979,Japan
+amc concord dl,23,4,151,null,3035,20.5,1982,USA
+volkswagen rabbit l,36,4,105,74,1980,15.3,1982,Europe
+mazda glc custom l,37,4,91,68,2025,18.2,1982,Japan
+mazda glc custom,31,4,91,68,1970,17.6,1982,Japan
+nissan stanza xe,36,4,120,88,2160,14.5,1982,Japan
+honda Accelerationord,36,4,107,75,2205,14.5,1982,Japan
+toyota corolla,34,4,108,70,2245,16.9,1982,Japan
