@@ -215,7 +215,11 @@ export const propagateIdentifiers = (dataModel, propModel, config = {}, nonTrave
         propagateIdentifiers(targetDM, propagationData, config, nonTraversingModel, hasGrouped);
     };
 
-    dataModel !== nonTraversingModel && dataModel.handlePropagation({
+    if (dataModel === nonTraversingModel) {
+        return;
+    }
+
+    dataModel.handlePropagation({
         payload: config.payload,
         data: propModel,
         sourceIdentifiers: config.sourceIdentifiers,
