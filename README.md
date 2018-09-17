@@ -145,7 +145,7 @@ Find detailed documentation and API reference from [here](https://www.charts.com
 
 Your PRs and stars are always welcome.
 
-Checkout the [CONTRIBUTING](https://github.com/chartshq/datamodel/CONTRIBUTING.md) guides.
+Checkout the [CONTRIBUTING](https://github.com/chartshq/datamodel/blob/master/CONTRIBUTING.md) guides.
 
 ## License
 
