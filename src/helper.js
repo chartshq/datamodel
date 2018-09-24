@@ -333,8 +333,9 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
                 if (actionConf.applyOnSource === false && actionConf.action === config.action &&
                         actionConf.sourceId !== propagationSourceId) {
                     excludeModels.push(actionInf.model);
-                    criterias.push({
-                        criteria: sourceActionCriterias.filter(d => d !== actionInf).map(d => d.config.criteria),
+                    criteria = sourceActionCriterias.filter(d => d !== actionInf).map(d => d.config.criteria);
+                    criteria.length && criterias.push({
+                        criteria,
                         models: actionInf.model,
                         path: getPathToRootModel(actionInf.model)
                     });
@@ -374,8 +375,7 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
             inf.models.handlePropagation(filteredModel, propConfig);
         } else {
             propagateIdentifiers(rootModel, propagationModel, propConfig, {
-                models: inf.models,
-                type: inf.type,
+                excludeModels: inf.excludeModels,
                 nonTraversingModel: propagateInterpolatedValues && rootGroupByModel
             });
         }
