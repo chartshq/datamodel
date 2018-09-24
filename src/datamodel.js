@@ -6,7 +6,8 @@ import {
     getRootGroupByModel,
     propagateToAllDataModels,
     getRootDataModel,
-    propagateImmutableActions
+    propagateImmutableActions,
+    addToPropNamespace
 } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {
@@ -393,9 +394,10 @@ class DataModel extends Relation {
      *
      * @return {DataModel} DataModel instance.
      */
-    propagate (identifiers, payload, config = {}) {
+    propagate (identifiers, config = {}, addToNameSpace) {
         const isMutableAction = config.isMutableAction;
         const propagationSourceId = config.sourceId;
+        const payload = config.payload;
         const rootModel = getRootDataModel(this);
         const propagationNameSpace = rootModel._propagationNameSpace;
         const rootGroupByModel = getRootGroupByModel(this);
@@ -403,47 +405,19 @@ class DataModel extends Relation {
             groupByModel: rootGroupByModel,
             model: rootModel
         };
-
-        propagateToAllDataModels(identifiers, rootModels, {
-            propagationNameSpace,
-            payload,
-            propagationSourceId
-        });
-
-        if (isMutableAction) {
-            propagateImmutableActions(propagationNameSpace, rootModels, propagationSourceId);
-        }
-        return this;
-    }
-
-    addToPropNamespace (sourceId, config = {}) {
-        let sourceNamespace;
-        const actionName = config.actionName;
-        const payload = config.payload;
-        const isMutableAction = config.isMutableAction;
-        const rootModel = getRootDataModel(this);
-        const propagationNameSpace = rootModel._propagationNameSpace;
-        const criteria = config.criteria;
-
-        if (isMutableAction) {
-            !propagationNameSpace.mutableActions[sourceId] && (propagationNameSpace.mutableActions[sourceId] = {});
-            sourceNamespace = propagationNameSpace.mutableActions[sourceId];
-        } else {
-            !propagationNameSpace.immutableActions[sourceId] && (propagationNameSpace.immutableActions[sourceId] = {});
-            sourceNamespace = propagationNameSpace.immutableActions[sourceId];
-        }
-
-        if (criteria === null) {
-            delete sourceNamespace[actionName];
-        } else {
-            sourceNamespace[actionName] = {
-                criteria,
+        addToNameSpace && addToPropNamespace(propagationNameSpace, config, this);
+        propagateToAllDataModels(identifiers, rootModels, { propagationNameSpace, sourceId: propagationSourceId },
+            Object.assign({
                 payload
-            };
+            }, config));
+
+        if (isMutableAction) {
+            propagateImmutableActions(propagationNameSpace, rootModels, propagationSourceId, this);
         }
 
         return this;
     }
+
 
     /**
      * Associates a callback with an event name.
@@ -484,9 +458,9 @@ class DataModel extends Relation {
      * @param {DataModel} identifiers The propagated DataModel.
      * @memberof DataModel
      */
-    handlePropagation (payload) {
+    handlePropagation (propModel, payload) {
         let propListeners = this._onPropagation;
-        propListeners.forEach(fn => fn.call(this, payload));
+        propListeners.forEach(fn => fn.call(this, propModel, payload));
     }
 
     /**
