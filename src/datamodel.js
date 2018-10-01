@@ -394,7 +394,7 @@ class DataModel extends Relation {
      *
      * @return {DataModel} DataModel instance.
      */
-    propagate (identifiers, config = {}, addToNameSpace) {
+    propagate (identifiers, config = {}, addToNameSpace, propConfig = {}) {
         const isMutableAction = config.isMutableAction;
         const propagationSourceId = config.sourceId;
         const payload = config.payload;
@@ -405,6 +405,7 @@ class DataModel extends Relation {
             groupByModel: rootGroupByModel,
             model: rootModel
         };
+
         addToNameSpace && addToPropNamespace(propagationNameSpace, config, this);
         propagateToAllDataModels(identifiers, rootModels, { propagationNameSpace, sourceId: propagationSourceId },
             Object.assign({
@@ -412,12 +413,14 @@ class DataModel extends Relation {
             }, config));
 
         if (isMutableAction) {
-            propagateImmutableActions(propagationNameSpace, rootModels, propagationSourceId, this);
+            propagateImmutableActions(propagationNameSpace, rootModels, {
+                config,
+                propConfig
+            }, this);
         }
 
         return this;
     }
-
 
     /**
      * Associates a callback with an event name.

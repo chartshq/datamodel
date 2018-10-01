@@ -382,13 +382,16 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
     });
 };
 
-export const propagateImmutableActions = (propagationNameSpace, rootModels, propagationSourceId) => {
+export const propagateImmutableActions = (propagationNameSpace, rootModels, propagationInf) => {
     const immutableActions = propagationNameSpace.immutableActions;
 
     for (const action in immutableActions) {
         const actionInf = immutableActions[action];
         const actionConf = actionInf.config;
-        if (actionConf.sourceId !== propagationSourceId) {
+        const propagationSourceId = propagationInf.config.sourceId;
+        const filterImmutableAction = propagationInf.propConfig.filterImmutableAction ?
+            propagationInf.propConfig.filterImmutableAction(actionConf, propagationInf.config) : true;
+        if (actionConf.sourceId !== propagationSourceId && filterImmutableAction) {
             const criteriaModel = actionConf.criteria;
             propagateToAllDataModels(criteriaModel, rootModels, {
                 propagationNameSpace,
