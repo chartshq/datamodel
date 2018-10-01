@@ -3,11 +3,7 @@ import Field from './fields/field';
 import fieldStore from './field-store';
 import Value from './value';
 import {
-    rowDiffsetIterator,
-    groupByIterator,
-    projectIterator,
-    selectIterator,
-    calculatedVariableIterator
+    rowDiffsetIterator
 } from './operator';
 import { DM_DERIVATIVES, LOGICAL_OPERATORS } from './constants';
 import createFields from './field-creator';
@@ -82,7 +78,7 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
     const operation = config.operation || LOGICAL_OPERATORS.AND;
     const filterByMeasure = config.filterByMeasure || false;
     let fns = [];
-    if (propModels === null) {
+    if (!propModels.length) {
         fns = [() => false];
     } else {
         fns = propModels.map(propModel => ((dataModel) => {
@@ -209,81 +205,74 @@ export const fieldInSchema = (schema, field) => {
     return null;
 };
 
-export const propagateIdentifiers = (dataModel, propModel, config = {}, nonTraversingModel, grouped) => {
-    // function to propagate to target the DataModel instance.
-    const forwardPropagation = (targetDM, propagationData, hasGrouped) => {
-        propagateIdentifiers(targetDM, propagationData, config, nonTraversingModel, hasGrouped);
+
+export const getOperationArguments = (child) => {
+    const derivation = child._derivation;
+    let params = [];
+    let operation;
+    if (derivation && derivation.length === 1) {
+        operation = derivation[0].op;
+        switch (operation) {
+        case DM_DERIVATIVES.SELECT:
+            params = [derivation[0].criteria];
+            break;
+        case DM_DERIVATIVES.PROJECT:
+            params = [derivation[0].meta.actualProjField];
+            break;
+        case DM_DERIVATIVES.GROUPBY:
+            operation = 'groupBy';
+            params = [derivation[0].meta.groupByString.split(','), derivation[0].criteria];
+            break;
+        default:
+            break;
+        }
+    }
+
+    return {
+        operation,
+        params
     };
+};
+
+const applyExistingOperationOnModel = (propModel, dataModel) => {
+    const { operation, params } = getOperationArguments(dataModel);
+    let selectionModel = propModel[0];
+    let rejectionModel = propModel[1];
+    if (operation && params.length) {
+        selectionModel = propModel[0][operation](...params, {
+            saveChild: false
+        });
+        rejectionModel = propModel[1][operation](...params, {
+            saveChild: false
+        });
+    }
+    return [selectionModel, rejectionModel];
+};
+
+const getFilteredModel = (propModel, path) => {
+    for (let i = 0, len = path.length; i < len; i++) {
+        const model = path[i];
+        propModel = applyExistingOperationOnModel(propModel, model);
+    }
+    return propModel;
+};
+
+const propagateIdentifiers = (dataModel, propModel, config = {}, propModelInf = {}) => {
+    const nonTraversingModel = propModelInf.nonTraversingModel;
+    const excludeModels = propModelInf.excludeModels || [];
 
     if (dataModel === nonTraversingModel) {
         return;
     }
 
-    dataModel.handlePropagation({
-        payload: config.payload,
-        data: propModel,
-        sourceIdentifiers: config.sourceIdentifiers,
-        sourceId: config.propagationSourceId,
-        groupedPropModel: !!grouped
-    });
+    const propagate = excludeModels.length ? excludeModels.indexOf(dataModel) === -1 : true;
 
-    // propagate to children created by SELECT operation
-    selectIterator(dataModel, (targetDM, criteria) => {
-        if (targetDM !== nonTraversingModel) {
-            const selectionModel = propModel[0].select(criteria, {
-                saveChild: false
-            });
-            const rejectionModel = propModel[1].select(criteria, {
-                saveChild: false
-            });
+    propagate && dataModel.handlePropagation(propModel, config);
 
-            forwardPropagation(targetDM, [selectionModel, rejectionModel], grouped);
-        }
-    });
-    // propagate to children created by PROJECT operation
-    projectIterator(dataModel, (targetDM, projField) => {
-        if (targetDM !== nonTraversingModel) {
-            const projModel = propModel[0].project(projField, {
-                saveChild: false
-            });
-            const rejectionProjModel = propModel[1].project(projField, {
-                saveChild: false
-            });
-
-            forwardPropagation(targetDM, [projModel, rejectionProjModel], grouped);
-        }
-    });
-
-    // propagate to children created by groupBy operation
-    groupByIterator(dataModel, (targetDM, conf) => {
-        if (targetDM !== nonTraversingModel) {
-            const {
-                    reducer,
-                    groupByString
-                } = conf;
-                // group the filtered model based on groupBy string of target
-            const selectionGroupedModel = propModel[0].groupBy(groupByString.split(','), reducer, {
-                saveChild: false
-            });
-            const rejectionGroupedModel = propModel[1].groupBy(groupByString.split(','), reducer, {
-                saveChild: false
-            });
-            forwardPropagation(targetDM, [selectionGroupedModel, rejectionGroupedModel], true);
-        }
-    });
-
-    calculatedVariableIterator(dataModel, (targetDM, ...params) => {
-        if (targetDM !== nonTraversingModel) {
-            const entryModel = propModel[0].clone(false, false).calculateVariable(...params, {
-                saveChild: false,
-                replaceVar: true
-            });
-            const exitModel = propModel[1].clone(false, false).calculateVariable(...params, {
-                saveChild: false,
-                replaceVar: true
-            });
-            forwardPropagation(targetDM, [entryModel, exitModel], grouped);
-        }
+    const children = dataModel._children;
+    children.forEach((child) => {
+        let [selectionModel, rejectionModel] = applyExistingOperationOnModel(propModel, child);
+        propagateIdentifiers(child, [selectionModel, rejectionModel], config, propModelInf);
     });
 };
 
@@ -301,59 +290,138 @@ export const getRootDataModel = (model) => {
     return model;
 };
 
-export const propagateToAllDataModels = (identifiers, rootModels, config) => {
+export const getPathToRootModel = (model, path = []) => {
+    if (model._parent !== null) {
+        path.push(model);
+        getPathToRootModel(model._parent, path);
+    }
+    return path;
+};
+
+export const propagateToAllDataModels = (identifiers, rootModels, propagationInf, config) => {
     let criteria;
     let propModel;
-    const propagationNameSpace = config.propagationNameSpace;
-    const payload = config.payload;
-    const propagationSourceId = config.propagationSourceId;
-
-    if (identifiers === null) {
-        criteria = null;
-    } else {
-        const filteredCriteria = Object.entries(propagationNameSpace.mutableActions)
-            .filter(d => d[0] !== propagationSourceId)
-            .map(d => Object.values(d[1]).map(action => action.criteria));
-        criteria = [].concat(...[...filteredCriteria, identifiers]);
-    }
-
-    const rootGroupByModel = rootModels.groupByModel;
-    const rootModel = rootModels.model;
-    const propConfig = {
-        payload,
-        propagationSourceId,
-        sourceIdentifiers: identifiers
+    const { propagationNameSpace, propagateToSource } = propagationInf;
+    const propagationSourceId = propagationInf.sourceId;
+    const propagateInterpolatedValues = config.propagateInterpolatedValues;
+    const filterFn = (entry) => {
+        const filter = config.filterFn || (() => true);
+        return filter(entry, config);
     };
 
-    if (rootGroupByModel) {
+    let criterias = [];
+
+    if (identifiers === null && config.persistent !== true) {
+        criterias = [{
+            criteria: []
+        }];
+    } else {
+        let actionCriterias = Object.values(propagationNameSpace.mutableActions);
+        if (propagateToSource !== false) {
+            actionCriterias = actionCriterias.filter(d => d.config.sourceId !== propagationSourceId);
+        }
+
+        const filteredCriteria = actionCriterias.filter(filterFn).map(action => action.config.criteria);
+
+        const excludeModels = [];
+
+        if (propagateToSource !== false) {
+            const sourceActionCriterias = Object.values(propagationNameSpace.mutableActions);
+
+            sourceActionCriterias.forEach((actionInf) => {
+                const actionConf = actionInf.config;
+                if (actionConf.applyOnSource === false && actionConf.action === config.action &&
+                        actionConf.sourceId !== propagationSourceId) {
+                    excludeModels.push(actionInf.model);
+                    criteria = sourceActionCriterias.filter(d => d !== actionInf).map(d => d.config.criteria);
+                    criteria.length && criterias.push({
+                        criteria,
+                        models: actionInf.model,
+                        path: getPathToRootModel(actionInf.model)
+                    });
+                }
+            });
+        }
+
+
+        criteria = [].concat(...[...filteredCriteria, identifiers]).filter(d => d !== null);
+        criterias.push({
+            criteria,
+            excludeModels: [...excludeModels, ...config.excludeModels || []]
+        });
+    }
+
+    const rootModel = rootModels.model;
+
+    const propConfig = Object.assign({
+        sourceIdentifiers: identifiers,
+        propagationSourceId
+    }, config);
+
+    const rootGroupByModel = rootModels.groupByModel;
+    if (propagateInterpolatedValues && rootGroupByModel) {
         propModel = filterPropagationModel(rootGroupByModel, criteria, {
-            filterByMeasure: true
+            filterByMeasure: propagateInterpolatedValues
         });
         propagateIdentifiers(rootGroupByModel, propModel, propConfig);
     }
 
-    propModel = filterPropagationModel(rootModel, criteria, {
-        filterByMeasure: !rootGroupByModel
-    });
-    propagateIdentifiers(rootModel, propModel, propConfig, rootGroupByModel);
-};
+    criterias.forEach((inf) => {
+        const propagationModel = filterPropagationModel(rootModel, inf.criteria);
+        const path = inf.path;
 
-export const propagateImmutableActions = (propagationNameSpace, rootModels, propagationSourceId) => {
-    const rootGroupByModel = rootModels.groupByModel;
-    const rootModel = rootModels.model;
-    const immutableActions = propagationNameSpace.immutableActions;
-    for (const sourceId in immutableActions) {
-        const actions = immutableActions[sourceId];
-        for (const action in actions) {
-            const criteriaModel = actions[action].criteria;
-            propagateToAllDataModels(criteriaModel, {
-                groupByModel: rootGroupByModel,
-                model: rootModel
-            }, {
-                propagationNameSpace,
-                payload: actions[action].payload,
-                propagationSourceId
+        if (path) {
+            const filteredModel = getFilteredModel(propagationModel, path.reverse());
+            inf.models.handlePropagation(filteredModel, propConfig);
+        } else {
+            propagateIdentifiers(rootModel, propagationModel, propConfig, {
+                excludeModels: inf.excludeModels,
+                nonTraversingModel: propagateInterpolatedValues && rootGroupByModel
             });
         }
+    });
+};
+
+export const propagateImmutableActions = (propagationNameSpace, rootModels, propagationInf) => {
+    const immutableActions = propagationNameSpace.immutableActions;
+
+    for (const action in immutableActions) {
+        const actionInf = immutableActions[action];
+        const actionConf = actionInf.config;
+        const propagationSourceId = propagationInf.config.sourceId;
+        const filterImmutableAction = propagationInf.propConfig.filterImmutableAction ?
+            propagationInf.propConfig.filterImmutableAction(actionConf, propagationInf.config) : true;
+        if (actionConf.sourceId !== propagationSourceId && filterImmutableAction) {
+            const criteriaModel = actionConf.criteria;
+            propagateToAllDataModels(criteriaModel, rootModels, {
+                propagationNameSpace,
+                propagateToSource: false,
+                sourceId: propagationSourceId
+            }, actionConf);
+        }
     }
+};
+
+export const addToPropNamespace = (propagationNameSpace, config = {}, model) => {
+    let sourceNamespace;
+    const isMutableAction = config.isMutableAction;
+    const criteria = config.criteria;
+    const key = `${config.action}-${config.sourceId}`;
+
+    if (isMutableAction) {
+        sourceNamespace = propagationNameSpace.mutableActions;
+    } else {
+        sourceNamespace = propagationNameSpace.immutableActions;
+    }
+
+    if (criteria === null) {
+        delete sourceNamespace[key];
+    } else {
+        sourceNamespace[key] = {
+            model,
+            config
+        };
+    }
+
+    return this;
 };
