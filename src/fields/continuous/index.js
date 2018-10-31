@@ -32,8 +32,7 @@ export default class Continuous extends Measure {
         let min = Number.POSITIVE_INFINITY;
         let max = Number.NEGATIVE_INFINITY;
 
-        // here don't use this.data() as the iteration will be
-        // occurred two times on same data.
+        // here don't use this.data() as the iteration will be occurred two times on same data.
         rowDiffsetIterator(this.rowDiffset, (i) => {
             const datum = this.partialField.data[i];
             if (datum < min) {

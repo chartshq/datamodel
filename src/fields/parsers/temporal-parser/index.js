@@ -18,6 +18,7 @@ export default class TemporalParser extends FieldParser {
     constructor (schema) {
         super();
         this.schema = schema;
+        this._dtf = null;
     }
 
     /**

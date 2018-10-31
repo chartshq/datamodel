@@ -32,8 +32,7 @@ export default class Categorical extends Dimension {
         const hash = new Set();
         const domain = [];
 
-        // here don't use this.data() as the iteration will be
-        // occurred two times on same data.
+        // here don't use this.data() as the iteration will be occurred two times on same data.
         rowDiffsetIterator(this.rowDiffset, (i) => {
             const datum = this.partialField.data[i];
             if (!hash.has(datum)) {

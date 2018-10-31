@@ -45,8 +45,7 @@ export default class Temporal extends Dimension {
         let prevDatum;
         let minDiff = Number.POSITIVE_INFINITY;
 
-        // here don't use this.data() as the iteration will be
-        // occurred two times on same data.
+        // here don't use this.data() as the iteration will be occurred two times on same data.
         rowDiffsetIterator(this.rowDiffset, (i) => {
             const datum = this.partialField.data[i];
             if (!currIdx++) {
