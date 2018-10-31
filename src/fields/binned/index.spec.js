@@ -36,7 +36,7 @@ describe('Binned', () => {
 
     describe('#bins', () => {
         it('should return the bins config array', () => {
-            expect(binField.bins).to.eql(schema.bins);
+            expect(binField.bins()).to.eql(schema.bins);
         });
     });
 });

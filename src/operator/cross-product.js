@@ -37,14 +37,14 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
     }
     // Here prepare the schema
     dm1FieldStore.fields.forEach((field) => {
-        const tmpSchema = extend2({}, field.schema);
+        const tmpSchema = extend2({}, field.schema());
         if (commonSchemaList.indexOf(tmpSchema.name) !== -1 && !replaceCommonSchema) {
             tmpSchema.name = `${dm1FieldStore.name}.${tmpSchema.name}`;
         }
         schema.push(tmpSchema);
     });
     dm2FieldStore.fields.forEach((field) => {
-        const tmpSchema = extend2({}, field.schema);
+        const tmpSchema = extend2({}, field.schema());
         if (commonSchemaList.indexOf(tmpSchema.name) !== -1) {
             if (!replaceCommonSchema) {
                 tmpSchema.name = `${dm2FieldStore.name}.${tmpSchema.name}`;
@@ -66,13 +66,13 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
             userArg[dm2FieldStoreName] = {};
             dm1FieldStore.fields.forEach((field) => {
                 tuple.push(field.partialField.data[i]);
-                userArg[dm1FieldStoreName][field.name] = field.partialField.data[i];
+                userArg[dm1FieldStoreName][field.name()] = field.partialField.data[i];
             });
             dm2FieldStore.fields.forEach((field) => {
-                if (!(commonSchemaList.indexOf(field.schema.name) !== -1 && replaceCommonSchema)) {
+                if (!(commonSchemaList.indexOf(field.schema().name) !== -1 && replaceCommonSchema)) {
                     tuple.push(field.partialField.data[ii]);
                 }
-                userArg[dm2FieldStoreName][field.name] = field.partialField.data[ii];
+                userArg[dm2FieldStoreName][field.name()] = field.partialField.data[ii];
             });
             const dm1Fields = prepareJoinData(userArg[dm1FieldStoreName]);
             const dm2Fields = prepareJoinData(userArg[dm2FieldStoreName]);

@@ -21,12 +21,12 @@ export default class Binned extends Dimension {
     }
 
     /**
-     * The bins config provided while creating the field instance.
+     * Returns the bins config provided while creating the field instance.
      *
      * @public
      * @return {Array} Returns the bins array config.
      */
-    get bins () {
+    bins () {
         return this.partialField.schema.bins;
     }
 }

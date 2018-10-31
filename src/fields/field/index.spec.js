@@ -45,37 +45,37 @@ describe('Field', () => {
 
     describe('#schema', () => {
         it('should return the field schema', () => {
-            expect(field.schema).to.eql(schema);
+            expect(field.schema()).to.eql(schema);
         });
     });
 
     describe('#name', () => {
         it('should return the field name', () => {
-            expect(field.name).to.equal(schema.name);
+            expect(field.name()).to.equal(schema.name);
         });
     });
 
     describe('#type', () => {
         it('should return the field type', () => {
-            expect(field.type).to.equal(schema.type);
+            expect(field.type()).to.equal(schema.type);
         });
     });
 
     describe('#subtype', () => {
         it('should return the field subtype', () => {
-            expect(field.subtype).to.equal(schema.subtype);
+            expect(field.subtype()).to.equal(schema.subtype);
         });
     });
 
     describe('#description', () => {
         it('should return the field description', () => {
-            expect(field.description).to.equal(schema.description);
+            expect(field.description()).to.equal(schema.description);
         });
     });
 
     describe('#displayName', () => {
         it('should return the field displayName', () => {
-            expect(field.displayName).to.equal(schema.displayName);
+            expect(field.displayName()).to.equal(schema.displayName);
         });
 
         it('should return the field name, if displayName is not present', () => {
@@ -85,7 +85,7 @@ describe('Field', () => {
             rowDiffset = '1-2,4';
             field = new Field(partField, rowDiffset);
 
-            expect(field.displayName).to.equal(newSchema.name);
+            expect(field.displayName()).to.equal(newSchema.name);
         });
     });
 

@@ -28,7 +28,7 @@ describe('Categorical', () => {
 
     describe('#subtype', () => {
         it('should return the correct subtype', () => {
-            expect(catField.subtype).to.equal(schema.subtype);
+            expect(catField.subtype()).to.equal(schema.subtype);
         });
     });
 

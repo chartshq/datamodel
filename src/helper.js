@@ -15,7 +15,7 @@ import * as converter from './converter';
 function prepareSelectionData (fields, i) {
     const resp = {};
     for (let field of fields) {
-        resp[field.name] = new Value(field.partialField.data[i], field);
+        resp[field.name()] = new Value(field.partialField.data[i], field);
     }
     return resp;
 }

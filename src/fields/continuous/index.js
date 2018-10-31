@@ -11,13 +11,13 @@ import Measure from '../measure';
  */
 export default class Continuous extends Measure {
     /**
-     * The subtype of the field.
+     * Returns the subtype of the field.
      *
      * @public
      * @override
      * @return {string} Returns the subtype of the field.
      */
-    get subtype () {
+    subtype () {
         return MeasureSubtype.CONTINUOUS;
     }
 

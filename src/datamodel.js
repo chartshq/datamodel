@@ -136,7 +136,7 @@ class DataModel extends Relation {
             this,
             this.getPartialFieldspace().fields,
             this._rowDiffset,
-            options.getAllFields ? fields.map(d => d.name).join() : this._colIdentifier,
+            options.getAllFields ? fields.map(d => d.name()).join() : this._colIdentifier,
             options.sort,
             {
                 columnWise: options.order === 'column',
@@ -301,14 +301,14 @@ class DataModel extends Relation {
     }
 
     addField (field) {
-        const fieldName = field.name;
+        const fieldName = field.name();
         this._colIdentifier += `,${fieldName}`;
         const partialFieldspace = this._partialFieldspace;
 
-        if (!partialFieldspace.fieldsObj()[field.name]) {
+        if (!partialFieldspace.fieldsObj()[field.name()]) {
             partialFieldspace.fields.push(field);
         } else {
-            const fieldIndex = partialFieldspace.fields.findIndex(fieldinst => fieldinst.name === fieldName);
+            const fieldIndex = partialFieldspace.fields.findIndex(fieldinst => fieldinst.name() === fieldName);
             fieldIndex >= 0 && (partialFieldspace.fields[fieldIndex] = field);
         }
 
@@ -522,7 +522,7 @@ class DataModel extends Relation {
         if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[dimensionName]) {
             throw new Error(`Field ${dimensionName} already exists.`);
         }
-        const field = this._partialFieldspace.fields.find(currfield => currfield.name === dimensionName);
+        const field = this._partialFieldspace.fields.find(currfield => currfield.name() === dimensionName);
         const dataSet = createBinnedFieldData(field, this._rowDiffset, config);
         const binField = createFields([dataSet.data], [
             {

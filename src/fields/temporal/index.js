@@ -66,12 +66,12 @@ export default class Temporal extends Dimension {
     }
 
     /**
-     * The format specified in the input schema while creating field.
+     * Returns the format specified in the input schema while creating field.
      *
      * @public
      * @return {string} Returns the datetime format.
      */
-    get format () {
+    format () {
         return this.partialField.schema.format;
     }
 }

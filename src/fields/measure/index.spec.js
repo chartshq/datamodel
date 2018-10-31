@@ -52,13 +52,13 @@ describe('Measure', () => {
 
     describe('#unit', () => {
         it('should return the field unit', () => {
-            expect(measField.unit).to.equal(schema.unit);
+            expect(measField.unit()).to.equal(schema.unit);
         });
     });
 
     describe('#defAggFn', () => {
         it('should return the field aggregation function name', () => {
-            expect(measField.defAggFn).to.equal(schema.defAggFn);
+            expect(measField.defAggFn()).to.equal(schema.defAggFn);
         });
 
         it('should return the default aggregation function, if it is not given', () => {
@@ -67,13 +67,13 @@ describe('Measure', () => {
             partField = new PartialField(newSchema.name, data, newSchema, contParser);
             rowDiffset = '0-8';
             measField = new Measure(partField, rowDiffset);
-            expect(measField.defAggFn).to.equal(defaultReducerName);
+            expect(measField.defAggFn()).to.equal(defaultReducerName);
         });
     });
 
     describe('#numberFormat', () => {
         it('should return the field numberFormat function', () => {
-            expect(measField.numberFormat).to.equal(schema.numberFormat);
+            expect(measField.numberFormat()).to.equal(schema.numberFormat);
         });
 
         it('should return the default numberFormat function, if it is not given', () => {
@@ -82,7 +82,7 @@ describe('Measure', () => {
             partField = new PartialField(newSchema.name, data, newSchema, contParser);
             rowDiffset = '0-8';
             measField = new Measure(partField, rowDiffset);
-            expect(measField.numberFormat).to.equal(formatNumber);
+            expect(measField.numberFormat()).to.equal(formatNumber);
         });
     });
 

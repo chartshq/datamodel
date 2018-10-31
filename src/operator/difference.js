@@ -31,8 +31,8 @@ export function difference (dm1, dm2) {
     // Prepare the schema
     (dm1._colIdentifier.split(',')).forEach((fieldName) => {
         const field = dm1FieldStoreFieldObj[fieldName];
-        schema.push(extend2({}, field.schema));
-        schemaNameArr.push(field.schema.name);
+        schema.push(extend2({}, field.schema()));
+        schemaNameArr.push(field.schema().name);
     });
 
     /**

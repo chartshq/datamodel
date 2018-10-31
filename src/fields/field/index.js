@@ -43,62 +43,62 @@ export default class Field {
     }
 
     /**
-     * The the field schema.
+     * Returns the the field schema.
      *
      * @public
      * @return {string} Returns the field schema.
      */
-    get schema () {
+    schema () {
         return this.partialField.schema;
     }
 
     /**
-     * The name of the field.
+     * Returns the name of the field.
      *
      * @public
      * @return {string} Returns the name of the field.
      */
-    get name () {
+    name () {
         return this.partialField.name;
     }
 
     /**
-     * The type of the field.
+     * Returns the type of the field.
      *
      * @public
      * @return {string} Returns the type of the field.
      */
-    get type () {
+    type () {
         return this.partialField.schema.type;
     }
 
     /**
-     * The subtype of the field.
+     * Returns the subtype of the field.
      *
      * @public
      * @return {string} Returns the subtype of the field.
      */
-    get subtype () {
+    subtype () {
         return this.partialField.schema.subtype;
     }
 
     /**
-     * The description of the field.
+     * Returns the description of the field.
      *
      * @public
      * @return {string} Returns the description of the field.
      */
-    get description () {
+    description () {
         return this.partialField.schema.description;
     }
 
     /**
-     * The display name of the field.
+     * Returns the display name of the field.
      *
      * @public
      * @return {string} Returns the display name of the field.
      */
-    get displayName () {
+    displayName () {
         return this.partialField.schema.displayName || this.partialField.schema.name;
     }
 

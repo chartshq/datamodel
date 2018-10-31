@@ -25,32 +25,32 @@ export default class Measure extends Field {
     }
 
   /**
-   * The unit of the measure field.
+   * Returns the unit of the measure field.
    *
    * @public
    * @return {string} Returns unit of the field.
    */
-    get unit() {
+    unit() {
         return this.partialField.schema.unit;
     }
 
   /**
-   * The aggregation function name of the measure field.
+   * Returns the aggregation function name of the measure field.
    *
    * @public
    * @return {string} Returns aggregation function name of the field.
    */
-    get defAggFn() {
+    defAggFn() {
         return this.partialField.schema.defAggFn || defaultReducerName;
     }
 
   /**
-   * The number format of the measure field.
+   * Returns the number format of the measure field.
    *
    * @public
    * @return {Function} Returns number format of the field.
    */
-    get numberFormat() {
+    numberFormat() {
         const { numberFormat } = this.partialField.schema;
         return numberFormat instanceof Function ? numberFormat : formatNumber;
     }

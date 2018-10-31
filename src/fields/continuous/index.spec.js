@@ -28,7 +28,7 @@ describe('Continuous', () => {
 
     describe('#subtype', () => {
         it('should return the correct subtype', () => {
-            expect(contField.subtype).to.equal(schema.subtype);
+            expect(contField.subtype()).to.equal(schema.subtype);
         });
     });
 

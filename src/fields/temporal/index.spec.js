@@ -53,7 +53,7 @@ describe('Temporal', () => {
 
     describe('#format', () => {
         it('should return the field datetime format', () => {
-            expect(tempField.format).to.equal(schema.format);
+            expect(tempField.format()).to.equal(schema.format);
         });
     });
 });

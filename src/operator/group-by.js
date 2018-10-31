@@ -64,7 +64,7 @@ function getReducerObj (dataModel, reducers = {}) {
         if (typeof reducers[key] !== 'function') {
             pReducers[key] = undefined;
         }
-        retObj[key] = pReducers[key] || reducerStore.resolve(measures[key].defAggFn) || reducer;
+        retObj[key] = pReducers[key] || reducerStore.resolve(measures[key].defAggFn()) || reducer;
     });
     return retObj;
 }
@@ -93,10 +93,10 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     // Prepare the schema
     Object.entries(fieldStoreObj).forEach(([key, value]) => {
         if (sFieldArr.indexOf(key) !== -1 || reducerObj[key]) {
-            schema.push(extend2({}, value.schema));
-            if (value.schema.type === FieldType.MEASURE) {
+            schema.push(extend2({}, value.schema()));
+            if (value.schema().type === FieldType.MEASURE) {
                 measureArr.push(key);
-            } else if (value.schema.type === FieldType.DIMENSION) {
+            } else if (value.schema().type === FieldType.DIMENSION) {
                 dimensionArr.push(key);
             }
         }
