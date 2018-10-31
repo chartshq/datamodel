@@ -2,7 +2,7 @@ import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import DataModel from '../export';
 import reducerStore from '../utils/reducer-store';
-import { FieldType, MeasureSubtype } from '../enums';
+import { FieldType } from '../enums';
 
 /**
  * This function sanitize the user given field and return a common Array structure field
@@ -15,7 +15,7 @@ function getFieldArr (dataModel, fieldArr) {
     const retArr = [];
     const fieldStore = dataModel.getPartialFieldspace();
     const dimensions = fieldStore.getDimension();
-    const measures = fieldStore.getMeasure();
+    // const measures = fieldStore.getMeasure();
 
     Object.entries(dimensions).forEach(([key]) => {
         if (fieldArr && fieldArr.length) {
@@ -27,17 +27,17 @@ function getFieldArr (dataModel, fieldArr) {
         }
     });
 
-    Object.entries(measures).forEach(([key]) => {
-        if (measures[key].subtype === MeasureSubtype.DISCRETE) {
-            if (fieldArr && fieldArr.length) {
-                if (fieldArr.indexOf(key) !== -1) {
-                    retArr.push(key);
-                }
-            } else {
-                retArr.push(key);
-            }
-        }
-    });
+    // Object.entries(measures).forEach(([key]) => {
+    //     if (measures[key].subtype === MeasureSubtype.DISCRETE) {
+    //         if (fieldArr && fieldArr.length) {
+    //             if (fieldArr.indexOf(key) !== -1) {
+    //                 retArr.push(key);
+    //             }
+    //         } else {
+    //             retArr.push(key);
+    //         }
+    //     }
+    // });
     return retArr;
 }
 
@@ -94,9 +94,9 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     Object.entries(fieldStoreObj).forEach(([key, value]) => {
         if (sFieldArr.indexOf(key) !== -1 || reducerObj[key]) {
             schema.push(extend2({}, value.schema));
-            if (value.schema.type === FieldType.MEASURE && value.schema.subtype !== MeasureSubtype.DISCRETE) {
+            if (value.schema.type === FieldType.MEASURE) {
                 measureArr.push(key);
-            } else if (value.schema.type === FieldType.DIMENSION || value.schema.subtype === MeasureSubtype.DISCRETE) {
+            } else if (value.schema.type === FieldType.DIMENSION) {
                 dimensionArr.push(key);
             }
         }

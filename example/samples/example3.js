@@ -1,58 +1,62 @@
-// const DataModel = window.DataModel;
+const DataModel = window.DataModel;
 
-// const schema = [
-//     {
-//         name: 'name',
-//         type: 'dimension'
-//     },
-//     {
-//         name: 'birthday',
-//         type: 'dimension',
-//         subtype: 'temporal',
-//         format: '%Y-%m-%d'
-//     },
-//     {
-//         name: 'roll',
-//         type: 'measure'
-//     }
-// ];
+const schema = [
+    {
+        name: 'name',
+        type: 'dimension'
+    },
+    {
+        name: 'birthday',
+        type: 'dimension',
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
+    },
+    {
+        name: 'roll',
+        type: 'measure'
+    }
+];
 
-// const data = [
-//     {
-//         name: 'Rousan',
-//         birthday: '1995-07-05',
-//         roll: 12
-//     },
-//     {
-//         name: 'Sumant',
-//         birthday: '1996-08-04',
-//         roll: 89
-//     },
-//     {
-//         name: 'Ajay',
-//         birthday: '1994-01-03',
-//         roll: 33
-//     },
-//     {
-//         name: 'Sushant',
-//         birthday: '1994-01-03',
-//         roll: 33
-//     },
-//     {
-//         name: 'Samim',
-//         birthday: '1994-01-03',
-//         roll: 33
-//     },
-//     {
-//         name: 'Akash',
-//         birthday: '1994-01-03',
-//         roll: 33
-//     }
-// ];
-// debugger;
-// const dm = new DataModel(data, schema);
-// const dmData = dm.getData();
-// console.log(dm);
+const data = [
+    {
+        name: 'Rousan',
+        birthday: '1995-07-05',
+        roll: 12
+    },
+    {
+        name: 'Sumant',
+        birthday: '1996-08-04',
+        roll: 89
+    },
+    {
+        name: 'Ajay',
+        birthday: '1994-01-03',
+        roll: 33
+    },
+    {
+        name: 'Sushant',
+        birthday: '1994-01-03',
+        roll: 33
+    },
+    {
+        name: 'Samim',
+        birthday: '1994-01-03',
+        roll: 33
+    },
+    {
+        name: 'Akash',
+        birthday: '1994-01-03',
+        roll: 33
+    }
+];
+debugger;
+const dm = new DataModel(data, schema);
+dms = dm.select(data => {
+    return data.birthday.value < +new Date(1994, 1, 1);
+});
+
+console.log(dms.getData());
+
 
 
 // const data1 = [
@@ -111,108 +115,108 @@
 
 
 
-let expectedResult = {
-    schema: [
-        {
-            name: 'ModelA.id',
-            type: 'dimension'
-        },
-        {
-            name: 'profit',
-            type: 'measure',
-            defAggFn: 'avg'
-        },
-        {
-            name: 'sales',
-            type: 'measure'
-        },
-        {
-            name: 'first',
-            type: 'dimension'
-        },
-        {
-            name: 'second',
-            type: 'dimension'
-        },
-        {
-            name: 'ModelB.id',
-            type: 'dimension'
-        },
-        {
-            name: 'netprofit',
-            type: 'measure',
-            defAggFn: 'avg'
-        },
-        {
-            name: 'netsales',
-            type: 'measure'
-        },
-        {
-            name: '_first',
-            type: 'dimension'
-        },
-        {
-            name: '_second',
-            type: 'dimension'
-        }
-    ],
-    data: [
-        [
-            '1',
-            10,
-            20,
-            'Hey',
-            'Jude',
-            '1',
-            10,
-            200,
-            'Hello',
-            'Jude'
-        ],
-        [
-            '2',
-            20,
-            25,
-            'Hey',
-            'Wood',
-            '',
-            null,
-            null,
-            '',
-            ''
-        ],
-        [
-            '3',
-            10,
-            20,
-            'White',
-            'the sun',
-            '',
-            null,
-            null,
-            '',
-            ''
-        ],
-        [
-            '4',
-            15,
-            25,
-            'White',
-            'walls',
-            '4',
-            200,
-            250,
-            'Bollo',
-            'Wood'
-        ]
-    ],
-    uids: [
-        0,
-        1,
-        2,
-        3
-    ]
-};
-expect(leftOuterJoin(data23, data24,
-    (dmFields1, dmFields2) => dmFields1.id.value === dmFields2.id.value).getData())
-                .to.deep.equal(expectedResult);
+// let expectedResult = {
+//     schema: [
+//         {
+//             name: 'ModelA.id',
+//             type: 'dimension'
+//         },
+//         {
+//             name: 'profit',
+//             type: 'measure',
+//             defAggFn: 'avg'
+//         },
+//         {
+//             name: 'sales',
+//             type: 'measure'
+//         },
+//         {
+//             name: 'first',
+//             type: 'dimension'
+//         },
+//         {
+//             name: 'second',
+//             type: 'dimension'
+//         },
+//         {
+//             name: 'ModelB.id',
+//             type: 'dimension'
+//         },
+//         {
+//             name: 'netprofit',
+//             type: 'measure',
+//             defAggFn: 'avg'
+//         },
+//         {
+//             name: 'netsales',
+//             type: 'measure'
+//         },
+//         {
+//             name: '_first',
+//             type: 'dimension'
+//         },
+//         {
+//             name: '_second',
+//             type: 'dimension'
+//         }
+//     ],
+//     data: [
+//         [
+//             '1',
+//             10,
+//             20,
+//             'Hey',
+//             'Jude',
+//             '1',
+//             10,
+//             200,
+//             'Hello',
+//             'Jude'
+//         ],
+//         [
+//             '2',
+//             20,
+//             25,
+//             'Hey',
+//             'Wood',
+//             '',
+//             null,
+//             null,
+//             '',
+//             ''
+//         ],
+//         [
+//             '3',
+//             10,
+//             20,
+//             'White',
+//             'the sun',
+//             '',
+//             null,
+//             null,
+//             '',
+//             ''
+//         ],
+//         [
+//             '4',
+//             15,
+//             25,
+//             'White',
+//             'walls',
+//             '4',
+//             200,
+//             250,
+//             'Bollo',
+//             'Wood'
+//         ]
+//     ],
+//     uids: [
+//         0,
+//         1,
+//         2,
+//         3
+//     ]
+// };
+// expect(leftOuterJoin(data23, data24,
+//     (dmFields1, dmFields2) => dmFields1.id.value === dmFields2.id.value).getData())
+//                 .to.deep.equal(expectedResult);

@@ -5,7 +5,6 @@
  * @enum {string}
  */
 const MeasureSubtype = {
-    DISCRETE: 'discrete',
     CONTINUOUS: 'continuous'
 };
 

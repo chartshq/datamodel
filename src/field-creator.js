@@ -4,12 +4,10 @@ import {
     Temporal,
     Binned,
     Continuous,
-    DiscreteMeasure,
     CategoricalParser,
     TemporalParser,
     BinnedParser,
     ContinuousParser,
-    DiscreteMeasureParser,
     PartialField
 } from './fields';
 
@@ -27,9 +25,6 @@ function createUnitField(data, schema) {
     switch (schema.type) {
     case FieldType.MEASURE:
         switch (schema.subtype) {
-        case MeasureSubtype.DISCRETE:
-            partialField = new PartialField(schema.name, data, schema, new DiscreteMeasureParser());
-            return new DiscreteMeasure(partialField, `0-${data.length - 1}`);
         case MeasureSubtype.CONTINUOUS:
             partialField = new PartialField(schema.name, data, schema, new ContinuousParser());
             return new Continuous(partialField, `0-${data.length - 1}`);
@@ -71,8 +66,6 @@ export function createUnitFieldFromPartial(partialField, rowDiffset) {
     switch (schema.type) {
     case FieldType.MEASURE:
         switch (schema.subtype) {
-        case MeasureSubtype.DISCRETE:
-            return new DiscreteMeasure(partialField, rowDiffset);
         case MeasureSubtype.CONTINUOUS:
             return new Continuous(partialField, rowDiffset);
         default:

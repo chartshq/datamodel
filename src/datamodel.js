@@ -1,6 +1,6 @@
 /* eslint-disable default-case */
 
-import { FieldType, MeasureSubtype } from './enums';
+import { FieldType, DimensionSubtype } from './enums';
 import {
     persistDerivation,
     getRootGroupByModel,
@@ -516,26 +516,26 @@ class DataModel extends Relation {
      *
      * @returns {DataModel} Instance of new DataModel with the newly created bin.
      */
-    bin (measureName, config = { }) {
+    bin (dimensionName, config = { }) {
         const clone = this.clone();
-        const binFieldName = config.name || `${measureName}_binned`;
-        if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[measureName]) {
-            throw new Error(`Field ${measureName} already exists.`);
+        const binFieldName = config.name || `${dimensionName}_binned`;
+        if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[dimensionName]) {
+            throw new Error(`Field ${dimensionName} already exists.`);
         }
-        const field = this._partialFieldspace.fields.find(currfield => currfield.name === measureName);
+        const field = this._partialFieldspace.fields.find(currfield => currfield.name === dimensionName);
         const dataSet = createBinnedFieldData(field, this._rowDiffset, config);
         const binField = createFields([dataSet.data], [
             {
                 name: binFieldName,
-                type: FieldType.MEASURE,
-                subtype: MeasureSubtype.DISCRETE,
+                type: FieldType.DIMENSION,
+                subtype: DimensionSubtype.BINNED,
                 bins: {
                     range: dataSet.range,
                     mid: dataSet.mid
                 }
             }], [binFieldName])[0];
         clone.addField(binField);
-        persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binFieldName }, null);
+        persistDerivation(clone, DM_DERIVATIVES.BIN, { dimensionName, config, binFieldName }, null);
         return clone;
     }
 }
