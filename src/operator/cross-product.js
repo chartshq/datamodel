@@ -65,14 +65,14 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
             userArg[dm1FieldStoreName] = {};
             userArg[dm2FieldStoreName] = {};
             dm1FieldStore.fields.forEach((field) => {
-                tuple.push(field.data[i]);
-                userArg[dm1FieldStoreName][field.name] = field.data[i];
+                tuple.push(field.partialField.data[i]);
+                userArg[dm1FieldStoreName][field.name] = field.partialField.data[i];
             });
             dm2FieldStore.fields.forEach((field) => {
                 if (!(commonSchemaList.indexOf(field.schema.name) !== -1 && replaceCommonSchema)) {
-                    tuple.push(field.data[ii]);
+                    tuple.push(field.partialField.data[ii]);
                 }
-                userArg[dm2FieldStoreName][field.name] = field.data[ii];
+                userArg[dm2FieldStoreName][field.name] = field.partialField.data[ii];
             });
             const dm1Fields = prepareJoinData(userArg[dm1FieldStoreName]);
             const dm2Fields = prepareJoinData(userArg[dm2FieldStoreName]);

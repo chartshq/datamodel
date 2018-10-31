@@ -202,7 +202,7 @@ export function dataBuilder (fieldStore, rowDiffset, colIdentifier, sortingDetai
         const insertInd = retObj.data.length - 1;
         let start = 0;
         tmpDataArr.forEach((field, ii) => {
-            retObj.data[insertInd][ii + start] = field.data[i];
+            retObj.data[insertInd][ii + start] = field.partialField.data[i];
         });
         if (addUid) {
             retObj.data[insertInd][tmpDataArr.length] = i;

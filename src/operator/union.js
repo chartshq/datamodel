@@ -43,7 +43,7 @@ export function union (dm1, dm2) {
             const tuple = {};
             let hashData = '';
             schemaNameArr.forEach((schemaName) => {
-                const value = fieldsObj[schemaName].data[i];
+                const value = fieldsObj[schemaName].partialField.data[i];
                 hashData += `-${value}`;
                 tuple[schemaName] = value;
             });

@@ -1024,7 +1024,7 @@ describe('DataModel', () => {
                 stops: [5, 11, 16, 20, 30]
             };
             const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
-            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').partialField.data;
             let expectedData = ['5-11', '11-16', '11-16', '11-16', '5-11', '16-20', '20-30', '16-20', '20-30'];
             expect(fieldData).to.deep.equal(expectedData);
         });
@@ -1053,12 +1053,12 @@ describe('DataModel', () => {
                 stops: [11, 16, 20, 30]
             };
             const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
-            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').partialField.data;
             let expectedData = ['10-11', '5-10', '5-10', '11-16', '10-11', '16-20', '20-30', '16-20', '30-32'];
             expect(fieldData).to.deep.equal(expectedData);
-            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().mid)
+            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins.mid)
                             .to.deep.equal([7.5, 10.5, 13.5, 18, 25, 31]);
-            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().range)
+            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins.range)
                             .to.deep.equal([5, 10, 11, 16, 20, 30, 32]);
         });
         it('should bin data when num of bins given', () => {
@@ -1082,7 +1082,7 @@ describe('DataModel', () => {
             ];
             const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
             const bin = dataModel.bin('profit', { binCount: 2, name: 'sumField' });
-            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').partialField.data;
             let expData = ['10-16', '10-16', '10-16', '10-16', '10-16', '16-22', '16-22', '16-22', '16-22', '16-22'];
             expect(fieldData).to.deep.equal(expData);
         });
@@ -1107,12 +1107,12 @@ describe('DataModel', () => {
             ];
             const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
             const bin = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
-            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
+            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').partialField.data;
             let expData = ['10-15', '15-20', '15-20', '15-20', '10-15', '15-20', '20-25', '15-20', '20-25', '20-25'];
             expect(expData).to.deep.equal(fieldData);
-            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().mid)
+            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins.mid)
                             .to.deep.equal([12.5, 17.5, 22.5]);
-            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().range)
+            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins.range)
                             .to.deep.equal([10, 15, 20, 25]);
         });
         // it('should return correct bins when binned after a selct operation', () => {

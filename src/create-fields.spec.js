@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { Measure, Categorical, DateTime } from './fields';
+import { Dimension, Categorical, Temporal, Measure, Continuous } from './fields';
 import createFields from './field-creator';
 
 describe('Creating Field', () => {
@@ -22,9 +22,9 @@ describe('Creating Field', () => {
             const fieldsArr = createFields(data, schema, headers);
 
             expect(fieldsArr.length === 3).to.be.true;
-            expect(fieldsArr[0] instanceof Categorical).to.be.true;
-            expect(fieldsArr[1] instanceof DateTime).to.be.true;
-            expect(fieldsArr[2] instanceof Measure).to.be.true;
+            expect((fieldsArr[0] instanceof Dimension) && (fieldsArr[0] instanceof Categorical)).to.be.true;
+            expect(fieldsArr[1] instanceof Temporal).to.be.true;
+            expect((fieldsArr[2] instanceof Measure) && (fieldsArr[2] instanceof Continuous)).to.be.true;
         });
     });
 });

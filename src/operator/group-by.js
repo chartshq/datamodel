@@ -2,6 +2,7 @@ import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import DataModel from '../export';
 import reducerStore from '../utils/reducer-store';
+import { FieldType, MeasureSubtype } from '../enums';
 
 /**
  * This function sanitize the user given field and return a common Array structure field
@@ -27,7 +28,7 @@ function getFieldArr (dataModel, fieldArr) {
     });
 
     Object.entries(measures).forEach(([key]) => {
-        if (measures[key].subType() === 'discrete') {
+        if (measures[key].subtype === MeasureSubtype.DISCRETE) {
             if (fieldArr && fieldArr.length) {
                 if (fieldArr.indexOf(key) !== -1) {
                     retArr.push(key);
@@ -63,7 +64,7 @@ function getReducerObj (dataModel, reducers = {}) {
         if (typeof reducers[key] !== 'function') {
             pReducers[key] = undefined;
         }
-        retObj[key] = pReducers[key] || reducerStore.resolve(measures[key].defAggFn()) || reducer;
+        retObj[key] = pReducers[key] || reducerStore.resolve(measures[key].defAggFn) || reducer;
     });
     return retObj;
 }
@@ -93,9 +94,9 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     Object.entries(fieldStoreObj).forEach(([key, value]) => {
         if (sFieldArr.indexOf(key) !== -1 || reducerObj[key]) {
             schema.push(extend2({}, value.schema));
-            if (value.schema.type === 'measure' && value.schema.subtype !== 'discrete') {
+            if (value.schema.type === FieldType.MEASURE && value.schema.subtype !== MeasureSubtype.DISCRETE) {
                 measureArr.push(key);
-            } else if (value.schema.type === 'dimension' || value.schema.subtype === 'discrete') {
+            } else if (value.schema.type === FieldType.DIMENSION || value.schema.subtype === MeasureSubtype.DISCRETE) {
                 dimensionArr.push(key);
             }
         }
@@ -105,21 +106,21 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     rowDiffsetIterator(dataModel._rowDiffset, (i) => {
         let hash = '';
         dimensionArr.forEach((_) => {
-            hash = `${hash}-${fieldStoreObj[_].data[i]}`;
+            hash = `${hash}-${fieldStoreObj[_].partialField.data[i]}`;
         });
         if (hashMap[hash] === undefined) {
             hashMap[hash] = rowCount;
             data.push({});
             dimensionArr.forEach((_) => {
-                data[rowCount][_] = fieldStoreObj[_].data[i];
+                data[rowCount][_] = fieldStoreObj[_].partialField.data[i];
             });
             measureArr.forEach((_) => {
-                data[rowCount][_] = [fieldStoreObj[_].data[i]];
+                data[rowCount][_] = [fieldStoreObj[_].partialField.data[i]];
             });
             rowCount += 1;
         } else {
             measureArr.forEach((_) => {
-                data[hashMap[hash]][_].push(fieldStoreObj[_].data[i]);
+                data[hashMap[hash]][_].push(fieldStoreObj[_].partialField.data[i]);
             });
         }
     });

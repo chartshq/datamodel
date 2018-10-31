@@ -1,6 +1,6 @@
 /* eslint-disable default-case */
 
-import { FieldType } from './enums';
+import { FieldType, MeasureSubtype } from './enums';
 import {
     persistDerivation,
     getRootGroupByModel,
@@ -301,11 +301,11 @@ class DataModel extends Relation {
     }
 
     addField (field) {
-        const fieldName = field.fieldName();
+        const fieldName = field.name;
         this._colIdentifier += `,${fieldName}`;
         const partialFieldspace = this._partialFieldspace;
 
-        if (!partialFieldspace.fieldsObj()[field.fieldName()]) {
+        if (!partialFieldspace.fieldsObj()[field.name]) {
             partialFieldspace.fields.push(field);
         } else {
             const fieldIndex = partialFieldspace.fields.findIndex(fieldinst => fieldinst.name === fieldName);
@@ -373,7 +373,7 @@ class DataModel extends Relation {
 
         const computedValues = [];
         rowDiffsetIterator(clone._rowDiffset, (i) => {
-            const fieldsData = suppliedFields.map(field => field.data[i]);
+            const fieldsData = suppliedFields.map(field => field.partialField.data[i]);
             computedValues[i] = retrieveFn(...fieldsData, i, fs);
         });
         const [field] = createFields([computedValues], [schema], [schema.name]);
@@ -528,7 +528,7 @@ class DataModel extends Relation {
             {
                 name: binFieldName,
                 type: FieldType.MEASURE,
-                subtype: 'discrete', // @todo : DimensionSubtype
+                subtype: MeasureSubtype.DISCRETE,
                 bins: {
                     range: dataSet.range,
                     mid: dataSet.mid
