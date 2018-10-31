@@ -5,7 +5,7 @@ import {
     rowDiffsetIterator
 } from './operator';
 import { DM_DERIVATIVES, LOGICAL_OPERATORS } from './constants';
-import createFields, { createUnitFieldFromPartial } from './field-creator';
+import { createFields, createUnitFieldFromPartial } from './field-creator';
 import defaultConfig from './default-config';
 import * as converter from './converter';
 

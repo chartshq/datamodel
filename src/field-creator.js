@@ -48,7 +48,8 @@ function createUnitField(data, schema) {
             return new Categorical(partialField, `0-${data.length - 1}`);
         }
     default:
-        return null;
+        partialField = new PartialField(schema.name, data, schema, new CategoricalParser());
+        return new Categorical(partialField, `0-${data.length - 1}`);
     }
 }
 
@@ -83,7 +84,7 @@ export function createUnitFieldFromPartial(partialField, rowDiffset) {
             return new Categorical(partialField, rowDiffset);
         }
     default:
-        return null;
+        return new Categorical(partialField, rowDiffset);
     }
 }
 
@@ -95,7 +96,7 @@ export function createUnitFieldFromPartial(partialField, rowDiffset) {
  * @param {Array} headers - The array of header names.
  * @return {Array.<Field>} Returns an array of newly created field instances.
  */
-function createFields(dataColumn, schema, headers) {
+export function createFields(dataColumn, schema, headers) {
     const headersObj = {};
 
     if (!(headers && headers.length)) {
@@ -108,5 +109,3 @@ function createFields(dataColumn, schema, headers) {
 
     return schema.map(item => createUnitField(dataColumn[headersObj[item.name]], item));
 }
-
-export default createFields;

@@ -18,7 +18,7 @@ import {
 import { createBinnedFieldData } from './operator/bucket-creator';
 import Relation from './relation';
 import reducerStore from './utils/reducer-store';
-import createFields from './field-creator';
+import { createFields } from './field-creator';
 
 /**
  * DataModel is an in-browser representation of tabular data. It supports
