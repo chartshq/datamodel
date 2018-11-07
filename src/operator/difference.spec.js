@@ -38,8 +38,8 @@ describe('Checking difference', () => {
             const differenceDataModel = difference(dataModel1, dataModel2);
             expect(differenceDataModel.getData()).to.deep.equal({
                 schema: [
-                { name: 'city', type: 'dimension' },
-                { name: 'state', type: 'dimension' },
+                { name: 'city', type: 'dimension', subtype: 'categorical' },
+                { name: 'state', type: 'dimension', subtype: 'categorical' },
                 ],
                 data: [
                 ['a', 'aa'],

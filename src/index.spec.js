@@ -82,7 +82,7 @@ describe('DataModel', () => {
                     ['Akash', 757535400000]
                 ],
                 schema: [
-                    { name: 'name', type: 'dimension' },
+                    { name: 'name', type: 'dimension', subtype: 'categorical' },
                     { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
                 ],
                 uids: [0, 1, 2]
@@ -98,7 +98,7 @@ describe('DataModel', () => {
                     [804882600000, 839097000000, 757535400000]
                 ],
                 schema: [
-                    { name: 'name', type: 'dimension' },
+                    { name: 'name', type: 'dimension', subtype: 'categorical' },
                     { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
                 ],
                 uids: [0, 1, 2]
@@ -117,7 +117,7 @@ describe('DataModel', () => {
             });
             expected = {
                 schema: [
-                    { name: 'name', type: 'dimension' },
+                    { name: 'name', type: 'dimension', subtype: 'categorical' },
                     { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
                 ],
                 data: [
@@ -141,7 +141,7 @@ describe('DataModel', () => {
             });
             expected = {
                 schema: [
-                    { name: 'name', type: 'dimension' },
+                    { name: 'name', type: 'dimension', subtype: 'categorical' },
                     { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
                 ],
                 data: [
@@ -161,9 +161,9 @@ describe('DataModel', () => {
                 { performance: 'decent', horsepower: 30, weight: 0.5 }
             ];
             const schema = [
-                { name: 'performance', type: 'dimension' },
-                { name: 'horsepower', type: 'measure' },
-                { name: 'weight', type: 'measure' }
+                { name: 'performance', type: 'dimension', subtype: 'categorical' },
+                { name: 'horsepower', type: 'measure', subtype: 'continuous' },
+                { name: 'weight', type: 'measure', subtype: 'continuous' }
             ];
 
             const dm = new DataModel(data, schema);
@@ -171,15 +171,18 @@ describe('DataModel', () => {
                 schema: [
                     {
                         name: 'performance',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'horsepower',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous'
                     },
                     {
                         name: 'weight',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous'
                     }
                 ],
                 data: [
@@ -220,8 +223,8 @@ describe('DataModel', () => {
                     [35, 'management']
                 ],
                 schema: [
-                    { name: 'age', type: 'measure' },
-                    { name: 'job', type: 'dimension' },
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
                 ],
                 uids: [0, 1, 2]
             };
@@ -241,8 +244,8 @@ describe('DataModel', () => {
                     ['tertiary', 'single']
                 ],
                 schema: [
-                    { name: 'education', type: 'dimension' },
-                    { name: 'marital', type: 'dimension' }
+                    { name: 'education', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
                 uids: [0, 1, 2]
             };
@@ -262,8 +265,8 @@ describe('DataModel', () => {
                     [35, 'management']
                 ],
                 schema: [
-                    { name: 'age', type: 'measure' },
-                    { name: 'job', type: 'dimension' },
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
                 ],
                 uids: [0, 1, 2]
             };
@@ -274,8 +277,8 @@ describe('DataModel', () => {
                     ['tertiary', 'single']
                 ],
                 schema: [
-                    { name: 'education', type: 'dimension' },
-                    { name: 'marital', type: 'dimension' }
+                    { name: 'education', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
                 uids: [0, 1, 2]
             };
@@ -326,7 +329,11 @@ describe('DataModel', () => {
                     [35, 'management', 'single'],
                     [28, 'blue-collar', 'married']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [0, 2, 4]
             };
 
@@ -354,14 +361,22 @@ describe('DataModel', () => {
                     [57, 'self-employed', 'married'],
                     [28, 'blue-collar', 'married']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [0, 1, 3, 4]
             });
             expect(rejected).to.deep.equal({
                 data: [
                     [35, 'management', 'single']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [2]
             });
             expect(selectionAll[0].getData()).to.deep.equal(selected);
@@ -381,8 +396,8 @@ describe('DataModel', () => {
                     [35, 'management']
                 ],
                 schema: [
-                    { name: 'age', type: 'measure' },
-                    { name: 'job', type: 'dimension' },
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
                 ],
                 uids: [0, 2]
             };
@@ -397,8 +412,8 @@ describe('DataModel', () => {
                     [35, 'management']
                 ],
                 schema: [
-                    { name: 'age', type: 'measure' },
-                    { name: 'job', type: 'dimension' },
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
                 ],
                 uids: [2]
             };
@@ -416,7 +431,11 @@ describe('DataModel', () => {
                     [35, 'management', 'single'],
                     [28, 'blue-collar', 'married']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [0, 2, 4]
             };
 
@@ -454,7 +473,11 @@ describe('DataModel', () => {
                     [35, 'management', 'single'],
                     [30, 'management', 'married']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [0, 1, 2, 3]
             };
 
@@ -494,7 +517,11 @@ describe('DataModel', () => {
                     [30, 'management', 'married'],
                     [28, 'blue-collar', 'married']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [0, 1, 2, 3, 4, 5]
             };
             expect(sortedDm._sortingDetails).to.deep.equal([
@@ -527,10 +554,10 @@ describe('DataModel', () => {
             ]);
             const expData = {
                 schema: [
-                    { name: 'Name', type: 'dimension' },
-                    { name: 'Age', type: 'measure' },
-                    { name: 'Gender', type: 'dimension' },
-                    { name: 'Location', type: 'dimension' },
+                    { name: 'Name', type: 'dimension', subtype: 'categorical' },
+                    { name: 'Age', type: 'measure', subtype: 'continuous' },
+                    { name: 'Gender', type: 'dimension', subtype: 'categorical' },
+                    { name: 'Location', type: 'dimension', subtype: 'categorical' },
                 ],
                 data: [
                     ['Shubham', 22, 'Male', 'Kolkata'],
@@ -575,7 +602,11 @@ describe('DataModel', () => {
                     [30, 'management', 'married'],
                     [28, 'blue-collar', 'married']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [0, 1, 2, 3, 4, 5]
             };
             expect(sortedDm.getData()).to.deep.equal(expData);
@@ -604,9 +635,9 @@ describe('DataModel', () => {
             let sortedDm = dataModel.sort(sortingDetails);
             let expected = {
                 schema: [
-                    { name: 'performance', type: 'dimension' },
-                    { name: 'horsepower', type: 'measure' },
-                    { name: 'weight', type: 'measure' }
+                    { name: 'performance', type: 'dimension', subtype: 'categorical' },
+                    { name: 'horsepower', type: 'measure', subtype: 'continuous' },
+                    { name: 'weight', type: 'measure', subtype: 'continuous' }
                 ],
                 data: [
                     ['decent', 30, 0.5],
@@ -628,9 +659,9 @@ describe('DataModel', () => {
             sortedDm = dataModel.sort(sortingDetails);
             expected = {
                 schema: [
-                    { name: 'performance', type: 'dimension' },
-                    { name: 'horsepower', type: 'measure' },
-                    { name: 'weight', type: 'measure' }
+                    { name: 'performance', type: 'dimension', subtype: 'categorical' },
+                    { name: 'horsepower', type: 'measure', subtype: 'continuous' },
+                    { name: 'weight', type: 'measure', subtype: 'continuous' }
                 ],
                 data: [
                     ['decent', 30, 0.5],
@@ -670,11 +701,11 @@ describe('DataModel', () => {
 
             expect((dataModel1.join(dataModel2)).getData()).to.deep.equal({
                 schema: [
-                    { name: 'profit', type: 'measure' },
-                    { name: 'sales', type: 'measure' },
-                    { name: 'ModelA.city', type: 'dimension' },
-                    { name: 'population', type: 'measure' },
-                    { name: 'ModelB.city', type: 'dimension' },
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'ModelA.city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'population', type: 'measure', subtype: 'continuous' },
+                    { name: 'ModelB.city', type: 'dimension', subtype: 'categorical' },
                 ],
                 data: [
                     [10, 20, 'a', 200, 'a'],
@@ -688,11 +719,11 @@ describe('DataModel', () => {
                 (dmFields1, dmFields2) => dmFields1.city.value === dmFields2.city.value))
                             .getData()).to.deep.equal({
                                 schema: [
-                        { name: 'profit', type: 'measure' },
-                        { name: 'sales', type: 'measure' },
-                        { name: 'ModelA.city', type: 'dimension' },
-                        { name: 'population', type: 'measure' },
-                        { name: 'ModelB.city', type: 'dimension' },
+                        { name: 'profit', type: 'measure', subtype: 'continuous' },
+                        { name: 'sales', type: 'measure', subtype: 'continuous' },
+                        { name: 'ModelA.city', type: 'dimension', subtype: 'categorical' },
+                        { name: 'population', type: 'measure', subtype: 'continuous' },
+                        { name: 'ModelB.city', type: 'dimension', subtype: 'categorical' },
                                 ],
                                 data: [
                         [10, 20, 'a', 200, 'a'],
@@ -702,10 +733,10 @@ describe('DataModel', () => {
                             });
             expect((dataModel1.naturalJoin(dataModel2)).getData()).to.deep.equal({
                 schema: [
-                    { name: 'profit', type: 'measure' },
-                    { name: 'sales', type: 'measure' },
-                    { name: 'city', type: 'dimension' },
-                    { name: 'population', type: 'measure' },
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'population', type: 'measure', subtype: 'continuous' },
                 ],
                 data: [
                     [10, 20, 'a', 200],
@@ -742,15 +773,15 @@ describe('DataModel', () => {
             const k = dataModel1.naturalJoin(dataModel2);
             expect(k.getData()).to.deep.equal({
                 schema: [
-                    { name: 'profit', type: 'measure' },
-                    { name: 'sales', type: 'measure' },
-                    { name: 'city', type: 'dimension' },
-                    { name: 'type', type: 'dimension' },
-                    { name: 'population', type: 'measure' },
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'type', type: 'dimension', subtype: 'categorical' },
+                    { name: 'population', type: 'measure', subtype: 'continuous' },
                 ],
                 data: [
-                        [10, 20, 'a', 'aa', 200],
-                        [15, 25, 'b', 'aa', 250]
+                    [10, 20, 'a', 'aa', 200],
+                    [15, 25, 'b', 'aa', 250]
                 ],
                 uids: [0, 1]
             });
@@ -783,14 +814,14 @@ describe('DataModel', () => {
             const k = dataModel1.naturalJoin(dataModel2);
             expect(k.getData()).to.deep.equal({
                 schema: [
-                    { name: 'profit', type: 'measure' },
-                    { name: 'sales', type: 'measure' },
-                    { name: 'city', type: 'dimension' },
-                    { name: 'type', type: 'dimension' },
-                    { name: 'population', type: 'measure' },
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'type', type: 'dimension', subtype: 'categorical' },
+                    { name: 'population', type: 'measure', subtype: 'continuous' },
                 ],
                 data: [
-                        [10, 20, 'a', 'aa', 200]
+                    [10, 20, 'a', 'aa', 200]
                 ],
                 uids: [0]
             });
@@ -828,8 +859,8 @@ describe('DataModel', () => {
 
             expect(dataModel1.difference(dataModel2).getData()).to.deep.equal({
                 schema: [
-                    { name: 'city', type: 'dimension' },
-                    { name: 'state', type: 'dimension' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'state', type: 'dimension', subtype: 'categorical' },
                 ],
                 data: [
                     ['a', 'aa'],
@@ -839,8 +870,8 @@ describe('DataModel', () => {
             });
             expect(dataModel1.union(dataModel2).getData()).to.deep.equal({
                 schema: [
-                    { name: 'city', type: 'dimension' },
-                    { name: 'state', type: 'dimension' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'state', type: 'dimension', subtype: 'categorical' },
                 ],
                 data: [
                     ['a', 'aa'],

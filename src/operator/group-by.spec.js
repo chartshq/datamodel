@@ -73,9 +73,9 @@ describe('Test groupBy', () => {
             const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
             const reqData = {
                 schema: [
-                { name: 'city', type: 'dimension' },
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
+                { name: 'city', type: 'dimension', subtype: 'categorical' },
+                { name: 'profit', type: 'measure', subtype: 'continuous' },
+                { name: 'sales', type: 'measure', subtype: 'continuous' },
                 ],
                 data: [
                 ['a', 20, 40],

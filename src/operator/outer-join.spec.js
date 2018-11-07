@@ -72,45 +72,55 @@ describe('Testing Outer Join', () => {
                 schema: [
                     {
                         name: 'ModelA.id',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'profit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'sales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: 'first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'ModelB.id',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'netprofit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'netsales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: '_first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: '_second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     }
                 ],
                 data: [
@@ -181,45 +191,55 @@ describe('Testing Outer Join', () => {
                 schema: [
                     {
                         name: 'ModelB.id',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'netprofit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'netsales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: '_first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: '_second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'ModelA.id',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'profit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'sales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: 'first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     }
                 ],
                 data: [
@@ -265,45 +285,55 @@ describe('Testing Outer Join', () => {
                 schema: [
                     {
                         name: 'ModelA.id',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'profit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'sales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: 'first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'ModelB.id',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'netprofit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'netsales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: '_first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: '_second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     }
                 ],
                 data: [

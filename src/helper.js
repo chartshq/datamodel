@@ -1,4 +1,4 @@
-import { FieldType, FilteringMode } from './enums';
+import { FieldType, FilteringMode, DimensionSubtype, MeasureSubtype } from './enums';
 import fieldStore from './field-store';
 import Value from './value';
 import {
@@ -8,6 +8,7 @@ import { DM_DERIVATIVES, LOGICAL_OPERATORS } from './constants';
 import { createFields, createUnitFieldFromPartial } from './field-creator';
 import defaultConfig from './default-config';
 import * as converter from './converter';
+import { extend2 } from './utils';
 
 /**
  * Prepares the selection data.
@@ -170,7 +171,30 @@ export const cloneWithProject = (sourceDm, projField, config, allFields) => {
     return cloned;
 };
 
+const sanitizeSchema = schema => schema.map((unitSchema) => {
+    // Do deep clone of the unit schema as the user might change it later.
+    unitSchema = extend2({}, unitSchema);
+    if (!unitSchema.type) {
+        unitSchema.type = FieldType.DIMENSION;
+    }
+
+    if (!unitSchema.subtype) {
+        switch (unitSchema.type) {
+        case FieldType.MEASURE:
+            unitSchema.subtype = MeasureSubtype.CONTINUOUS;
+            break;
+        default:
+        case FieldType.DIMENSION:
+            unitSchema.subtype = DimensionSubtype.CATEGORICAL;
+            break;
+        }
+    }
+
+    return unitSchema;
+});
+
 export const updateData = (relation, data, schema, options) => {
+    schema = sanitizeSchema(schema);
     options = Object.assign(Object.assign({}, defaultConfig), options);
     const converterFn = converter[options.dataFormat];
 
