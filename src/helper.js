@@ -8,6 +8,7 @@ import { DM_DERIVATIVES, LOGICAL_OPERATORS } from './constants';
 import { createFields, createUnitFieldFromPartial } from './field-creator';
 import defaultConfig from './default-config';
 import * as converter from './converter';
+import { extend2 } from './utils';
 
 /**
  * Prepares the selection data.
@@ -170,29 +171,27 @@ export const cloneWithProject = (sourceDm, projField, config, allFields) => {
     return cloned;
 };
 
-const sanitizeSchema = (schema) => {
-    // Do deep clone of the schema as the user might change the input schema reference.
-    const clonedSchema = JSON.parse(JSON.stringify(schema));
-    return clonedSchema.map((s) => {
-        if (!s.type) {
-            s.type = FieldType.DIMENSION;
-        }
+const sanitizeSchema = schema => schema.map((unitSchema) => {
+    // Do deep clone of the unit schema as the user might change it later.
+    unitSchema = extend2({}, unitSchema);
+    if (!unitSchema.type) {
+        unitSchema.type = FieldType.DIMENSION;
+    }
 
-        if (!s.subtype) {
-            switch (s.type) {
-            case FieldType.MEASURE:
-                s.subtype = MeasureSubtype.CONTINUOUS;
-                break;
-            default:
-            case FieldType.DIMENSION:
-                s.subtype = DimensionSubtype.CATEGORICAL;
-                break;
-            }
+    if (!unitSchema.subtype) {
+        switch (unitSchema.type) {
+        case FieldType.MEASURE:
+            unitSchema.subtype = MeasureSubtype.CONTINUOUS;
+            break;
+        default:
+        case FieldType.DIMENSION:
+            unitSchema.subtype = DimensionSubtype.CATEGORICAL;
+            break;
         }
+    }
 
-        return s;
-    });
-};
+    return unitSchema;
+});
 
 export const updateData = (relation, data, schema, options) => {
     schema = sanitizeSchema(schema);
