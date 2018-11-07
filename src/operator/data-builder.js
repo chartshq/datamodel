@@ -177,7 +177,7 @@ export function dataBuilder (fieldStore, rowDiffset, colIdentifier, sortingDetai
 
     colIArr.forEach((colName) => {
         for (let i = 0; i < fieldStore.length; i += 1) {
-            if (fieldStore[i].name === colName) {
+            if (fieldStore[i].name() === colName) {
                 tmpDataArr.push(fieldStore[i]);
                 break;
             }
@@ -187,7 +187,7 @@ export function dataBuilder (fieldStore, rowDiffset, colIdentifier, sortingDetai
     // Inserts the schema to the schema object
     tmpDataArr.forEach((field) => {
         /** @todo Need to use extend2 here otherwise user can overwrite the schema. */
-        retObj.schema.push(field.schema);
+        retObj.schema.push(field.schema());
     });
 
     if (addUid) {
@@ -202,7 +202,7 @@ export function dataBuilder (fieldStore, rowDiffset, colIdentifier, sortingDetai
         const insertInd = retObj.data.length - 1;
         let start = 0;
         tmpDataArr.forEach((field, ii) => {
-            retObj.data[insertInd][ii + start] = field.data[i];
+            retObj.data[insertInd][ii + start] = field.partialField.data[i];
         });
         if (addUid) {
             retObj.data[insertInd][tmpDataArr.length] = i;

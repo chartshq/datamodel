@@ -22,7 +22,7 @@ describe('Test Natural Join', () => {
     const schema1 = [
         {
             name: 'id',
-            type: 'dimention'
+            type: 'dimension'
         },
         {
             name: 'profit',
@@ -45,7 +45,7 @@ describe('Test Natural Join', () => {
     const schema2 = [
         {
             name: 'id',
-            type: 'dimention'
+            type: 'dimension'
         },
         {
             name: 'netprofit',
@@ -74,7 +74,7 @@ describe('Test Natural Join', () => {
                 schema: [
                     {
                         name: 'id',
-                        type: 'dimention'
+                        type: 'dimension'
                     },
                     {
                         name: 'profit',

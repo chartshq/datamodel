@@ -12,15 +12,15 @@ const fieldStore = {
             fieldsObj () {
                 const retObj = {};
                 this.fields.forEach((field) => {
-                    retObj[field.name] = field;
+                    retObj[field.name()] = field;
                 });
                 return retObj;
             },
             getMeasure () {
                 const retObj = {};
                 this.fields.forEach((field) => {
-                    if (field.schema.type === FieldType.MEASURE) {
-                        retObj[field.name] = field;
+                    if (field.schema().type === FieldType.MEASURE) {
+                        retObj[field.name()] = field;
                     }
                 });
                 return retObj;
@@ -28,8 +28,8 @@ const fieldStore = {
             getDimension () {
                 const retObj = {};
                 this.fields.forEach((field) => {
-                    if (field.schema.type === FieldType.DIMENSION) {
-                        retObj[field.name] = field;
+                    if (field.schema().type === FieldType.DIMENSION) {
+                        retObj[field.name()] = field;
                     }
                 });
                 return retObj;

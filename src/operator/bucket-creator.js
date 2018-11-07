@@ -24,7 +24,7 @@ export function createBinnedFieldData (field, rowDiffset, config) {
     // create dataStore with index according to rowDiffSet
     rowDiffsetIterator(rowDiffset, (i) => {
         dataStore.push({
-            data: field.data[i],
+            data: field.partialField.data[i],
             index: i
         });
     });

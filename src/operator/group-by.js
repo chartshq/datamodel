@@ -2,6 +2,7 @@ import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import DataModel from '../export';
 import reducerStore from '../utils/reducer-store';
+import { FieldType } from '../enums';
 
 /**
  * This function sanitize the user given field and return a common Array structure field
@@ -14,7 +15,6 @@ function getFieldArr (dataModel, fieldArr) {
     const retArr = [];
     const fieldStore = dataModel.getPartialFieldspace();
     const dimensions = fieldStore.getDimension();
-    const measures = fieldStore.getMeasure();
 
     Object.entries(dimensions).forEach(([key]) => {
         if (fieldArr && fieldArr.length) {
@@ -26,17 +26,6 @@ function getFieldArr (dataModel, fieldArr) {
         }
     });
 
-    Object.entries(measures).forEach(([key]) => {
-        if (measures[key].subType() === 'discrete') {
-            if (fieldArr && fieldArr.length) {
-                if (fieldArr.indexOf(key) !== -1) {
-                    retArr.push(key);
-                }
-            } else {
-                retArr.push(key);
-            }
-        }
-    });
     return retArr;
 }
 
@@ -89,13 +78,18 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     const hashMap = {};
     const data = [];
     let newDataModel;
+
     // Prepare the schema
     Object.entries(fieldStoreObj).forEach(([key, value]) => {
         if (sFieldArr.indexOf(key) !== -1 || reducerObj[key]) {
-            schema.push(extend2({}, value.schema));
-            if (value.schema.type === 'measure' && value.schema.subtype !== 'discrete') {
+            schema.push(extend2({}, value.schema()));
+
+            switch (value.schema().type) {
+            case FieldType.MEASURE:
                 measureArr.push(key);
-            } else if (value.schema.type === 'dimension' || value.schema.subtype === 'discrete') {
+                break;
+            default:
+            case FieldType.DIMENSION:
                 dimensionArr.push(key);
             }
         }
@@ -105,21 +99,21 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     rowDiffsetIterator(dataModel._rowDiffset, (i) => {
         let hash = '';
         dimensionArr.forEach((_) => {
-            hash = `${hash}-${fieldStoreObj[_].data[i]}`;
+            hash = `${hash}-${fieldStoreObj[_].partialField.data[i]}`;
         });
         if (hashMap[hash] === undefined) {
             hashMap[hash] = rowCount;
             data.push({});
             dimensionArr.forEach((_) => {
-                data[rowCount][_] = fieldStoreObj[_].data[i];
+                data[rowCount][_] = fieldStoreObj[_].partialField.data[i];
             });
             measureArr.forEach((_) => {
-                data[rowCount][_] = [fieldStoreObj[_].data[i]];
+                data[rowCount][_] = [fieldStoreObj[_].partialField.data[i]];
             });
             rowCount += 1;
         } else {
             measureArr.forEach((_) => {
-                data[hashMap[hash]][_].push(fieldStoreObj[_].data[i]);
+                data[hashMap[hash]][_].push(fieldStoreObj[_].partialField.data[i]);
             });
         }
     });

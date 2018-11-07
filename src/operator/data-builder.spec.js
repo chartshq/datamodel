@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { dataBuilder } from './data-builder';
-import createFields from '../field-creator';
+import { createFields } from '../field-creator';
 
 function avg(...nums) {
     return nums.reduce((acc, next) => acc + next, 0) / nums.length;

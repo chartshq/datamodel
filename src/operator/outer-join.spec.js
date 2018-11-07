@@ -16,13 +16,12 @@ describe('Testing Outer Join', () => {
     const data2 = [
         { id: 1, netprofit: 10, netsales: 200, _first: 'Hello', _second: 'Jude' },
         { id: 4, netprofit: 200, netsales: 250, _first: 'Bollo', _second: 'Wood' },
-
     ];
 
     const schema1 = [
         {
             name: 'id',
-            type: 'dimention'
+            type: 'dimension'
         },
         {
             name: 'profit',
@@ -45,7 +44,7 @@ describe('Testing Outer Join', () => {
     const schema2 = [
         {
             name: 'id',
-            type: 'dimention'
+            type: 'dimension'
         },
         {
             name: 'netprofit',
@@ -73,7 +72,7 @@ describe('Testing Outer Join', () => {
                 schema: [
                     {
                         name: 'ModelA.id',
-                        type: 'dimention'
+                        type: 'dimension'
                     },
                     {
                         name: 'profit',
@@ -94,7 +93,7 @@ describe('Testing Outer Join', () => {
                     },
                     {
                         name: 'ModelB.id',
-                        type: 'dimention'
+                        type: 'dimension'
                     },
                     {
                         name: 'netprofit',
@@ -133,11 +132,11 @@ describe('Testing Outer Join', () => {
                         25,
                         'Hey',
                         'Wood',
-                        '',
                         null,
                         null,
-                        '',
-                        ''
+                        null,
+                        null,
+                        null
                     ],
                     [
                         '3',
@@ -145,11 +144,11 @@ describe('Testing Outer Join', () => {
                         20,
                         'White',
                         'the sun',
-                        '',
                         null,
                         null,
-                        '',
-                        ''
+                        null,
+                        null,
+                        null
                     ],
                     [
                         '4',
@@ -182,7 +181,7 @@ describe('Testing Outer Join', () => {
                 schema: [
                     {
                         name: 'ModelB.id',
-                        type: 'dimention'
+                        type: 'dimension'
                     },
                     {
                         name: 'netprofit',
@@ -203,7 +202,7 @@ describe('Testing Outer Join', () => {
                     },
                     {
                         name: 'ModelA.id',
-                        type: 'dimention'
+                        type: 'dimension'
                     },
                     {
                         name: 'profit',
@@ -266,7 +265,7 @@ describe('Testing Outer Join', () => {
                 schema: [
                     {
                         name: 'ModelA.id',
-                        type: 'dimention'
+                        type: 'dimension'
                     },
                     {
                         name: 'profit',
@@ -287,7 +286,7 @@ describe('Testing Outer Join', () => {
                     },
                     {
                         name: 'ModelB.id',
-                        type: 'dimention'
+                        type: 'dimension'
                     },
                     {
                         name: 'netprofit',
@@ -326,11 +325,11 @@ describe('Testing Outer Join', () => {
                         25,
                         'Hey',
                         'Wood',
-                        '',
                         null,
                         null,
-                        '',
-                        ''
+                        null,
+                        null,
+                        null
                     ],
                     [
                         '3',
@@ -338,11 +337,11 @@ describe('Testing Outer Join', () => {
                         20,
                         'White',
                         'the sun',
-                        '',
                         null,
                         null,
-                        '',
-                        ''
+                        null,
+                        null,
+                        null
                     ],
                     [
                         '4',

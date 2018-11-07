@@ -1,6 +1,6 @@
 /* eslint-disable default-case */
 
-import { FieldType } from './enums';
+import { FieldType, DimensionSubtype } from './enums';
 import {
     persistDerivation,
     getRootGroupByModel,
@@ -18,7 +18,7 @@ import {
 import { createBinnedFieldData } from './operator/bucket-creator';
 import Relation from './relation';
 import reducerStore from './utils/reducer-store';
-import createFields from './field-creator';
+import { createFields } from './field-creator';
 
 /**
  * DataModel is an in-browser representation of tabular data. It supports
@@ -136,7 +136,7 @@ class DataModel extends Relation {
             this,
             this.getPartialFieldspace().fields,
             this._rowDiffset,
-            options.getAllFields ? fields.map(d => d.name).join() : this._colIdentifier,
+            options.getAllFields ? fields.map(d => d.name()).join() : this._colIdentifier,
             options.sort,
             {
                 columnWise: options.order === 'column',
@@ -301,14 +301,14 @@ class DataModel extends Relation {
     }
 
     addField (field) {
-        const fieldName = field.fieldName();
+        const fieldName = field.name();
         this._colIdentifier += `,${fieldName}`;
         const partialFieldspace = this._partialFieldspace;
 
-        if (!partialFieldspace.fieldsObj()[field.fieldName()]) {
+        if (!partialFieldspace.fieldsObj()[field.name()]) {
             partialFieldspace.fields.push(field);
         } else {
-            const fieldIndex = partialFieldspace.fields.findIndex(fieldinst => fieldinst.name === fieldName);
+            const fieldIndex = partialFieldspace.fields.findIndex(fieldinst => fieldinst.name() === fieldName);
             fieldIndex >= 0 && (partialFieldspace.fields[fieldIndex] = field);
         }
 
@@ -373,7 +373,7 @@ class DataModel extends Relation {
 
         const computedValues = [];
         rowDiffsetIterator(clone._rowDiffset, (i) => {
-            const fieldsData = suppliedFields.map(field => field.data[i]);
+            const fieldsData = suppliedFields.map(field => field.partialField.data[i]);
             computedValues[i] = retrieveFn(...fieldsData, i, fs);
         });
         const [field] = createFields([computedValues], [schema], [schema.name]);
@@ -516,26 +516,26 @@ class DataModel extends Relation {
      *
      * @returns {DataModel} Instance of new DataModel with the newly created bin.
      */
-    bin (measureName, config = { }) {
+    bin (dimensionName, config = { }) {
         const clone = this.clone();
-        const binFieldName = config.name || `${measureName}_binned`;
-        if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[measureName]) {
-            throw new Error(`Field ${measureName} already exists.`);
+        const binFieldName = config.name || `${dimensionName}_binned`;
+        if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[dimensionName]) {
+            throw new Error(`Field ${dimensionName} already exists.`);
         }
-        const field = this._partialFieldspace.fields.find(currfield => currfield.name === measureName);
+        const field = this._partialFieldspace.fields.find(currfield => currfield.name() === dimensionName);
         const dataSet = createBinnedFieldData(field, this._rowDiffset, config);
         const binField = createFields([dataSet.data], [
             {
                 name: binFieldName,
-                type: FieldType.MEASURE,
-                subtype: 'discrete', // @todo : DimensionSubtype
+                type: FieldType.DIMENSION,
+                subtype: DimensionSubtype.BINNED,
                 bins: {
                     range: dataSet.range,
                     mid: dataSet.mid
                 }
             }], [binFieldName])[0];
         clone.addField(binField);
-        persistDerivation(clone, DM_DERIVATIVES.BIN, { measureName, config, binFieldName }, null);
+        persistDerivation(clone, DM_DERIVATIVES.BIN, { dimensionName, config, binFieldName }, null);
         return clone;
     }
 }

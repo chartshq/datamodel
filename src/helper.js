@@ -1,12 +1,11 @@
 import { FieldType, FilteringMode } from './enums';
-import Field from './fields/field';
 import fieldStore from './field-store';
 import Value from './value';
 import {
     rowDiffsetIterator
 } from './operator';
 import { DM_DERIVATIVES, LOGICAL_OPERATORS } from './constants';
-import createFields from './field-creator';
+import { createFields, createUnitFieldFromPartial } from './field-creator';
 import defaultConfig from './default-config';
 import * as converter from './converter';
 
@@ -16,7 +15,7 @@ import * as converter from './converter';
 function prepareSelectionData (fields, i) {
     const resp = {};
     for (let field of fields) {
-        resp[field.name] = new Value(field.data[i], field);
+        resp[field.name()] = new Value(field.partialField.data[i], field);
     }
     return resp;
 }
@@ -30,7 +29,7 @@ export function prepareJoinData (fields) {
 export const updateFields = ([rowDiffset, colIdentifier], partialFieldspace, fieldStoreName) => {
     let collID = colIdentifier.length ? colIdentifier.split(',') : [];
     let partialFieldMap = partialFieldspace.fieldsObj();
-    let newFields = collID.map(coll => new Field(partialFieldMap[coll], rowDiffset));
+    let newFields = collID.map(coll => createUnitFieldFromPartial(partialFieldMap[coll].partialField, rowDiffset));
     return fieldStore.createNamespace(newFields, fieldStoreName);
 };
 

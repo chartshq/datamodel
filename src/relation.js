@@ -74,7 +74,7 @@ class Relation {
      *      ```
      */
     getSchema () {
-        return this.getFieldspace().fields.map(d => d.schema);
+        return this.getFieldspace().fields.map(d => d.schema());
     }
 
     /**
@@ -433,9 +433,9 @@ class Relation {
 
     calculateFieldsConfig () {
         this._fieldConfig = this._fieldspace.fields.reduce((acc, fieldDef, i) => {
-            acc[fieldDef.name] = {
+            acc[fieldDef.name()] = {
                 index: i,
-                def: { name: fieldDef._ref.name, type: fieldDef._ref.fieldType, subtype: fieldDef._ref.subType() }
+                def: { name: fieldDef.name(), type: fieldDef.type(), subtype: fieldDef.subtype() }
             };
             return acc;
         }, {});
