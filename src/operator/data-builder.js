@@ -1,4 +1,4 @@
-import { FieldType, DimensionSubtype } from '../enums';
+import { DimensionSubtype, MeasureSubtype } from '../enums';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import { mergeSort } from './merge-sort';
 import { fieldInSchema } from '../helper';
@@ -15,7 +15,7 @@ import { isCallable, isArray, } from '../utils';
 function getSortFn (dataType, sortType, index) {
     let retFunc;
     switch (dataType) {
-    case FieldType.MEASURE:
+    case MeasureSubtype.CONTINUOUS:
     case DimensionSubtype.TEMPORAL:
         if (sortType === 'desc') {
             retFunc = (a, b) => b[index] - a[index];

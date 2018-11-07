@@ -31,11 +31,11 @@ describe('CrossProduct Functionality', () => {
             const crossDataModel = crossProduct(dataModel1, dataModel2);
             expect(crossDataModel.getData()).to.deep.equal({
                 schema: [
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
-                { name: 'ModelA.city', type: 'dimension' },
-                { name: 'population', type: 'measure' },
-                { name: 'ModelB.city', type: 'dimension' },
+                { name: 'profit', type: 'measure', subtype: 'continuous' },
+                { name: 'sales', type: 'measure', subtype: 'continuous' },
+                { name: 'ModelA.city', type: 'dimension', subtype: 'categorical' },
+                { name: 'population', type: 'measure', subtype: 'continuous' },
+                { name: 'ModelB.city', type: 'dimension', subtype: 'categorical' },
                 ],
                 data: [
                 [10, 20, 'a', 200, 'a'],
@@ -54,10 +54,10 @@ describe('CrossProduct Functionality', () => {
 
             expect(crossDataModel.getData()).to.deep.equal({
                 schema: [
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
-                { name: 'city', type: 'dimension' },
-                { name: 'population', type: 'measure' },
+                { name: 'profit', type: 'measure', subtype: 'continuous' },
+                { name: 'sales', type: 'measure', subtype: 'continuous' },
+                { name: 'city', type: 'dimension', subtype: 'categorical' },
+                { name: 'population', type: 'measure', subtype: 'continuous' },
                 ],
                 data: [
                 [10, 20, 'a', 200],
