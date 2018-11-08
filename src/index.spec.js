@@ -1,8 +1,8 @@
-/* global describe, it, context */
+/* global beforeEach, describe, it, context */
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { FilteringMode } from './enums';
+import { FilteringMode, DataFormat } from './enums';
 import DataModel from './index';
 import pkg from '../package.json';
 
@@ -1337,6 +1337,147 @@ describe('DataModel', () => {
             it('should return average for 1D Array', () => {
                 expect(DataModel.Stats.avg([10, 12, 17])).to.equal(39 / 3);
             });
+        });
+    });
+
+    describe('#serialize', () => {
+        const schema = [
+            {
+                name: 'name',
+                type: 'dimension'
+            },
+            {
+                name: 'birthday',
+                type: 'dimension',
+                subtype: 'temporal',
+                format: '%Y-%m-%d'
+            },
+            {
+                name: 'roll',
+                type: 'measure'
+            }
+        ];
+
+        const data = [
+            {
+                name: 'Rousan',
+                birthday: '1995-07-05',
+                roll: 2
+            },
+            {
+                name: 'Sumant',
+                birthday: '1996-08-04',
+                roll: 89
+            },
+            {
+                name: 'Ajay',
+                birthday: '1994-01-03',
+                roll: 31
+            },
+            {
+                name: 'Sushant',
+                birthday: '1994-01-03',
+                roll: 99
+            },
+            {
+                name: 'Samim',
+                birthday: '1994-01-03',
+                roll: 12
+            },
+            {
+                name: 'Akash',
+                birthday: '1994-01-03',
+                roll: 20
+            }
+        ];
+
+        let dm;
+
+        beforeEach(() => {
+            dm = new DataModel(data, schema);
+        });
+
+        it('should return json data for FlatJSON data type', () => {
+            const expected = [
+                { name: 'Rousan', birthday: 804882600000, roll: 2 },
+                { name: 'Sumant', birthday: 839097000000, roll: 89 },
+                { name: 'Ajay', birthday: 757535400000, roll: 31 },
+                { name: 'Sushant', birthday: 757535400000, roll: 99 },
+                { name: 'Samim', birthday: 757535400000, roll: 12 },
+                { name: 'Akash', birthday: 757535400000, roll: 20 }
+            ];
+
+            expect(dm.serialize(DataFormat.FLAT_JSON)).to.eql(expected);
+        });
+
+        it('should return dsv string for DSVStr data type', () => {
+            let expected = [
+                'name,birthday,roll',
+                'Rousan,804882600000,2',
+                'Sumant,839097000000,89',
+                'Ajay,757535400000,31',
+                'Sushant,757535400000,99',
+                'Samim,757535400000,12',
+                'Akash,757535400000,20'
+            ].join('\n');
+
+            expect(dm.serialize(DataFormat.DSV_STR)).to.eql(expected);
+
+            expected = [
+                'name\tbirthday\troll',
+                'Rousan\t804882600000\t2',
+                'Sumant\t839097000000\t89',
+                'Ajay\t757535400000\t31',
+                'Sushant\t757535400000\t99',
+                'Samim\t757535400000\t12',
+                'Akash\t757535400000\t20'
+            ].join('\n');
+
+            expect(dm.serialize(DataFormat.DSV_STR, { fieldSeparator: '\t' })).to.eql(expected);
+        });
+
+        it('should return dsv array for DSVArr data type', () => {
+            const expected = [
+                ['name', 'birthday', 'roll'],
+                ['Rousan', 804882600000, 2],
+                ['Sumant', 839097000000, 89],
+                ['Ajay', 757535400000, 31],
+                ['Sushant', 757535400000, 99],
+                ['Samim', 757535400000, 12],
+                ['Akash', 757535400000, 20]
+            ];
+
+            expect(dm.serialize(DataFormat.DSV_ARR)).to.eql(expected);
+        });
+
+        it('should return data in input data format if type is not specified', () => {
+            const mockedSchema = [
+                {
+                    name: 'name',
+                    type: 'dimension'
+                },
+                {
+                    name: 'birthday',
+                    type: 'dimension',
+                    subtype: 'temporal',
+                    format: '%Y-%m-%d'
+                },
+                {
+                    name: 'roll',
+                    type: 'measure'
+                }
+            ];
+            const mockedData = 'name,birthday,roll\nRousan,1995-07-05,2\nSumant,1996-08-04,89\nAjay,1994-01-03,31';
+            dm = new DataModel(mockedData, mockedSchema, { dataFormat: DataFormat.DSV_STR });
+
+            const expected = [
+                'name,birthday,roll',
+                'Rousan,804882600000,2',
+                'Sumant,839097000000,89',
+                'Ajay,757535400000,31'
+            ].join('\n');
+
+            expect(dm.serialize()).to.eql(expected);
         });
     });
 });

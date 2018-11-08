@@ -1,4 +1,4 @@
-import { FieldType, FilteringMode, DimensionSubtype, MeasureSubtype } from './enums';
+import { FieldType, FilteringMode, DimensionSubtype, MeasureSubtype, DataFormat } from './enums';
 import fieldStore from './field-store';
 import Value from './value';
 import {
@@ -8,7 +8,7 @@ import { DM_DERIVATIVES, LOGICAL_OPERATORS } from './constants';
 import { createFields, createUnitFieldFromPartial } from './field-creator';
 import defaultConfig from './default-config';
 import * as converter from './converter';
-import { extend2 } from './utils';
+import { extend2, detectDataFormat } from './utils';
 
 /**
  * Prepares the selection data.
@@ -211,6 +211,7 @@ export const updateData = (relation, data, schema, options) => {
     // If data is provided create the default colIdentifier and rowDiffset
     relation._rowDiffset = formattedData.length && formattedData[0].length ? `0-${formattedData[0].length - 1}` : '';
     relation._colIdentifier = (schema.map(_ => _.name)).join();
+    relation._dataFormat = options.dataFormat === DataFormat.AUTO ? detectDataFormat(data) : options.dataFormat;
     return relation;
 };
 

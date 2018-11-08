@@ -1,6 +1,6 @@
 /* eslint-disable default-case */
 
-import { FieldType, DimensionSubtype } from './enums';
+import { FieldType, DimensionSubtype, DataFormat } from './enums';
 import {
     persistDerivation,
     getRootGroupByModel,
@@ -298,6 +298,50 @@ class DataModel extends Relation {
         const sortedDm = new this.constructor(dataInCSVArr, rawData.schema, { dataFormat: 'DSVArr' });
         sortedDm._sortingDetails = sortingDetails;
         return sortedDm;
+    }
+
+    /**
+     * Performs the serialization operation on the current {@link DataModel} instance according to the specified data
+     * type. When an {@link DataModel} instance is created, it de-serializes the input data into its internal format,
+     * and during its serialization process, it converts its internal data format to the specified data type and returns
+     * that data regardless what type of data is used during the {@link DataModel} initialization.
+     *
+     * @example
+     * // here dm is the pre-declared DataModel instance.
+     * const csvData = dm.serialize(DataModel.DataFormat.DSV_STR, { fieldSeparator: "," });
+     * console.log(csvData); // The csv formatted data.
+     *
+     * const jsonData = dm.serialize(DataModel.DataFormat.FLAT_JSON);
+     * console.log(jsonData); // The json data.
+     *
+     * @public
+     *
+     * @param {string} type - The data type name for serialization.
+     * @param {Object} options - The optional option object.
+     * @param {string} options.fieldSeparator - The field separator character for DSV data type.
+     * @return {Array|string} Returns the serialized data.
+     */
+    serialize (type, options) {
+        type = type || this._dataFormat;
+        options = Object.assign({}, { fieldSeparator: ',' }, options);
+
+        const { data, schema } = this.getData();
+
+        if (type === DataFormat.FLAT_JSON) {
+            return data.map(row => schema.reduce((acc, col, idx) => {
+                acc[col.name] = row[idx];
+                return acc;
+            }, {}));
+        } else if (type === DataFormat.DSV_STR) {
+            const rows = [schema.map(unitSchema => unitSchema.name).join(options.fieldSeparator)];
+            data.forEach(row => rows.push(row.join(options.fieldSeparator)));
+            return rows.join('\n');
+        } else if (type === DataFormat.DSV_ARR) {
+            const rows = [schema.map(unitSchema => unitSchema.name)];
+            data.forEach(row => rows.push(row));
+            return rows;
+        }
+        throw new Error(`Data type ${type} is not supported`);
     }
 
     addField (field) {
