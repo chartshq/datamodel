@@ -91,4 +91,11 @@ describe('Measure', () => {
             expect(measField.calculateDataDomain).to.throw(Error, 'Not yet implemented');
         });
     });
+
+    describe('#formattedData', () => {
+        it('should return the formatted data', () => {
+            const expected = [18, 26, 12, 33, 56, 45, 26, 19, 18];
+            expect(measField.formattedData()).to.eql(expected);
+        });
+    });
 });

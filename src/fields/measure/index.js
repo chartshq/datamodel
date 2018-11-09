@@ -17,7 +17,7 @@ export default class Measure extends Field {
    * @public
    * @return {any} Returns the calculated domain.
    */
-    domain() {
+    domain () {
         if (!this._cachedDomain) {
             this._cachedDomain = this.calculateDataDomain();
         }
@@ -30,7 +30,7 @@ export default class Measure extends Field {
    * @public
    * @return {string} Returns unit of the field.
    */
-    unit() {
+    unit () {
         return this.partialField.schema.unit;
     }
 
@@ -40,7 +40,7 @@ export default class Measure extends Field {
    * @public
    * @return {string} Returns aggregation function name of the field.
    */
-    defAggFn() {
+    defAggFn () {
         return this.partialField.schema.defAggFn || defaultReducerName;
     }
 
@@ -50,7 +50,7 @@ export default class Measure extends Field {
    * @public
    * @return {Function} Returns number format of the field.
    */
-    numberFormat() {
+    numberFormat () {
         const { numberFormat } = this.partialField.schema;
         return numberFormat instanceof Function ? numberFormat : formatNumber;
     }
@@ -61,7 +61,18 @@ export default class Measure extends Field {
    * @public
    * @abstract
    */
-    calculateDataDomain() {
+    calculateDataDomain () {
         throw new Error('Not yet implemented');
+    }
+
+    /**
+     * Returns the formatted version of the underlying field data.
+     *
+     * @public
+     * @override
+     * @return {Array} Returns the formatted data.
+     */
+    formattedData () {
+        return this.data();
     }
 }

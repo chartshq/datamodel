@@ -95,4 +95,10 @@ describe('Field', () => {
             expect(field.data()).to.eql(expected);
         });
     });
+
+    describe('#formattedData', () => {
+        it('should be abstract, not be implemented', () => {
+            expect(field.formattedData).to.throw(Error, 'Not yet implemented');
+        });
+    });
 });

@@ -54,4 +54,4 @@ const data = [
 
 const dm = new DataModel(data, schema);
 
-console.log(dm.serialize());
+console.log(dm.serialize(DataModel.DataFormat.FLAT_JSON));

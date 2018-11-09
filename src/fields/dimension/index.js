@@ -31,4 +31,15 @@ export default class Dimension extends Field {
     calculateDataDomain () {
         throw new Error('Not yet implemented');
     }
+
+     /**
+     * Returns the formatted version of the underlying field data.
+     *
+     * @public
+     * @override
+     * @return {Array} Returns the formatted data.
+     */
+    formattedData () {
+        return this.data();
+    }
 }

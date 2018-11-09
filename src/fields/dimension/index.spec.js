@@ -51,4 +51,11 @@ describe('Dimension', () => {
             expect(dimField.domain()).to.eql(mockedDomain);
         });
     });
+
+    describe('#formattedData', () => {
+        it('should return the formatted data', () => {
+            const expected = ['India', 'US', 'Canada', 'India', 'US'];
+            expect(dimField.formattedData()).to.eql(expected);
+        });
+    });
 });
