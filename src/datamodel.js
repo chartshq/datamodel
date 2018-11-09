@@ -19,6 +19,7 @@ import { createBinnedFieldData } from './operator/bucket-creator';
 import Relation from './relation';
 import reducerStore from './utils/reducer-store';
 import { createFields } from './field-creator';
+import { DateTimeFormatter } from './utils';
 
 /**
  * DataModel is an in-browser representation of tabular data. It supports
@@ -69,7 +70,7 @@ class DataModel extends Relation {
      *      assigned to the instance.
      * @param {string} [options.fieldSeparator=','] specify field separator type if the data is of type dsv string.
      */
-    constructor (...args) {
+    constructor(...args) {
         super(...args);
 
         this._onPropagation = [];
@@ -85,7 +86,7 @@ class DataModel extends Relation {
      *
      * @return {ReducerStore} Singleton instance of {@link ReducerStore}.
      */
-    static get Reducers () {
+    static get Reducers() {
         return reducerStore;
     }
 
@@ -121,7 +122,7 @@ class DataModel extends Relation {
      *          }
      *      ```
      */
-    getData (options) {
+    getData(options) {
         const defOptions = {
             order: 'row',
             formatter: null,
@@ -217,7 +218,7 @@ class DataModel extends Relation {
      *
      * @return {DataModel} Returns a new DataModel instance after performing the groupby.
      */
-    groupBy (fieldsArr, reducers = {}, config = { saveChild: true }) {
+    groupBy(fieldsArr, reducers = {}, config = { saveChild: true }) {
         const groupByString = `${fieldsArr.join()}`;
         let params = [this, fieldsArr, reducers];
         const newDataModel = groupBy(...params);
@@ -287,7 +288,7 @@ class DataModel extends Relation {
      * @param {Array.<Array>} sortingDetails - Sorting details based on which the sorting will be performed.
      * @return {DataModel} Returns a new instance of DataModel with sorted data.
      */
-    sort (sortingDetails) {
+    sort(sortingDetails) {
         const rawData = this.getData({
             order: 'row',
             sort: sortingDetails
@@ -298,6 +299,23 @@ class DataModel extends Relation {
         const sortedDm = new this.constructor(dataInCSVArr, rawData.schema, { dataFormat: 'DSVArr' });
         sortedDm._sortingDetails = sortingDetails;
         return sortedDm;
+    }
+
+    /**
+     *
+     * Serializes a single field value.
+     *
+     * @private
+     *
+     * @param {Object} schema - The target field schema.
+     * @param {any} datum - The target field data.
+     * @return {any} Returns the serialized value.
+     */
+    _serializeFieldData(schema, datum) {
+        if (schema.type === FieldType.DIMENSION && schema.subtype === DimensionSubtype.TEMPORAL) {
+            return DateTimeFormatter.formatAs(datum, schema.format);
+        }
+        return datum;
     }
 
     /**
@@ -321,7 +339,7 @@ class DataModel extends Relation {
      * @param {string} options.fieldSeparator - The field separator character for DSV data type.
      * @return {Array|string} Returns the serialized data.
      */
-    serialize (type, options) {
+    serialize(type, options) {
         type = type || this._dataFormat;
         options = Object.assign({}, { fieldSeparator: ',' }, options);
 
@@ -329,22 +347,26 @@ class DataModel extends Relation {
 
         if (type === DataFormat.FLAT_JSON) {
             return data.map(row => schema.reduce((acc, col, idx) => {
-                acc[col.name] = row[idx];
+                acc[col.name] = this._serializeFieldData(col, row[idx]);
                 return acc;
             }, {}));
         } else if (type === DataFormat.DSV_STR) {
             const rows = [schema.map(unitSchema => unitSchema.name).join(options.fieldSeparator)];
-            data.forEach(row => rows.push(row.join(options.fieldSeparator)));
+            data.forEach(row => rows.push(
+                row.map((v, idx) => this._serializeFieldData(schema[idx], v)).join(options.fieldSeparator)
+            ));
             return rows.join('\n');
         } else if (type === DataFormat.DSV_ARR) {
             const rows = [schema.map(unitSchema => unitSchema.name)];
-            data.forEach(row => rows.push(row));
+            data.forEach(row => rows.push(
+                row.map((v, idx) => this._serializeFieldData(schema[idx], v))
+            ));
             return rows;
         }
         throw new Error(`Data type ${type} is not supported`);
     }
 
-    addField (field) {
+    addField(field) {
         const fieldName = field.name();
         this._colIdentifier += `,${fieldName}`;
         const partialFieldspace = this._partialFieldspace;
@@ -360,40 +382,40 @@ class DataModel extends Relation {
         return this;
     }
 
-     /**
-     * Creates a new variable calculated from existing variable. This method expects the defination of the newly created
-     * variable and a function which resolves the value of the new variable from existing variables.
-     *
-     * Can create a new measure based on existing variables
-     * @example
-     *  // DataModel already prepared and assigned to dm vairable;
-     *  const newDm = dataModel.calculateVariable({
-     *      name: 'powerToWeight',
-     *      type: 'measure'
-     *  }, ['horsepower', 'weight_in_lbs', (hp, weight) => hp / weight ]);
-     *
-     *
-     * Can create a new dimension based on existing variables
-     * @example
-     *  // DataModel already prepared and assigned to dm vairable;
-     *  const child = dataModel.calculateVariable(
-     *     {
-     *       name: 'Efficiency',
-     *       type: 'dimension'
-     *     }, ['horsepower', (hp) => {
-     *      if (hp < 80) { return 'low'; },
-     *      else if (hp < 120) { return 'moderate'; }
-     *      else { return 'high' }
-     *  }]);
-     *
-     * @public
-     *
-     * @param {Schema} schema: Schema of newly defined variable
-     * @param {VariableResolver} resolver: Resolver format to resolve the current variable
-     *
-     * @return {DataModel} Instance of DataModel with the new field
-     */
-    calculateVariable (schema, dependency, config = { saveChild: true, replaceVar: false }) {
+    /**
+    * Creates a new variable calculated from existing variable. This method expects the defination of the newly created
+    * variable and a function which resolves the value of the new variable from existing variables.
+    *
+    * Can create a new measure based on existing variables
+    * @example
+    *  // DataModel already prepared and assigned to dm vairable;
+    *  const newDm = dataModel.calculateVariable({
+    *      name: 'powerToWeight',
+    *      type: 'measure'
+    *  }, ['horsepower', 'weight_in_lbs', (hp, weight) => hp / weight ]);
+    *
+    *
+    * Can create a new dimension based on existing variables
+    * @example
+    *  // DataModel already prepared and assigned to dm vairable;
+    *  const child = dataModel.calculateVariable(
+    *     {
+    *       name: 'Efficiency',
+    *       type: 'dimension'
+    *     }, ['horsepower', (hp) => {
+    *      if (hp < 80) { return 'low'; },
+    *      else if (hp < 120) { return 'moderate'; }
+    *      else { return 'high' }
+    *  }]);
+    *
+    * @public
+    *
+    * @param {Schema} schema: Schema of newly defined variable
+    * @param {VariableResolver} resolver: Resolver format to resolve the current variable
+    *
+    * @return {DataModel} Instance of DataModel with the new field
+    */
+    calculateVariable(schema, dependency, config = { saveChild: true, replaceVar: false }) {
         const fieldsConfig = this.getFieldsConfig();
         const depVars = dependency.slice(0, dependency.length - 1);
         const retrieveFn = dependency[dependency.length - 1];
@@ -438,7 +460,7 @@ class DataModel extends Relation {
      *
      * @return {DataModel} DataModel instance.
      */
-    propagate (identifiers, config = {}, addToNameSpace, propConfig = {}) {
+    propagate(identifiers, config = {}, addToNameSpace, propConfig = {}) {
         const isMutableAction = config.isMutableAction;
         const propagationSourceId = config.sourceId;
         const payload = config.payload;
@@ -473,7 +495,7 @@ class DataModel extends Relation {
      * @param {Function} callback - The callback to invoke.
      * @return {DataModel} Returns this current DataModel instance itself.
      */
-    on (eventName, callback) {
+    on(eventName, callback) {
         switch (eventName) {
         case PROPAGATION:
             this._onPropagation.push(callback);
@@ -488,7 +510,7 @@ class DataModel extends Relation {
      * @param {string} eventName - The name of the event to unsubscribe.
      * @return {DataModel} Returns the current DataModel instance itself.
      */
-    unsubscribe (eventName) {
+    unsubscribe(eventName) {
         switch (eventName) {
         case PROPAGATION:
             this._onPropagation = [];
@@ -505,7 +527,7 @@ class DataModel extends Relation {
      * @param {DataModel} identifiers The propagated DataModel.
      * @memberof DataModel
      */
-    handlePropagation (propModel, payload) {
+    handlePropagation(propModel, payload) {
         let propListeners = this._onPropagation;
         propListeners.forEach(fn => fn.call(this, propModel, payload));
     }
@@ -560,7 +582,7 @@ class DataModel extends Relation {
      *
      * @returns {DataModel} Instance of new DataModel with the newly created bin.
      */
-    bin (dimensionName, config = { }) {
+    bin(dimensionName, config = {}) {
         const clone = this.clone();
         const binFieldName = config.name || `${dimensionName}_binned`;
         if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[dimensionName]) {

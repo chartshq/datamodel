@@ -1399,12 +1399,12 @@ describe('DataModel', () => {
 
         it('should return json data for FlatJSON data type', () => {
             const expected = [
-                { name: 'Rousan', birthday: 804882600000, roll: 2 },
-                { name: 'Sumant', birthday: 839097000000, roll: 89 },
-                { name: 'Ajay', birthday: 757535400000, roll: 31 },
-                { name: 'Sushant', birthday: 757535400000, roll: 99 },
-                { name: 'Samim', birthday: 757535400000, roll: 12 },
-                { name: 'Akash', birthday: 757535400000, roll: 20 }
+                { name: 'Rousan', birthday: '1995-07-05', roll: 2 },
+                { name: 'Sumant', birthday: '1996-08-04', roll: 89 },
+                { name: 'Ajay', birthday: '1994-01-03', roll: 31 },
+                { name: 'Sushant', birthday: '1994-01-03', roll: 99 },
+                { name: 'Samim', birthday: '1994-01-03', roll: 12 },
+                { name: 'Akash', birthday: '1994-01-03', roll: 20 }
             ];
 
             expect(dm.serialize(DataFormat.FLAT_JSON)).to.eql(expected);
@@ -1413,24 +1413,24 @@ describe('DataModel', () => {
         it('should return dsv string for DSVStr data type', () => {
             let expected = [
                 'name,birthday,roll',
-                'Rousan,804882600000,2',
-                'Sumant,839097000000,89',
-                'Ajay,757535400000,31',
-                'Sushant,757535400000,99',
-                'Samim,757535400000,12',
-                'Akash,757535400000,20'
+                'Rousan,1995-07-05,2',
+                'Sumant,1996-08-04,89',
+                'Ajay,1994-01-03,31',
+                'Sushant,1994-01-03,99',
+                'Samim,1994-01-03,12',
+                'Akash,1994-01-03,20'
             ].join('\n');
 
             expect(dm.serialize(DataFormat.DSV_STR)).to.eql(expected);
 
             expected = [
                 'name\tbirthday\troll',
-                'Rousan\t804882600000\t2',
-                'Sumant\t839097000000\t89',
-                'Ajay\t757535400000\t31',
-                'Sushant\t757535400000\t99',
-                'Samim\t757535400000\t12',
-                'Akash\t757535400000\t20'
+                'Rousan\t1995-07-05\t2',
+                'Sumant\t1996-08-04\t89',
+                'Ajay\t1994-01-03\t31',
+                'Sushant\t1994-01-03\t99',
+                'Samim\t1994-01-03\t12',
+                'Akash\t1994-01-03\t20'
             ].join('\n');
 
             expect(dm.serialize(DataFormat.DSV_STR, { fieldSeparator: '\t' })).to.eql(expected);
@@ -1439,12 +1439,12 @@ describe('DataModel', () => {
         it('should return dsv array for DSVArr data type', () => {
             const expected = [
                 ['name', 'birthday', 'roll'],
-                ['Rousan', 804882600000, 2],
-                ['Sumant', 839097000000, 89],
-                ['Ajay', 757535400000, 31],
-                ['Sushant', 757535400000, 99],
-                ['Samim', 757535400000, 12],
-                ['Akash', 757535400000, 20]
+                ['Rousan', '1995-07-05', 2],
+                ['Sumant', '1996-08-04', 89],
+                ['Ajay', '1994-01-03', 31],
+                ['Sushant', '1994-01-03', 99],
+                ['Samim', '1994-01-03', 12],
+                ['Akash', '1994-01-03', 20]
             ];
 
             expect(dm.serialize(DataFormat.DSV_ARR)).to.eql(expected);
@@ -1472,9 +1472,9 @@ describe('DataModel', () => {
 
             const expected = [
                 'name,birthday,roll',
-                'Rousan,804882600000,2',
-                'Sumant,839097000000,89',
-                'Ajay,757535400000,31'
+                'Rousan,1995-07-05,2',
+                'Sumant,1996-08-04,89',
+                'Ajay,1994-01-03,31'
             ].join('\n');
 
             expect(dm.serialize()).to.eql(expected);
