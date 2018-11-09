@@ -1,5 +1,6 @@
 import { rowDiffsetIterator } from '../../operator/row-diffset-iterator';
 import Dimension from '../dimension';
+import { DateTimeFormatter } from '../../utils';
 
 /**
  * Represents temporal field subtype.
@@ -79,6 +80,21 @@ export default class Temporal extends Dimension {
      */
     format () {
         return this.partialField.schema.format;
+    }
+
+    /**
+     * Returns the formatted version of the underlying field data.
+     *
+     * @public
+     * @override
+     * @return {Array} Returns the formatted data.
+     */
+    formattedData () {
+        const data = [];
+        rowDiffsetIterator(this.rowDiffset, (i) => {
+            data.push(DateTimeFormatter.formatAs(this.partialField.data[i], this.format()));
+        });
+        return data;
     }
 }
 

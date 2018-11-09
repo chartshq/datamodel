@@ -56,4 +56,11 @@ describe('Temporal', () => {
             expect(tempField.format()).to.equal(schema.format);
         });
     });
+
+    describe('#formattedData', () => {
+        it('should return the formatted data', () => {
+            const expected = ['2017-03-02', '2017-03-03', '2019-11-07'];
+            expect(tempField.formattedData()).to.eql(expected);
+        });
+    });
 });

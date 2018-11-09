@@ -115,4 +115,14 @@ export default class Field {
         });
         return data;
     }
+
+    /**
+     * Returns the formatted version of the underlying field data.
+     *
+     * @public
+     * @abstract
+     */
+    formattedData () {
+        throw new Error('Not yet implemented');
+    }
 }

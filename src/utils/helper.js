@@ -1,3 +1,5 @@
+import { DataFormat } from '../enums';
+
 /**
  * Checks whether the value is an array.
  *
@@ -113,3 +115,20 @@ export function isArrEqual(arr1, arr2) {
 export function formatNumber(val) {
     return val;
 }
+
+/**
+ * Returns the detected data format.
+ *
+ * @param {any} data - The input data to be tested.
+ * @return {string} Returns the data format name.
+ */
+export const detectDataFormat = (data) => {
+    if (isString(data)) {
+        return DataFormat.DSV_STR;
+    } else if (isArray(data) && isArray(data[0])) {
+        return DataFormat.DSV_ARR;
+    } else if (isArray(data) && (data.length === 0 || isObject(data[0]))) {
+        return DataFormat.FLAT_JSON;
+    }
+    return null;
+};

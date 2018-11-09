@@ -1,6 +1,6 @@
 /* eslint-disable default-case */
 
-import { FieldType, DimensionSubtype } from './enums';
+import { FieldType, DimensionSubtype, DataFormat } from './enums';
 import {
     persistDerivation,
     getRootGroupByModel,
@@ -300,6 +300,73 @@ class DataModel extends Relation {
         return sortedDm;
     }
 
+    /**
+     * Performs the serialization operation on the current {@link DataModel} instance according to the specified data
+     * type. When an {@link DataModel} instance is created, it de-serializes the input data into its internal format,
+     * and during its serialization process, it converts its internal data format to the specified data type and returns
+     * that data regardless what type of data is used during the {@link DataModel} initialization.
+     *
+     * @example
+     * // here dm is the pre-declared DataModel instance.
+     * const csvData = dm.serialize(DataModel.DataFormat.DSV_STR, { fieldSeparator: "," });
+     * console.log(csvData); // The csv formatted data.
+     *
+     * const jsonData = dm.serialize(DataModel.DataFormat.FLAT_JSON);
+     * console.log(jsonData); // The json data.
+     *
+     * @public
+     *
+     * @param {string} type - The data type name for serialization.
+     * @param {Object} options - The optional option object.
+     * @param {string} options.fieldSeparator - The field separator character for DSV data type.
+     * @return {Array|string} Returns the serialized data.
+     */
+    serialize (type, options) {
+        type = type || this._dataFormat;
+        options = Object.assign({}, { fieldSeparator: ',' }, options);
+
+        const fields = this.getFieldspace().fields;
+        const colData = fields.map(f => f.formattedData());
+        const rowsCount = colData[0].length;
+        let serializedData;
+        let rowIdx;
+        let colIdx;
+
+        if (type === DataFormat.FLAT_JSON) {
+            serializedData = [];
+            for (rowIdx = 0; rowIdx < rowsCount; rowIdx++) {
+                const row = {};
+                for (colIdx = 0; colIdx < fields.length; colIdx++) {
+                    row[fields[colIdx].name()] = colData[colIdx][rowIdx];
+                }
+                serializedData.push(row);
+            }
+        } else if (type === DataFormat.DSV_STR) {
+            serializedData = [fields.map(f => f.name()).join(options.fieldSeparator)];
+            for (rowIdx = 0; rowIdx < rowsCount; rowIdx++) {
+                const row = [];
+                for (colIdx = 0; colIdx < fields.length; colIdx++) {
+                    row.push(colData[colIdx][rowIdx]);
+                }
+                serializedData.push(row.join(options.fieldSeparator));
+            }
+            serializedData = serializedData.join('\n');
+        } else if (type === DataFormat.DSV_ARR) {
+            serializedData = [fields.map(f => f.name())];
+            for (rowIdx = 0; rowIdx < rowsCount; rowIdx++) {
+                const row = [];
+                for (colIdx = 0; colIdx < fields.length; colIdx++) {
+                    row.push(colData[colIdx][rowIdx]);
+                }
+                serializedData.push(row);
+            }
+        } else {
+            throw new Error(`Data type ${type} is not supported`);
+        }
+
+        return serializedData;
+    }
+
     addField (field) {
         const fieldName = field.name();
         this._colIdentifier += `,${fieldName}`;
@@ -316,39 +383,39 @@ class DataModel extends Relation {
         return this;
     }
 
-     /**
-     * Creates a new variable calculated from existing variable. This method expects the defination of the newly created
-     * variable and a function which resolves the value of the new variable from existing variables.
-     *
-     * Can create a new measure based on existing variables
-     * @example
-     *  // DataModel already prepared and assigned to dm vairable;
-     *  const newDm = dataModel.calculateVariable({
-     *      name: 'powerToWeight',
-     *      type: 'measure'
-     *  }, ['horsepower', 'weight_in_lbs', (hp, weight) => hp / weight ]);
-     *
-     *
-     * Can create a new dimension based on existing variables
-     * @example
-     *  // DataModel already prepared and assigned to dm vairable;
-     *  const child = dataModel.calculateVariable(
-     *     {
-     *       name: 'Efficiency',
-     *       type: 'dimension'
-     *     }, ['horsepower', (hp) => {
-     *      if (hp < 80) { return 'low'; },
-     *      else if (hp < 120) { return 'moderate'; }
-     *      else { return 'high' }
-     *  }]);
-     *
-     * @public
-     *
-     * @param {Schema} schema: Schema of newly defined variable
-     * @param {VariableResolver} resolver: Resolver format to resolve the current variable
-     *
-     * @return {DataModel} Instance of DataModel with the new field
-     */
+    /**
+    * Creates a new variable calculated from existing variable. This method expects the defination of the newly created
+    * variable and a function which resolves the value of the new variable from existing variables.
+    *
+    * Can create a new measure based on existing variables
+    * @example
+    *  // DataModel already prepared and assigned to dm vairable;
+    *  const newDm = dataModel.calculateVariable({
+    *      name: 'powerToWeight',
+    *      type: 'measure'
+    *  }, ['horsepower', 'weight_in_lbs', (hp, weight) => hp / weight ]);
+    *
+    *
+    * Can create a new dimension based on existing variables
+    * @example
+    *  // DataModel already prepared and assigned to dm vairable;
+    *  const child = dataModel.calculateVariable(
+    *     {
+    *       name: 'Efficiency',
+    *       type: 'dimension'
+    *     }, ['horsepower', (hp) => {
+    *      if (hp < 80) { return 'low'; },
+    *      else if (hp < 120) { return 'moderate'; }
+    *      else { return 'high' }
+    *  }]);
+    *
+    * @public
+    *
+    * @param {Schema} schema: Schema of newly defined variable
+    * @param {VariableResolver} resolver: Resolver format to resolve the current variable
+    *
+    * @return {DataModel} Instance of DataModel with the new field
+    */
     calculateVariable (schema, dependency, config = { saveChild: true, replaceVar: false }) {
         const fieldsConfig = this.getFieldsConfig();
         const depVars = dependency.slice(0, dependency.length - 1);
@@ -516,7 +583,7 @@ class DataModel extends Relation {
      *
      * @returns {DataModel} Instance of new DataModel with the newly created bin.
      */
-    bin (dimensionName, config = { }) {
+    bin (dimensionName, config = {}) {
         const clone = this.clone();
         const binFieldName = config.name || `${dimensionName}_binned`;
         if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[dimensionName]) {
