@@ -7,7 +7,8 @@ import {
     propagateToAllDataModels,
     getRootDataModel,
     propagateImmutableActions,
-    addToPropNamespace
+    addToPropNamespace,
+    sanitizeUnitSchema
 } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {
@@ -384,21 +385,21 @@ class DataModel extends Relation {
     }
 
     /**
-    * Creates a new variable calculated from existing variable. This method expects the defination of the newly created
+    * Creates a new variable calculated from existing variables. This method expects the definition of the newly created
     * variable and a function which resolves the value of the new variable from existing variables.
     *
-    * Can create a new measure based on existing variables
+    * Can create a new measure based on existing variables:
     * @example
-    *  // DataModel already prepared and assigned to dm vairable;
+    *  // DataModel already prepared and assigned to dm variable;
     *  const newDm = dataModel.calculateVariable({
     *      name: 'powerToWeight',
     *      type: 'measure'
     *  }, ['horsepower', 'weight_in_lbs', (hp, weight) => hp / weight ]);
     *
     *
-    * Can create a new dimension based on existing variables
+    * Can create a new dimension based on existing variables:
     * @example
-    *  // DataModel already prepared and assigned to dm vairable;
+    *  // DataModel already prepared and assigned to dm variable;
     *  const child = dataModel.calculateVariable(
     *     {
     *       name: 'Efficiency',
@@ -411,19 +412,26 @@ class DataModel extends Relation {
     *
     * @public
     *
-    * @param {Schema} schema: Schema of newly defined variable
-    * @param {VariableResolver} resolver: Resolver format to resolve the current variable
-    *
-    * @return {DataModel} Instance of DataModel with the new field
+    * @param {Object} schema - The schema of newly defined variable.
+    * @param {Array.<string|function>} dependency - An array containing the dependency variable names and a resolver
+    * function as the last element.
+    * @param {Object} config - An optional config object.
+    * @param {boolean} [config.saveChild] - Whether the newly created DataModel will be a child.
+    * @param {boolean} [config.replaceVar] - Whether the newly created variable will replace the existing variable.
+    * @return {DataModel} Returns an instance of DataModel with the new field.
     */
-    calculateVariable (schema, dependency, config = { saveChild: true, replaceVar: false }) {
+    calculateVariable (schema, dependency, config) {
+        schema = sanitizeUnitSchema(schema);
+        config = Object.assign({}, { saveChild: true, replaceVar: false }, config);
+
         const fieldsConfig = this.getFieldsConfig();
         const depVars = dependency.slice(0, dependency.length - 1);
         const retrieveFn = dependency[dependency.length - 1];
 
         if (fieldsConfig[schema.name] && !config.replaceVar) {
-            throw new Error(`${schema.name} field already exists in model.`);
+            throw new Error(`${schema.name} field already exists in datamodel`);
         }
+
         const depFieldIndices = depVars.map((field) => {
             const fieldSpec = fieldsConfig[field];
             if (!fieldSpec) {
@@ -433,7 +441,7 @@ class DataModel extends Relation {
             return fieldSpec.index;
         });
 
-        let clone = this.clone();
+        const clone = this.clone();
 
         const fs = clone.getFieldspace().fields;
         const suppliedFields = depFieldIndices.map(idx => fs[idx]);

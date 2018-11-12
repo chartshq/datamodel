@@ -171,7 +171,7 @@ export const cloneWithProject = (sourceDm, projField, config, allFields) => {
     return cloned;
 };
 
-const sanitizeSchema = schema => schema.map((unitSchema) => {
+export const sanitizeUnitSchema = (unitSchema) => {
     // Do deep clone of the unit schema as the user might change it later.
     unitSchema = extend2({}, unitSchema);
     if (!unitSchema.type) {
@@ -191,7 +191,9 @@ const sanitizeSchema = schema => schema.map((unitSchema) => {
     }
 
     return unitSchema;
-});
+};
+
+export const sanitizeSchema = schema => schema.map(unitSchema => sanitizeUnitSchema(unitSchema));
 
 export const updateData = (relation, data, schema, options) => {
     schema = sanitizeSchema(schema);

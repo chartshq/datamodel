@@ -52,6 +52,12 @@ const data = [
 
 // const data = "name,birthday,roll\nRousan,1995-07-05,222\nSumant,1996-08-04,89\nAjay,1994-01-03,13";
 
+debugger;
 const dm = new DataModel(data, schema);
 
-console.log(dm.serialize(DataModel.DataFormat.FLAT_JSON));
+const clonedDm = dm.clone();
+
+const calDm = clonedDm.calculateVariable({name: "abc", type: "measure"}, [ idx => idx]);
+
+// console.log(dm.groupBy(["name"]).serialize());
+// console.log(dm.clone().groupBy(["name"]).serialize());
