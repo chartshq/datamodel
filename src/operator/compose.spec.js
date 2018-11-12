@@ -104,7 +104,6 @@ describe('Testing compose functionality', () => {
             normalDm = normalDm.project(['profit', 'sales']);
             normalDm = normalDm.groupBy(['profit']);
             let composedDm = composedFn(dataModel2);
-            // debugger;
             expect(normalDm.getData()).to.deep.equal(composedDm.getData());
         });
 
