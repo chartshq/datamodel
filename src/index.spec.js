@@ -920,7 +920,7 @@ describe('DataModel', () => {
                         name: 'Efficiency'
                     }, ['profit', 'sales', (profit, sales) => profit / sales]);
                 }
-            ).to.throw('Efficiency field already exists in model.');
+            ).to.throw('Efficiency field already exists in datamodel');
         });
 
         it('should create a calculated dimension', () => {
