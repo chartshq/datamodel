@@ -38,6 +38,7 @@ class Relation {
             // parent datamodel was passed as part of source
             this._colIdentifier = source._colIdentifier;
             this._rowDiffset = source._rowDiffset;
+            this._dataFormat = source._dataFormat;
             this._parent = source;
             this._partialFieldspace = this._parent._partialFieldspace;
             this._fieldStoreName = getUniqueId();
