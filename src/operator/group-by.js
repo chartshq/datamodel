@@ -13,7 +13,7 @@ import { FieldType } from '../enums';
  */
 function getFieldArr (dataModel, fieldArr) {
     const retArr = [];
-    const fieldStore = dataModel.getPartialFieldspace();
+    const fieldStore = dataModel.getFieldspace();
     const dimensions = fieldStore.getDimension();
 
     Object.entries(dimensions).forEach(([key]) => {
@@ -39,7 +39,7 @@ function getFieldArr (dataModel, fieldArr) {
 function getReducerObj (dataModel, reducers = {}) {
     const retObj = {};
     const pReducers = reducers;
-    const fieldStore = dataModel.getPartialFieldspace();
+    const fieldStore = dataModel.getFieldspace();
     const measures = fieldStore.getMeasure();
     let reducer = reducerStore.defaultReducer();
     if (typeof reducers === 'function') {
@@ -69,7 +69,7 @@ function getReducerObj (dataModel, reducers = {}) {
 function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     const sFieldArr = getFieldArr(dataModel, fieldArr);
     const reducerObj = getReducerObj(dataModel, reducers);
-    const fieldStore = dataModel.getPartialFieldspace();
+    const fieldStore = dataModel.getFieldspace();
     const fieldStoreObj = fieldStore.fieldsObj();
     const dbName = fieldStore.name;
     const dimensionArr = [];

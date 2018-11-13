@@ -86,5 +86,24 @@ describe('Test groupBy', () => {
             const compData = groupBy(dataModel1, ['city']).getData();
             expect(compData).to.deep.equal(reqData);
         });
+
+        it('should return a grouped dataModel after projection', () => {
+            const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' })
+                .project(['city', 'sales']);
+
+            const reqData = {
+                schema: [
+                { name: 'city', type: 'dimension', subtype: 'categorical' },
+                { name: 'sales', type: 'measure', subtype: 'continuous' },
+                ],
+                data: [
+                ['a', 40],
+                ['b', 50],
+                ],
+                uids: [0, 1]
+            };
+            const compData = groupBy(dataModel1, ['city']).getData();
+            expect(compData).to.deep.equal(reqData);
+        });
     });
 });
