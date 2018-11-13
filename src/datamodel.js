@@ -446,10 +446,14 @@ class DataModel extends Relation {
         const fs = clone.getFieldspace().fields;
         const suppliedFields = depFieldIndices.map(idx => fs[idx]);
 
+        let cachedClonedDm;
+        let cachedStore = {};
+        let cloneProvider = () => { if (!cachedClonedDm) cachedClonedDm = this.detachedRoot(); return cachedClonedDm; };
+
         const computedValues = [];
         rowDiffsetIterator(clone._rowDiffset, (i) => {
             const fieldsData = suppliedFields.map(field => field.partialField.data[i]);
-            computedValues[i] = retrieveFn(...fieldsData, i, fs);
+            computedValues[i] = retrieveFn(...fieldsData, i, cloneProvider, cachedStore);
         });
         const [field] = createFields([computedValues], [schema], [schema.name]);
         clone.addField(field);

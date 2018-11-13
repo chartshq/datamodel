@@ -761,21 +761,20 @@ describe('DataModel', () => {
                 uids: [0, 1, 2, 3]
             });
             expect((dataModel1.join(dataModel2,
-                (dmFields1, dmFields2) => dmFields1.city.value === dmFields2.city.value))
-                            .getData()).to.deep.equal({
-                                schema: [
+                (dmFields1, dmFields2) => dmFields1.city.value === dmFields2.city.value)).getData()).to.deep.equal({
+                    schema: [
                         { name: 'profit', type: 'measure', subtype: 'continuous' },
                         { name: 'sales', type: 'measure', subtype: 'continuous' },
                         { name: 'ModelA.city', type: 'dimension', subtype: 'categorical' },
                         { name: 'population', type: 'measure', subtype: 'continuous' },
                         { name: 'ModelB.city', type: 'dimension', subtype: 'categorical' },
-                                ],
-                                data: [
+                    ],
+                    data: [
                         [10, 20, 'a', 200, 'a'],
                         [15, 25, 'b', 250, 'b'],
-                                ],
-                                uids: [0, 1]
-                            });
+                    ],
+                    uids: [0, 1]
+                });
             expect((dataModel1.naturalJoin(dataModel2)).getData()).to.deep.equal({
                 schema: [
                     { name: 'profit', type: 'measure', subtype: 'continuous' },
@@ -870,6 +869,58 @@ describe('DataModel', () => {
                 ],
                 uids: [0]
             });
+        });
+
+        it('should provide appropriate arguments to the predicate function', () => {
+            const data1 = [
+                { profit: 10, sales: 20, city: 'a' },
+                { profit: 15, sales: 25, city: 'b' },
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'city', type: 'dimension' },
+            ];
+            const data2 = [
+                { population: 200, city: 'a' },
+                { population: 250, city: 'b' },
+            ];
+            const schema2 = [
+                { name: 'population', type: 'measure' },
+                { name: 'city', type: 'dimension' }
+            ];
+            const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
+            const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
+
+            const joinedDm = dataModel1.join(dataModel2, (fields1, fields2, cloneProvider1, cloneProvider2, store) => {
+                if (!store.clonedDm1) {
+                    store.clonedDm1 = cloneProvider1();
+                }
+                if (!store.clonedDm2) {
+                    store.clonedDm2 = cloneProvider2();
+                }
+                if (!store.avgPopulation) {
+                    store.avgPopulation = store.clonedDm2.groupBy([''], { population: 'avg' }).getData().data[0][0];
+                }
+
+                return (fields1.profit.value * fields1.sales.value) > store.avgPopulation;
+            });
+
+            const expected = {
+                schema: [
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'ModelA.city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'population', type: 'measure', subtype: 'continuous' },
+                    { name: 'ModelB.city', type: 'dimension', subtype: 'categorical' }
+                ],
+                data: [
+                    [15, 25, 'b', 200, 'a'],
+                    [15, 25, 'b', 250, 'b']
+                ],
+                uids: [0, 1]
+            };
+            expect(joinedDm.getData()).to.eql(expected);
         });
     });
 
@@ -1034,7 +1085,7 @@ describe('DataModel', () => {
             ).to.equal('Hey Jude');
         });
 
-        it('should return correct value from the callback funciton', () => {
+        it('should return correct value from the callback function', () => {
             const data = [
                 { a: 10, aaa: 20, aaaa: 'd' },
                 { a: 15, aaa: 25, aaaa: 'demo' },
@@ -1057,6 +1108,79 @@ describe('DataModel', () => {
             const childData = child.getData().data;
             const efficiency = childData[1][childData[1].length - 1];
             expect(efficiency).to.equal(41);
+        });
+
+        it('should provide appropriate arguments to the predicate function', () => {
+            const data1 = [
+                { profit: 10, sales: 20, city: 'a', state: 'aa' },
+                { profit: 15, sales: 25, city: 'b', state: 'bb' },
+                { profit: 10, sales: 20, city: 'a', state: 'ab' },
+                { profit: 15, sales: 25, city: 'b', state: 'ba' },
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'city', type: 'dimension' },
+                { name: 'state', type: 'dimension' },
+            ];
+            const dm = new DataModel(data1, schema1);
+
+            let calculatedDm = dm.calculateVariable({
+                name: 'avgProfitOffset',
+                type: 'measure'
+            }, ['profit', (profit, i, cloneProvider, store) => {
+                if (!store.clonedDm) {
+                    store.clonedDm = cloneProvider();
+                }
+                if (!store.avgProfit) {
+                    store.avgProfit = store.clonedDm.groupBy([''], { profit: 'avg' }).getData().data[0][0];
+                }
+
+                return store.avgProfit - profit;
+            }]);
+
+            let expected = {
+                schema: [
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'state', type: 'dimension', subtype: 'categorical' },
+                    { name: 'avgProfitOffset', type: 'measure', subtype: 'continuous' }
+                ],
+                data: [
+                    [10, 20, 'a', 'aa', 2.5],
+                    [15, 25, 'b', 'bb', -2.5],
+                    [10, 20, 'a', 'ab', 2.5],
+                    [15, 25, 'b', 'ba', -2.5]
+                ],
+                uids: [0, 1, 2, 3]
+            };
+
+            expect(calculatedDm.getData()).to.eql(expected);
+
+            calculatedDm = dm.calculateVariable({
+                name: 'profitIndex',
+                type: 'measure'
+            }, ['profit', (profit, i) => profit * i]);
+
+            expected = {
+                schema: [
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'state', type: 'dimension', subtype: 'categorical' },
+                    { name: 'profitIndex', type: 'measure', subtype: 'continuous' }
+                ],
+                data: [
+                    [10, 20, 'a', 'aa', 0],
+                    [15, 25, 'b', 'bb', 15],
+                    [10, 20, 'a', 'ab', 20],
+                    [15, 25, 'b', 'ba', 45]
+                ],
+                uids: [0, 1, 2, 3]
+            };
+
+            expect(calculatedDm.getData()).to.eql(expected);
         });
     });
 
@@ -1294,23 +1418,27 @@ describe('DataModel', () => {
                 const childData = grouped.getData().data;
                 expect(childData[0][0]).to.equal(15);
             });
+
             it('should group properly if def aggregation function is sum', () => {
                 const grouped = dataModel.groupBy(['first']);
                 const childData = grouped.getData().data;
                 expect(childData[0][1]).to.equal(45);
             });
+
             it('should group properly if def aggregation function is min', () => {
                 DataModel.Reducers.defaultReducer('min');
                 const grouped = dataModel.groupBy(['first']);
                 const childData = grouped.getData().data;
                 expect(childData[0][1]).to.equal(45);
             });
+
             it('should group properly if def aggregation function is changed from first to min', () => {
                 DataModel.Reducers.defaultReducer('min');
                 const grouped = dataModel.groupBy(['first']);
                 const childData = grouped.getData().data;
                 expect(childData[0][1]).to.equal(45);
             });
+
             it('should group properly if def aggregation function is changed from min to first', () => {
                 DataModel.Reducers.defaultReducer('min');
                 const grouped = dataModel.groupBy(['first'], {
@@ -1319,6 +1447,7 @@ describe('DataModel', () => {
                 const childData = grouped.getData().data;
                 expect(childData[0][1]).to.equal(45);
             });
+
             it('should Register a global aggregation', () => {
                 DataModel.Reducers.register('mySum', (arr) => {
                     const isNestedArray = arr[0] instanceof Array;
@@ -1336,9 +1465,41 @@ describe('DataModel', () => {
                 const childData = grouped.getData().data;
                 expect(childData[0][1]).to.equal(4500);
             });
+
             it('should reset default fnc', () => {
                 DataModel.Reducers.defaultReducer('sum');
                 expect(DataModel.Reducers.defaultReducer()).to.equal(DataModel.Reducers.resolve('sum'));
+            });
+
+            it('should provide appropriate arguments to the aggregation function', () => {
+                const dm = new DataModel(data1, schema1);
+                const groupedDm = dm.groupBy(['first'], {
+                    profit: (vals, cloneProvider, store) => {
+                        if (!store.clonedDm) {
+                            store.clonedDm = cloneProvider();
+                        }
+                        if (!store.avgProfit) {
+                            store.avgProfit = store.clonedDm.groupBy([''], { profit: 'avg' }).getData().data[0][0];
+                        }
+
+                        return DataModel.Stats.avg(vals) - store.avgProfit;
+                    }
+                });
+
+                const expected = {
+                    schema: [
+                        { name: 'profit', type: 'measure', defAggFn: 'avg', subtype: 'continuous' },
+                        { name: 'sales', type: 'measure', subtype: 'continuous' },
+                        { name: 'first', type: 'dimension', subtype: 'categorical' }
+                    ],
+                    data: [
+                        [1.25, 45, 'Hey'],
+                        [-1.25, 45, 'White']
+                    ],
+                    uids: [0, 1]
+                };
+
+                expect(groupedDm.getData()).to.eql(expected);
             });
         });
     });
