@@ -446,6 +446,51 @@ describe('DataModel', () => {
             expect(selectedDm.getData()).to.deep.equal(expData);
             expect(selectedDm.getFieldspace().fields[0].domain()).to.deep.equal([28, 35]);
         });
+
+        it('should provide appropriate arguments to the predicate function', () => {
+            const dataModel = new DataModel(data, schema);
+
+            let selectedDm = dataModel.select((fields, i, cloneProvider, store) => {
+                if (!store.clonedDm) {
+                    store.clonedDm = cloneProvider();
+                }
+                if (!store.avgAge) {
+                    store.avgAge = store.clonedDm.groupBy([''], { age: 'avg' }).getData().data[0][0];
+                }
+
+                return fields.age.value > store.avgAge;
+            });
+            let expData = {
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                data: [
+                    [59, 'blue-collar', 'married'],
+                    [57, 'self-employed', 'married']
+                ],
+                uids: [1, 3]
+            };
+
+            expect(selectedDm.getData()).to.eql(expData);
+
+            selectedDm = dataModel.select((fields, i) => i < 2);
+            expData = {
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                data: [
+                    [30, 'management', 'married'],
+                    [59, 'blue-collar', 'married']
+                ],
+                uids: [0, 1]
+            };
+
+            expect(selectedDm.getData()).to.eql(expData);
+        });
     });
 
     describe('#sort', () => {

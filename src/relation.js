@@ -206,17 +206,17 @@ class Relation {
     }
 
     /**
-     * {@link link_to_selection | Selection} is a row filtering operation. It expects an predicate and an optional mode
+     * {@link link_to_selection | Selection} is a row filtering operation. It expects a predicate and an optional mode
      * which control which all rows should be included in the resultant DataModel instance.
      *
-     * {@link SelectionPredicate} is a function which returns a boolean value. For selection opearation the selection
+     * {@link SelectionPredicate} is a function which returns a boolean value. For selection operation the selection
      * function is called for each row of DataModel instance with the current row passed as argument.
      *
      * After executing {@link SelectionPredicate} the rows are labeled as either an entry of selection set or an entry
      * of rejection set.
      *
      * {@link FilteringMode} operates on the selection and rejection set to determine which one would reflect in the
-     * resulatant datamodel.
+     * resultant datamodel.
      *
      * @warning
      * Selection and rejection set is only a logical idea for concept explanation purpose.
@@ -243,14 +243,13 @@ class Relation {
      *
      * @public
      *
-     * @param {SelectionPredicate} selectFn - Predicate funciton which is called for each row with the current row
-     *      ```
-     *          function (row, i)  { ... }
-     *      ```
-     * @param {Object} [config] - The configuration object to control the inclusion exclusion of a row in resultant
-     *      DataModel instance
-     * @param {FilteringMode} [config.mode=FilteringMode.NORMAL] - The mode of the selection
-     *
+     * @param {Function} selectFn - The predicate function which is called for each row with the current row.
+     * ```
+     *  function (row, i, cloneProvider, store)  { ... }
+     * ```
+     * @param {Object} config - The configuration object to control the inclusion exclusion of a row in resultant
+     * DataModel instance.
+     * @param {FilteringMode} [config.mode=FilteringMode.NORMAL] - The mode of the selection.
      * @return {DataModel} Returns the new DataModel instance(s) after operation.
      */
     select (selectFn, config) {

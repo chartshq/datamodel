@@ -51,15 +51,28 @@ export const persistDerivation = (model, operation, config = {}, criteriaFn) => 
     }
 };
 
-export const selectHelper = (rowDiffset, fields, selectFn, config) => {
+export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => {
     const newRowDiffSet = [];
     let lastInsertedValue = -1;
     let { mode } = config;
     let li;
-    let checker = index => selectFn(prepareSelectionData(fields, index), index);
+    let cachedClonedDm;
+    let cachedStore = {};
+    let cloneProvider = () => { if (!cachedClonedDm) cachedClonedDm = sourceDm.detachedRoot(); return cachedClonedDm; };
+    const selectorHelperFn = index => selectFn(
+        prepareSelectionData(fields, index),
+        index,
+        cloneProvider,
+        cachedStore
+    );
+
+    let checker;
     if (mode === FilteringMode.INVERSE) {
-        checker = index => !selectFn(prepareSelectionData(fields, index));
+        checker = index => !selectorHelperFn(index);
+    } else {
+        checker = index => selectorHelperFn(index);
     }
+
     rowDiffsetIterator(rowDiffset, (i) => {
         if (checker(i)) {
             if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
@@ -136,7 +149,8 @@ export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) =
         cloned._rowDiffset,
         cloned.getPartialFieldspace().fields,
         selectFn,
-        selectConfig
+        selectConfig,
+        sourceDm
     );
     cloned._rowDiffset = rowDiffset;
     cloned.__calculateFieldspace().calculateFieldsConfig();
