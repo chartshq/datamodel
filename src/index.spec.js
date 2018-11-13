@@ -904,7 +904,7 @@ describe('DataModel', () => {
             const newDm = dataModel.calculateVariable({
                 name: 'Song',
                 type: 'dimension'
-            }, [() => 3]);
+            }, [i => i]);
 
             const songData = newDm.groupBy(['Song']);
             const expected = {
@@ -913,8 +913,14 @@ describe('DataModel', () => {
                     { name: 'sales', type: 'measure', subtype: 'continuous' },
                     { name: 'Song', type: 'dimension', subtype: 'categorical' }
                 ],
-                data: [[50, 90, '3']],
-                uids: [0] };
+                data: [
+                    [10, 20, '0'],
+                    [15, 25, '1'],
+                    [10, 20, '2'],
+                    [15, 25, '3']
+                ],
+                uids: [0, 1, 2, 3]
+            };
 
             expect(
                 songData.getData()
