@@ -124,4 +124,3 @@ const joinedDm = dataModel1.join(dataModel2, (f1, f2, cloneProvider1, cloneProvi
 
     return (f1.profit.value * f1.sales.value) > store.avgPopulation;
 });
-debugger;
