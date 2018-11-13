@@ -542,9 +542,9 @@ class DataModel extends Relation {
     }
 
     /**
-     * Perfoms binning on a measure field based on a binning configuration. This method does not aggregate the number of
-     * rows present in DataModel instance after binning, it just adds a new field with the binned value. Refer binning
-     * {@link example_of_binning | example} to have a intuition of what binning is and the use case.
+     * Performs binning on a measure field based on a binning configuration. This method does not aggregate the number
+     * of rows present in DataModel instance after binning, it just adds a new field with the binned value. Refer
+     * binning {@link example_of_binning | example} to have a intuition of what binning is and the use case.
      *
      * Binning can be configured by
      * - providing custom bin configuration with non uniform buckets
@@ -553,7 +553,7 @@ class DataModel extends Relation {
      *
      * When custom buckets are provided as part of binning configuration
      * @example
-     *  // DataModel already prepared and assigned to dm vairable
+     *  // DataModel already prepared and assigned to dm variable
      *  const buckets = {
      *      start: 30
      *      stops: [80, 100, 110]
@@ -564,14 +564,14 @@ class DataModel extends Relation {
      * @text
      * When `binCount` is defined as part of binning configuration
      * @example
-     *  // DataModel already prepared and assigned to dm vairable
+     *  // DataModel already prepared and assigned to dm variable
      *  const config = { binCount: 5, name: 'binnedHP' }
      *  const binDM = dataModel.bin('horsepower', config);
      *
      * @text
      * When `binSize` is defined as part of binning configuration
      * @example
-     *  // DataModel already prepared and assigned to dm vairable
+     *  // DataModel already prepared and assigned to dm variable
      *  const config = { binSize: 200, name: 'binnedHorsepower' }
      *  const binDM = dataModel.bin('horsepower', config);
      *
@@ -579,7 +579,7 @@ class DataModel extends Relation {
      *
      * @param {String} name Name of measure which will be used to create bin
      * @param {Object} config Config required for bin creation
-     * @param {Array.<Number>} config.bucketObj.stops Defination of bucket ranges. Two subsequent number from arrays
+     * @param {Array.<Number>} config.bucketObj.stops Definition of bucket ranges. Two subsequent number from arrays
      *      are picked and a range is created. The first number from range is inclusive and the second number from range
      *      is exclusive.
      * @param {Number} [config.bucketObj.startAt] Force the start of the bin from a particular number.
@@ -612,6 +612,36 @@ class DataModel extends Relation {
         clone.addField(binField);
         persistDerivation(clone, DM_DERIVATIVES.BIN, { dimensionName, config, binFieldName }, null);
         return clone;
+    }
+
+    /**
+     * Creates a new {@link DataModel} instance with completely detached root from current {@link DataModel} instance,
+     * the new {@link DataModel} instance has no parent-children relationship with the current one, but has same data as
+     * the current one.
+     * This API is useful when a completely different {@link DataModel} but with same data as the current instance is
+     * needed.
+     *
+     * @example
+     *  const dm = new DataModel(data, schema);
+     *  const detachedDm = dm.detachedRoot();
+     *
+     * // has different namespace
+     * console.log(dm.getPartialFieldspace().name);
+     * console.log(detachedDm.getPartialFieldspace().name);
+     *
+     * // has same data
+     * console.log(dm.getData());
+     * console.log(detachedDm.getData());
+     *
+     * @public
+     *
+     * @return {DataModel} Returns a detached {@link DataModel} instance.
+     */
+    detachedRoot () {
+        const data = this.serialize(DataFormat.FLAT_JSON);
+        const schema = this.getSchema();
+
+        return new DataModel(data, schema);
     }
 }
 

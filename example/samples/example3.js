@@ -51,13 +51,16 @@ const data = [
 ];
 
 // const data = "name,birthday,roll\nRousan,1995-07-05,222\nSumant,1996-08-04,89\nAjay,1994-01-03,13";
-
 const dm = new DataModel(data, schema);
 // const calDm = dm.calculateVariable({name: "abc", type: "measure"}, [ (idx) => 6]);
-const dm2 = dm.project(["name", "birthday"]);
+// const dm2 = dm.project(["name", "birthday"]);
 
-const groupByDm = dm2.groupBy(["name"]);
-console.log(groupByDm.getData());
+// const groupByDm = dm2.groupBy(["name"]);
+// console.log(groupByDm.getData());
 
 // console.log(dm.groupBy(["name"]).serialize());
 // console.log(dm.clone().groupBy(["name"]).serialize());
+
+const detachedDm = dm.detachedRoot();
+const dm2 = detachedDm.project(["name", "roll"]);
+console.log(dm2);
