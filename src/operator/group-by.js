@@ -117,11 +117,14 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
             });
         }
     });
+
     // reduction
+    let cachedStore = {};
+    let cloneProvider = () => dataModel.detachedRoot();
     data.forEach((row) => {
         const tuple = row;
         measureArr.forEach((_) => {
-            tuple[_] = reducerObj[_](row[_]);
+            tuple[_] = reducerObj[_](row[_], cloneProvider, cachedStore);
         });
     });
     if (existingDataModel) {

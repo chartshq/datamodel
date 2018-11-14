@@ -74,9 +74,14 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
                 }
                 userArg[dm2FieldStoreName][field.name()] = field.partialField.data[ii];
             });
+
+            let cachedStore = {};
+            let cloneProvider1 = () => dm1.detachedRoot();
+            let cloneProvider2 = () => dm2.detachedRoot();
+
             const dm1Fields = prepareJoinData(userArg[dm1FieldStoreName]);
             const dm2Fields = prepareJoinData(userArg[dm2FieldStoreName]);
-            if (applicableFilterFn(dm1Fields, dm2Fields)) {
+            if (applicableFilterFn(dm1Fields, dm2Fields, cloneProvider1, cloneProvider2, cachedStore)) {
                 const tupleObj = {};
                 tuple.forEach((cellVal, iii) => {
                     tupleObj[schema[iii].name] = cellVal;
@@ -89,8 +94,7 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
                     rowAdded = true;
                     rowPosition = i;
                 }
-            }
-            else if ((jointype === JOINS.LEFTOUTER || jointype === JOINS.RIGHTOUTER) && !rowAdded) {
+            } else if ((jointype === JOINS.LEFTOUTER || jointype === JOINS.RIGHTOUTER) && !rowAdded) {
                 const tupleObj = {};
                 let len = dm1FieldStore.fields.length - 1;
                 tuple.forEach((cellVal, iii) => {

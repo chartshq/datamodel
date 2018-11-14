@@ -56,9 +56,8 @@ export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => 
     let lastInsertedValue = -1;
     let { mode } = config;
     let li;
-    let cachedClonedDm;
     let cachedStore = {};
-    let cloneProvider = () => { if (!cachedClonedDm) cachedClonedDm = sourceDm.detachedRoot(); return cachedClonedDm; };
+    let cloneProvider = () => sourceDm.detachedRoot();
     const selectorHelperFn = index => selectFn(
         prepareSelectionData(fields, index),
         index,
