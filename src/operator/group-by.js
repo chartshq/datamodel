@@ -119,12 +119,8 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     });
 
     // reduction
-    let cachedClonedDm;
     let cachedStore = {};
-    let cloneProvider = () => {
-        if (!cachedClonedDm) cachedClonedDm = dataModel.detachedRoot();
-        return cachedClonedDm;
-    };
+    let cloneProvider = () => dataModel.detachedRoot();
     data.forEach((row) => {
         const tuple = row;
         measureArr.forEach((_) => {

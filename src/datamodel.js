@@ -446,9 +446,8 @@ class DataModel extends Relation {
         const fs = clone.getFieldspace().fields;
         const suppliedFields = depFieldIndices.map(idx => fs[idx]);
 
-        let cachedClonedDm;
         let cachedStore = {};
-        let cloneProvider = () => { if (!cachedClonedDm) cachedClonedDm = this.detachedRoot(); return cachedClonedDm; };
+        let cloneProvider = () => this.detachedRoot();
 
         const computedValues = [];
         rowDiffsetIterator(clone._rowDiffset, (i) => {

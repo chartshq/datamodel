@@ -75,17 +75,9 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
                 userArg[dm2FieldStoreName][field.name()] = field.partialField.data[ii];
             });
 
-            let cachedClonedDm1;
-            let cachedClonedDm2;
             let cachedStore = {};
-            let cloneProvider1 = () => {
-                if (!cachedClonedDm1) cachedClonedDm1 = dm1.detachedRoot();
-                return cachedClonedDm1;
-            };
-            let cloneProvider2 = () => {
-                if (!cachedClonedDm2) cachedClonedDm2 = dm2.detachedRoot();
-                return cachedClonedDm2;
-            };
+            let cloneProvider1 = () => dm1.detachedRoot();
+            let cloneProvider2 = () => dm2.detachedRoot();
 
             const dm1Fields = prepareJoinData(userArg[dm1FieldStoreName]);
             const dm2Fields = prepareJoinData(userArg[dm2FieldStoreName]);
