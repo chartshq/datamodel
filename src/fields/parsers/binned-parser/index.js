@@ -20,7 +20,7 @@ export default class BinnedParser extends FieldParser {
             return null;
         }
 
-        const regex = /^\s*(\d+)\s*-\s*(\d+)\s*$/;
+        const regex = /^\s*(-?\d+)\s*-\s*(-?\d+)\s*$/;
         val = String(val);
 
         const matched = val.match(regex);

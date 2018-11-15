@@ -1257,51 +1257,22 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
+            const dm = new DataModel(data1, schema1, { name: 'Yo' });
 
-            const buckets = {
-                start: 0,
-                stops: [5, 11, 16, 20, 30]
-            };
-            const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
-            let fieldData = bin.getFieldspace().fields.find(field => field.name() === 'sumField').partialField.data;
+            let binnedDm = dm.bin('profit', { buckets: [0, 5, 11, 16, 20, 30], name: 'sumField' });
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
             let expectedData = ['5-11', '11-16', '11-16', '11-16', '5-11', '16-20', '20-30', '16-20', '20-30'];
-            expect(fieldData).to.deep.equal(expectedData);
-        });
-        it('should bin the data when buckets are given but data value having lesser and greater value', () => {
-            const data1 = [
-                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-                { profit: 5, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 5, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-                { profit: 18, sales: 25, first: 'White', second: 'walls' },
-                { profit: 21, sales: 25, first: 'White', second: 'walls' },
-                { profit: 18, sales: 25, first: 'White', second: 'walls' },
-                { profit: 32, sales: 25, first: 'White', second: 'walls' }
-            ];
-            const schema1 = [
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
-                { name: 'first', type: 'dimension' },
-                { name: 'second', type: 'dimension' },
-            ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
+            expect(newField.data()).to.deep.equal(expectedData);
+            expect(newField.bins()).to.deep.equal([0, 5, 11, 16, 20, 30]);
 
-            const buckets = {
-                start: 10,
-                stops: [11, 16, 20, 30]
-            };
-            const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
-            let fieldData = bin.getFieldspace().fields.find(field => field.name() === 'sumField').partialField.data;
-            let expectedData = ['10-11', '5-10', '5-10', '11-16', '10-11', '16-20', '20-30', '16-20', '30-32'];
-            expect(fieldData).to.deep.equal(expectedData);
-            expect(bin.getFieldspace().fields.find(field => field.name() === 'sumField').bins().mid)
-                            .to.deep.equal([7.5, 10.5, 13.5, 18, 25, 31]);
-            expect(bin.getFieldspace().fields.find(field => field.name() === 'sumField').bins().range)
-                            .to.deep.equal([5, 10, 11, 16, 20, 30, 32]);
+            binnedDm = dm.bin('profit', { buckets: [11, 16, 20], name: 'sumField1' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField1');
+            expectedData = ['10-11', '11-16', '11-16', '11-16', '10-11', '16-20', '20-22', '16-20', '20-22'];
+            expect(newField.data()).to.deep.equal(expectedData);
+            expect(newField.bins()).to.deep.equal([10, 11, 16, 20, 22]);
         });
-        it('should bin data when num of bins given', () => {
+
+        it('should bin data when binsCount is given', () => {
             const data1 = [
                 { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
                 { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
@@ -1320,12 +1291,27 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
-            const bin = dataModel.bin('profit', { binCount: 2, name: 'sumField' });
-            let fieldData = bin.getFieldspace().fields.find(field => field.name() === 'sumField').partialField.data;
+            const dm = new DataModel(data1, schema1, { name: 'Yo' });
+
+            let binnedDm = dm.bin('profit', { binsCount: 2, name: 'sumField' });
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
             let expData = ['10-16', '10-16', '10-16', '10-16', '10-16', '16-22', '16-22', '16-22', '16-22', '16-22'];
-            expect(fieldData).to.deep.equal(expData);
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal([10, 16, 22]);
+
+            binnedDm = dm.bin('profit', { binsCount: 2, start: 0, name: 'sumField1' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField1');
+            expData = ['0-11', '11-22', '11-22', '11-22', '0-11', '11-22', '11-22', '11-22', '11-22', '11-22'];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal([0, 11, 22]);
+
+            binnedDm = dm.bin('profit', { binsCount: 2, start: 15, name: 'sumField2' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField2');
+            expData = ['10-16', '10-16', '10-16', '10-16', '10-16', '16-22', '16-22', '16-22', '16-22', '16-22'];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal([10, 16, 22]);
         });
+
         it('should bin data when binSize is given', () => {
             const data1 = [
                 { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
@@ -1345,43 +1331,77 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
-            const bin = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
-            let fieldData = bin.getFieldspace().fields.find(field => field.name() === 'sumField').partialField.data;
-            let expData = ['10-15', '15-20', '15-20', '15-20', '10-15', '15-20', '20-25', '15-20', '20-25', '20-25'];
-            expect(expData).to.deep.equal(fieldData);
-            expect(bin.getFieldspace().fields.find(field => field.name() === 'sumField').bins().mid)
-                            .to.deep.equal([12.5, 17.5, 22.5]);
-            expect(bin.getFieldspace().fields.find(field => field.name() === 'sumField').bins().range)
-                            .to.deep.equal([10, 15, 20, 25]);
-        });
-        // it('should return correct bins when binned after a selct operation', () => {
-        //     const data1 = [
-        //         { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-        //         { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-        //         { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-        //         { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-        //         { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-        //         { profit: 18, sales: 25, first: 'White', second: 'walls' },
-        //         { profit: 21, sales: 25, first: 'White', second: 'walls' },
-        //         { profit: 18, sales: 25, first: 'White', second: 'walls' },
-        //         { profit: 21, sales: 25, first: 'White', second: 'walls' },
-        //         { profit: 21, sales: 25, first: 'White', second: 'walls' }
-        //     ];
-        //     const schema1 = [
-        //         { name: 'profit', type: 'measure' },
-        //         { name: 'sales', type: 'measure' },
-        //         { name: 'first', type: 'dimension' },
-        //         { name: 'second', type: 'dimension' },
-        //     ];
-        //     const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
+            const dm = new DataModel(data1, schema1, { name: 'Yo' });
 
-        //     const dm2 = dataModel.select(feild => feild.sales.value === 25);
-        //     const bin = dm2.bin('profit', { binSize: 3, name: 'sumField' }, x => x[0]);
-        //     let fieldData = bin.getFieldspace().fields.find(field => field.name() === 'sumField').data;
-        //     let profitData = bin.getFieldspace().fields.find(field => field.name() === 'profit').data;
-        //     expect(fieldData).to.deep.equal(profitData);
-        // });
+            let binnedDm = dm.bin('profit', { binSize: 5, start: 1, end: 100, name: 'sumField' });
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
+            let expData = ['6-11', '11-16', '11-16', '11-16', '6-11', '16-21', '21-26', '16-21', '21-26', '21-26'];
+            let expBins = [1, 6, 11, 16, 21, 26, 31, 36, 41, 46, 51, 56, 61, 66, 71, 76, 81, 86, 91, 96, 101];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal(expBins);
+
+            binnedDm = dm.bin('profit', { binSize: 5, name: 'sumField1' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField1');
+            expData = ['10-15', '15-20', '15-20', '15-20', '10-15', '15-20', '20-25', '15-20', '20-25', '20-25'];
+            expBins = [10, 15, 20, 25];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal(expBins);
+
+            binnedDm = dm.bin('profit', { binSize: 5, start: 12, end: 89, name: 'sumField2' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField2');
+            expData = ['10-15', '15-20', '15-20', '15-20', '10-15', '15-20', '20-25', '15-20', '20-25', '20-25'];
+            expBins = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal(expBins);
+        });
+
+
+        it('should bin data when negative values are present', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: -18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: -21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: -14, sales: 25, first: 'White', second: 'walls' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dm = new DataModel(data1, schema1, { name: 'Yo' });
+
+            let binnedDm = dm.bin('profit', { buckets: [0, 6, 12, 20], name: 'sumField' });
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
+            let expData = ['6-12', '12-20', '12-20', '12-20', '6-12', '-21-0', '20-22', '12-20', '-21-0', '20-22',
+                '-21-0'];
+            let expBins = [-21, 0, 6, 12, 20, 22];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal(expBins);
+
+            binnedDm = dm.bin('profit', { binsCount: 5, start: 1, name: 'sumField1' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField1');
+            expData = ['6-15', '15-24', '15-24', '15-24', '6-15', '-21--12', '15-24', '15-24', '-21--12', '15-24',
+                '-21--12'];
+            expBins = [-21, -12, -3, 6, 15, 24];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal(expBins);
+
+            binnedDm = dm.bin('profit', { binSize: 10, start: -1, end: 30, name: 'sumField2' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField2');
+            expData = ['9-19', '9-19', '9-19', '9-19', '9-19', '-21--11', '19-29', '9-19', '-21--11', '19-29',
+                '-21--11'];
+            expBins = [-21, -11, -1, 9, 19, 29, 39];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal(expBins);
+        });
     });
 
     context('Aggregation function context', () => {
