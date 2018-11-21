@@ -996,7 +996,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
+            const dataModel = new DataModel(data1, schema1);
             const newDm = dataModel.calculateVariable({
                 name: 'Song',
                 type: 'dimension'
@@ -1036,7 +1036,7 @@ describe('DataModel', () => {
                 { name: 'city', type: 'dimension' },
                 { name: 'state', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
+            const dataModel = new DataModel(data1, schema1);
 
             const next = dataModel.project(['profit', 'sales']).select(f => +f.profit > 10);
             const child = next.calculateVariable({
@@ -1072,7 +1072,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
+            const dataModel = new DataModel(data1, schema1);
             const newDm = dataModel.calculateVariable({
                 name: 'Song',
                 type: 'dimension'
@@ -1202,7 +1202,7 @@ describe('DataModel', () => {
             let projetionFlag = false;
             let selectionFlag = false;
             let groupByFlag = false;
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
+            const dataModel = new DataModel(data1, schema1);
             const projected = dataModel.project(['profit']);
             const selected = dataModel.select(fields => fields.profit.valueOf() > 10);
             const grouped = dataModel.groupBy(['first']);
@@ -1257,7 +1257,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dm = new DataModel(data1, schema1, { name: 'Yo' });
+            const dm = new DataModel(data1, schema1);
 
             let binnedDm = dm.bin('profit', { buckets: [0, 5, 11, 16, 20, 30], name: 'sumField' });
             let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
@@ -1270,6 +1270,35 @@ describe('DataModel', () => {
             expectedData = ['10-11', '11-16', '11-16', '11-16', '10-11', '16-20', '20-22', '16-20', '20-22'];
             expect(newField.data()).to.deep.equal(expectedData);
             expect(newField.bins()).to.deep.equal([10, 11, 16, 20, 22]);
+        });
+
+        it('should bin the data when data has the same value as bucket\'s start or end', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dm = new DataModel(data1, schema1);
+
+            let binnedDm = dm.bin('profit', { buckets: [10, 13, 16, 20, 30], name: 'sumField' });
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
+            let expectedData = ['10-13', '13-16', '10-13', '16-20', '20-30'];
+            expect(newField.data()).to.deep.equal(expectedData);
+            expect(newField.bins()).to.deep.equal([10, 13, 16, 20, 30]);
+
+            binnedDm = dm.bin('profit', { buckets: [1, 13, 16, 20, 21], name: 'sumField1' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField1');
+            expectedData = ['1-13', '13-16', '1-13', '16-20', '21-22'];
+            expect(newField.data()).to.deep.equal(expectedData);
+            expect(newField.bins()).to.deep.equal([1, 13, 16, 20, 21, 22]);
         });
 
         it('should bin data when binsCount is given', () => {
@@ -1291,7 +1320,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dm = new DataModel(data1, schema1, { name: 'Yo' });
+            const dm = new DataModel(data1, schema1);
 
             let binnedDm = dm.bin('profit', { binsCount: 2, name: 'sumField' });
             let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
@@ -1331,7 +1360,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dm = new DataModel(data1, schema1, { name: 'Yo' });
+            const dm = new DataModel(data1, schema1);
 
             let binnedDm = dm.bin('profit', { binSize: 5, start: 1, end: 100, name: 'sumField' });
             let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
@@ -1376,7 +1405,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dm = new DataModel(data1, schema1, { name: 'Yo' });
+            const dm = new DataModel(data1, schema1);
 
             let binnedDm = dm.bin('profit', { buckets: [0, 6, 12, 20], name: 'sumField' });
             let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');

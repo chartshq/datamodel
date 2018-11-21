@@ -13,6 +13,29 @@ const generateBuckets = (binSize, start, end) => {
     return buckets;
 };
 
+const findBucketRange = (bucketRanges, value) => {
+    let leftIdx = 0;
+    let rightIdx = bucketRanges.length - 1;
+    let midIdx;
+    let range;
+
+    // Here use binary search as the bucketRanges is a sorted array
+    while (leftIdx <= rightIdx) {
+        midIdx = leftIdx + Math.floor((rightIdx - leftIdx) / 2);
+        range = bucketRanges[midIdx];
+
+        if (value >= range.start && value < range.end) {
+            return range;
+        } else if (value >= range.end) {
+            leftIdx = midIdx + 1;
+        } else if (value < range.start) {
+            rightIdx = midIdx - 1;
+        }
+    }
+
+    return null;
+};
+
  /**
   * Creates the bin data from input measure field and supplied configs.
   *
@@ -39,7 +62,7 @@ export function createBinnedFieldData (measureField, rowDiffset, config) {
     if (buckets[0] > dMin) {
         buckets.unshift(dMin);
     }
-    if (buckets[buckets.length - 1] < dMax) {
+    if (buckets[buckets.length - 1] <= dMax) {
         buckets.push(dMax + 1);
     }
 
@@ -54,7 +77,7 @@ export function createBinnedFieldData (measureField, rowDiffset, config) {
     const binnedData = [];
     rowDiffsetIterator(rowDiffset, (i) => {
         const datum = measureField.partialField.data[i];
-        const range = bucketRanges.find(r => datum >= r.start && datum < r.end);
+        const range = findBucketRange(bucketRanges, datum);
         binnedData.push(`${range.start}-${range.end}`);
     });
 

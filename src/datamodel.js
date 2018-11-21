@@ -545,10 +545,10 @@ class DataModel extends Relation {
     }
 
     /**
-     * Performs the binning operation with a measure field based on a binning configuration. This method does not
-     * aggregate the number of rows present in {@link DataModel} instance after binning, it just adds a new field with
-     * the binned value. Refer binning {@link example_of_binning | example} to have a intuition of what binning is and
-     * the use case.
+     * Performs the binning operation on a measure field based on the binning configuration. Binning means discretizing
+     * values of a measure. Binning configuration contains an array; subsequent values from the array marks the boundary
+     * of buckets in [inclusive, exclusive) range format. This operation does not mutate the subject measure field,
+     * instead, it creates a new field (variable) of type dimension and subtype binned.
      *
      * Binning can be configured by
      * - providing custom bin configuration with non-uniform buckets,
