@@ -37,5 +37,16 @@ describe('Continuous', () => {
             const expected = [12, 56];
             expect(contField.calculateDataDomain()).to.eql(expected);
         });
+
+        it('should ignore null data values', () => {
+            const data1 = [18, 26, 12, 33, 56, 45, 26, 19, 18, null, 11, 13, null, 90];
+            contParser = new ContinuousParser();
+            partField = new PartialField(schema.name, data1, schema, contParser);
+            rowDiffset = '0-13';
+            contField = new Continuous(partField, rowDiffset);
+
+            const expected = [11, 90];
+            expect(contField.calculateDataDomain()).to.eql(expected);
+        });
     });
 });

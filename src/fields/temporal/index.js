@@ -25,6 +25,10 @@ export default class Temporal extends Dimension {
         // occurred two times on same data.
         rowDiffsetIterator(this.rowDiffset, (i) => {
             const datum = this.partialField.data[i];
+            if (datum === null) {
+                return;
+            }
+
             if (!hash.has(datum)) {
                 hash.add(datum);
                 domain.push(datum);
@@ -92,7 +96,12 @@ export default class Temporal extends Dimension {
     formattedData () {
         const data = [];
         rowDiffsetIterator(this.rowDiffset, (i) => {
-            data.push(DateTimeFormatter.formatAs(this.partialField.data[i], this.format()));
+            const datum = this.partialField.data[i];
+            if (datum === null) {
+                data.push(null);
+            } else {
+                data.push(DateTimeFormatter.formatAs(datum, this.format()));
+            }
         });
         return data;
     }

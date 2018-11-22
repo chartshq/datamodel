@@ -20,7 +20,7 @@ export default class BinnedParser extends FieldParser {
             return null;
         }
 
-        const regex = /^\s*(\d+)\s*-\s*(\d+)\s*$/;
+        const regex = /^\s*([+-]?\d+(?:\.\d+)?)\s*-\s*([+-]?\d+(?:\.\d+)?)\s*$/;
         val = String(val);
 
         const matched = val.match(regex);
@@ -28,6 +28,6 @@ export default class BinnedParser extends FieldParser {
             return null;
         }
 
-        return `${matched[1]}-${matched[2]}`;
+        return `${Number.parseFloat(matched[1])}-${Number.parseFloat(matched[2])}`;
     }
 }

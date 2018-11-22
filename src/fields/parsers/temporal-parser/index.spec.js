@@ -28,8 +28,18 @@ describe('TemporalParser', () => {
 
         it('should bypass to Date API when format is not present', () => {
             const val = 1540629018697;
-            temParser = new TemporalParser(Object.assign(schema, { format: undefined }));
+            temParser = new TemporalParser(Object.assign({}, schema, { format: undefined }));
             expect(temParser.parse(val)).to.equal(+new Date(val));
+        });
+
+        it('should return current timestamp for invalid formatted date value', () => {
+            const dateStr = 'invalid format';
+            expect(temParser.parse(dateStr)).to.equal(Date.now());
+        });
+
+        it('should return null for invalid value', () => {
+            expect(temParser.parse(null)).to.be.null;
+            expect(temParser.parse(undefined)).to.be.null;
         });
     });
 });
