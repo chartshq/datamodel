@@ -1431,6 +1431,39 @@ describe('DataModel', () => {
             expect(newField.data()).to.deep.equal(expData);
             expect(newField.bins()).to.deep.equal(expBins);
         });
+
+        it('should handle the null data values', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: null, sales: 25, first: 'White', second: 'walls' },
+                { profit: 12, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: null, sales: 25, first: 'Norwegian', second: 'Wood' },
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dm = new DataModel(data1, schema1);
+
+            let binnedDm = dm.bin('profit', { buckets: [0, 5, 11, 16, 20, 30], name: 'sumField' });
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
+            let expectedData = ['5-11', '11-16', '11-16', '5-11', '16-20', '20-30', null, '11-16', null];
+            expect(newField.data()).to.deep.equal(expectedData);
+            expect(newField.bins()).to.deep.equal([0, 5, 11, 16, 20, 30]);
+
+            binnedDm = dm.bin('profit', { buckets: [11, 16, 20], name: 'sumField1' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField1');
+            expectedData = ['10-11', '11-16', '11-16', '10-11', '16-20', '20-22', null, '11-16', null];
+            expect(newField.data()).to.deep.equal(expectedData);
+            expect(newField.bins()).to.deep.equal([10, 11, 16, 20, 22]);
+        });
     });
 
     context('Aggregation function context', () => {

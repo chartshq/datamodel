@@ -588,13 +588,15 @@ class DataModel extends Relation {
      * @return {DataModel} Returns a new {@link DataModel} instance with the new field.
      */
     bin (measureFieldName, config) {
-        if (!this.getFieldsConfig()[measureFieldName]) {
+        const fieldsConfig = this.getFieldsConfig();
+
+        if (!fieldsConfig[measureFieldName]) {
             throw new Error(`Field ${measureFieldName} doesn't exist`);
         }
 
         const binFieldName = config.name || `${measureFieldName}_binned`;
 
-        if (this.getFieldsConfig()[binFieldName]) {
+        if (fieldsConfig[binFieldName]) {
             throw new Error(`Field ${binFieldName} already exists`);
         }
 

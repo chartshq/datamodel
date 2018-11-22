@@ -77,6 +77,11 @@ export function createBinnedFieldData (measureField, rowDiffset, config) {
     const binnedData = [];
     rowDiffsetIterator(rowDiffset, (i) => {
         const datum = measureField.partialField.data[i];
+        if (datum === null) {
+            binnedData.push(null);
+            return;
+        }
+
         const range = findBucketRange(bucketRanges, datum);
         binnedData.push(`${range.start}-${range.end}`);
     });
