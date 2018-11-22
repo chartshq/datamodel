@@ -58,6 +58,14 @@ describe('DataModel', () => {
         });
     });
 
+    context('Test for a failing data format type', () => {
+        let mockedDm = () => new DataModel([], [], { dataFormat: 'erroneous-data-type' });
+
+        it('should throw no coverter function found error', () => {
+            expect(mockedDm).to.throw('No converter function found for erroneous-data-type format');
+        });
+    });
+
     describe('#getData', () => {
         it('should return the data in the specified format', () => {
             const schema = [
@@ -1182,6 +1190,46 @@ describe('DataModel', () => {
 
             expect(calculatedDm.getData()).to.eql(expected);
         });
+
+        it('should throw an error if invalid column name passed in function to resolve value of new variable', () => {
+            const data = [
+                {
+                    name: 'Rousan',
+                    birthday: '1995-07-05',
+                    roll: 2
+                },
+                {
+                    name: 'Sumant',
+                    birthday: '1996-08-04',
+                    roll: 89
+                }
+            ];
+            const schema = [
+                {
+                    name: 'name',
+                    type: 'dimension'
+                },
+                {
+                    name: 'birthday',
+                    type: 'dimension',
+                    subtype: 'temporal',
+                    format: '%Y-%m-%d'
+                },
+                {
+                    name: 'roll',
+                    type: 'measure',
+                    defAggFn: 'avg'
+                }
+            ];
+            const dataModel = new DataModel(data, schema);
+            const mockedFn = () =>
+                dataModel.calculateVariable({
+                    name: 'age',
+                    type: 'measure'
+                }, ['country', c => c]);
+
+            expect(mockedFn).to.throw('country is not a valid column name');
+        });
     });
 
     describe('#propagate', () => {
@@ -1229,8 +1277,13 @@ describe('DataModel', () => {
             }]);
 
             dataModel.propagate(propModel, {
-                action: 'reaction'
+                action: 'reaction',
+                isMutableAction: true,
+                propagateInterpolatedValues: true
             });
+            // unsubscribe callbacks for propagation event
+            projected.unsubscribe('propagation');
+
             expect(
                 projetionFlag && selectionFlag && groupByFlag
             ).to.be.true;
@@ -1793,6 +1846,41 @@ describe('DataModel', () => {
             ].join('\n');
 
             expect(dm.serialize()).to.eql(expected);
+        });
+
+        it('should throw an error if data type is not supported', () => {
+            const mockedFn = () => dm.serialize('erroneous-data-type');
+            expect(mockedFn).to.throw('Data type erroneous-data-type is not supported');
+        });
+    });
+
+    describe('#getName', () => {
+        const dataModel = new DataModel([], [], { name: 'ModelA' });
+
+        it('should return user-defined name of the datamodel instance', () => {
+            expect(dataModel.getName()).to.equal('ModelA');
+        });
+    });
+
+    describe('#isEmpty', () => {
+        const data = [
+            { age: 30, job: 'unemployed', marital: 'married' },
+            { age: 33, job: 'services', marital: 'married' },
+            { age: 35, job: 'management', marital: 'single' }
+        ];
+        const schema = [
+            { name: 'age', type: 'measure' },
+            { name: 'job', type: 'dimension' },
+            { name: 'marital', type: 'dimension' },
+        ];
+        const dataModel = new DataModel([], []);
+        const dataModel1 = new DataModel(data, schema);
+
+        it('should return true if datamodel instance has no data', () => {
+            expect(dataModel.isEmpty()).to.be.true;
+        });
+        it('should return false if datamodel instance has data', () => {
+            expect(dataModel1.isEmpty()).to.be.false;
         });
     });
 });
