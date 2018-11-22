@@ -16,6 +16,18 @@ describe('BinnedParser', () => {
             expect(binParser.parse('10-11')).to.equal('10-11');
             expect(binParser.parse(' 10-11 ')).to.equal('10-11');
             expect(binParser.parse('10 - 11')).to.equal('10-11');
+            expect(binParser.parse('5-6')).to.equal('5-6');
+            expect(binParser.parse('+5-6')).to.equal('5-6');
+        });
+
+        it('should handle negative or floating-point values', () => {
+            expect(binParser.parse('-10-11')).to.equal('-10-11');
+            expect(binParser.parse(' -10 -11 ')).to.equal('-10-11');
+            expect(binParser.parse(' 10.11 - 11 ')).to.equal('10.11-11');
+            expect(binParser.parse(' -10.11 - 11.333 ')).to.equal('-10.11-11.333');
+            expect(binParser.parse(' -10.11 - -11.567 ')).to.equal('-10.11--11.567');
+            expect(binParser.parse(' -1.11 - -1.567 ')).to.equal('-1.11--1.567');
+            expect(binParser.parse(' +1.11 - -1.567 ')).to.equal('1.11--1.567');
         });
 
         it('should return null for invalid formatted value', () => {

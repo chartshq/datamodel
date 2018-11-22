@@ -68,11 +68,8 @@ const data = [
 
 const dm = new DataModel(data, schema);
 
-const binnedDm = dm.bin("roll", {
-    name: "binnedRoll",
-    binSize: 10,
-    end: 0
-});
+const groupedDm = rootData.groupBy(['Origin', 'Cylinders'])
+const binnedDm = groupedDm.bin('Miles_per_Gallon', { binsCount: 10})
 
 
 // const selectedDm = dm.select(fields => fields.roll.value > 10 || fields.roll.value < 0);
