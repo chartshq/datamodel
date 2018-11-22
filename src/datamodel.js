@@ -600,7 +600,7 @@ class DataModel extends Relation {
             throw new Error(`Field ${binFieldName} already exists`);
         }
 
-        const measureField = this.getFieldspace().fields.find(f => f.name() === measureFieldName);
+        const measureField = this.getFieldspace().fieldsObj()[measureFieldName];
         const { binnedData, bins } = createBinnedFieldData(measureField, this._rowDiffset, config);
 
         const binField = createFields([binnedData], [
