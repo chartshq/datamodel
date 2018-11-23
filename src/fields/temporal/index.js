@@ -46,30 +46,26 @@ export default class Temporal extends Dimension {
      * @return {number} Returns the minimum consecutive diff in milliseconds.
      */
     minimumConsecutiveDifference () {
-        const hash = new Set();
-        let currIdx = 0;
-        let prevDatum;
+        const sortedData = this.data().sort((a, b) => a - b);
+        const arrLn = sortedData.length;
         let minDiff = Number.POSITIVE_INFINITY;
+        let prevDatum;
+        let nextDatum;
+        let processedCount = 0;
 
-        // here don't use this.data() as the iteration will be occurred two times on same data.
-        rowDiffsetIterator(this.rowDiffset, (i) => {
-            const datum = this.partialField.data[i];
+        for (let i = 1; i < arrLn; i++) {
+            prevDatum = sortedData[i - 1];
+            nextDatum = sortedData[i];
 
-            if (hash.has(datum)) {
-                return;
-            }
-            hash.add(datum);
-
-            if (!currIdx++) {
-                prevDatum = datum;
-                return;
+            if (nextDatum === prevDatum) {
+                continue;
             }
 
-            minDiff = Math.min(minDiff, datum - prevDatum);
-            prevDatum = datum;
-        });
+            minDiff = Math.min(minDiff, nextDatum - sortedData[i - 1]);
+            processedCount++;
+        }
 
-        if (currIdx <= 1) {
+        if (!processedCount) {
             return null;
         }
 

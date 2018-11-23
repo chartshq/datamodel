@@ -53,10 +53,41 @@ describe('Temporal', () => {
             expect(tempField.minimumConsecutiveDifference()).to.equal(expected);
         });
 
-        it('should return null if there is only one data item', () => {
+        it('should sort the data before minimumConsecutiveDifference calculation', () => {
+            let data1 = ['2017-03-02', '2016-01-11', '2011-04-21', '2018-11-27'];
             temParser = new TemporalParser(schema);
-            partField = new PartialField(schema.name, data, schema, temParser);
-            rowDiffset = '2';
+            partField = new PartialField(schema.name, data1, schema, temParser);
+            rowDiffset = '0-3';
+            tempField = new Temporal(partField, rowDiffset);
+            expect(tempField.minimumConsecutiveDifference()).to.equal(35942400000);
+
+            data1 = ['2017-03-02', '2016-01-11', '2011-04-21', '2018-11-27', '2016-01-11', '2018-11-27'];
+            temParser = new TemporalParser(schema);
+            partField = new PartialField(schema.name, data1, schema, temParser);
+            rowDiffset = '0-5';
+            tempField = new Temporal(partField, rowDiffset);
+            expect(tempField.minimumConsecutiveDifference()).to.equal(35942400000);
+        });
+
+        it('should return null if there is only one unique data item or empty data', () => {
+            let data1 = ['2017-03-01'];
+            temParser = new TemporalParser(schema);
+            partField = new PartialField(schema.name, data1, schema, temParser);
+            rowDiffset = '0';
+            tempField = new Temporal(partField, rowDiffset);
+            expect(tempField.minimumConsecutiveDifference()).to.be.null;
+
+            data1 = ['2017-03-01', '2017-03-01', '2017-03-01'];
+            temParser = new TemporalParser(schema);
+            partField = new PartialField(schema.name, data1, schema, temParser);
+            rowDiffset = '0';
+            tempField = new Temporal(partField, rowDiffset);
+            expect(tempField.minimumConsecutiveDifference()).to.be.null;
+
+            data1 = [];
+            temParser = new TemporalParser(schema);
+            partField = new PartialField(schema.name, data1, schema, temParser);
+            rowDiffset = '0';
             tempField = new Temporal(partField, rowDiffset);
             expect(tempField.minimumConsecutiveDifference()).to.be.null;
         });
