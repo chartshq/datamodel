@@ -15,9 +15,6 @@ describe('groupBy function tests', () => {
         it('should return Average for 1D Array', () => {
             expect(fnList.avg([10, 12, 17])).to.equal(39 / 3);
         });
-        it('should return Average for nested Array', () => {
-            expect(fnList.avg([[10, 12], [15, 17]])).to.equal(54 / 4);
-        });
         it('should return null for an empty Array', () => {
             expect(fnList.avg([])).to.equal(null);
         });
@@ -28,7 +25,7 @@ describe('groupBy function tests', () => {
         });
         it('should return min for nested Array', () => {
             const expectedMin = [9, 12];
-            expect(fnList.min([[10, 12], [9, 16]])).to.equal(expectedMin);
+            expect(fnList.min([[10, 12], [9, 16]])).to.eql(expectedMin);
         });
         it('should return null for empty Array', () => {
             expect(fnList.min([])).to.equal(null);

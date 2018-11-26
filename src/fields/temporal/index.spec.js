@@ -34,6 +34,17 @@ describe('Temporal', () => {
             const expected = [1488306600000, 1488393000000, 1488479400000];
             expect(tempField.calculateDataDomain()).to.eql(expected);
         });
+
+        it('should ignore null data values', () => {
+            const data1 = ['2017-03-01', '2017-03-02', '2017-03-03', '2018-01-06', '2019-11-07', null, '2017-03-02'];
+            temParser = new TemporalParser(schema);
+            partField = new PartialField(schema.name, data1, schema, temParser);
+            rowDiffset = '1-2,4-5';
+            tempField = new Temporal(partField, rowDiffset);
+
+            const expected = [1488393000000, 1488479400000, 1573065000000];
+            expect(tempField.calculateDataDomain()).to.eql(expected);
+        });
     });
 
     describe('#minimumConsecutiveDifference', () => {
@@ -59,7 +70,13 @@ describe('Temporal', () => {
 
     describe('#formattedData', () => {
         it('should return the formatted data', () => {
-            const expected = ['2017-03-01', '2017-03-02', '2017-03-03', '2017-03-01'];
+            const data1 = ['2017-03-01', '2017-03-02', '2017-03-03', '2018-01-06', '2019-11-07', null, '2017-03-02'];
+            temParser = new TemporalParser(schema);
+            partField = new PartialField(schema.name, data1, schema, temParser);
+            rowDiffset = '1-2,4-5';
+            tempField = new Temporal(partField, rowDiffset);
+
+            const expected = ['2017-03-02', '2017-03-03', '2019-11-07', null];
             expect(tempField.formattedData()).to.eql(expected);
         });
     });

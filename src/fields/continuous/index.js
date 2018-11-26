@@ -35,6 +35,10 @@ export default class Continuous extends Measure {
         // here don't use this.data() as the iteration will be occurred two times on same data.
         rowDiffsetIterator(this.rowDiffset, (i) => {
             const datum = this.partialField.data[i];
+            if (datum === null) {
+                return;
+            }
+
             if (datum < min) {
                 min = datum;
             }

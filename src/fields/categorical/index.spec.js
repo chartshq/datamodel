@@ -37,5 +37,16 @@ describe('Categorical', () => {
             const expected = ['India', 'US', 'Canada'];
             expect(catField.calculateDataDomain()).to.eql(expected);
         });
+
+        it('should ignore null data values', () => {
+            const data1 = ['India', 'US', 'Canada', 'India', 'US', null, 'US', null];
+            catParser = new CategoricalParser();
+            partField = new PartialField(schema.name, data1, schema, catParser);
+            rowDiffset = '0-7';
+            catField = new Categorical(partField, rowDiffset);
+
+            const expected = ['India', 'US', 'Canada'];
+            expect(catField.calculateDataDomain()).to.eql(expected);
+        });
     });
 });

@@ -29,6 +29,10 @@ export default class TemporalParser extends FieldParser {
      * @return {number} Returns the millisecond value.
      */
     parse (val) {
+        if (val === null || val === undefined) {
+            return null;
+        }
+
         if (this.schema.format) {
             this._dtf = this._dtf || new DateTimeFormatter(this.schema.format);
             return this._dtf.getNativeDate(val).getTime();

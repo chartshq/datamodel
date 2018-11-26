@@ -126,7 +126,7 @@ describe('Testing compose functionality', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
+            const dataModel = new DataModel(data1, schema1);
             const bins = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
 
             let composedFn = compose(
@@ -155,9 +155,9 @@ describe('Testing compose functionality', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
+            const dataModel = new DataModel(data1, schema1);
 
-            const dataModel2 = new DataModel(data1, schema1, 'Yo');
+            const dataModel2 = new DataModel(data1, schema1);
             const bins = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
 
             let selectedBin = bins.select(fields => fields.profit.value <= 15);

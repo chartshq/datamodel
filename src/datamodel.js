@@ -545,75 +545,77 @@ class DataModel extends Relation {
     }
 
     /**
-     * Performs binning on a measure field based on a binning configuration. This method does not aggregate the number
-     * of rows present in DataModel instance after binning, it just adds a new field with the binned value. Refer
-     * binning {@link example_of_binning | example} to have a intuition of what binning is and the use case.
+     * Performs the binning operation on a measure field based on the binning configuration. Binning means discretizing
+     * values of a measure. Binning configuration contains an array; subsequent values from the array marks the boundary
+     * of buckets in [inclusive, exclusive) range format. This operation does not mutate the subject measure field,
+     * instead, it creates a new field (variable) of type dimension and subtype binned.
      *
      * Binning can be configured by
-     * - providing custom bin configuration with non uniform buckets
-     * - providing bin count
-     * - providing each bin size
+     * - providing custom bin configuration with non-uniform buckets,
+     * - providing bins count,
+     * - providing each bin size,
      *
-     * When custom buckets are provided as part of binning configuration
+     * When custom `buckets` are provided as part of binning configuration:
      * @example
      *  // DataModel already prepared and assigned to dm variable
-     *  const buckets = {
-     *      start: 30
-     *      stops: [80, 100, 110]
-     *  };
-     *  const config = { buckets, name: 'binnedHP' }
-     *  const binDM = dataModel.bin('horsepower', config);\
+     *  const config = { name: 'binnedHP', buckets: [30, 80, 100, 110] }
+     *  const binnedDM = dataModel.bin('horsepower', config);
      *
      * @text
-     * When `binCount` is defined as part of binning configuration
+     * When `binsCount` is defined as part of binning configuration:
      * @example
      *  // DataModel already prepared and assigned to dm variable
-     *  const config = { binCount: 5, name: 'binnedHP' }
+     *  const config = { name: 'binnedHP', binsCount: 5, start: 0, end: 100 }
      *  const binDM = dataModel.bin('horsepower', config);
      *
      * @text
-     * When `binSize` is defined as part of binning configuration
+     * When `binSize` is defined as part of binning configuration:
      * @example
      *  // DataModel already prepared and assigned to dm variable
-     *  const config = { binSize: 200, name: 'binnedHorsepower' }
+     *  const config = { name: 'binnedHorsepower', binSize: 20, start: 5}
      *  const binDM = dataModel.bin('horsepower', config);
      *
      * @public
      *
-     * @param {String} name Name of measure which will be used to create bin
-     * @param {Object} config Config required for bin creation
-     * @param {Array.<Number>} config.bucketObj.stops Definition of bucket ranges. Two subsequent number from arrays
-     *      are picked and a range is created. The first number from range is inclusive and the second number from range
-     *      is exclusive.
-     * @param {Number} [config.bucketObj.startAt] Force the start of the bin from a particular number.
-     *      If not mentioned, the start of the bin or the lower domain of the data if stops is not mentioned, else its
-     *      the first value of the stop.
-     * @param {Number} config.binSize Bucket size for each bin
-     * @param {Number} config.binCount Number of bins which will be created
-     * @param {String} config.name Name of the new binned field to be created
-     *
-     * @returns {DataModel} Instance of new DataModel with the newly created bin.
+     * @param {string} measureFieldName - The name of the target measure field.
+     * @param {Object} config - The config object.
+     * @param {string} [config.name] - The name of the new field which will be created.
+     * @param {string} [config.buckets] - An array containing the bucket ranges.
+     * @param {string} [config.binSize] - The size of each bin. It is ignored when buckets are given.
+     * @param {string} [config.binsCount] - The total number of bins to generate. It is ignored when buckets are given.
+     * @param {string} [config.start] - The start value of the bucket ranges. It is ignored when buckets are given.
+     * @param {string} [config.end] - The end value of the bucket ranges. It is ignored when buckets are given.
+     * @return {DataModel} Returns a new {@link DataModel} instance with the new field.
      */
-    bin (dimensionName, config = {}) {
-        const clone = this.clone();
-        const binFieldName = config.name || `${dimensionName}_binned`;
-        if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[dimensionName]) {
-            throw new Error(`Field ${dimensionName} already exists.`);
+    bin (measureFieldName, config) {
+        const fieldsConfig = this.getFieldsConfig();
+
+        if (!fieldsConfig[measureFieldName]) {
+            throw new Error(`Field ${measureFieldName} doesn't exist`);
         }
-        const field = this._partialFieldspace.fields.find(currfield => currfield.name() === dimensionName);
-        const dataSet = createBinnedFieldData(field, this._rowDiffset, config);
-        const binField = createFields([dataSet.data], [
+
+        const binFieldName = config.name || `${measureFieldName}_binned`;
+
+        if (fieldsConfig[binFieldName]) {
+            throw new Error(`Field ${binFieldName} already exists`);
+        }
+
+        const measureField = this.getFieldspace().fieldsObj()[measureFieldName];
+        const { binnedData, bins } = createBinnedFieldData(measureField, this._rowDiffset, config);
+
+        const binField = createFields([binnedData], [
             {
                 name: binFieldName,
                 type: FieldType.DIMENSION,
                 subtype: DimensionSubtype.BINNED,
-                bins: {
-                    range: dataSet.range,
-                    mid: dataSet.mid
-                }
+                bins
             }], [binFieldName])[0];
+
+        const clone = this.clone();
         clone.addField(binField);
-        persistDerivation(clone, DM_DERIVATIVES.BIN, { dimensionName, config, binFieldName }, null);
+
+        persistDerivation(clone, DM_DERIVATIVES.BIN, { measureFieldName, config, binFieldName }, null);
+
         return clone;
     }
 

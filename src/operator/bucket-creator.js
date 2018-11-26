@@ -1,85 +1,90 @@
 import { rowDiffsetIterator } from './row-diffset-iterator';
 
-/**
- * Creates bin f from the data and the supplied config.
- *
- * @param {Array} data - The input data.
- * @param {Object} config - The config object.
- * @param {number} config.binSize - The size of the bin.
- * @param {number} config.numOfBins - The number of bins to be created.
- * @return {Array} Returns an array of created bins.
- */
-export function createBinnedFieldData (field, rowDiffset, config) {
-    let { buckets, binCount, binSize, start } = config;
-    let dataStore = [];
-    let binnedData = [];
-    let [min, max] = field.domain();
-    let oriMax = max;
-    let stops = [];
-    let binEnd;
-    let prevEndpoint;
-    let mid;
+const generateBuckets = (binSize, start, end) => {
+    const buckets = [];
+    let next = start;
+
+    while (next < end) {
+        buckets.push(next);
+        next += binSize;
+    }
+    buckets.push(next);
+
+    return buckets;
+};
+
+const findBucketRange = (bucketRanges, value) => {
+    let leftIdx = 0;
+    let rightIdx = bucketRanges.length - 1;
+    let midIdx;
     let range;
 
-    // create dataStore with index according to rowDiffSet
-    rowDiffsetIterator(rowDiffset, (i) => {
-        dataStore.push({
-            data: field.partialField.data[i],
-            index: i
-        });
-    });
+    // Here use binary search as the bucketRanges is a sorted array
+    while (leftIdx <= rightIdx) {
+        midIdx = leftIdx + Math.floor((rightIdx - leftIdx) / 2);
+        range = bucketRanges[midIdx];
 
-    // create buckets if buckets not given
+        if (value >= range.start && value < range.end) {
+            return range;
+        } else if (value >= range.end) {
+            leftIdx = midIdx + 1;
+        } else if (value < range.start) {
+            rightIdx = midIdx - 1;
+        }
+    }
+
+    return null;
+};
+
+ /**
+  * Creates the bin data from input measure field and supplied configs.
+  *
+  * @param {Measure} measureField - The Measure field instance.
+  * @param {string} rowDiffset - The datamodel rowDiffset values.
+  * @param {Object} config - The config object.
+  * @return {Object} Returns the binned data and the corresponding bins.
+  */
+export function createBinnedFieldData (measureField, rowDiffset, config) {
+    let { buckets, binsCount, binSize, start, end } = config;
+    const [dMin, dMax] = measureField.domain();
+
     if (!buckets) {
-        max += 1;
-        binSize = binSize || (max - min) / binCount;
+        start = (start !== 0 && (!start || start > dMin)) ? dMin : start;
+        end = (end !== 0 && (!end || end < dMax)) ? (dMax + 1) : end;
 
-        const extraBinELm = (max - min) % binSize;
-        if (!binCount && extraBinELm !== 0) {
-            max = max + binSize - extraBinELm;
+        if (binsCount) {
+            binSize = Math.ceil(Math.abs(end - start) / binsCount);
         }
-        binEnd = min + binSize;
-        while (binEnd <= max) {
-            stops.push(binEnd);
-            binEnd += binSize;
-        }
-        start = start || min;
-        buckets = { start, stops };
+
+        buckets = generateBuckets(binSize, start, end);
     }
 
-    // initialize intial bucket start
-    prevEndpoint = buckets.start === 0 ? 0 : buckets.start || min;
+    if (buckets[0] > dMin) {
+        buckets.unshift(dMin);
+    }
+    if (buckets[buckets.length - 1] <= dMax) {
+        buckets.push(dMax + 1);
+    }
 
-    // mark each data in dataStore to respective buckets
-    buckets.stops.forEach((endPoint) => {
-        let tempStore = dataStore.filter(datum => datum.data >= prevEndpoint && datum.data < endPoint);
-        tempStore.forEach((datum) => { binnedData[datum.index] = `${prevEndpoint}-${endPoint}`; });
-        prevEndpoint = endPoint;
+    const bucketRanges = [];
+    for (let i = 0; i < buckets.length - 1; i++) {
+        bucketRanges.push({
+            start: buckets[i],
+            end: buckets[i + 1]
+        });
+    }
+
+    const binnedData = [];
+    rowDiffsetIterator(rowDiffset, (i) => {
+        const datum = measureField.partialField.data[i];
+        if (datum === null) {
+            binnedData.push(null);
+            return;
+        }
+
+        const range = findBucketRange(bucketRanges, datum);
+        binnedData.push(`${range.start}-${range.end}`);
     });
 
-    // create a bin for values less than start
-    dataStore.filter(datum => datum.data < buckets.start)
-                    .forEach((datum) => { binnedData[datum.index] = `${min}-${buckets.start}`; });
-
-    // create a bin for values more than end
-    dataStore.filter(datum => datum.data >= buckets.stops[buckets.stops.length - 1])
-                    .forEach((datum) =>
-                    { binnedData[datum.index] = `${buckets.stops[buckets.stops.length - 1]}-${oriMax}`; });
-
-    // create range and mid
-    // append start to bucket marks
-    buckets.stops.unshift(buckets.start);
-    range = new Set(buckets.stops);
-
-    // Add endpoints to buckets marks if not added
-    if (min < buckets.start) { range.add(min); }
-    if (oriMax > buckets.stops[buckets.stops.length - 1]) { range.add(oriMax); }
-
-    range = [...range].sort((a, b) => a - b);
-    mid = [];
-
-    for (let i = 1; i < range.length; i++) {
-        mid.push((range[i - 1] + range[i]) / 2);
-    }
-    return { data: binnedData, mid, range };
+    return { binnedData, bins: buckets };
 }
