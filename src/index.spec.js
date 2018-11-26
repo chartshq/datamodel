@@ -206,6 +206,35 @@ describe('DataModel', () => {
                 sort: [['horsepower', 'asc']]
             })).to.deep.equal(expected);
         });
+
+        it('should add a column named uid if withUid is true', () => {
+            const schema = [
+                { name: 'name', type: 'dimension' },
+                { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
+            ];
+
+            const data = [
+                { name: 'Rousan', birthday: '1995-07-05' },
+                { name: 'Sumant', birthday: '1996-08-04' },
+                { name: 'Akash', birthday: '1994-01-03' }
+            ];
+            const dataModel = new DataModel(data, schema);
+            const expected = {
+                data: [
+                  ['Rousan', 804882600000, 0],
+                  ['Sumant', 839097000000, 1],
+                  ['Akash', 757535400000, 2]
+                ],
+                schema: [
+                    { name: 'name', type: 'dimension', subtype: 'categorical' },
+                    { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' },
+                    { name: 'uid', type: 'identifier' }
+                ],
+                uids: [0, 1, 2]
+            };
+
+            expect(dataModel.getData({ withUid: true })).to.deep.equal(expected);
+        });
     });
 
     describe('#project', () => {
@@ -1233,20 +1262,30 @@ describe('DataModel', () => {
     });
 
     describe('#propagate', () => {
-        it('should propagate variables through out the dag', () => {
-            const data1 = [
-                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-                { profit: 15, sales: 25, first: 'White', second: 'walls' },
-            ];
-            const schema1 = [
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
-                { name: 'first', type: 'dimension' },
-                { name: 'second', type: 'dimension' },
-            ];
+        const data1 = [
+            { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+            { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+            { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+            { profit: 15, sales: 25, first: 'White', second: 'walls' },
+        ];
+        const schema1 = [
+            { name: 'profit', type: 'measure' },
+            { name: 'sales', type: 'measure' },
+            { name: 'first', type: 'dimension' },
+            { name: 'second', type: 'dimension' },
+        ];
+        const propModel = new DataModel([{
+            first: 'Hey',
+            second: 'Jude'
+        }], [{
+            name: 'first',
+            type: 'dimension'
+        }, {
+            name: 'second',
+            type: 'dimension'
+        }]);
 
+        it('should propagate variables through out the dag', () => {
             let projetionFlag = false;
             let selectionFlag = false;
             let groupByFlag = false;
@@ -1265,22 +1304,21 @@ describe('DataModel', () => {
                 groupByFlag = true;
             });
 
-            const propModel = new DataModel([{
-                first: 'Hey',
-                second: 'Jude'
-            }], [{
-                name: 'first',
-                type: 'dimension'
-            }, {
-                name: 'second',
-                type: 'dimension'
-            }]);
-
             dataModel.propagate(propModel, {
                 action: 'reaction',
                 isMutableAction: true,
-                propagateInterpolatedValues: true
-            });
+                propagateInterpolatedValues: true,
+                sourceId: 'canvas-1',
+                payload: {
+                    action: 'highlight',
+                    persistant: true
+                },
+                applyOnSource: true,
+                criteria: null
+            }, true);
+
+            selected.propagate(null, { isMutableAction: false }, true);
+
             // unsubscribe callbacks for propagation event
             projected.unsubscribe('propagation');
 
@@ -1407,6 +1445,25 @@ describe('DataModel', () => {
                             .to.deep.equal([12.5, 17.5, 22.5]);
             expect(bin.getFieldspace().fields.find(field => field.name() === 'sumField').bins().range)
                             .to.deep.equal([10, 15, 20, 25]);
+        });
+
+        it('should throw an error if the binned field already exists', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, { name: 'ModelA' });
+            const mockedBinErr = () => dataModel.bin('profit', { binSize: 10, name: 'sales' });
+
+            expect(mockedBinErr).to.throw('Field profit already exists');
         });
         // it('should return correct bins when binned after a selct operation', () => {
         //     const data1 = [

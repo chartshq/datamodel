@@ -27,7 +27,7 @@ describe('groupBy function tests', () => {
             expect(fnList.min([10, 12, 17])).to.equal(10);
         });
         it('should return min for nested Array', () => {
-            const expectedMin = [10, 12];
+            const expectedMin = [9, 12];
             expect(fnList.min([[10, 12], [9, 16]])).to.equal(expectedMin);
         });
         it('should return null for empty Array', () => {

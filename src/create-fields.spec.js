@@ -24,6 +24,9 @@ describe('Creating Field', () => {
             mockedPartialField.schema = { name: 'Country', type: 'dimension', subtype: DimensionSubtype.BINNED };
             expect(createUnitFieldFromPartial(mockedPartialField, mockedRowDiffset) instanceof Binned).to.be.true;
 
+            mockedPartialField.schema = { name: 'Country', type: 'dimension' };
+            expect(createUnitFieldFromPartial(mockedPartialField, mockedRowDiffset) instanceof Categorical).to.be.true;
+
             mockedPartialField.schema = { name: 'Country', type: 'measure' };
             expect(createUnitFieldFromPartial(mockedPartialField, mockedRowDiffset) instanceof Continuous).to.be.true;
 
