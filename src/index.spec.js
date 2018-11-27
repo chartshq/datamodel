@@ -1422,7 +1422,7 @@ describe('DataModel', () => {
                 projectionFlag && selectionFlag && groupByFlag
             ).to.be.true;
             expect(dataModel._propagationNameSpace.mutableActions)
-                            .to.have.keys(['brush-canvas-12', 'drilldown-canvas-123']);
+                            .to.have.keys(['brush-canvas-12', 'hover-canvas-123']);
             expect(dataModel._propagationNameSpace.immutableActions)
                             .to.have.key('select-canvas-1');
         });
