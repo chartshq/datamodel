@@ -23,26 +23,26 @@ class ReducerStore {
      * value of `defaultReducer` is used for aggregation.
      *
      * @public
-     *
-     * @param {string} [reducer='sum'] name of the default reducer. It picks up the definition from store by doing name
-     *      lookup. If no name is found then it takes `sum` as the default reducer.
-     *
-     * @return {ReducerStore} instance of the singleton store in page.
+     * @param {string} [reducer='sum'] - The name of the default reducer. It picks up the definition from store by doing
+     * name lookup. If no name is found then it takes `sum` as the default reducer.
+     * @return {ReducerStore} Returns instance of the singleton store in page.
      */
-    defaultReducer (...params) {
-        if (params.length) {
-            let reducer = params[0];
-            if (typeof reducer === 'function') {
-                this.store.set('defReducer', reducer);
-            } else if (typeof reducer === 'string') {
-                if (Object.keys(fnList).indexOf(reducer) !== -1) {
-                    this.store.set('defReducer', fnList[reducer]);
-                }
-            }
-            return this;
+    defaultReducer (reducer) {
+        if (!reducer) {
+            return this.store.get('defReducer');
         }
 
-        return this.store.get('defReducer');
+        if (typeof reducer === 'function') {
+            this.store.set('defReducer', reducer);
+        } else {
+            reducer = String(reducer);
+            if (Object.keys(fnList).indexOf(reducer) !== -1) {
+                this.store.set('defReducer', fnList[reducer]);
+            } else {
+                throw new Error(`Reducer ${reducer} not found in registry`);
+            }
+        }
+        return this;
     }
 
     /**
@@ -78,9 +78,12 @@ class ReducerStore {
      * @return {Function} function for unregistering the reducer.
      */
     register (name, reducer) {
-        if (typeof name === 'string' && typeof reducer === 'function') {
-            this.store.set(name, reducer);
+        if (typeof reducer !== 'function') {
+            throw new Error('Reducer should be a function');
         }
+
+        name = String(name);
+        this.store.set(name, reducer);
 
         return () => { this.__unregister(name); };
     }
