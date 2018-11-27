@@ -1347,7 +1347,7 @@ describe('DataModel', () => {
 
         it('should propagate variables through out the dag', () => {
             dataModel.propagate(propModel, {
-                action: 'reaction'
+                action: 'click'
             }, true);
 
             // unsubscribe callbacks for propagation event
@@ -1407,7 +1407,7 @@ describe('DataModel', () => {
             }, true);
 
             dataModel.propagate(propModel1, {
-                action: 'drilldown',
+                action: 'hover',
                 isMutableAction: true,
                 propagateInterpolatedValues: true,
                 sourceId: 'canvas-123',
