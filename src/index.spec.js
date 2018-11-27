@@ -1358,16 +1358,21 @@ describe('DataModel', () => {
             ).to.be.true;
         });
 
+        it('should successfully unsubscribe listener on a datamodel instance', () => {
+            // unsubscribe callback
+            selected.unsubscribe('propagation');
+
+            expect(selected._onPropagation.length).to.equal(0);
+        });
+
         it('should register a mutable action and propagate variables through the dag', () => {
             dataModel.propagate(propModel, {
-                action: 'reaction',
+                action: 'highlight',
                 isMutableAction: true,
                 propagateInterpolatedValues: true,
                 sourceId: 'canvas-1',
-                payload: {
-                    persistant: true,
-                },
-                applyOnSource: true,
+                applyOnSource: false,
+                propagateToSource: true,
                 criteria: {
                     first: ['White'],
                     sales: 25
@@ -1380,54 +1385,32 @@ describe('DataModel', () => {
             expect(
                 projectionFlag && selectionFlag && groupByFlag
             ).to.be.true;
-            expect(dataModel._propagationNameSpace.mutableActions).to.have.key('reaction-canvas-1');
-        });
-
-        it('should find the parent datamodel instance and apply propagation on it', () => {
-            selected.propagate(propModel1, {
-                isMutableAction: false, criteria: null
-            }, true);
-
-            // unsubscribe callbacks for propagation event
-            projected.unsubscribe('propagation');
-
-            expect(
-                projectionFlag && selectionFlag && groupByFlag
-            ).to.be.true;
+            expect(dataModel._propagationNameSpace.mutableActions).to.have.key('highlight-canvas-1');
         });
 
         it('should handle multiple propagations with different configs', () => {
             dataModel.propagate(propModel1, {
-                action: 'reaction',
+                action: 'select',
                 propagateInterpolatedValues: true,
                 sourceId: 'canvas-1',
-                payload: {
-                    persistant: true,
-                },
                 applyOnSource: false,
                 criteria: propModel1
             }, true);
 
             dataModel.propagate(propModel1, {
-                action: 'reaction',
+                action: 'brush',
                 isMutableAction: true,
                 propagateInterpolatedValues: true,
                 sourceId: 'canvas-12',
-                payload: {
-                    persistant: true,
-                },
                 applyOnSource: false,
                 criteria: propModel1
             }, true);
 
             dataModel.propagate(propModel1, {
-                action: 'reaction',
+                action: 'drilldown',
                 isMutableAction: true,
                 propagateInterpolatedValues: true,
                 sourceId: 'canvas-123',
-                payload: {
-                    persistant: true,
-                },
                 applyOnSource: false,
                 criteria: propModel1
             }, true);
@@ -1439,13 +1422,13 @@ describe('DataModel', () => {
                 projectionFlag && selectionFlag && groupByFlag
             ).to.be.true;
             expect(dataModel._propagationNameSpace.mutableActions)
-                            .to.have.keys(['reaction-canvas-12', 'reaction-canvas-123']);
+                            .to.have.keys(['brush-canvas-12', 'drilldown-canvas-123']);
             expect(dataModel._propagationNameSpace.immutableActions)
-                            .to.have.key('reaction-canvas-1');
+                            .to.have.key('select-canvas-1');
         });
 
         it('should handle propagation if null is passed as an identifier', () => {
-            dataModel.propagate(null, { action: 'reaction' }, true);
+            dataModel.propagate(null, { action: 'reaction', criteria: null }, true);
 
             expect(
                 projectionFlag && selectionFlag && groupByFlag
