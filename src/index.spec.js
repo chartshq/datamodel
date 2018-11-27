@@ -1305,6 +1305,20 @@ describe('DataModel', () => {
             name: 'second',
             type: 'dimension'
         }]);
+        const propModel1 = new DataModel([{
+            first: 'Hey',
+            second: 'Jude',
+            count: 100
+        }], [{
+            name: 'first',
+            type: 'dimension'
+        }, {
+            name: 'second',
+            type: 'dimension'
+        }, {
+            name: 'count',
+            type: 'measure'
+        }]);
 
         it('should propagate variables through out the dag', () => {
             let projetionFlag = false;
@@ -1398,7 +1412,7 @@ describe('DataModel', () => {
                 groupByFlag = true;
             });
 
-            selected.propagate(null, {
+            selected.propagate(propModel1, {
                 isMutableAction: false, criteria: null
             }, true);
 
@@ -1429,23 +1443,103 @@ describe('DataModel', () => {
                 groupByFlag = true;
             });
 
-            dataModel.propagate(propModel, {
+            dataModel.propagate(propModel1, {
                 action: 'reaction',
-                isMutableAction: false,
-                propagateInterpolatedValues: false,
+                propagateInterpolatedValues: true,
                 sourceId: 'canvas-1',
                 payload: {
                     persistant: true,
                 },
                 applyOnSource: false,
                 criteria: {
-                    first: ['White'],
-                    sales: 25
+                    second: ['White'],
+                    first: 'Hey'
                 }
+            }, true);
+
+            dataModel.propagate(propModel1, {
+                action: 'reaction',
+                isMutableAction: true,
+                propagateInterpolatedValues: true,
+                sourceId: 'canvas-12',
+                payload: {
+                    persistant: true,
+                },
+                applyOnSource: false,
+                criteria: {
+                    count: 200
+                },
             }, true);
 
             // unsubscribe callbacks for propagation event
             projected.unsubscribe('propagation');
+
+            expect(
+                projectionFlag && selectionFlag && groupByFlag
+            ).to.be.true;
+        });
+
+        it('should filterPropagationModel if field is of type measure and exists in the schema', () => {
+            let projectionFlag = false;
+            let selectionFlag = false;
+            let groupByFlag = false;
+            const dataModel = new DataModel(data1, schema1);
+            const projected = dataModel.project(['profit']);
+            const selected = dataModel.select(fields => fields.profit.valueOf() > 10);
+            const grouped = dataModel.groupBy(['first']);
+            // setup listeners
+            projected.on('propagation', () => {
+                projectionFlag = true;
+            });
+            selected.on('propagation', () => {
+                selectionFlag = true;
+            });
+            grouped.on('propagation', () => {
+                groupByFlag = true;
+            });
+
+            dataModel.propagate(propModel1, {
+                action: 'reaction',
+                isMutableAction: true,
+                propagateInterpolatedValues: true,
+                sourceId: 'canvas-1',
+                payload: {
+                    persistant: true,
+                },
+                applyOnSource: false,
+                criteria: {
+                    count: 100
+                },
+            }, true);
+
+            // unsubscribe callbacks for propagation event
+            projected.unsubscribe('propagation');
+
+            expect(
+                projectionFlag && selectionFlag && groupByFlag
+            ).to.be.true;
+        });
+
+        it('should not propagate values if null is passed as an identifier', () => {
+            let projectionFlag = false;
+            let selectionFlag = false;
+            let groupByFlag = false;
+            const dataModel = new DataModel(data1, schema1);
+            const projected = dataModel.project(['profit']);
+            const selected = dataModel.select(fields => fields.profit.valueOf() > 10);
+            const grouped = dataModel.groupBy(['first']);
+            // setup listeners
+            projected.on('propagation', () => {
+                projectionFlag = true;
+            });
+            selected.on('propagation', () => {
+                selectionFlag = true;
+            });
+            grouped.on('propagation', () => {
+                groupByFlag = true;
+            });
+
+            dataModel.propagate(null, { action: 'reaction' }, true);
 
             expect(
                 projectionFlag && selectionFlag && groupByFlag
