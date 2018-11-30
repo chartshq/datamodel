@@ -27,7 +27,13 @@ module.exports = function (config) {
                             options: { esModules: true },
                         },
                         enforce: 'pre',
-                        exclude: /node_modules|src\/utils\/|\.spec\.js$|\/muze-utils/,
+                        exclude: [
+                            /node_modules/,
+                            /\.spec\.js$/,
+                            /src\/utils\/date-time-formatter\.js/,
+                            /src\/utils\/extend2\.js/,
+                            /src\/index\.js/
+                        ]
                     },
                 ],
             },

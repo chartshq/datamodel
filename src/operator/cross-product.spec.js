@@ -66,5 +66,14 @@ describe('CrossProduct Functionality', () => {
                 uids: [0, 1]
             });
         });
+
+        it('should throw an error if two datamodels have the same name', () => {
+            const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
+            const dataModel2 = new DataModel(data2, schema2, { name: 'ModelA' });
+            const mockedCrossProductFn = () => crossProduct(dataModel1, dataModel2,
+                (dmFields1, dmFields2) => dmFields1.city.value === dmFields2.city.value, true);
+
+            expect(mockedCrossProductFn).to.throw('DataModels must have different alias names');
+        });
     });
 });
