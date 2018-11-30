@@ -27,10 +27,12 @@ class ReducerStore {
      * name lookup. If no name is found then it takes `sum` as the default reducer.
      * @return {ReducerStore} Returns instance of the singleton store in page.
      */
-    defaultReducer (reducer) {
-        if (!reducer) {
+    defaultReducer (...params) {
+        if (!params.length) {
             return this.store.get('defReducer');
         }
+
+        let reducer = params[0];
 
         if (typeof reducer === 'function') {
             this.store.set('defReducer', reducer);
