@@ -58,6 +58,14 @@ describe('DataModel', () => {
         });
     });
 
+    context('Test for a failing data format type', () => {
+        let mockedDm = () => new DataModel([], [], { dataFormat: 'erroneous-data-type' });
+
+        it('should throw no coverter function found error', () => {
+            expect(mockedDm).to.throw('No converter function found for erroneous-data-type format');
+        });
+    });
+
     describe('#getData', () => {
         it('should return the data in the specified format', () => {
             const schema = [
@@ -198,6 +206,35 @@ describe('DataModel', () => {
                 sort: [['horsepower', 'asc']]
             })).to.deep.equal(expected);
         });
+
+        it('should add a column named uid if withUid is true', () => {
+            const schema = [
+                { name: 'name', type: 'dimension' },
+                { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
+            ];
+
+            const data = [
+                { name: 'Rousan', birthday: '1995-07-05' },
+                { name: 'Sumant', birthday: '1996-08-04' },
+                { name: 'Akash', birthday: '1994-01-03' }
+            ];
+            const dataModel = new DataModel(data, schema);
+            const expected = {
+                data: [
+                  ['Rousan', 804882600000, 0],
+                  ['Sumant', 839097000000, 1],
+                  ['Akash', 757535400000, 2]
+                ],
+                schema: [
+                    { name: 'name', type: 'dimension', subtype: 'categorical' },
+                    { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' },
+                    { name: 'uid', type: 'identifier' }
+                ],
+                uids: [0, 1, 2]
+            };
+
+            expect(dataModel.getData({ withUid: true })).to.deep.equal(expected);
+        });
     });
 
     describe('#project', () => {
@@ -302,6 +339,27 @@ describe('DataModel', () => {
             shecma.forEach((sch) => {
                 expect(sch.index).to.equal(fieldMap[sch.name].index);
             });
+        });
+
+        it('should make projection by matching fields with the input regexp', () => {
+            const dataModel = new DataModel(data, schema);
+            const projectedDataModel = dataModel.project([/o/g, /age/g]);
+            const expected = {
+                schema: [
+                    { name: 'education', type: 'dimension', subtype: 'categorical' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'age', type: 'measure', subtype: 'continuous' }
+                ],
+                data: [
+                    ['tertiary', 'management', 30],
+                    ['secondary', 'blue-collar', 59],
+                    ['tertiary', 'management', 35]
+                ],
+                uids: [0, 1, 2]
+            };
+
+            expect(dataModel === projectedDataModel).to.be.false;
+            expect(projectedDataModel.getData()).to.deep.equal(expected);
         });
     });
 
@@ -1182,33 +1240,102 @@ describe('DataModel', () => {
 
             expect(calculatedDm.getData()).to.eql(expected);
         });
+
+        it('should throw an error if invalid column name passed in function to resolve value of new variable', () => {
+            const data = [
+                {
+                    name: 'Rousan',
+                    birthday: '1995-07-05',
+                    roll: 2
+                },
+                {
+                    name: 'Sumant',
+                    birthday: '1996-08-04',
+                    roll: 89
+                }
+            ];
+            const schema = [
+                {
+                    name: 'name',
+                    type: 'dimension'
+                },
+                {
+                    name: 'birthday',
+                    type: 'dimension',
+                    subtype: 'temporal',
+                    format: '%Y-%m-%d'
+                },
+                {
+                    name: 'roll',
+                    type: 'measure',
+                    defAggFn: 'avg'
+                }
+            ];
+            const dataModel = new DataModel(data, schema);
+            const mockedFn = () =>
+                dataModel.calculateVariable({
+                    name: 'age',
+                    type: 'measure'
+                }, ['country', c => c]);
+
+            expect(mockedFn).to.throw('country is not a valid column name');
+        });
     });
 
     describe('#propagate', () => {
-        it('should propagate variables through out the dag', () => {
-            const data1 = [
-                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-                { profit: 15, sales: 25, first: 'White', second: 'walls' },
-            ];
-            const schema1 = [
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
-                { name: 'first', type: 'dimension' },
-                { name: 'second', type: 'dimension' },
-            ];
+        const data1 = [
+            { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+            { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+            { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+            { profit: 15, sales: 25, first: 'White', second: 'walls' },
+        ];
+        const schema1 = [
+            { name: 'profit', type: 'measure' },
+            { name: 'sales', type: 'measure' },
+            { name: 'first', type: 'dimension' },
+            { name: 'second', type: 'dimension' },
+        ];
+        const propModel = new DataModel([{
+            first: 'Hey',
+            second: 'Jude'
+        }], [{
+            name: 'first',
+            type: 'dimension'
+        }, {
+            name: 'second',
+            type: 'dimension'
+        }]);
+        const propModel1 = new DataModel([{
+            first: 'Hey',
+            second: 'Jude',
+            count: 100
+        }], [{
+            name: 'first',
+            type: 'dimension'
+        }, {
+            name: 'second',
+            type: 'dimension'
+        }, {
+            name: 'count',
+            type: 'measure'
+        }]);
 
-            let projetionFlag = false;
-            let selectionFlag = false;
-            let groupByFlag = false;
-            const dataModel = new DataModel(data1, schema1);
-            const projected = dataModel.project(['profit']);
-            const selected = dataModel.select(fields => fields.profit.valueOf() > 10);
-            const grouped = dataModel.groupBy(['first']);
+        let dataModel;
+        let projectionFlag = false;
+        let selectionFlag = false;
+        let groupByFlag = false;
+        let projected;
+        let selected;
+        let grouped;
+
+        beforeEach(() => {
+            dataModel = new DataModel(data1, schema1);
+            projected = dataModel.project(['profit']);
+            selected = dataModel.select(fields => fields.profit.valueOf() > 10);
+            grouped = dataModel.groupBy(['first']);
             // setup listeners
             projected.on('propagation', () => {
-                projetionFlag = true;
+                projectionFlag = true;
             });
             selected.on('propagation', () => {
                 selectionFlag = true;
@@ -1216,27 +1343,98 @@ describe('DataModel', () => {
             grouped.on('propagation', () => {
                 groupByFlag = true;
             });
+        });
 
-            const propModel = new DataModel([{
-                first: 'Hey',
-                second: 'Jude'
-            }], [{
-                name: 'first',
-                type: 'dimension'
-            }, {
-                name: 'second',
-                type: 'dimension'
-            }]);
-
+        it('should propagate variables through out the dag', () => {
             dataModel.propagate(propModel, {
-                action: 'reaction'
-            });
+                action: 'click'
+            }, true);
+
+            // unsubscribe callbacks for propagation event
+            projected.unsubscribe('propagation');
+
             expect(
-                projetionFlag && selectionFlag && groupByFlag
+                projectionFlag && selectionFlag && groupByFlag
+            ).to.be.true;
+        });
+
+        it('should successfully unsubscribe listener on a datamodel instance', () => {
+            // unsubscribe callback
+            selected.unsubscribe('propagation');
+
+            expect(selected._onPropagation.length).to.equal(0);
+        });
+
+        it('should register a mutable action and propagate variables through the dag', () => {
+            dataModel.propagate(propModel, {
+                action: 'highlight',
+                isMutableAction: true,
+                propagateInterpolatedValues: true,
+                sourceId: 'canvas-1',
+                applyOnSource: false,
+                propagateToSource: true,
+                criteria: {
+                    first: ['White'],
+                    sales: 25
+                }
+            }, true);
+
+            // unsubscribe callbacks for propagation event
+            projected.unsubscribe('propagation');
+
+            expect(
+                projectionFlag && selectionFlag && groupByFlag
+            ).to.be.true;
+            expect(dataModel._propagationNameSpace.mutableActions).to.have.key('highlight-canvas-1');
+        });
+
+        it('should handle multiple propagations with different configs', () => {
+            dataModel.propagate(propModel1, {
+                action: 'select',
+                propagateInterpolatedValues: true,
+                sourceId: 'canvas-1',
+                applyOnSource: false,
+                criteria: propModel1
+            }, true);
+
+            dataModel.propagate(propModel1, {
+                action: 'brush',
+                isMutableAction: true,
+                propagateInterpolatedValues: true,
+                sourceId: 'canvas-12',
+                applyOnSource: false,
+                criteria: propModel1
+            }, true);
+
+            dataModel.propagate(propModel1, {
+                action: 'hover',
+                isMutableAction: true,
+                propagateInterpolatedValues: true,
+                sourceId: 'canvas-123',
+                applyOnSource: false,
+                criteria: propModel1
+            }, true);
+
+            // unsubscribe callbacks for propagation event
+            projected.unsubscribe('propagation');
+
+            expect(
+                projectionFlag && selectionFlag && groupByFlag
+            ).to.be.true;
+            expect(dataModel._propagationNameSpace.mutableActions)
+                            .to.have.keys(['brush-canvas-12', 'hover-canvas-123']);
+            expect(dataModel._propagationNameSpace.immutableActions)
+                            .to.have.key('select-canvas-1');
+        });
+
+        it('should handle propagation if null is passed as an identifier', () => {
+            dataModel.propagate(null, { action: 'reaction', criteria: null }, true);
+
+            expect(
+                projectionFlag && selectionFlag && groupByFlag
             ).to.be.true;
         });
     });
-
 
     describe('#bin', () => {
         it('should bin the data when buckets are given', () => {
@@ -1384,7 +1582,6 @@ describe('DataModel', () => {
             expect(newField.bins()).to.deep.equal(expBins);
         });
 
-
         it('should bin data when negative values are present', () => {
             const data1 = [
                 { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
@@ -1463,6 +1660,65 @@ describe('DataModel', () => {
             expectedData = ['10-11', '11-16', '11-16', '10-11', '16-20', '20-22', null, '11-16', null];
             expect(newField.data()).to.deep.equal(expectedData);
             expect(newField.bins()).to.deep.equal([10, 11, 16, 20, 22]);
+        });
+
+        it('should throw an error if the binned field already exists', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, { name: 'ModelA' });
+            const mockedBinErr = () => dataModel.bin('profit', { binSize: 10, name: 'sales' });
+
+            expect(mockedBinErr).to.throw('Field sales already exists');
+        });
+
+        it('should throw an error if the source field to create a binned field does not exists', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, { name: 'ModelA' });
+            const mockedBinErr = () => dataModel.bin('name', { binSize: 10, name: 'cost' });
+
+            expect(mockedBinErr).to.throw("Field name doesn't exist");
+        });
+
+        it('should assign a name to the binned field if not passed in config', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, { name: 'ModelA' });
+            const binnedDm = dataModel.bin('profit', { binSize: 10 });
+
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'profit_binned');
+
+            expect(newField.partialField.name).to.equal('profit_binned');
         });
     });
 
@@ -1875,6 +2131,41 @@ describe('DataModel', () => {
             ].join('\n');
 
             expect(dm.serialize()).to.eql(expected);
+        });
+
+        it('should throw an error if data type is not supported', () => {
+            const mockedFn = () => dm.serialize('erroneous-data-type');
+            expect(mockedFn).to.throw('Data type erroneous-data-type is not supported');
+        });
+    });
+
+    describe('#getName', () => {
+        const dataModel = new DataModel([], [], { name: 'ModelA' });
+
+        it('should return user-defined name of the datamodel instance', () => {
+            expect(dataModel.getName()).to.equal('ModelA');
+        });
+    });
+
+    describe('#isEmpty', () => {
+        const data = [
+            { age: 30, job: 'unemployed', marital: 'married' },
+            { age: 33, job: 'services', marital: 'married' },
+            { age: 35, job: 'management', marital: 'single' }
+        ];
+        const schema = [
+            { name: 'age', type: 'measure' },
+            { name: 'job', type: 'dimension' },
+            { name: 'marital', type: 'dimension' },
+        ];
+        const dataModel = new DataModel([], []);
+        const dataModel1 = new DataModel(data, schema);
+
+        it('should return true if datamodel instance has no data', () => {
+            expect(dataModel.isEmpty()).to.be.true;
+        });
+        it('should return false if datamodel instance has data', () => {
+            expect(dataModel1.isEmpty()).to.be.false;
         });
     });
 });

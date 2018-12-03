@@ -2,7 +2,16 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { isArray, isObject, isCallable, isString, uniqueValues, isArrEqual, detectDataFormat } from './helper';
+import {
+    isArray,
+    isObject,
+    isCallable,
+    isString,
+    uniqueValues,
+    isArrEqual,
+    detectDataFormat,
+    formatNumber
+} from './helper';
 import { DataFormat } from '../enums';
 
 describe('Utils', () => {
@@ -102,6 +111,13 @@ describe('Utils', () => {
 
             data = 222;
             expect(detectDataFormat(data)).is.null;
+        });
+    });
+
+    describe('#formatNumber', () => {
+        it('should return the passed value as result', () => {
+            expect(formatNumber(10)).is.equal(10);
+            expect(formatNumber(-10)).is.equal(-10);
         });
     });
 });

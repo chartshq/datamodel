@@ -16,7 +16,7 @@ describe('Temporal', () => {
         description: 'The is a test field',
         displayName: 'date'
     };
-    const data = ['2017-03-01', '2017-03-02', '2017-03-03', '2018-01-06', '2019-11-07'];
+    const data = ['2017-03-01', '2017-03-02', '2017-03-03', '2018-01-06', '2019-11-07', '2017-03-01'];
     let temParser;
     let partField;
     let rowDiffset;
@@ -25,13 +25,13 @@ describe('Temporal', () => {
     beforeEach(() => {
         temParser = new TemporalParser(schema);
         partField = new PartialField(schema.name, data, schema, temParser);
-        rowDiffset = '1-2,4';
+        rowDiffset = '0-2,5';
         tempField = new Temporal(partField, rowDiffset);
     });
 
     describe('#calculateDataDomain', () => {
         it('should return the field domain', () => {
-            const expected = [1488393000000, 1488479400000, 1573065000000];
+            const expected = [1488306600000, 1488393000000, 1488479400000];
             expect(tempField.calculateDataDomain()).to.eql(expected);
         });
 
