@@ -48,9 +48,10 @@ describe('Temporal', () => {
     });
 
     describe('#minimumConsecutiveDifference', () => {
-        it('should return the minimum diff', () => {
+        it('should return the minimum diff and cache the result', () => {
             const expected = 86400000;
             expect(tempField.minimumConsecutiveDifference()).to.equal(expected);
+            expect(tempField._cachedMinDiff).to.equal(expected);
         });
 
         it('should sort the data before minimumConsecutiveDifference calculation', () => {

@@ -11,6 +11,19 @@ import { DateTimeFormatter } from '../../utils';
  */
 export default class Temporal extends Dimension {
      /**
+     * Initialize a new instance.
+     *
+     * @public
+     * @param {PartialField} partialField - The partialField instance which holds the whole data.
+     * @param {string} rowDiffset - The data subset definition.
+     */
+    constructor (partialField, rowDiffset) {
+        super(partialField, rowDiffset);
+
+        this._cachedMinDiff = null;
+    }
+
+     /**
      * Calculates the corresponding field domain.
      *
      * @public
@@ -46,6 +59,10 @@ export default class Temporal extends Dimension {
      * @return {number} Returns the minimum consecutive diff in milliseconds.
      */
     minimumConsecutiveDifference () {
+        if (this._cachedMinDiff) {
+            return this._cachedMinDiff;
+        }
+
         const sortedData = this.data().sort((a, b) => a - b);
         const arrLn = sortedData.length;
         let minDiff = Number.POSITIVE_INFINITY;
@@ -66,10 +83,11 @@ export default class Temporal extends Dimension {
         }
 
         if (!processedCount) {
-            return null;
+            minDiff = null;
         }
+        this._cachedMinDiff = minDiff;
 
-        return minDiff;
+        return this._cachedMinDiff;
     }
 
     /**
