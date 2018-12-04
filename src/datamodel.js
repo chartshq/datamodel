@@ -380,6 +380,11 @@ class DataModel extends Relation {
             fieldIndex >= 0 && (partialFieldspace.fields[fieldIndex] = field);
         }
 
+        // flush out cached namespace values
+        partialFieldspace._cachedFieldsObj =
+        partialFieldspace._cachedDimension =
+        partialFieldspace._cachedMeasure = null;
+
         this.__calculateFieldspace().calculateFieldsConfig();
         return this;
     }

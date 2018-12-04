@@ -66,6 +66,92 @@ describe('DataModel', () => {
         });
     });
 
+    context('should cache namespace values once it is computed', () => {
+        const data = [
+            { age: 30, job: 'unemployed', marital: 'married' },
+            { age: 33, job: 'services', marital: 'married' },
+            { age: 35, job: 'management', marital: 'single' }
+        ];
+        const schema = [
+            { name: 'age', type: 'measure' },
+            { name: 'job', type: 'dimension' },
+            { name: 'marital', type: 'dimension' },
+        ];
+        const dataModel = new DataModel(data, schema);
+
+        const fieldsObj = dataModel.getPartialFieldspace()._cachedFieldsObj;
+        const expectedFieldsObj = {
+            age: {
+                partialField: {
+                    name: 'age',
+                    schema: { name: 'age', type: 'measure', subtype: 'continuous' },
+                    parser: {},
+                    data: [30, 33, 35]
+                },
+                rowDiffset: '0-2'
+            },
+            job: {
+                partialField: {
+                    name: 'job',
+                    schema: { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    parser: {},
+                    data: ['unemployed', 'services', 'management']
+                },
+                rowDiffset: '0-2'
+            },
+            marital: {
+                partialField: {
+                    name: 'marital',
+                    schema: { name: 'marital', type: 'dimension', subtype: 'categorical' },
+                    parser: {},
+                    data: ['married', 'married', 'single']
+                },
+                rowDiffset: '0-2'
+            }
+        };
+
+        dataModel.getPartialFieldspace().getMeasure();
+        const cachedMeasureFields = dataModel.getPartialFieldspace()._cachedMeasure;
+        const expectedMeasureFields = {
+            age: {
+                partialField: {
+                    name: 'age',
+                    schema: { name: 'age', type: 'measure', subtype: 'continuous' },
+                    parser: {},
+                    data: [30, 33, 35]
+                },
+                rowDiffset: '0-2'
+            }
+        };
+
+        dataModel.getPartialFieldspace().getDimension();
+        const cachedDimensionFields = dataModel.getPartialFieldspace()._cachedDimension;
+        const expectedDimensionFields = {
+            job: {
+                partialField: {
+                    name: 'job',
+                    schema: { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    parser: {},
+                    data: ['unemployed', 'services', 'management']
+                },
+                rowDiffset: '0-2'
+            },
+            marital: {
+                partialField: {
+                    name: 'marital',
+                    schema: { name: 'marital', type: 'dimension', subtype: 'categorical' },
+                    parser: {},
+                    data: ['married', 'married', 'single']
+                },
+                rowDiffset: '0-2'
+            }
+        };
+
+        expect(fieldsObj).to.eql(expectedFieldsObj);
+        expect(cachedMeasureFields).to.eql(expectedMeasureFields);
+        expect(cachedDimensionFields).to.eql(expectedDimensionFields);
+    });
+
     describe('#getData', () => {
         it('should return the data in the specified format', () => {
             const schema = [
@@ -362,7 +448,6 @@ describe('DataModel', () => {
             expect(projectedDataModel.getData()).to.deep.equal(expected);
         });
     });
-
 
     describe('#select', () => {
         const data = [
@@ -1841,7 +1926,6 @@ describe('DataModel', () => {
             });
         });
     });
-
 
     context('Checking api for updating parent child relationship', () => {
         const data1 = [
