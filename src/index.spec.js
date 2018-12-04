@@ -102,8 +102,16 @@ describe('DataModel', () => {
             });
             expected = {
                 data: [
-                    ['Rousan', 'Sumant', 'Akash'],
-                    [804882600000, 839097000000, 757535400000]
+                    [
+                        'Rousan',
+                        'Sumant',
+                        'Akash'
+                    ],
+                    [
+                        new Date(1995, 7 - 1, 5).getTime(),
+                        new Date(1996, 8 - 1, 4).getTime(),
+                        new Date(1994, 1 - 1, 3).getTime()
+                    ]
                 ],
                 schema: [
                     { name: 'name', type: 'dimension', subtype: 'categorical' },
