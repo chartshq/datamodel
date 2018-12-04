@@ -85,9 +85,9 @@ describe('DataModel', () => {
             });
             let expected = {
                 data: [
-                    ['Rousan', 804882600000],
-                    ['Sumant', 839097000000],
-                    ['Akash', 757535400000]
+                    ['Rousan', new Date(1995, 7 - 1, 5).getTime()],
+                    ['Sumant', new Date(1996, 8 - 1, 4).getTime()],
+                    ['Akash', new Date(1994, 1 - 1, 3).getTime()]
                 ],
                 schema: [
                     { name: 'name', type: 'dimension', subtype: 'categorical' },
@@ -221,9 +221,9 @@ describe('DataModel', () => {
             const dataModel = new DataModel(data, schema);
             const expected = {
                 data: [
-                  ['Rousan', 804882600000, 0],
-                  ['Sumant', 839097000000, 1],
-                  ['Akash', 757535400000, 2]
+                    ['Rousan', new Date(1995, 7 - 1, 5).getTime(), 0],
+                    ['Sumant', new Date(1996, 8 - 1, 4).getTime(), 1],
+                    ['Akash', new Date(1994, 1 - 1, 3).getTime(), 2]
                 ],
                 schema: [
                     { name: 'name', type: 'dimension', subtype: 'categorical' },
