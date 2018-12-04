@@ -9,6 +9,7 @@
 <br />
 <br /> -->
 
+[![Build Status](https://api.travis-ci.org/chartshq/datamodel.svg?branch=develop)](https://travis-ci.org/chartshq/datamodel)
 [![NPM version](https://img.shields.io/npm/v/datamodel.svg)](https://www.npmjs.com/package/datamodel)
 [![NPM total downloads](https://img.shields.io/npm/dt/datamodel.svg)](https://www.npmjs.com/package/datamodel)
 [![Contributors](https://img.shields.io/github/contributors/chartshq/datamodel.svg)](https://github.com/chartshq/datamodel/graphs/contributors)
