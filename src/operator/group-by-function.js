@@ -1,19 +1,16 @@
+import { isArray } from '../utils';
+
 /**
  * Reducer function that takes care about the sum aggregation
  * @param  {Array} arr array of values
  * @return {number}     sum of the array
  */
 function sum (arr) {
-    let allNulls = true;
-    const isNestedArray = arr[0] instanceof Array;
-    const sumVal = arr.reduce((carry, a) => {
-        if (isNestedArray) {
-            return carry.map((x, i) => x + a[i]);
-        }
-        allNulls = allNulls && (a === null);
-        return carry + a;
-    }, isNestedArray ? Array(...Array(arr[0].length)).map(() => 0) : 0);
-    return allNulls ? null : sumVal;
+    if (isArray(arr) && arr.length) {
+        const totalSum = arr.reduce((acc, curr) => acc + +curr, 0);
+        return Number.isNaN(totalSum) ? NaN : totalSum;
+    }
+    return null;
 }
 
 /**
@@ -22,13 +19,12 @@ function sum (arr) {
  * @return {number}     mean of the array
  */
 function avg (arr) {
-    const isNestedArray = arr[0] instanceof Array;
-    const len = arr.length || 1;
-    const arrSum = sum(arr);
-    if (isNestedArray) {
-        return arrSum.map(x => x / len);
+    if (isArray(arr) && arr.length) {
+        const totalSum = sum(arr);
+        const len = arr.length;
+        return Number.isNaN(totalSum) ? NaN : totalSum / len;
     }
-    return arrSum === null ? null : arrSum / len;
+    return null;
 }
 
 /**
@@ -37,12 +33,11 @@ function avg (arr) {
  * @return {number}     min of the array
  */
 function min (arr) {
-    const isNestedArray = arr[0] instanceof Array;
-    if (isNestedArray) {
-        return arr.reduce((carry, a) => carry.map((x, i) => Math.min(x, a[i])),
-        Array(...Array(arr[0].length)).map(() => Infinity));
+    if (isArray(arr)) {
+        const minVal = arr.every(d => d === null) ? null : Math.min(...arr);
+        return minVal;
     }
-    return arr.every(d => d === null) ? null : Math.min(...arr);
+    return null;
 }
 
 /**
@@ -51,12 +46,11 @@ function min (arr) {
  * @return {number}     max of the array
  */
 function max (arr) {
-    const isNestedArray = arr[0] instanceof Array;
-    if (isNestedArray) {
-        return arr.reduce((carry, a) => carry.map((x, i) => Math.max(x, a[i])),
-        Array(...Array(arr[0].length)).map(() => -Infinity));
+    if (isArray(arr)) {
+        const maxVal = arr.every(d => d === null) ? null : Math.max(...arr);
+        return maxVal;
     }
-    return arr.every(d => d === null) ? null : Math.max(...arr);
+    return null;
 }
 
 /**
@@ -83,12 +77,10 @@ function last (arr) {
  * @return {number}     count of the array
  */
 function count (arr) {
-    const isNestedArray = arr[0] instanceof Array;
-    const len = arr.length;
-    if (isNestedArray) {
-        return Array(...Array(arr[0].length)).map(() => len);
+    if (isArray(arr)) {
+        return arr.length;
     }
-    return len;
+    return null;
 }
 
 /**
