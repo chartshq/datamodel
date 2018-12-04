@@ -5,3 +5,5 @@ before_script:
   - npm install
 script:
   - npm test
+notifications:
+    slack: fusioncharts:JmooWfzCnyxe4p7KTTJU5xzP
