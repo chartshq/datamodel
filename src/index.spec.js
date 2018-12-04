@@ -78,78 +78,16 @@ describe('DataModel', () => {
             { name: 'marital', type: 'dimension' },
         ];
         const dataModel = new DataModel(data, schema);
+        const fieldspace = dataModel.getFieldspace();
 
-        const fieldsObj = dataModel.getPartialFieldspace()._cachedFieldsObj;
-        const expectedFieldsObj = {
-            age: {
-                partialField: {
-                    name: 'age',
-                    schema: { name: 'age', type: 'measure', subtype: 'continuous' },
-                    parser: {},
-                    data: [30, 33, 35]
-                },
-                rowDiffset: '0-2'
-            },
-            job: {
-                partialField: {
-                    name: 'job',
-                    schema: { name: 'job', type: 'dimension', subtype: 'categorical' },
-                    parser: {},
-                    data: ['unemployed', 'services', 'management']
-                },
-                rowDiffset: '0-2'
-            },
-            marital: {
-                partialField: {
-                    name: 'marital',
-                    schema: { name: 'marital', type: 'dimension', subtype: 'categorical' },
-                    parser: {},
-                    data: ['married', 'married', 'single']
-                },
-                rowDiffset: '0-2'
-            }
-        };
+        const fieldsObj = fieldspace.fieldsObj();
+        expect(fieldsObj).to.eql(fieldspace._cachedFieldsObj);
 
-        dataModel.getPartialFieldspace().getMeasure();
-        const cachedMeasureFields = dataModel.getPartialFieldspace()._cachedMeasure;
-        const expectedMeasureFields = {
-            age: {
-                partialField: {
-                    name: 'age',
-                    schema: { name: 'age', type: 'measure', subtype: 'continuous' },
-                    parser: {},
-                    data: [30, 33, 35]
-                },
-                rowDiffset: '0-2'
-            }
-        };
+        const measureFields = fieldspace.getMeasure();
+        expect(measureFields).to.eql(fieldspace._cachedMeasure);
 
-        dataModel.getPartialFieldspace().getDimension();
-        const cachedDimensionFields = dataModel.getPartialFieldspace()._cachedDimension;
-        const expectedDimensionFields = {
-            job: {
-                partialField: {
-                    name: 'job',
-                    schema: { name: 'job', type: 'dimension', subtype: 'categorical' },
-                    parser: {},
-                    data: ['unemployed', 'services', 'management']
-                },
-                rowDiffset: '0-2'
-            },
-            marital: {
-                partialField: {
-                    name: 'marital',
-                    schema: { name: 'marital', type: 'dimension', subtype: 'categorical' },
-                    parser: {},
-                    data: ['married', 'married', 'single']
-                },
-                rowDiffset: '0-2'
-            }
-        };
-
-        expect(fieldsObj).to.eql(expectedFieldsObj);
-        expect(cachedMeasureFields).to.eql(expectedMeasureFields);
-        expect(cachedDimensionFields).to.eql(expectedDimensionFields);
+        const dimensionFields = fieldspace.getDimension();
+        expect(dimensionFields).to.eql(fieldspace._cachedDimension);
     });
 
     describe('#getData', () => {
