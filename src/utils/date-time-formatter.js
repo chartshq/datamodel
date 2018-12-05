@@ -358,7 +358,7 @@ DateTimeFormatter.getTokenDefinitions = function () {
             name: 'B',
             index: 1,
             extract () { return `(${monthsDef.long.join('|')})`; },
-            parser: DateTimeFormatter.defaultNumberParser(monthsDef.long),
+            parser: DateTimeFormatter.defaultRangeParser(monthsDef.long),
             formatter (val) {
                 const d = convertToNativeDate(val);
                 const month = d.getMonth();
