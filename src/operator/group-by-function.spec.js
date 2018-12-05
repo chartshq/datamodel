@@ -10,25 +10,31 @@ describe('groupBy function tests', () => {
         it('should return sum for 1D array', () => {
             expect(fnList.sum([10, 12, 17])).to.equal(39);
         });
-        it('should return NaN for nested array', () => {
-            expect(fnList.sum([[10, 12], [9, 16]])).to.be.NaN;
+        it('should return null for nested array', () => {
+            expect(fnList.sum([[10, 12], [9, 16]])).to.be.null;
         });
-        it('should return 0 for an empty Array', () => {
-            expect(fnList.sum([])).to.equal(0);
+        it('should return null for an empty Array', () => {
+            expect(fnList.sum([])).to.be.null;
         });
         it('should return null for an empty input', () => {
             expect(fnList.sum()).to.be.null;
+        });
+        it('should treat false as value 0', () => {
+            expect(fnList.sum([null, undefined, false])).to.equal(0);
+        });
+        it('should filter out null and undefined values', () => {
+            expect(fnList.sum([10, 12, 17, null, undefined])).to.equal(39);
         });
     });
     describe('#avg', () => {
         it('should return Average for 1D Array', () => {
             expect(fnList.avg([10, 12, 17])).to.equal(39 / 3);
         });
-        it('should return NaN for nested array', () => {
-            expect(fnList.avg([[10, 12], [9, 16]])).to.be.NaN;
+        it('should return null for nested array', () => {
+            expect(fnList.avg([[10, 12], [9, 16]])).to.be.null;
         });
-        it('should return 0 for an empty Array', () => {
-            expect(fnList.avg([])).to.equal(0);
+        it('should return null for an empty Array', () => {
+            expect(fnList.avg([])).to.be.null;
         });
         it('should return null for an empty input', () => {
             expect(fnList.avg()).to.be.null;
@@ -38,8 +44,8 @@ describe('groupBy function tests', () => {
         it('should return min for 1D Array', () => {
             expect(fnList.min([10, 12, 17])).to.equal(10);
         });
-        it('should return NaN for nested Array', () => {
-            expect(fnList.min([[10, 12], [9, 16]])).to.be.NaN;
+        it('should return null for nested Array', () => {
+            expect(fnList.min([[10, 12], [9, 16]])).to.be.null;
         });
         it('should return null for empty Array', () => {
             expect(fnList.min([])).to.be.null;
@@ -52,8 +58,8 @@ describe('groupBy function tests', () => {
         it('should return max for 1D Array', () => {
             expect(fnList.max([10, 12, 17])).to.equal(17);
         });
-        it('should return NaN for nested Array', () => {
-            expect(fnList.max([[10, 12], [15, 17]])).to.be.NaN;
+        it('should return null for nested Array', () => {
+            expect(fnList.max([[10, 12], [15, 17]])).to.be.null;
         });
         it('should return null for empty Array', () => {
             expect(fnList.max([])).to.be.null;

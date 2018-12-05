@@ -9,8 +9,11 @@ import { isArray } from '../utils';
  */
 function sum (arr) {
     if (isArray(arr)) {
-        const totalSum = arr.reduce((acc, curr) => acc + +curr, 0);
-        return Number.isNaN(totalSum) ? NaN : totalSum;
+        const totalSum = arr.reduce((acc, curr) =>
+            ((curr === null || curr === undefined) ? acc : acc + +curr)
+        , null);
+
+        return Number.isNaN(totalSum) ? null : totalSum;
     }
     return null;
 }
@@ -26,7 +29,7 @@ function avg (arr) {
     if (isArray(arr)) {
         const totalSum = sum(arr);
         const len = arr.length || 1;
-        return Number.isNaN(totalSum) ? NaN : totalSum / len;
+        return (Number.isNaN(totalSum) || totalSum === null) ? null : totalSum / len;
     }
     return null;
 }
@@ -40,8 +43,11 @@ function avg (arr) {
  */
 function min (arr) {
     if (isArray(arr)) {
-        const minVal = arr.every(d => d === null) ? null : Math.min(...arr);
-        return minVal;
+        // Filter out undefined, null and NaN values
+        const filteredValues = arr.filter(num =>
+            !(num === undefined || num === null || Number.isNaN(+num)));
+
+        return (filteredValues.length) ? Math.min(...filteredValues) : null;
     }
     return null;
 }
@@ -55,8 +61,11 @@ function min (arr) {
  */
 function max (arr) {
     if (isArray(arr)) {
-        const maxVal = arr.every(d => d === null) ? null : Math.max(...arr);
-        return maxVal;
+        // Filter out undefined, null and NaN values
+        const filteredValues = arr.filter(num =>
+            !(num === undefined || num === null || Number.isNaN(+num)));
+
+        return (filteredValues.length) ? Math.max(...filteredValues) : null;
     }
     return null;
 }
