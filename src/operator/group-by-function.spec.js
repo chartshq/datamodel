@@ -16,6 +16,9 @@ describe('groupBy function tests', () => {
         it('should return 0 for an empty Array', () => {
             expect(fnList.sum([])).to.equal(0);
         });
+        it('should return null for an empty input', () => {
+            expect(fnList.sum()).to.be.null;
+        });
     });
     describe('#avg', () => {
         it('should return Average for 1D Array', () => {
@@ -27,6 +30,9 @@ describe('groupBy function tests', () => {
         it('should return 0 for an empty Array', () => {
             expect(fnList.avg([])).to.equal(0);
         });
+        it('should return null for an empty input', () => {
+            expect(fnList.avg()).to.be.null;
+        });
     });
     describe('#min', () => {
         it('should return min for 1D Array', () => {
@@ -36,7 +42,10 @@ describe('groupBy function tests', () => {
             expect(fnList.min([[10, 12], [9, 16]])).to.be.NaN;
         });
         it('should return null for empty Array', () => {
-            expect(fnList.min([])).to.equal(null);
+            expect(fnList.min([])).to.be.null;
+        });
+        it('should return null for an empty input', () => {
+            expect(fnList.min()).to.be.null;
         });
     });
     describe('#max', () => {
@@ -47,7 +56,10 @@ describe('groupBy function tests', () => {
             expect(fnList.max([[10, 12], [15, 17]])).to.be.NaN;
         });
         it('should return null for empty Array', () => {
-            expect(fnList.max([])).to.equal(null);
+            expect(fnList.max([])).to.be.null;
+        });
+        it('should return null for an empty input', () => {
+            expect(fnList.max()).to.be.null;
         });
     });
     describe('#first', () => {
@@ -69,6 +81,9 @@ describe('groupBy function tests', () => {
         });
         it('should return count for empty Array', () => {
             expect(fnList.count([])).to.equal(0);
+        });
+        it('should return null for an empty input', () => {
+            expect(fnList.count()).to.be.null;
         });
     });
     describe('#std', () => {
