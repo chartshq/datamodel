@@ -1,12 +1,14 @@
 import { isArray } from '../utils';
 
 /**
- * Reducer function that takes care about the sum aggregation
- * @param  {Array} arr array of values
- * @return {number}     sum of the array
+ * Reducer function that returns the sum of all the values.
+ *
+ * @public
+ * @param  {Array.<number>} arr - The input array.
+ * @return {number} Returns the sum of the array.
  */
 function sum (arr) {
-    if (isArray(arr) && arr.length) {
+    if (isArray(arr)) {
         const totalSum = arr.reduce((acc, curr) => acc + +curr, 0);
         return Number.isNaN(totalSum) ? NaN : totalSum;
     }
@@ -14,23 +16,27 @@ function sum (arr) {
 }
 
 /**
- * reducer function that takes care about the mean aggregation
- * @param  {Array} arr array of values
- * @return {number}     mean of the array
+ * Reducer function that returns the average of all the values.
+ *
+ * @public
+ * @param  {Array.<number>} arr - The input array.
+ * @return {number} Returns the mean value of the array.
  */
 function avg (arr) {
-    if (isArray(arr) && arr.length) {
+    if (isArray(arr)) {
         const totalSum = sum(arr);
-        const len = arr.length;
+        const len = arr.length || 1;
         return Number.isNaN(totalSum) ? NaN : totalSum / len;
     }
     return null;
 }
 
 /**
- * reducer function that gives the min value
- * @param  {Array} arr array of values
- * @return {number}     min of the array
+ * Reducer function that gives the min value amongst all the values.
+ *
+ * @public
+ * @param  {Array.<number>} arr - The input array.
+ * @return {number} Returns the minimum value of the array.
  */
 function min (arr) {
     if (isArray(arr)) {
@@ -41,9 +47,11 @@ function min (arr) {
 }
 
 /**
- * reducer function that gives the max value
- * @param  {Array} arr array of values
- * @return {number}     max of the array
+ * Reducer function that gives the max value amongst all the values.
+ *
+ * @public
+ * @param  {Array.<number>} arr - The input array.
+ * @return {number} Returns the maximum value of the array.
  */
 function max (arr) {
     if (isArray(arr)) {
@@ -54,27 +62,33 @@ function max (arr) {
 }
 
 /**
- * reducer function that gives the first value
- * @param  {Array} arr array of values
- * @return {number}     first value of the array
+ * Reducer function that gives the first value of the array.
+ *
+ * @public
+ * @param  {Array} arr - The input array.
+ * @return {number} Returns the first value of the array.
  */
 function first (arr) {
     return arr[0];
 }
 
 /**
- * reducer function that gives the last value
- * @param  {Array} arr array of values
- * @return {number}     last value of the array
+ * Reducer function that gives the last value of the array.
+ *
+ * @public
+ * @param  {Array} arr - The input array.
+ * @return {number} Returns the last value of the array.
  */
 function last (arr) {
     return arr[arr.length - 1];
 }
 
 /**
- * reducer function that gives the count value
- * @param  {Array} arr array of values
- * @return {number}     count of the array
+ * Reducer function that gives the count value of the array.
+ *
+ * @public
+ * @param  {Array} arr - The input array.
+ * @return {number} Returns the length of the array.
  */
 function count (arr) {
     if (isArray(arr)) {
@@ -86,7 +100,7 @@ function count (arr) {
 /**
  * Calculates the variance of the input array.
  *
- * @param {Array.<number>} arr - The input array.
+ * @param  {Array.<number>} arr - The input array.
  * @return {number} Returns the variance of the input array.
  */
 function variance (arr) {
@@ -97,7 +111,8 @@ function variance (arr) {
 /**
  * Calculates the square root of the variance of the input array.
  *
- * @param {Array.<number>} arr - The input array.
+ * @public
+ * @param  {Array.<number>} arr - The input array.
  * @return {number} Returns the square root of the variance.
  */
 function std (arr) {

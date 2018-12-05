@@ -13,8 +13,8 @@ describe('groupBy function tests', () => {
         it('should return NaN for nested array', () => {
             expect(fnList.sum([[10, 12], [9, 16]])).to.be.NaN;
         });
-        it('should return null for an empty Array', () => {
-            expect(fnList.sum([])).to.equal(null);
+        it('should return 0 for an empty Array', () => {
+            expect(fnList.sum([])).to.equal(0);
         });
     });
     describe('#avg', () => {
@@ -24,8 +24,8 @@ describe('groupBy function tests', () => {
         it('should return NaN for nested array', () => {
             expect(fnList.avg([[10, 12], [9, 16]])).to.be.NaN;
         });
-        it('should return null for an empty Array', () => {
-            expect(fnList.avg([])).to.equal(null);
+        it('should return 0 for an empty Array', () => {
+            expect(fnList.avg([])).to.equal(0);
         });
     });
     describe('#min', () => {
