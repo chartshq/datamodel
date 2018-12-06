@@ -1,4 +1,5 @@
 import FieldParser from '../field-parser';
+import { getNullValuesMap } from '../../../null-values';
 
 /**
  * A FieldParser which parses the binned values.
@@ -16,8 +17,10 @@ export default class BinnedParser extends FieldParser {
    * @return {string} Returns the sanitized value.
    */
     parse (val) {
+        const nullValuesMap = getNullValuesMap();
+
         if (val === null || val === undefined) {
-            return null;
+            return nullValuesMap[val];
         }
 
         const regex = /^\s*([+-]?\d+(?:\.\d+)?)\s*-\s*([+-]?\d+(?:\.\d+)?)\s*$/;
@@ -25,7 +28,7 @@ export default class BinnedParser extends FieldParser {
 
         const matched = val.match(regex);
         if (!matched) {
-            return null;
+            return nullValuesMap.invalid;
         }
 
         return `${Number.parseFloat(matched[1])}-${Number.parseFloat(matched[2])}`;
