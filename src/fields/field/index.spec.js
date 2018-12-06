@@ -91,7 +91,11 @@ describe('Field', () => {
 
     describe('#data', () => {
         it('should return the associated data', () => {
-            const expected = [1488393000000, 1488479400000, 1573065000000];
+            const expected = [
+                new Date(2017, 3 - 1, 2).getTime(),
+                new Date(2017, 3 - 1, 3).getTime(),
+                new Date(2019, 11 - 1, 7).getTime()
+            ];
             expect(field.data()).to.eql(expected);
         });
     });

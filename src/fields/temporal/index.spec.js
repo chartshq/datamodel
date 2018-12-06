@@ -31,7 +31,11 @@ describe('Temporal', () => {
 
     describe('#calculateDataDomain', () => {
         it('should return the field domain', () => {
-            const expected = [1488306600000, 1488393000000, 1488479400000];
+            const expected = [
+                new Date(2017, 3 - 1, 1).getTime(),
+                new Date(2017, 3 - 1, 2).getTime(),
+                new Date(2017, 3 - 1, 3).getTime()
+            ];
             expect(tempField.calculateDataDomain()).to.eql(expected);
         });
 
@@ -42,7 +46,11 @@ describe('Temporal', () => {
             rowDiffset = '1-2,4-5';
             tempField = new Temporal(partField, rowDiffset);
 
-            const expected = [1488393000000, 1488479400000, 1573065000000];
+            const expected = [
+                new Date(2017, 3 - 1, 2).getTime(),
+                new Date(2017, 3 - 1, 3).getTime(),
+                new Date(2019, 11 - 1, 7).getTime(),
+            ];
             expect(tempField.calculateDataDomain()).to.eql(expected);
         });
     });
