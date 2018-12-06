@@ -1,100 +1,115 @@
+import { isArray } from '../utils';
+
 /**
- * Reducer function that takes care about the sum aggregation
- * @param  {Array} arr array of values
- * @return {number}     sum of the array
+ * Reducer function that returns the sum of all the values.
+ *
+ * @public
+ * @param  {Array.<number>} arr - The input array.
+ * @return {number} Returns the sum of the array.
  */
 function sum (arr) {
-    let allNulls = true;
-    const isNestedArray = arr[0] instanceof Array;
-    const sumVal = arr.reduce((carry, a) => {
-        if (isNestedArray) {
-            return carry.map((x, i) => x + a[i]);
-        }
-        allNulls = allNulls && (a === null);
-        return carry + a;
-    }, isNestedArray ? Array(...Array(arr[0].length)).map(() => 0) : 0);
-    return allNulls ? null : sumVal;
+    if (isArray(arr)) {
+        const totalSum = arr.reduce((acc, curr) =>
+            ((curr === null || curr === undefined) ? acc : acc + +curr)
+        , null);
+
+        return Number.isNaN(totalSum) ? null : totalSum;
+    }
+    return null;
 }
 
 /**
- * reducer function that takes care about the mean aggregation
- * @param  {Array} arr array of values
- * @return {number}     mean of the array
+ * Reducer function that returns the average of all the values.
+ *
+ * @public
+ * @param  {Array.<number>} arr - The input array.
+ * @return {number} Returns the mean value of the array.
  */
 function avg (arr) {
-    const isNestedArray = arr[0] instanceof Array;
-    const len = arr.length || 1;
-    const arrSum = sum(arr);
-    if (isNestedArray) {
-        return arrSum.map(x => x / len);
+    if (isArray(arr)) {
+        const totalSum = sum(arr);
+        const len = arr.length || 1;
+        return (Number.isNaN(totalSum) || totalSum === null) ? null : totalSum / len;
     }
-    return arrSum === null ? null : arrSum / len;
+    return null;
 }
 
 /**
- * reducer function that gives the min value
- * @param  {Array} arr array of values
- * @return {number}     min of the array
+ * Reducer function that gives the min value amongst all the values.
+ *
+ * @public
+ * @param  {Array.<number>} arr - The input array.
+ * @return {number} Returns the minimum value of the array.
  */
 function min (arr) {
-    const isNestedArray = arr[0] instanceof Array;
-    if (isNestedArray) {
-        return arr.reduce((carry, a) => carry.map((x, i) => Math.min(x, a[i])),
-        Array(...Array(arr[0].length)).map(() => Infinity));
+    if (isArray(arr)) {
+        // Filter out undefined, null and NaN values
+        const filteredValues = arr.filter(num =>
+            !(num === undefined || num === null || Number.isNaN(+num)));
+
+        return (filteredValues.length) ? Math.min(...filteredValues) : null;
     }
-    return arr.every(d => d === null) ? null : Math.min(...arr);
+    return null;
 }
 
 /**
- * reducer function that gives the max value
- * @param  {Array} arr array of values
- * @return {number}     max of the array
+ * Reducer function that gives the max value amongst all the values.
+ *
+ * @public
+ * @param  {Array.<number>} arr - The input array.
+ * @return {number} Returns the maximum value of the array.
  */
 function max (arr) {
-    const isNestedArray = arr[0] instanceof Array;
-    if (isNestedArray) {
-        return arr.reduce((carry, a) => carry.map((x, i) => Math.max(x, a[i])),
-        Array(...Array(arr[0].length)).map(() => -Infinity));
+    if (isArray(arr)) {
+        // Filter out undefined, null and NaN values
+        const filteredValues = arr.filter(num =>
+            !(num === undefined || num === null || Number.isNaN(+num)));
+
+        return (filteredValues.length) ? Math.max(...filteredValues) : null;
     }
-    return arr.every(d => d === null) ? null : Math.max(...arr);
+    return null;
 }
 
 /**
- * reducer function that gives the first value
- * @param  {Array} arr array of values
- * @return {number}     first value of the array
+ * Reducer function that gives the first value of the array.
+ *
+ * @public
+ * @param  {Array} arr - The input array.
+ * @return {number} Returns the first value of the array.
  */
 function first (arr) {
     return arr[0];
 }
 
 /**
- * reducer function that gives the last value
- * @param  {Array} arr array of values
- * @return {number}     last value of the array
+ * Reducer function that gives the last value of the array.
+ *
+ * @public
+ * @param  {Array} arr - The input array.
+ * @return {number} Returns the last value of the array.
  */
 function last (arr) {
     return arr[arr.length - 1];
 }
 
 /**
- * reducer function that gives the count value
- * @param  {Array} arr array of values
- * @return {number}     count of the array
+ * Reducer function that gives the count value of the array.
+ *
+ * @public
+ * @param  {Array} arr - The input array.
+ * @return {number} Returns the length of the array.
  */
 function count (arr) {
-    const isNestedArray = arr[0] instanceof Array;
-    const len = arr.length;
-    if (isNestedArray) {
-        return Array(...Array(arr[0].length)).map(() => len);
+    if (isArray(arr)) {
+        return arr.length;
     }
-    return len;
+    return null;
 }
 
 /**
  * Calculates the variance of the input array.
  *
- * @param {Array.<number>} arr - The input array.
+ * @param  {Array.<number>} arr - The input array.
  * @return {number} Returns the variance of the input array.
  */
 function variance (arr) {
@@ -105,7 +120,8 @@ function variance (arr) {
 /**
  * Calculates the square root of the variance of the input array.
  *
- * @param {Array.<number>} arr - The input array.
+ * @public
+ * @param  {Array.<number>} arr - The input array.
  * @return {number} Returns the square root of the variance.
  */
 function std (arr) {
