@@ -3,12 +3,15 @@
 
 import { expect } from 'chai';
 import BinnedParser from './index';
+import { getNullValuesMap } from '../../../null-values';
 
 describe('BinnedParser', () => {
     let binParser;
+    let nullValuesMap;
 
     beforeEach(() => {
         binParser = new BinnedParser();
+        nullValuesMap = getNullValuesMap();
     });
 
     describe('#parse', () => {
@@ -30,12 +33,12 @@ describe('BinnedParser', () => {
             expect(binParser.parse(' +1.11 - -1.567 ')).to.equal('1.11--1.567');
         });
 
-        it('should return null for invalid formatted value', () => {
-            expect(binParser.parse(null)).to.be.null;
-            expect(binParser.parse(undefined)).to.be.null;
-            expect(binParser.parse('abc')).to.be.null;
-            expect(binParser.parse('10-12,13-22')).to.be.null;
-            expect(binParser.parse('10-')).to.be.null;
+        it('should return appropriate type for an invalid formatted value', () => {
+            expect(binParser.parse(null)).to.equal(nullValuesMap.null);
+            expect(binParser.parse(undefined)).to.equal(nullValuesMap.undefined);
+            expect(binParser.parse('abc')).to.equal(nullValuesMap.invalid);
+            expect(binParser.parse('10-12,13-22')).to.equal(nullValuesMap.invalid);
+            expect(binParser.parse('10-')).to.equal(nullValuesMap.invalid);
         });
     });
 });

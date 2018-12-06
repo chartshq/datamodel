@@ -3,12 +3,15 @@
 
 import { expect } from 'chai';
 import ContinuousParser from './index';
+import { getNullValuesMap } from '../../../null-values';
 
 describe('ContinuousParser', () => {
     let contParser;
+    let nullValuesMap;
 
     beforeEach(() => {
         contParser = new ContinuousParser();
+        nullValuesMap = getNullValuesMap();
     });
 
     describe('#parse', () => {
@@ -25,8 +28,8 @@ describe('ContinuousParser', () => {
         });
 
         it('should return null when value is not number convertible', () => {
-            expect(contParser.parse('abc1234')).to.be.null;
-            expect(contParser.parse('abcd')).to.be.null;
+            expect(contParser.parse('abc1234')).to.equal(nullValuesMap.invalid);
+            expect(contParser.parse('abcd')).to.equal(nullValuesMap.invalid);
         });
     });
 });

@@ -3,12 +3,15 @@
 
 import { expect } from 'chai';
 import CategoricalParser from './index';
+import { getNullValuesMap } from '../../../null-values';
 
 describe('CategoricalParser', () => {
     let catParser;
+    let nullValuesMap;
 
     beforeEach(() => {
         catParser = new CategoricalParser();
+        nullValuesMap = getNullValuesMap();
     });
 
     describe('#parse', () => {
@@ -19,8 +22,8 @@ describe('CategoricalParser', () => {
         });
 
         it('should not touch the undefined, null or empty string value', () => {
-            expect(catParser.parse(undefined)).to.be.null;
-            expect(catParser.parse(null)).to.be.null;
+            expect(catParser.parse(undefined)).to.equal(nullValuesMap.undefined);
+            expect(catParser.parse(null)).to.equal(nullValuesMap.null);
             expect(catParser.parse('')).to.equal('');
             expect(catParser.parse('   ')).to.equal('');
         });
