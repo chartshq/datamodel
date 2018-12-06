@@ -66,6 +66,30 @@ describe('DataModel', () => {
         });
     });
 
+    context('should cache namespace values once it is computed', () => {
+        const data = [
+            { age: 30, job: 'unemployed', marital: 'married' },
+            { age: 33, job: 'services', marital: 'married' },
+            { age: 35, job: 'management', marital: 'single' }
+        ];
+        const schema = [
+            { name: 'age', type: 'measure' },
+            { name: 'job', type: 'dimension' },
+            { name: 'marital', type: 'dimension' },
+        ];
+        const dataModel = new DataModel(data, schema);
+        const fieldspace = dataModel.getFieldspace();
+
+        const fieldsObj = fieldspace.fieldsObj();
+        expect(fieldsObj).to.eql(fieldspace._cachedFieldsObj);
+
+        const measureFields = fieldspace.getMeasure();
+        expect(measureFields).to.eql(fieldspace._cachedMeasure);
+
+        const dimensionFields = fieldspace.getDimension();
+        expect(dimensionFields).to.eql(fieldspace._cachedDimension);
+    });
+
     describe('#getData', () => {
         it('should return the data in the specified format', () => {
             const schema = [
@@ -85,9 +109,9 @@ describe('DataModel', () => {
             });
             let expected = {
                 data: [
-                    ['Rousan', 804882600000],
-                    ['Sumant', 839097000000],
-                    ['Akash', 757535400000]
+                    ['Rousan', new Date(1995, 7 - 1, 5).getTime()],
+                    ['Sumant', new Date(1996, 8 - 1, 4).getTime()],
+                    ['Akash', new Date(1994, 1 - 1, 3).getTime()]
                 ],
                 schema: [
                     { name: 'name', type: 'dimension', subtype: 'categorical' },
@@ -102,8 +126,16 @@ describe('DataModel', () => {
             });
             expected = {
                 data: [
-                    ['Rousan', 'Sumant', 'Akash'],
-                    [804882600000, 839097000000, 757535400000]
+                    [
+                        'Rousan',
+                        'Sumant',
+                        'Akash'
+                    ],
+                    [
+                        new Date(1995, 7 - 1, 5).getTime(),
+                        new Date(1996, 8 - 1, 4).getTime(),
+                        new Date(1994, 1 - 1, 3).getTime()
+                    ]
                 ],
                 schema: [
                     { name: 'name', type: 'dimension', subtype: 'categorical' },
@@ -221,9 +253,9 @@ describe('DataModel', () => {
             const dataModel = new DataModel(data, schema);
             const expected = {
                 data: [
-                  ['Rousan', 804882600000, 0],
-                  ['Sumant', 839097000000, 1],
-                  ['Akash', 757535400000, 2]
+                    ['Rousan', new Date(1995, 7 - 1, 5).getTime(), 0],
+                    ['Sumant', new Date(1996, 8 - 1, 4).getTime(), 1],
+                    ['Akash', new Date(1994, 1 - 1, 3).getTime(), 2]
                 ],
                 schema: [
                     { name: 'name', type: 'dimension', subtype: 'categorical' },
@@ -362,7 +394,6 @@ describe('DataModel', () => {
             expect(projectedDataModel.getData()).to.deep.equal(expected);
         });
     });
-
 
     describe('#select', () => {
         const data = [
@@ -1841,7 +1872,6 @@ describe('DataModel', () => {
             });
         });
     });
-
 
     context('Checking api for updating parent child relationship', () => {
         const data1 = [

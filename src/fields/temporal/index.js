@@ -11,6 +11,19 @@ import { DateTimeFormatter } from '../../utils';
  */
 export default class Temporal extends Dimension {
      /**
+     * Initialize a new instance.
+     *
+     * @public
+     * @param {PartialField} partialField - The partialField instance which holds the whole data.
+     * @param {string} rowDiffset - The data subset definition.
+     */
+    constructor (partialField, rowDiffset) {
+        super(partialField, rowDiffset);
+
+        this._cachedMinDiff = null;
+    }
+
+     /**
      * Calculates the corresponding field domain.
      *
      * @public
@@ -46,34 +59,35 @@ export default class Temporal extends Dimension {
      * @return {number} Returns the minimum consecutive diff in milliseconds.
      */
     minimumConsecutiveDifference () {
-        const hash = new Set();
-        let currIdx = 0;
-        let prevDatum;
-        let minDiff = Number.POSITIVE_INFINITY;
-
-        // here don't use this.data() as the iteration will be occurred two times on same data.
-        rowDiffsetIterator(this.rowDiffset, (i) => {
-            const datum = this.partialField.data[i];
-
-            if (hash.has(datum)) {
-                return;
-            }
-            hash.add(datum);
-
-            if (!currIdx++) {
-                prevDatum = datum;
-                return;
-            }
-
-            minDiff = Math.min(minDiff, datum - prevDatum);
-            prevDatum = datum;
-        });
-
-        if (currIdx <= 1) {
-            return null;
+        if (this._cachedMinDiff) {
+            return this._cachedMinDiff;
         }
 
-        return minDiff;
+        const sortedData = this.data().sort((a, b) => a - b);
+        const arrLn = sortedData.length;
+        let minDiff = Number.POSITIVE_INFINITY;
+        let prevDatum;
+        let nextDatum;
+        let processedCount = 0;
+
+        for (let i = 1; i < arrLn; i++) {
+            prevDatum = sortedData[i - 1];
+            nextDatum = sortedData[i];
+
+            if (nextDatum === prevDatum) {
+                continue;
+            }
+
+            minDiff = Math.min(minDiff, nextDatum - sortedData[i - 1]);
+            processedCount++;
+        }
+
+        if (!processedCount) {
+            minDiff = null;
+        }
+        this._cachedMinDiff = minDiff;
+
+        return this._cachedMinDiff;
     }
 
     /**

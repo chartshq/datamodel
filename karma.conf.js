@@ -72,12 +72,13 @@ module.exports = function (config) {
                     },
                 },
             },
-            reports: ['html', 'lcov', 'text-summary'],
+            reports: ['html', 'lcov', 'text-summary', 'lcovonly'],
             fixWebpackSourcePaths: true,
             reporters: [
                 { type: 'text' },
                 { type: 'html', subdir: 'report-html', file: 'report.html' },
                 { type: 'lcov', subdir: 'report-lcov', file: 'report.txt' },
+                { type: 'lcovonly', subdir: '.' },
             ],
         },
 
