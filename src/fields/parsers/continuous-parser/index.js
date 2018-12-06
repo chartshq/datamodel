@@ -1,6 +1,5 @@
 import FieldParser from '../field-parser';
 import { getNullValuesMap } from '../../../null-values';
-import { isString } from '../../../utils';
 
 /**
  * A FieldParser which parses the continuous values.
@@ -19,12 +18,13 @@ export default class ContinuousParser extends FieldParser {
    */
     parse (val) {
         const nullValuesMap = getNullValuesMap();
-        const parsedVal = parseFloat(val, 10);
 
-        if (Number.isNaN(parsedVal)) {
-            return (isString(val)) ? nullValuesMap.invalid : nullValuesMap[val];
+        if (val === null || val === undefined) {
+            return nullValuesMap[val];
         }
 
-        return parsedVal;
+        const parsedVal = parseFloat(val, 10);
+
+        return Number.isNaN(parsedVal) ? nullValuesMap.invalid : parsedVal;
     }
 }

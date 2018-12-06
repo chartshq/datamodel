@@ -17,6 +17,31 @@ describe('DataModel', () => {
         });
     });
 
+    describe('#setNullValues', () => {
+        it('should update null values mapping with new configuration', () => {
+            const data = [
+                { age: 30, job: 'unemployed', marital: null },
+                { age: 'Age', job: 'services', marital: 'married' },
+                { age: 22, job: undefined, marital: 'single' }
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' },
+            ];
+            DataModel.setNullValues({ undefined: 'NA' });
+
+            const dataModel = new DataModel(data, schema);
+            const expectedGetData = [
+                [30, 'unemployed', null],
+                ['NA', 'services', 'married'],
+                [22, 'NA', 'single']
+            ];
+
+            expect(dataModel.getData().data).to.eql(expectedGetData);
+        });
+    });
+
     describe('#clone', () => {
         it('should make a new copy of the current DataModel instance', () => {
             const data = [

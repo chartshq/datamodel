@@ -96,11 +96,11 @@ class DataModel extends Relation {
      *
      * @public
      *
-     * @param {Object} [config] Configuration to control how null, undefined and non-parsable values are
+     * @param {Object} [config] - Configuration to control how null, undefined and non-parsable values are
      * represented in DataModel.
-     * @param {string} [config.undefined] Define how an undefined value will be represented.
-     * @param {string} [config.null] Define how a null value will be represented.
-     * @param {string} [config.invalid] Define how a non-parsable value will be represented.
+     * @param {string} [config.undefined] - Define how an undefined value will be represented.
+     * @param {string} [config.null] - Define how a null value will be represented.
+     * @param {string} [config.invalid] - Define how a non-parsable value will be represented.
      */
     static setNullValues (config) {
         setNullValuesMap(config);

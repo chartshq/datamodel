@@ -27,9 +27,11 @@ describe('ContinuousParser', () => {
             expect(contParser.parse('1234.33abc')).to.equal(1234.33);
         });
 
-        it('should return null when value is not number convertible', () => {
+        it('should return appropriate type when value is not number convertible', () => {
             expect(contParser.parse('abc1234')).to.equal(nullValuesMap.invalid);
             expect(contParser.parse('abcd')).to.equal(nullValuesMap.invalid);
+            expect(contParser.parse(null)).to.equal(nullValuesMap.null);
+            expect(contParser.parse(undefined)).to.equal(nullValuesMap.undefined);
         });
     });
 });

@@ -1,23 +1,18 @@
-import { NullValuesRepr } from './enums';
+import defaultNullValues from './default-null-values';
 
 /**
- * Default configuration to represent undefined, null and
- * non-parsable (invalid) values
+ * Clone the default configuration into a new object
  */
-let nullValuesMap = {
-    undefined: NullValuesRepr.NULL,
-    null: NullValuesRepr.NULL,
-    invalid: NullValuesRepr.NA
-};
+let nullValuesMap = Object.assign({}, defaultNullValues);
 
 /**
  * Sets the value of representing undefined/null/invalid values
  *
- * @param {Object} [config] Configuration to control how null, undefined and non-parsable values will
+ * @param {Object} [config] - Configuration to control how null, undefined and non-parsable values will
  * be represented in DataModel.
- * @param {string} [config.undefined] Define how an undefined value will be represented.
- * @param {string} [config.null] Define how a null value will be represented.
- * @param {string} [config.invalid] Define how a non-parsable value will be represented.
+ * @param {string} [config.undefined] - Define how an undefined value will be represented.
+ * @param {string} [config.null] - Define how a null value will be represented.
+ * @param {string} [config.invalid] - Define how a non-parsable value will be represented.
  * @return {Object} Returns the mapping of the modified configuration.
  */
 export const setNullValuesMap = (config) => {
