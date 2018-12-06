@@ -9,7 +9,8 @@
 <br />
 <br /> -->
 
-[![Build Status](https://api.travis-ci.org/chartshq/datamodel.svg?branch=develop)](https://travis-ci.org/chartshq/datamodel)
+[![Build Status](https://api.travis-ci.org/chartshq/datamodel.svg?branch=feature%2F%2335-integrate-travis-ci)](https://travis-ci.org/chartshq/datamodel)
+[![codecov](https://codecov.io/gh/chartshq/datamodel/branch/feature%2F%2335-integrate-travis-ci/graph/badge.svg)](https://codecov.io/gh/chartshq/datamodel)
 [![NPM version](https://img.shields.io/npm/v/datamodel.svg)](https://www.npmjs.com/package/datamodel)
 [![NPM total downloads](https://img.shields.io/npm/dt/datamodel.svg)](https://www.npmjs.com/package/datamodel)
 [![Contributors](https://img.shields.io/github/contributors/chartshq/datamodel.svg)](https://github.com/chartshq/datamodel/graphs/contributors)
