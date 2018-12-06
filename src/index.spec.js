@@ -66,6 +66,30 @@ describe('DataModel', () => {
         });
     });
 
+    context('should cache namespace values once it is computed', () => {
+        const data = [
+            { age: 30, job: 'unemployed', marital: 'married' },
+            { age: 33, job: 'services', marital: 'married' },
+            { age: 35, job: 'management', marital: 'single' }
+        ];
+        const schema = [
+            { name: 'age', type: 'measure' },
+            { name: 'job', type: 'dimension' },
+            { name: 'marital', type: 'dimension' },
+        ];
+        const dataModel = new DataModel(data, schema);
+        const fieldspace = dataModel.getFieldspace();
+
+        const fieldsObj = fieldspace.fieldsObj();
+        expect(fieldsObj).to.eql(fieldspace._cachedFieldsObj);
+
+        const measureFields = fieldspace.getMeasure();
+        expect(measureFields).to.eql(fieldspace._cachedMeasure);
+
+        const dimensionFields = fieldspace.getDimension();
+        expect(dimensionFields).to.eql(fieldspace._cachedDimension);
+    });
+
     describe('#getData', () => {
         it('should return the data in the specified format', () => {
             const schema = [
@@ -362,7 +386,6 @@ describe('DataModel', () => {
             expect(projectedDataModel.getData()).to.deep.equal(expected);
         });
     });
-
 
     describe('#select', () => {
         const data = [
@@ -1841,7 +1864,6 @@ describe('DataModel', () => {
             });
         });
     });
-
 
     context('Checking api for updating parent child relationship', () => {
         const data1 = [
