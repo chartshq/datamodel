@@ -9,5 +9,3 @@ script:
   - codecov -f coverage/lcov.info
 notifications:
     slack: fusioncharts:JmooWfzCnyxe4p7KTTJU5xzP
-env:
-  - CODECOV_TOKEN="e420c15c-b3ab-4bd9-be21-a0d1dda0c0b1"
