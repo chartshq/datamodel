@@ -6,6 +6,7 @@ import PartialField from '../partial-field';
 import { DimensionSubtype } from '../../enums';
 import TemporalParser from '../parsers/temporal-parser';
 import Temporal from './index';
+import DataModel from '../../index';
 
 describe('Temporal', () => {
     const schema = {
@@ -50,6 +51,7 @@ describe('Temporal', () => {
                 new Date(2017, 3 - 1, 2).getTime(),
                 new Date(2017, 3 - 1, 3).getTime(),
                 new Date(2019, 11 - 1, 7).getTime(),
+                DataModel.InvalidAwareTypes.NULL
             ];
             expect(tempField.calculateDataDomain()).to.eql(expected);
         });
@@ -115,8 +117,7 @@ describe('Temporal', () => {
             partField = new PartialField(schema.name, data1, schema, temParser);
             rowDiffset = '1-2,4-5';
             tempField = new Temporal(partField, rowDiffset);
-            console.log(tempField.formattedData());
-            const expected = ['2017-03-02', '2017-03-03', '2019-11-07', null];
+            const expected = ['2017-03-02', '2017-03-03', '2019-11-07', DataModel.InvalidAwareTypes.NULL];
             expect(tempField.formattedData()).to.eql(expected);
         });
     });

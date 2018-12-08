@@ -6,6 +6,7 @@ import PartialField from '../partial-field';
 import { DimensionSubtype } from '../../enums';
 import CategoricalParser from '../parsers/categorical-parser';
 import Categorical from './index';
+import DataModel from '../../index';
 
 describe('Categorical', () => {
     const schema = {
@@ -38,14 +39,14 @@ describe('Categorical', () => {
             expect(catField.calculateDataDomain()).to.eql(expected);
         });
 
-        it('should ignore null data values', () => {
+        it('should parse null data value as default invalid type', () => {
             const data1 = ['India', 'US', 'Canada', 'India', 'US', null, 'US', null];
             catParser = new CategoricalParser();
             partField = new PartialField(schema.name, data1, schema, catParser);
             rowDiffset = '0-7';
             catField = new Categorical(partField, rowDiffset);
 
-            const expected = ['India', 'US', 'Canada'];
+            const expected = ['India', 'US', 'Canada', DataModel.InvalidAwareTypes.NULL];
             expect(catField.calculateDataDomain()).to.eql(expected);
         });
     });
