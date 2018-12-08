@@ -3,15 +3,13 @@
 
 import { expect } from 'chai';
 import BinnedParser from './index';
-import { getNullValuesMap } from '../../../null-values';
+import DataModel from '../../../';
 
 describe('BinnedParser', () => {
     let binParser;
-    let nullValuesMap;
 
     beforeEach(() => {
         binParser = new BinnedParser();
-        nullValuesMap = getNullValuesMap();
     });
 
     describe('#parse', () => {
@@ -34,11 +32,11 @@ describe('BinnedParser', () => {
         });
 
         it('should return appropriate type for an invalid formatted value', () => {
-            expect(binParser.parse(null)).to.equal(nullValuesMap.null);
-            expect(binParser.parse(undefined)).to.equal(nullValuesMap.undefined);
-            expect(binParser.parse('abc')).to.equal(nullValuesMap.invalid);
-            expect(binParser.parse('10-12,13-22')).to.equal(nullValuesMap.invalid);
-            expect(binParser.parse('10-')).to.equal(nullValuesMap.invalid);
+            expect(binParser.parse(null)).to.equal(DataModel.InvalidAwareTypes.NULL);
+            expect(binParser.parse(undefined)).to.equal(DataModel.InvalidAwareTypes.NA);
+            expect(binParser.parse('abc')).to.equal(DataModel.InvalidAwareTypes.NA);
+            expect(binParser.parse('nil')).to.equal(DataModel.InvalidAwareTypes.NIL);
+            expect(binParser.parse('10-')).to.equal(DataModel.InvalidAwareTypes.NA);
         });
     });
 });

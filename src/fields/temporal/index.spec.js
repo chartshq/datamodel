@@ -115,7 +115,7 @@ describe('Temporal', () => {
             partField = new PartialField(schema.name, data1, schema, temParser);
             rowDiffset = '1-2,4-5';
             tempField = new Temporal(partField, rowDiffset);
-
+            console.log(tempField.formattedData());
             const expected = ['2017-03-02', '2017-03-03', '2019-11-07', null];
             expect(tempField.formattedData()).to.eql(expected);
         });

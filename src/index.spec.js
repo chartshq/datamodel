@@ -17,6 +17,32 @@ describe('DataModel', () => {
         });
     });
 
+    describe('#configureInvalidAwareTypes', () => {
+        it('should update invalid values mapping with new configuration', () => {
+            const data = [
+                { age: 30, job: 'unemployed', marital: null },
+                { age: 'Age', job: 'services', marital: 'married' },
+                { age: 22, job: undefined, marital: 'single' }
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' },
+            ];
+            DataModel.configureInvalidAwareTypes({
+                undefined: DataModel.InvalidAwareTypes.NA
+            });
+
+            const dataModel = new DataModel(data, schema);
+            const dmData = dataModel.getData().data;
+
+            expect(dmData[0][2] instanceof DataModel.InvalidAwareTypes).to.be.true;
+            expect(dmData[0][2]).to.eql(DataModel.InvalidAwareTypes.NULL);
+            expect(dmData[2][1] instanceof DataModel.InvalidAwareTypes).to.be.true;
+            expect(dmData[2][1]).to.eql(DataModel.InvalidAwareTypes.NA);
+        });
+    });
+
     describe('#clone', () => {
         it('should make a new copy of the current DataModel instance', () => {
             const data = [

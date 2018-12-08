@@ -1,6 +1,5 @@
 import FieldParser from '../field-parser';
-import { getNullValuesMap } from '../../../null-values';
-import { isString } from '../../../utils';
+import InvalidAwareTypes from '../../../invalid-aware-types';
 
 /**
  * A FieldParser which parses the continuous values.
@@ -18,13 +17,18 @@ export default class ContinuousParser extends FieldParser {
    * @return {string} Returns the number value.
    */
     parse (val) {
-        const nullValuesMap = getNullValuesMap();
+        let invalidValMap = InvalidAwareTypes.invalidAwareVals();
+
+        if (val === null || val === undefined) {
+            return invalidValMap[val];
+        }
+
         const parsedVal = parseFloat(val, 10);
 
         if (Number.isNaN(parsedVal)) {
-            return (isString(val)) ? nullValuesMap.invalid : nullValuesMap[val];
+            const invalidVal = (val === 'nil') ? val : 'invalid';
+            return invalidValMap[invalidVal];
         }
-
         return parsedVal;
     }
 }

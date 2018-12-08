@@ -1,5 +1,5 @@
 import FieldParser from '../field-parser';
-import { getNullValuesMap } from '../../../null-values';
+import InvalidAwareTypes from '../../../invalid-aware-types';
 
 /**
  * A FieldParser which parses the categorical values.
@@ -17,8 +17,12 @@ export default class CategoricalParser extends FieldParser {
    * @return {string} Returns the stringified value.
    */
     parse (val) {
-        const nullValuesMap = getNullValuesMap();
+        let invalidValMap;
 
-        return (val === undefined || val === null) ? nullValuesMap[val] : String(val).trim();
+        if (val === undefined || val === null) {
+            invalidValMap = InvalidAwareTypes.invalidAwareVals();
+            return invalidValMap[val];
+        }
+        return String(val).trim();
     }
 }

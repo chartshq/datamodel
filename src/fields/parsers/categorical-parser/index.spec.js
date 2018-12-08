@@ -3,15 +3,13 @@
 
 import { expect } from 'chai';
 import CategoricalParser from './index';
-import { getNullValuesMap } from '../../../null-values';
+import DataModel from '../../../';
 
 describe('CategoricalParser', () => {
     let catParser;
-    let nullValuesMap;
 
     beforeEach(() => {
         catParser = new CategoricalParser();
-        nullValuesMap = getNullValuesMap();
     });
 
     describe('#parse', () => {
@@ -21,11 +19,14 @@ describe('CategoricalParser', () => {
             expect(catParser.parse(' India   ')).to.equal('India');
         });
 
-        it('should not touch the undefined, null or empty string value', () => {
-            expect(catParser.parse(undefined)).to.equal(nullValuesMap.undefined);
-            expect(catParser.parse(null)).to.equal(nullValuesMap.null);
+        it('should not touch the empty string value', () => {
             expect(catParser.parse('')).to.equal('');
             expect(catParser.parse('   ')).to.equal('');
+        });
+
+        it('should parse invalid values to their default invalid types', () => {
+            expect(catParser.parse(undefined)).to.equal(DataModel.InvalidAwareTypes.NA);
+            expect(catParser.parse(null)).to.equal(DataModel.InvalidAwareTypes.NULL);
         });
     });
 });

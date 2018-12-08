@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import TemporalParser from './index';
 import { DimensionSubtype } from '../../../enums';
 import { DateTimeFormatter } from '../../../utils';
-import { getNullValuesMap } from '../../../null-values';
+import DataModel from '../../../';
 
 describe('TemporalParser', () => {
     const schema = {
@@ -15,11 +15,9 @@ describe('TemporalParser', () => {
         format: '%Y-%m-%d'
     };
     let temParser;
-    let nullValuesMap;
 
     beforeEach(() => {
         temParser = new TemporalParser(schema);
-        nullValuesMap = getNullValuesMap();
     });
 
     describe('#parse', () => {
@@ -40,9 +38,9 @@ describe('TemporalParser', () => {
             expect(temParser.parse(dateStr)).to.equal(Date.now());
         });
 
-        it('should return null for invalid value', () => {
-            expect(temParser.parse(null)).to.equal(nullValuesMap.null);
-            expect(temParser.parse(undefined)).to.equal(nullValuesMap.undefined);
+        it('should return default invalid type for invalid value', () => {
+            expect(temParser.parse(null)).to.eql(DataModel.InvalidAwareTypes.NULL);
+            expect(temParser.parse(undefined)).to.equal(DataModel.InvalidAwareTypes.NA);
         });
     });
 });

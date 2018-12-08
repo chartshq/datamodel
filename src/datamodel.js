@@ -20,7 +20,7 @@ import { createBinnedFieldData } from './operator/bucket-creator';
 import Relation from './relation';
 import reducerStore from './utils/reducer-store';
 import { createFields } from './field-creator';
-import { setNullValuesMap } from './null-values';
+import InvalidAwareTypes from './invalid-aware-types';
 
 /**
  * DataModel is an in-browser representation of tabular data. It supports
@@ -96,14 +96,14 @@ class DataModel extends Relation {
      *
      * @public
      *
-     * @param {Object} [config] Configuration to control how null, undefined and non-parsable values are
+     * @param {Object} [config] - Configuration to control how null, undefined and non-parsable values are
      * represented in DataModel.
-     * @param {string} [config.undefined] Define how an undefined value will be represented.
-     * @param {string} [config.null] Define how a null value will be represented.
-     * @param {string} [config.invalid] Define how a non-parsable value will be represented.
+     * @param {string} [config.undefined] - Define how an undefined value will be represented.
+     * @param {string} [config.null] - Define how a null value will be represented.
+     * @param {string} [config.invalid] - Define how a non-parsable value will be represented.
      */
-    static setNullValues (config) {
-        setNullValuesMap(config);
+    static configureInvalidAwareTypes (config) {
+        return InvalidAwareTypes.invalidAwareVals(config);
     }
 
     /**

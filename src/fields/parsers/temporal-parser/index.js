@@ -1,6 +1,6 @@
 import { DateTimeFormatter } from '../../../utils';
 import FieldParser from '../field-parser';
-import { getNullValuesMap } from '../../../null-values';
+import InvalidAwareTypes from '../../../invalid-aware-types';
 
 /**
  * A FieldParser which parses the temporal values.
@@ -30,10 +30,9 @@ export default class TemporalParser extends FieldParser {
      * @return {number} Returns the millisecond value.
      */
     parse (val) {
-        const nullValuesMap = getNullValuesMap();
-
         if (val === null || val === undefined) {
-            return nullValuesMap[val];
+            let invalidValMap = InvalidAwareTypes.invalidAwareVals();
+            return invalidValMap[val];
         }
 
         if (this.schema.format) {
