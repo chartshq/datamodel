@@ -1,6 +1,6 @@
 /* eslint-disable default-case */
 
-import { FieldType, DimensionSubtype, DataFormat } from './enums';
+import { FieldType, DimensionSubtype, DataFormat, FilteringMode } from './enums';
 import {
     persistDerivation,
     getRootGroupByModel,
@@ -8,7 +8,8 @@ import {
     getRootDataModel,
     propagateImmutableActions,
     addToPropNamespace,
-    sanitizeUnitSchema
+    sanitizeUnitSchema,
+    splitWithSelect
 } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {
@@ -653,6 +654,60 @@ class DataModel extends Relation {
 
         return new DataModel(data, schema);
     }
+
+
+  /**
+     * Creates a set of new {@link DataModel} instances by splitting the set of rows in the source {@link DataModel}
+     * instance based on a set of dimensions.
+     *
+     * For each unique dimensional value, a new split is created which creates a unique {@link DataModel} instance for
+     *  that split
+     *
+     * If multiple dimensions are provided, it splits the source {@link DataModel} instance with all possible
+     * combinations of the dimensional values for all the dimensions provided
+     *
+     * Additionally, it also accepts a predicate function to reduce the set of rows provided. A
+     * {@link link_to_selection | Selection} is performed on all the split {@link DataModel} instances based on
+     * the predicate function
+     *
+     * @example
+     *  // without predicate function:
+     *  const splitDt = dt.splitByRow(['Origin'])
+     *  console.log(normDt));
+     * // This should give three unique DataModel instances, one each having rows only for 'USA',
+     * // 'Europe' and 'Japan' respectively
+     *
+     * @example
+     *  // without predicate function:
+     *  const splitDt = dt.splitByRow(['Origin', 'Cylinders'])
+     *  console.log(normDt));
+     * // This should give DataModel instances for all unique combinations of Origin and Cylinder values
+     *
+     * @example
+     * // with predicate function:
+     * const splitWithPredDt = dt.select(['Origin'], fields => fields.Origin.value === "USA")
+     * console.log(splitWithPredDt);
+     * // This should not include the DataModel for the Origin : 'USA'
+     *
+     *
+     * @public
+     *
+     * @param {Function} dimensionArr - Set of dimensions based on which the split should occur
+     * @param {Object} config - The configuration object
+     * @param {string} [config.saveChild] - Configuration to save child or not
+     * @param {string}[config.mode=FilteringMode.NORMAL] -The mode of the selection.
+     * @return {Array}  Returns the new DataModel instances after operation.
+     */
+    splitByRow (dimensionArr, reducerFn, config) {
+        const defConfig = {
+            mode: FilteringMode.NORMAL,
+            saveChild: true
+        };
+        config = Object.assign({}, defConfig, config);
+
+        return splitWithSelect(this, dimensionArr, reducerFn, config);
+    }
+
 }
 
 export default DataModel;

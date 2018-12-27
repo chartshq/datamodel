@@ -142,6 +142,84 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
     return filteredModel;
 };
 
+
+export const splitWithSelect = (sourceDm, dimensionArr, reducers, config) => {
+    const {
+        saveChild,
+    } = config;
+    let li;
+
+    const splitRowDiffset = {};
+    const dimensionMap = {};
+    const fieldStoreObj = sourceDm.getFieldspace().fieldsObj();
+
+    rowDiffsetIterator(sourceDm._rowDiffset, (i) => {
+        let hash = '';
+        let lastInsertedValue = -1;
+        let dimensionSet = { keys: {} };
+
+        dimensionArr.forEach((_) => {
+            const data = fieldStoreObj[_].partialField.data[i];
+            hash = `${hash}-${data}`;
+            dimensionSet.keys[_] = data;
+        });
+        if (splitRowDiffset[hash] === undefined) {
+            splitRowDiffset[hash] = [];
+            dimensionMap[hash] = dimensionSet;
+        }
+
+        if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
+            li = splitRowDiffset[hash].length - 1;
+            splitRowDiffset[hash][li] = `${splitRowDiffset[hash][li].split('-')[0]}-${i}`;
+        } else {
+            splitRowDiffset[hash].push(`${i}`);
+        }
+        lastInsertedValue = i;
+    });
+
+    const clonedDMs = [];
+    Object.keys(splitRowDiffset).sort().forEach((e) => {
+        if (splitRowDiffset[e]) {
+            const cloned = sourceDm.clone(saveChild);
+            const derivation = dimensionMap[e];
+            cloned._rowDiffset = splitRowDiffset[e].join(',');
+            cloned.__calculateFieldspace().calculateFieldsConfig();
+
+            const derivationFormula = fields => dimensionArr.every(_ => fields[_].value === derivation.keys[_]);
+            // Store reference to child model and selector function
+            if (saveChild) {
+                persistDerivation(cloned, DM_DERIVATIVES.SELECT, config, derivationFormula);
+            }
+            const newDM = dimensionMap[e];
+            newDM.dataModel = cloned;
+            clonedDMs.push(newDM);
+        }
+    });
+
+
+    return clonedDMs;
+};
+
+export const splitWithProject = (sourceDm, selectFn, selectConfig, cloneConfig) => {
+    const cloned = sourceDm.clone(cloneConfig.saveChild);
+    const rowDiffset = selectHelper(
+        cloned._rowDiffset,
+        cloned.getPartialFieldspace().fields,
+        selectFn,
+        selectConfig,
+        sourceDm
+    );
+    cloned._rowDiffset = rowDiffset;
+    cloned.__calculateFieldspace().calculateFieldsConfig();
+    // Store reference to child model and selector function
+    if (cloneConfig.saveChild) {
+        persistDerivation(cloned, DM_DERIVATIVES.SELECT, { config: selectConfig }, selectFn);
+    }
+
+    return cloned;
+};
+
+
 export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) => {
     const cloned = sourceDm.clone(cloneConfig.saveChild);
     const rowDiffset = selectHelper(
