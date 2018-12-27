@@ -229,25 +229,6 @@ export const splitWithSelect = (sourceDm, dimensionArr, reducerFn = val => val, 
     return clonedDMs;
 };
 
-export const splitWithProject = (sourceDm, selectFn, selectConfig, cloneConfig) => {
-    const cloned = sourceDm.clone(cloneConfig.saveChild);
-    const rowDiffset = selectHelper(
-        cloned._rowDiffset,
-        cloned.getPartialFieldspace().fields,
-        selectFn,
-        selectConfig,
-        sourceDm
-    );
-    cloned._rowDiffset = rowDiffset;
-    cloned.__calculateFieldspace().calculateFieldsConfig();
-    // Store reference to child model and selector function
-    if (cloneConfig.saveChild) {
-        persistDerivation(cloned, DM_DERIVATIVES.SELECT, { config: selectConfig }, selectFn);
-    }
-
-    return cloned;
-};
-
 
 export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) => {
     const cloned = sourceDm.clone(cloneConfig.saveChild);
@@ -290,6 +271,11 @@ export const cloneWithProject = (sourceDm, projField, config, allFields) => {
 
     return cloned;
 };
+
+
+export const splitWithProject = (sourceDm, projFieldSet, config, allFields) =>
+    projFieldSet.map(projFields =>
+        cloneWithProject(sourceDm, projFields, config, allFields));
 
 export const sanitizeUnitSchema = (unitSchema) => {
     // Do deep clone of the unit schema as the user might change it later.
@@ -570,4 +556,17 @@ export const addToPropNamespace = (propagationNameSpace, config = {}, model) => 
     }
 
     return this;
+};
+
+
+export const getNormalizedProFields = (projField, allFields, fieldConfig) => {
+    const normalizedProjField = projField.reduce((acc, field) => {
+        if (field.constructor.name === 'RegExp') {
+            acc.push(...allFields.filter(fieldName => fieldName.search(field) !== -1));
+        } else if (field in fieldConfig) {
+            acc.push(field);
+        }
+        return acc;
+    }, []);
+    return Array.from(new Set(normalizedProjField)).map(field => field.trim());
 };

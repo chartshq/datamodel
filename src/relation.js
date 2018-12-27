@@ -1,6 +1,13 @@
 import { FilteringMode } from './enums';
 import { getUniqueId } from './utils';
-import { persistDerivation, updateFields, cloneWithSelect, cloneWithProject, updateData } from './helper';
+import {
+    persistDerivation,
+    updateFields,
+    cloneWithSelect,
+    cloneWithProject,
+    updateData,
+    getNormalizedProFields
+} from './helper';
 import { crossProduct, difference, naturalJoinFilter, union } from './operator';
 import { DM_DERIVATIVES } from './constants';
 
@@ -396,17 +403,8 @@ class Relation {
         const fieldConfig = this.getFieldsConfig();
         const allFields = Object.keys(fieldConfig);
         const { mode } = config;
+        const normalizedProjField = getNormalizedProFields(projField, allFields, fieldConfig);
 
-        let normalizedProjField = projField.reduce((acc, field) => {
-            if (field.constructor.name === 'RegExp') {
-                acc.push(...allFields.filter(fieldName => fieldName.search(field) !== -1));
-            } else if (field in fieldConfig) {
-                acc.push(field);
-            }
-            return acc;
-        }, []);
-
-        normalizedProjField = Array.from(new Set(normalizedProjField)).map(field => field.trim());
         let dataModel;
 
         if (mode === FilteringMode.ALL) {

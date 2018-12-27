@@ -52,4 +52,7 @@ d3.json('./data/cars.json', (data) => {
 
     const dmWithConditionInverse =   datamodel.splitByRow(['Origin', 'Cylinders'], (fields)=>fields.Cylinders.value !== '6', {mode: 'inverse'});
     console.log(dmWithConditionInverse);
+
+    const projectDm = datamodel.splitByColumn(['Origin'], [['Acceleration'], ['Horsepower']]);
+    console.log(projectDm)
 });

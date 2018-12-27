@@ -9,7 +9,9 @@ import {
     propagateImmutableActions,
     addToPropNamespace,
     sanitizeUnitSchema,
-    splitWithSelect
+    splitWithSelect,
+    splitWithProject,
+    getNormalizedProFields
 } from './helper';
 import { DM_DERIVATIVES, PROPAGATION } from './constants';
 import {
@@ -655,8 +657,7 @@ class DataModel extends Relation {
         return new DataModel(data, schema);
     }
 
-
-  /**
+    /**
      * Creates a set of new {@link DataModel} instances by splitting the set of rows in the source {@link DataModel}
      * instance based on a set of dimensions.
      *
@@ -699,14 +700,43 @@ class DataModel extends Relation {
      * @return {Array}  Returns the new DataModel instances after operation.
      */
     splitByRow (dimensionArr, reducerFn, config) {
+        const fieldsConfig = this.getFieldsConfig();
+
+        dimensionArr.forEach((fieldName) => {
+            if (!fieldsConfig[fieldName]) {
+                throw new Error(`Field ${fieldName} doesn't exist in the schema`);
+            }
+        });
+
         const defConfig = {
             mode: FilteringMode.NORMAL,
             saveChild: true
         };
+
         config = Object.assign({}, defConfig, config);
 
         return splitWithSelect(this, dimensionArr, reducerFn, config);
     }
+
+    splitByColumn (commonFields = [], uniqueFields = [], config) {
+        const defConfig = {
+            mode: FilteringMode.NORMAL,
+            saveChild: true
+        };
+        const fieldConfig = this.getFieldsConfig();
+        const allFields = Object.keys(fieldConfig);
+        const normalizedProjFieldSets = [[commonFields]];
+
+        config = Object.assign({}, defConfig, config);
+        uniqueFields.forEach((fieldSet, i) => {
+            normalizedProjFieldSets[i] = getNormalizedProFields(
+                [...commonFields, ...fieldSet],
+                allFields,
+                fieldConfig);
+        });
+        return splitWithProject(this, normalizedProjFieldSets, config, allFields);
+    }
+
 
 }
 
