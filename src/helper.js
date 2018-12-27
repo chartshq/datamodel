@@ -51,26 +51,10 @@ export const persistDerivation = (model, operation, config = {}, criteriaFn) => 
     }
 };
 
-export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => {
-    const newRowDiffSet = [];
-    let lastInsertedValue = -1;
-    let { mode } = config;
+export const selectRowDiffsetIterator = (rowDiffset, checker) => {
     let li;
-    let cachedStore = {};
-    let cloneProvider = () => sourceDm.detachedRoot();
-    const selectorHelperFn = index => selectFn(
-        prepareSelectionData(fields, index),
-        index,
-        cloneProvider,
-        cachedStore
-    );
-
-    let checker;
-    if (mode === FilteringMode.INVERSE) {
-        checker = index => !selectorHelperFn(index);
-    } else {
-        checker = index => selectorHelperFn(index);
-    }
+    let lastInsertedValue = -1;
+    const newRowDiffSet = [];
 
     rowDiffsetIterator(rowDiffset, (i) => {
         if (checker(i)) {
@@ -84,6 +68,68 @@ export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => 
         }
     });
     return newRowDiffSet.join(',');
+};
+
+
+export const rowSplitDiffsetIterator = (rowDiffset, checker, dimensionArr, fieldStoreObj) => {
+    let li;
+    const splitRowDiffset = {};
+    const dimensionMap = {};
+
+    rowDiffsetIterator(rowDiffset, (i) => {
+        if (checker(i)) {
+            let hash = '';
+            let lastInsertedValue = -1;
+            let dimensionSet = { keys: {} };
+
+            dimensionArr.forEach((_) => {
+                const data = fieldStoreObj[_].partialField.data[i];
+                hash = `${hash}-${data}`;
+                dimensionSet.keys[_] = data;
+            });
+
+            if (splitRowDiffset[hash] === undefined) {
+                splitRowDiffset[hash] = [];
+                dimensionMap[hash] = dimensionSet;
+            }
+
+            if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
+                li = splitRowDiffset[hash].length - 1;
+                splitRowDiffset[hash][li] = `${splitRowDiffset[hash][li].split('-')[0]}-${i}`;
+            } else {
+                splitRowDiffset[hash].push(`${i}`);
+            }
+            lastInsertedValue = i;
+        }
+    });
+    return {
+        splitRowDiffset,
+        dimensionMap
+    };
+};
+
+
+export const selectHelper = (clonedDm, selectFn, config, sourceDm, iterator) => {
+    let { mode } = config;
+    let cachedStore = {};
+    let cloneProvider = () => sourceDm.detachedRoot();
+
+    const rowDiffset = clonedDm._rowDiffset;
+    const fields = clonedDm.getPartialFieldspace().fields;
+    const selectorHelperFn = index => selectFn(
+        prepareSelectionData(fields, index),
+        index,
+        cloneProvider,
+        cachedStore
+    );
+
+    let checker;
+    if (mode === FilteringMode.INVERSE) {
+        checker = index => !selectorHelperFn(index);
+    } else {
+        checker = index => selectorHelperFn(index);
+    }
+    return iterator(rowDiffset, checker);
 };
 
 export const filterPropagationModel = (model, propModels, config = {}) => {
@@ -143,39 +189,22 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
 };
 
 
-export const splitWithSelect = (sourceDm, dimensionArr, reducers, config) => {
+export const splitWithSelect = (sourceDm, dimensionArr, reducerFn = val => val, config) => {
     const {
         saveChild,
     } = config;
-    let li;
-
-    const splitRowDiffset = {};
-    const dimensionMap = {};
     const fieldStoreObj = sourceDm.getFieldspace().fieldsObj();
 
-    rowDiffsetIterator(sourceDm._rowDiffset, (i) => {
-        let hash = '';
-        let lastInsertedValue = -1;
-        let dimensionSet = { keys: {} };
-
-        dimensionArr.forEach((_) => {
-            const data = fieldStoreObj[_].partialField.data[i];
-            hash = `${hash}-${data}`;
-            dimensionSet.keys[_] = data;
-        });
-        if (splitRowDiffset[hash] === undefined) {
-            splitRowDiffset[hash] = [];
-            dimensionMap[hash] = dimensionSet;
-        }
-
-        if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
-            li = splitRowDiffset[hash].length - 1;
-            splitRowDiffset[hash][li] = `${splitRowDiffset[hash][li].split('-')[0]}-${i}`;
-        } else {
-            splitRowDiffset[hash].push(`${i}`);
-        }
-        lastInsertedValue = i;
-    });
+    const {
+        splitRowDiffset,
+        dimensionMap
+    } = selectHelper(
+        sourceDm.clone(saveChild),
+        reducerFn,
+        config,
+        sourceDm,
+        (...params) => rowSplitDiffsetIterator(...params, dimensionArr, fieldStoreObj)
+        );
 
     const clonedDMs = [];
     Object.keys(splitRowDiffset).sort().forEach((e) => {
@@ -223,11 +252,11 @@ export const splitWithProject = (sourceDm, selectFn, selectConfig, cloneConfig) 
 export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) => {
     const cloned = sourceDm.clone(cloneConfig.saveChild);
     const rowDiffset = selectHelper(
-        cloned._rowDiffset,
-        cloned.getPartialFieldspace().fields,
+        cloned,
         selectFn,
         selectConfig,
-        sourceDm
+        sourceDm,
+        selectRowDiffsetIterator
     );
     cloned._rowDiffset = rowDiffset;
     cloned.__calculateFieldspace().calculateFieldsConfig();

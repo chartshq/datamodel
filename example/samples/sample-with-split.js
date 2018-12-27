@@ -32,15 +32,24 @@ d3.json('./data/cars.json', (data) => {
         }, {
             name: 'Year',
             type: 'dimension',
+            subtype: 'temporal',
+            format: '%Y-%m-%d'
+            
         }, {
             name: 'Origin',
             type: 'dimension'
         }];
     window.datamodel = new DataModel(jsonData, schema);
 
-    window.dms = datamodel.splitByRow(['Origin', 'Cylinders']);
-    console.log(window.dms)
+    const splitDms = datamodel.splitByRow(['Origin']);
+    console.log(splitDms);
 
-    // const xDM = dm.select(window.dms[0].dataModel._derivation[0].criteria)
-    // console.log(xDM.getData())
+    const splitDmsMultipleDimensions = datamodel.splitByRow(['Origin', 'Cylinders']);
+    console.log(splitDmsMultipleDimensions);
+
+    const dmWithCondition =   datamodel.splitByRow(['Origin', 'Cylinders'], (fields)=>fields.Cylinders.value !== '6');
+    console.log(dmWithCondition);
+
+    const dmWithConditionInverse =   datamodel.splitByRow(['Origin', 'Cylinders'], (fields)=>fields.Cylinders.value !== '6', {mode: 'inverse'});
+    console.log(dmWithConditionInverse);
 });
