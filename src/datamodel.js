@@ -674,14 +674,14 @@ class DataModel extends Relation {
      * @example
      *  // without predicate function:
      *  const splitDt = dt.splitByRow(['Origin'])
-     *  console.log(normDt));
+     *  console.log(splitDt));
      * // This should give three unique DataModel instances, one each having rows only for 'USA',
      * // 'Europe' and 'Japan' respectively
      *
      * @example
      *  // without predicate function:
-     *  const splitDt = dt.splitByRow(['Origin', 'Cylinders'])
-     *  console.log(normDt));
+     *  const splitDtMulti = dt.splitByRow(['Origin', 'Cylinders'])
+     *  console.log(splitDtMulti));
      * // This should give DataModel instances for all unique combinations of Origin and Cylinder values
      *
      * @example
@@ -693,7 +693,7 @@ class DataModel extends Relation {
      *
      * @public
      *
-     * @param {Function} dimensionArr - Set of dimensions based on which the split should occur
+     * @param {Array} dimensionArr - Set of dimensions based on which the split should occur
      * @param {Object} config - The configuration object
      * @param {string} [config.saveChild] - Configuration to save child or not
      * @param {string}[config.mode=FilteringMode.NORMAL] -The mode of the selection.
@@ -718,6 +718,42 @@ class DataModel extends Relation {
         return splitWithSelect(this, dimensionArr, reducerFn, config);
     }
 
+    /**
+     * Creates a set of new {@link DataModel} instances by splitting the set of fields in the source {@link DataModel}
+     * instance based on a set of common and unique field names provided.
+     *
+     * Each DataModel created contains a set of fields which are common to all and a set of unique fields.
+     * It also accepts configurations such as saveChild and mode(inverse or normal) to include/exclude the respective
+     * fields
+     *
+     * @example
+     *  // without predicate function:
+     *  const splitDt = dt.splitByColumn(['Origin'], [['Acceleration'], ['Horsepower']])
+     *  console.log(splitDt));
+     * // This should give two unique DataModel instances, both having the field 'Origin' and
+     * // one each having 'Acceleration' and 'Horsepower' fields respectively
+     *
+     * @example
+     *  // without predicate function:
+     *  const splitDtInv = dt.splitByColumn(['Origin', 'Cylinders'], [['Acceleration'], ['Horsepower'],
+     *                           {mode: 'inverse'})
+     *  console.log(splitDtInv));
+     * // This should give DataModel instances in the following way:
+     * // All DataModel Instances do not have the fields 'Origin' and 'Cylinders'
+     * // One DataModel Instance has rest of the fields except 'Acceleration' and the other DataModel instance
+     * // has rest of the fields except 'Horsepower'
+     *
+     *
+     *
+     * @public
+     *
+     * @param {Array} commonFields - Set of common fields included in all datamModel instances
+     * @param {Array} uniqueFields - Set of unique fields included in each datamModel instance
+     * @param {Object} config - The configuration object
+     * @param {string} [config.saveChild] - Configuration to save child or not
+     * @param {string}[config.mode=FilteringMode.NORMAL] -The mode of the selection.
+     * @return {Array}  Returns the new DataModel instances after operation.
+     */
     splitByColumn (commonFields = [], uniqueFields = [], config) {
         const defConfig = {
             mode: FilteringMode.NORMAL,

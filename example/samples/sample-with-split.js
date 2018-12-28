@@ -54,5 +54,11 @@ d3.json('./data/cars.json', (data) => {
     console.log(dmWithConditionInverse);
 
     const projectDm = datamodel.splitByColumn(['Origin'], [['Acceleration'], ['Horsepower']]);
-    console.log(projectDm)
+    console.log(projectDm);
+
+
+    const compose = window.DataModel.Operators.compose;
+    const splitByRow = window.DataModel.Operators.splitByRow;
+    const composedDM = compose(splitByRow(['Origin']))
+    console.log(composedDM(datamodel))
 });
