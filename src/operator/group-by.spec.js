@@ -52,18 +52,12 @@ describe('Test groupBy', () => {
             });
         });
         it('should return given reducer passed in params', () => {
-            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
-            /**
-             * sample function
-             * @return {number} 0
-             */
-            function abc() { return 0; }
+            const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
             expect(getReducerObj(dataModel1, {
-                profit: 'sum',
-                sales: abc,
+                profit: 'avg'
             })).to.deep.equal({
-                profit: fnList.sum,
-                sales: abc,
+                profit: fnList.avg,
+                sales: fnList.sum,
             });
         });
     });

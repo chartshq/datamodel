@@ -1841,18 +1841,19 @@ describe('DataModel', () => {
             });
 
             it('should provide appropriate arguments to the aggregation function', () => {
+                const unRegisterHandle = DataModel.Reducers.register('myReducer', (vals, cloneProvider, store) => {
+                    if (!store.clonedDm) {
+                        store.clonedDm = cloneProvider();
+                    }
+                    if (!store.avgProfit) {
+                        store.avgProfit = store.clonedDm.groupBy([''], { profit: 'avg' }).getData().data[0][0];
+                    }
+
+                    return DataModel.Stats.avg(vals) - store.avgProfit;
+                });
                 const dm = new DataModel(data1, schema1);
                 const groupedDm = dm.groupBy(['first'], {
-                    profit: (vals, cloneProvider, store) => {
-                        if (!store.clonedDm) {
-                            store.clonedDm = cloneProvider();
-                        }
-                        if (!store.avgProfit) {
-                            store.avgProfit = store.clonedDm.groupBy([''], { profit: 'avg' }).getData().data[0][0];
-                        }
-
-                        return DataModel.Stats.avg(vals) - store.avgProfit;
-                    }
+                    profit: 'myReducer',
                 });
 
                 const expected = {
@@ -1869,6 +1870,7 @@ describe('DataModel', () => {
                 };
 
                 expect(groupedDm.getData()).to.eql(expected);
+                unRegisterHandle();
             });
         });
     });
@@ -1951,6 +1953,51 @@ describe('DataModel', () => {
             it('should return average for 1D Array', () => {
                 expect(DataModel.Stats.avg([10, 12, 17])).to.equal(39 / 3);
             });
+        });
+    });
+
+    describe('#getParent', () => {
+        it('should return the parent DataModel', () => {
+            const schema = [
+                    { name: 'Name', type: 'dimension' },
+                    { name: 'HorsePower', type: 'measure' },
+                    { name: 'Origin', type: 'dimension' }
+            ];
+            const data = [
+                    { Name: 'chevrolet chevelle malibu', Horsepower: 130, Origin: 'USA' },
+                    { Name: 'citroen ds-21 pallas', Horsepower: 115, Origin: 'Europe' },
+                    { Name: 'datsun pl510', Horsepower: 88, Origin: 'Japan' },
+                    { Name: 'amc rebel sst', Horsepower: 150, Origin: 'USA' },
+            ];
+            const dt = new DataModel(data, schema);
+
+            const dt2 = dt.select(fields => fields.Origin.value === 'USA');
+            expect(dt2.getParent()).to.equal(dt);
+        });
+    });
+
+    describe('#getChildren', () => {
+        it('should return the immediate child DataModels', () => {
+            const schema = [
+                   { name: 'Name', type: 'dimension' },
+                   { name: 'HorsePower', type: 'measure' },
+                   { name: 'Origin', type: 'dimension' }
+            ];
+            const data = [
+                { Name: 'chevrolet chevelle malibu', Horsepower: 130, Origin: 'USA' },
+                { Name: 'citroen ds-21 pallas', Horsepower: 115, Origin: 'Europe' },
+                { Name: 'datsun pl510', Horsepower: 88, Origin: 'Japan' },
+                { Name: 'amc rebel sst', Horsepower: 150, Origin: 'USA' },
+            ];
+            const dt = new DataModel(data, schema);
+
+            const dm1 = dt.select(fields => fields.Origin.value === 'USA');
+            const dm2 = dt.select(fields => fields.Origin.value === 'Japan');
+            const dm3 = dt.groupBy(['Origin']);
+            expect(dt.getChildren().length).to.equal(3);
+            expect(dt.getChildren()[0]).to.equal(dm1);
+            expect(dt.getChildren()[1]).to.equal(dm2);
+            expect(dt.getChildren()[2]).to.equal(dm3);
         });
     });
 
