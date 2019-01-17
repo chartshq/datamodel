@@ -556,6 +556,34 @@ class Relation {
     getChildren() {
         return this._children;
     }
+
+    /**
+     * Returns the in-between operation meta data while creating the current {@link DataModel} instance.
+     *
+     * @example
+     * const schema = [
+     *   { name: 'Name', type: 'dimension' },
+     *   { name: 'HorsePower', type: 'measure' },
+     *   { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *   { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *   { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *   { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *   { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(data, schema);
+     * const dt2 = dt.select(fields => fields.Origin.value === "USA");
+     * const dt3 = dt2.groupBy(["Origin"]);
+     * const derivations = dt3.getDerivations();
+     *
+     * @return {Any[]} Returns the derivation meta data.
+     */
+    getDerivations() {
+        return this._derivation;
+    }
 }
 
 export default Relation;

@@ -2001,6 +2001,28 @@ describe('DataModel', () => {
         });
     });
 
+    describe('#getDerivations', () => {
+        it('should return in-between derivative operations', () => {
+            const schema = [
+                   { name: 'Name', type: 'dimension' },
+                   { name: 'HorsePower', type: 'measure' },
+                   { name: 'Origin', type: 'dimension' }
+            ];
+            const data = [
+                { Name: 'chevrolet chevelle malibu', Horsepower: 130, Origin: 'USA' },
+                { Name: 'citroen ds-21 pallas', Horsepower: 115, Origin: 'Europe' },
+                { Name: 'datsun pl510', Horsepower: 88, Origin: 'Japan' },
+                { Name: 'amc rebel sst', Horsepower: 150, Origin: 'USA' },
+            ];
+            const dt = new DataModel(data, schema);
+            const dt2 = dt.select(fields => fields.Origin.value === 'USA');
+            const dt3 = dt2.groupBy(['Origin'], { HorsePower: 'avg' });
+            const derivations = dt3.getDerivations();
+            expect(Array.isArray(derivations)).to.be.true;
+            expect(derivations[0].criteria).to.deep.equal({ HorsePower: 'avg' });
+        });
+    });
+
     describe('#detachedRoot', () => {
         const schema = [
             {
