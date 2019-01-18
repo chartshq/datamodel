@@ -383,14 +383,20 @@ DateTimeFormatter.getTokenDefinitions = function () {
             // Short year like 90 for 1990
             name: 'y',
             index: 0,
-            extract () { return '(\\d{4})'; },
+            extract () { return '(\\d{2})'; },
             parser (val) {
                 if (val) {
                     const l = val.length;
                     val = val.substring(l - 2, l);
                 }
-
-                return DateTimeFormatter.defaultNumberParser()(val);
+                let parsedVal = DateTimeFormatter.defaultNumberParser()(val);
+                let presentYear = Math.trunc(((new Date()).getFullYear()) / 100);
+                if (parsedVal instanceof Number) {
+                    parsedVal = (presentYear * 100) + parsedVal;
+                } else {
+                    parsedVal = `${presentYear}${parsedVal}`;
+                }
+                return parsedVal;
             },
             formatter (val) {
                 const d = convertToNativeDate(val);
