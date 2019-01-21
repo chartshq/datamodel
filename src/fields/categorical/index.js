@@ -1,7 +1,6 @@
 import { rowDiffsetIterator } from '../../operator/row-diffset-iterator';
 import { DimensionSubtype } from '../../enums';
 import Dimension from '../dimension';
-import InvalidAwareTypes from '../../invalid-aware-types';
 /**
  * Represents categorical field subtype.
  *
