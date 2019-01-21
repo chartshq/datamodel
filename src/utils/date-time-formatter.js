@@ -700,13 +700,15 @@ DateTimeFormatter.prototype.extractTokenValue = function (dateTimeStamp) {
  */
 DateTimeFormatter.prototype.getNativeDate = function (dateTimeStamp) {
     let date = null;
-    if (dateTimeStamp && isFinite(dateTimeStamp) && !this.format) {
+    if (!this.format && isFinite(dateTimeStamp)) {
         date = new Date(dateTimeStamp);
     } else {
         const dtParams = this.dtParams = this.parse(dateTimeStamp);
-        dtParams.unshift(null);
-        this.nativeDate = new (Function.prototype.bind.apply(Date, dtParams))();
-        date = this.nativeDate;
+        if (dtParams.length) {
+            dtParams.unshift(null);
+            this.nativeDate = new (Function.prototype.bind.apply(Date, dtParams))();
+            date = this.nativeDate;
+        }
     }
     return date;
 };
