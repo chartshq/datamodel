@@ -44,6 +44,7 @@ describe('Test groupBy', () => {
                 sales: defReducer,
             });
         });
+
         it('should return default reducer when no reducer is passed in parameter', () => {
             const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
             expect(getReducerObj(dataModel1, {})).to.deep.equal({
@@ -51,13 +52,25 @@ describe('Test groupBy', () => {
                 sales: defReducer,
             });
         });
+
         it('should return given reducer passed in params', () => {
             const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
             expect(getReducerObj(dataModel1, {
                 profit: 'avg'
             })).to.deep.equal({
                 profit: fnList.avg,
-                sales: fnList.sum,
+                sales: defReducer,
+            });
+        });
+
+        it('should return default reducer if input reducer does not exist', () => {
+            const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
+            expect(getReducerObj(dataModel1, {
+                profit: 'unknown',
+                sales: 'avg'
+            })).to.deep.equal({
+                profit: defReducer,
+                sales: fnList.avg,
             });
         });
     });
