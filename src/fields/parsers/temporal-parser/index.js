@@ -19,7 +19,7 @@ export default class TemporalParser extends FieldParser {
     constructor (schema) {
         super();
         this.schema = schema;
-        this._dtf = null;
+        this._dtf = new DateTimeFormatter(this.schema.format);
     }
 
     /**
@@ -30,18 +30,14 @@ export default class TemporalParser extends FieldParser {
      * @return {number} Returns the millisecond value.
      */
     parse (val) {
-        if (val === null || val === undefined) {
-            let invalidValMap = InvalidAwareTypes.invalidAwareVals();
-            return invalidValMap[val];
+        let result;
+        // check if invalid date value
+        if (!InvalidAwareTypes.isInvalid(val)) {
+            let nativeDate = this._dtf.getNativeDate(val);
+            result = nativeDate ? nativeDate.getTime() : InvalidAwareTypes.NA;
+        } else {
+            result = InvalidAwareTypes.getInvalidType(val);
         }
-
-        if (this.schema.format) {
-            this._dtf = this._dtf || new DateTimeFormatter(this.schema.format);
-            return this._dtf.getNativeDate(val).getTime();
-        }
-
-        // If format is not present which means the value is such that
-        // it could be directly passed to Date constructor.
-        return +new Date(val);
+        return result;
     }
 }

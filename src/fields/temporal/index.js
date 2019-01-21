@@ -1,6 +1,7 @@
 import { rowDiffsetIterator } from '../../operator/row-diffset-iterator';
 import Dimension from '../dimension';
 import { DateTimeFormatter } from '../../utils';
+import InvalidAwareTypes from '../../invalid-aware-types';
 
 /**
  * Represents temporal field subtype.
@@ -111,8 +112,8 @@ export default class Temporal extends Dimension {
         const data = [];
         rowDiffsetIterator(this.rowDiffset, (i) => {
             const datum = this.partialField.data[i];
-            if (datum === null) {
-                data.push(null);
+            if (datum instanceof InvalidAwareTypes) {
+                data.push(datum);
             } else {
                 data.push(DateTimeFormatter.formatAs(datum, this.format()));
             }

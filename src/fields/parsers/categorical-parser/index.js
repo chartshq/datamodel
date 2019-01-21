@@ -17,12 +17,13 @@ export default class CategoricalParser extends FieldParser {
    * @return {string} Returns the stringified value.
    */
     parse (val) {
-        let invalidValMap;
-
-        if (val === undefined || val === null) {
-            invalidValMap = InvalidAwareTypes.invalidAwareVals();
-            return invalidValMap[val];
+        let result;
+        // check if invalid date value
+        if (!InvalidAwareTypes.isInvalid(val)) {
+            result = String(val).trim();
+        } else {
+            result = InvalidAwareTypes.getInvalidType(val);
         }
-        return String(val).trim();
+        return result;
     }
 }

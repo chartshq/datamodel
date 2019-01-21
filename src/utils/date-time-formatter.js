@@ -699,17 +699,16 @@ DateTimeFormatter.prototype.extractTokenValue = function (dateTimeStamp) {
  * @return {Date} : Native JS Date
  */
 DateTimeFormatter.prototype.getNativeDate = function (dateTimeStamp) {
-    if (dateTimeStamp instanceof Date) {
-        return dateTimeStamp;
-    } else if (isFinite(dateTimeStamp) && !!this.format) {
-        return new Date(dateTimeStamp);
+    let date = null;
+    if (dateTimeStamp && isFinite(dateTimeStamp) && !this.format) {
+        date = new Date(dateTimeStamp);
+    } else {
+        const dtParams = this.dtParams = this.parse(dateTimeStamp);
+        dtParams.unshift(null);
+        this.nativeDate = new (Function.prototype.bind.apply(Date, dtParams))();
+        date = this.nativeDate;
     }
-
-    const dtParams = this.dtParams = this.parse(dateTimeStamp);
-
-    dtParams.unshift(null);
-    this.nativeDate = new (Function.prototype.bind.apply(Date, dtParams))();
-    return this.nativeDate;
+    return date;
 };
 
 /*

@@ -17,18 +17,14 @@ export default class ContinuousParser extends FieldParser {
    * @return {string} Returns the number value.
    */
     parse (val) {
-        let invalidValMap = InvalidAwareTypes.invalidAwareVals();
-
-        if (val === null || val === undefined) {
-            return invalidValMap[val];
+        let result;
+        // check if invalid date value
+        if (!InvalidAwareTypes.isInvalid(val)) {
+            let parsedVal = parseFloat(val, 10);
+            result = Number.isNaN(parsedVal) ? InvalidAwareTypes.NA : parsedVal;
+        } else {
+            result = InvalidAwareTypes.getInvalidType(val);
         }
-
-        const parsedVal = parseFloat(val, 10);
-
-        if (Number.isNaN(parsedVal)) {
-            const invalidVal = (val === 'nil') ? val : 'invalid';
-            return invalidValMap[invalidVal];
-        }
-        return parsedVal;
+        return result;
     }
 }

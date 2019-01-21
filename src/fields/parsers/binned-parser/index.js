@@ -17,25 +17,18 @@ export default class BinnedParser extends FieldParser {
    * @return {string} Returns the sanitized value.
    */
     parse (val) {
-        let invalidValMap;
-
-        if (val === null || val === undefined) {
-            invalidValMap = InvalidAwareTypes.invalidAwareVals();
-            return invalidValMap[val];
-        }
-
         const regex = /^\s*([+-]?\d+(?:\.\d+)?)\s*-\s*([+-]?\d+(?:\.\d+)?)\s*$/;
         val = String(val);
-
-        const matched = val.match(regex);
-
-        if (!matched) {
-            val = (val.toLowerCase() === 'nil' ? val.toLowerCase() : 'invalid');
-
-            invalidValMap = InvalidAwareTypes.invalidAwareVals();
-            return invalidValMap[val];
+        let result;
+        // check if invalid date value
+        if (!InvalidAwareTypes.isInvalid(val)) {
+            let matched = val.match(regex);
+            result = matched ? `${Number.parseFloat(matched[1])}-${Number.parseFloat(matched[2])}`
+                             : InvalidAwareTypes.getInvalidType((val.toLowerCase() === 'nil'
+                                ? val.toLowerCase() : 'invalid'));
+        } else {
+            result = InvalidAwareTypes.getInvalidType(val);
         }
-
-        return `${Number.parseFloat(matched[1])}-${Number.parseFloat(matched[2])}`;
+        return result;
     }
 }

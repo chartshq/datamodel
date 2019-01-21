@@ -48,6 +48,14 @@ class InvalidAwareTypes {
     toString () {
         return String(this._value);
     }
+
+    static isInvalid(val) {
+        return !!InvalidAwareTypes.invalidAwareVals()[val];
+    }
+
+    static getInvalidType(val) {
+        return InvalidAwareTypes.invalidAwareVals()[val];
+    }
 }
 
 /**
