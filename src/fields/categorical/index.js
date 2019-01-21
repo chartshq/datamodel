@@ -1,7 +1,7 @@
 import { rowDiffsetIterator } from '../../operator/row-diffset-iterator';
 import { DimensionSubtype } from '../../enums';
 import Dimension from '../dimension';
-
+import InvalidAwareTypes from '../../invalid-aware-types';
 /**
  * Represents categorical field subtype.
  *
@@ -35,10 +35,6 @@ export default class Categorical extends Dimension {
         // here don't use this.data() as the iteration will be occurred two times on same data.
         rowDiffsetIterator(this.rowDiffset, (i) => {
             const datum = this.partialField.data[i];
-            if (datum === null) {
-                return;
-            }
-
             if (!hash.has(datum)) {
                 hash.add(datum);
                 domain.push(datum);

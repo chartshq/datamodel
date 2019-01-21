@@ -39,10 +39,6 @@ export default class Temporal extends Dimension {
         // occurred two times on same data.
         rowDiffsetIterator(this.rowDiffset, (i) => {
             const datum = this.partialField.data[i];
-            if (datum === null) {
-                return;
-            }
-
             if (!hash.has(datum)) {
                 hash.add(datum);
                 domain.push(datum);

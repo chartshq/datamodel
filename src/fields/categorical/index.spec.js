@@ -45,7 +45,6 @@ describe('Categorical', () => {
             partField = new PartialField(schema.name, data1, schema, catParser);
             rowDiffset = '0-7';
             catField = new Categorical(partField, rowDiffset);
-
             const expected = ['India', 'US', 'Canada', DataModel.InvalidAwareTypes.NULL];
             expect(catField.calculateDataDomain()).to.eql(expected);
         });
