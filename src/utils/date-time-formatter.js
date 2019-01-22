@@ -700,9 +700,12 @@ DateTimeFormatter.prototype.extractTokenValue = function (dateTimeStamp) {
  */
 DateTimeFormatter.prototype.getNativeDate = function (dateTimeStamp) {
     let date = null;
-    if (!this.format && isFinite(dateTimeStamp)) {
+    if (isFinite(dateTimeStamp)) {
         date = new Date(dateTimeStamp);
-    } else {
+    } else if (!this.format && Date.parse(dateTimeStamp)) {
+        date = new Date(dateTimeStamp);
+    }
+    else {
         const dtParams = this.dtParams = this.parse(dateTimeStamp);
         if (dtParams.length) {
             dtParams.unshift(null);

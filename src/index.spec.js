@@ -436,6 +436,55 @@ describe('DataModel', () => {
             { name: 'marital', type: 'dimension' }
         ];
 
+        it('should not fail with null or invalid data', () => {
+            const dataaa = [
+                { age: 30, job: 'management', marital: null },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: null, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' },
+                { age: 28, job: null, marital: 'married' },
+            ];
+            const schemaa = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
+            ];
+
+            const expData = {
+                data: [
+                    [30, 'management', DataModel.InvalidAwareTypes.NULL],
+                    [28, DataModel.InvalidAwareTypes.NULL, 'married']
+                ],
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                uids: [0, 4]
+            };
+
+            const expData2 = {
+                data: [
+                    [59, 'blue-collar', 'married'],
+                    [57, 'self-employed', 'married'],
+                    [28, DataModel.InvalidAwareTypes.NULL, 'married']
+                ],
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                uids: [1, 3, 4]
+            };
+
+            const dataModel = new DataModel(dataaa, schemaa);
+            const selectedDm = dataModel.select(fields => fields.age.value < 40);
+            const selectDm2 = dataModel.select(fields => fields.marital.value === 'married');
+
+            expect(selectDm2.getData()).to.deep.equal(expData2);
+            expect(selectedDm.getData()).to.deep.equal(expData);
+        });
+
         it('should perform normal selection', () => {
             const dataModel = new DataModel(data, schema);
             const selectedDm = dataModel.select(fields => fields.age.value < 40);
@@ -1527,6 +1576,42 @@ describe('DataModel', () => {
                 const childData = grouped.getData().data;
                 expect(childData[0][0]).to.equal(15);
             });
+
+            it('should not fail with null or invalid data', () => {
+                const dataaa = [
+                    { age: 30, job: 'management', marital: null },
+                    { age: 59, job: 'blue-collar', marital: 'married' },
+                    { age: null, job: 'management', marital: 'single' },
+                    { age: 28, job: 'management', marital: 'single' },
+                    { age: null, job: 'management', marital: 'complex' },
+                    { age: 57, job: 'self-employed', marital: 'married' },
+                    { age: 28, job: null, marital: 'married' },
+                ];
+                const schemaa = [
+                    { name: 'age', type: 'measure' },
+                    { name: 'job', type: 'dimension' },
+                    { name: 'marital', type: 'dimension' }
+                ];
+
+                const expData = {
+                    data: [
+                        [30, DataModel.InvalidAwareTypes.NULL],
+                        [144, 'married'],
+                        [28, 'single'],
+                        [DataModel.InvalidAwareTypes.NULL, 'complex']
+                    ],
+                    schema: [
+                        { name: 'age', type: 'measure', subtype: 'continuous' },
+                        { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                    ],
+                    uids: [0, 1, 2, 3]
+                };
+
+                const dataModel2 = new DataModel(dataaa, schemaa);
+                const groupedDm = dataModel2.groupBy(['marital']);
+                expect(groupedDm.getData()).to.deep.equal(expData);
+            });
+
 
             it('should group properly if def aggregation function is sum', () => {
                 const grouped = dataModel.groupBy(['first']);
