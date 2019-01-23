@@ -2,7 +2,7 @@
 fetch("/data/cars.json")
 .then(resp => resp.json())
 .then(data => {
-    schema = [
+    const schema = [
         // {
         //   "name": "Ticket",
         //   "type": "dimension"
@@ -141,13 +141,13 @@ fetch("/data/cars.json")
         // }
     ];
     
-    DataModel.configureInvalidAwareTypes({
-        "": DataModel.InvalidAwareTypes.NULL,
-    });
-    dm = new DataModel(data, schema);
-    dmData = dm.getData().data;
-    selected = dm.select(fields => fields['Date of Payment'].value === DataModel.InvalidAwareTypes.NULL);
+    // DataModel.configureInvalidAwareTypes({
+    //     "": DataModel.InvalidAwareTypes.NULL,
+    // });
+    const dm = new DataModel(data, schema);
+    const dmData = dm.getData().data;
+    const selected = dm.select(fields => fields['Date of Payment'].value === DataModel.InvalidAwareTypes.NULL);
     
-    compData = dm.groupBy(['name']).getData();
+    const compData = dm.groupBy(['name']).getData();
 })
 
