@@ -50,11 +50,11 @@ class InvalidAwareTypes {
     }
 
     static isInvalid(val) {
-        return !!InvalidAwareTypes.invalidAwareVals()[val];
+        return (val instanceof InvalidAwareTypes) || !!InvalidAwareTypes.invalidAwareVals()[val];
     }
 
     static getInvalidType(val) {
-        return InvalidAwareTypes.invalidAwareVals()[val];
+        return val instanceof InvalidAwareTypes ? val : InvalidAwareTypes.invalidAwareVals()[val];
     }
 }
 
