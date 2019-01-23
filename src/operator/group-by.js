@@ -2,6 +2,7 @@ import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import DataModel from '../export';
 import reducerStore from '../utils/reducer-store';
+import { defaultReducerName } from './group-by-function';
 import { FieldType } from '../enums';
 
 /**
@@ -38,21 +39,21 @@ function getFieldArr (dataModel, fieldArr) {
  */
 function getReducerObj (dataModel, reducers = {}) {
     const retObj = {};
-    const pReducers = reducers;
     const fieldStore = dataModel.getFieldspace();
     const measures = fieldStore.getMeasure();
-    let reducer = reducerStore.defaultReducer();
-    if (typeof reducers === 'function') {
-        reducer = reducers;
-    }
-    Object.entries(measures).forEach(([key]) => {
-        if (typeof reducers[key] === 'string') {
-            pReducers[key] = reducerStore.resolve(pReducers[key]) ? reducerStore.resolve(pReducers[key]) : reducer;
+    const defReducer = reducerStore.defaultReducer();
+
+    Object.keys(measures).forEach((measureName) => {
+        if (typeof reducers[measureName] !== 'string') {
+            reducers[measureName] = measures[measureName].defAggFn();
         }
-        if (typeof reducers[key] !== 'function') {
-            pReducers[key] = undefined;
+        const reducerFn = reducerStore.resolve(reducers[measureName]);
+        if (reducerFn) {
+            retObj[measureName] = reducerFn;
+        } else {
+            retObj[measureName] = defReducer;
+            reducers[measureName] = defaultReducerName;
         }
-        retObj[key] = pReducers[key] || reducerStore.resolve(measures[key].defAggFn()) || reducer;
     });
     return retObj;
 }

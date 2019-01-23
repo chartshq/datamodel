@@ -39,6 +39,12 @@ d3.json('./data/cars.json', (data) => {
     const binnedDm = groupedDm.bin('Miles_per_Gallon', { binsCount: 10})
   });
 
+  dm.calculateVariable ({
+      name: "fieldName",
+      type: "measure|dimension"
+  }, ["existingField1", "existingField2", (existingField1, existingField2) => {
+      return "operation_value"
+  }])
 
 // load('../../js/cars.csv')
 //     .then((res) => {

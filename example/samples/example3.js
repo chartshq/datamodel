@@ -68,9 +68,24 @@ const data = [
 
 const dm = new DataModel(data, schema);
 
-const groupedDm = rootData.groupBy(['Origin', 'Cylinders'])
-const binnedDm = groupedDm.bin('Miles_per_Gallon', { binsCount: 10})
+// const groupedDm = dm.groupBy(['name']);
 
+const groupedDm2 = dm.select(fields => fields.name.value === "Rousan");
+
+// const schema = [
+//     { name: 'Name', type: 'dimension' },
+//     { name: 'HorsePower', type: 'measure' },
+//     { name: 'Origin', type: 'dimension' }
+// ];
+// const data = [
+//     { Name: 'chevrolet chevelle malibu', Horsepower: 130, Origin: 'USA' },
+//     { Name: 'citroen ds-21 pallas', Horsepower: 115, Origin: 'Europe' },
+//     { Name: 'datsun pl510', Horsepower: 88, Origin: 'Japan' },
+//     { Name: 'amc rebel sst', Horsepower: 150, Origin: 'USA' },
+// ];
+// const dt = new DataModel(schema, data);
+
+// const dt2 = dt.select(fields => fields.Origin.value === 'USA');
 
 // const selectedDm = dm.select(fields => fields.roll.value > 10 || fields.roll.value < 0);
 
