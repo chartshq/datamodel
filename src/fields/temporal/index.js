@@ -60,7 +60,7 @@ export default class Temporal extends Dimension {
             return this._cachedMinDiff;
         }
 
-        const sortedData = this.data().sort((a, b) => a - b);
+        const sortedData = this.data().filter(item => !(item instanceof InvalidAwareTypes)).sort((a, b) => a - b);
         const arrLn = sortedData.length;
         let minDiff = Number.POSITIVE_INFINITY;
         let prevDatum;
