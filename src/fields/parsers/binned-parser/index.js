@@ -24,8 +24,7 @@ export default class BinnedParser extends FieldParser {
         if (!InvalidAwareTypes.isInvalid(val)) {
             let matched = val.match(regex);
             result = matched ? `${Number.parseFloat(matched[1])}-${Number.parseFloat(matched[2])}`
-                             : InvalidAwareTypes.getInvalidType((val.toLowerCase() === 'nil'
-                                ? val.toLowerCase() : 'invalid'));
+                             : InvalidAwareTypes.NA;
         } else {
             result = InvalidAwareTypes.getInvalidType(val);
         }
