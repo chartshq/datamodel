@@ -385,6 +385,7 @@ DateTimeFormatter.getTokenDefinitions = function () {
             index: 0,
             extract () { return '(\\d{2})'; },
             parser (val) {
+                let result;
                 if (val) {
                     const l = val.length;
                     val = val.substring(l - 2, l);
@@ -392,11 +393,14 @@ DateTimeFormatter.getTokenDefinitions = function () {
                 let parsedVal = DateTimeFormatter.defaultNumberParser()(val);
                 let presentYear = Math.trunc(((new Date()).getFullYear()) / 100);
                 if (parsedVal instanceof Number) {
-                    parsedVal = (presentYear * 100) + parsedVal;
+                    result = `${(presentYear * 100) + parsedVal}`;
                 } else {
-                    parsedVal = `${presentYear}${parsedVal}`;
+                    result = `${presentYear}${parsedVal}`;
                 }
-                return parsedVal;
+                if (new Date(result).getFullYear() > new Date().getFullYear()) {
+                    result = `${presentYear - 1}${parsedVal}`;
+                }
+                return new Date(result).getFullYear();
             },
             formatter (val) {
                 const d = convertToNativeDate(val);
@@ -707,13 +711,19 @@ DateTimeFormatter.prototype.getNativeDate = function (dateTimeStamp) {
     }
     else {
         const dtParams = this.dtParams = this.parse(dateTimeStamp);
+        let dateParms = [];
         if (dtParams.length) {
-            dtParams.unshift(null);
-            this.nativeDate = new (Function.prototype.bind.apply(Date, dtParams))();
+            this.checkIfOnlyYear(dtParams.length) ? dateParms.unshift(null, dtParams[0], 0, 1)
+                                                    : dateParms.unshift(null, ...dtParams);
+            this.nativeDate = new (Function.prototype.bind.apply(Date, dateParms))();
             date = this.nativeDate;
         }
     }
     return date;
+};
+
+DateTimeFormatter.prototype.checkIfOnlyYear = function(len) {
+    return len === 1 && this.format.match(/y|Y/g).length;
 };
 
 /*

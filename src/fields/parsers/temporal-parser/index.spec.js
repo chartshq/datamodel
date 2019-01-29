@@ -38,5 +38,14 @@ describe('TemporalParser', () => {
             expect(temParser.parse(undefined)).to.equal(DataModel.InvalidAwareTypes.NA);
             expect(temParser.parse('abcd')).to.equal(DataModel.InvalidAwareTypes.NA);
         });
+        it('should return valid date for edge case', () => {
+            expect(temParser.parse('')).to.equal(DataModel.InvalidAwareTypes.NA);
+
+            temParser = new TemporalParser(Object.assign({}, schema, { format: '%Y' }));
+            expect(temParser.parse('1998')).to.equal(new Date(1998, 0, 1).getTime());
+
+            temParser = new TemporalParser(Object.assign({}, schema, { format: '%y' }));
+            expect(temParser.parse('98')).to.equal(new Date(1998, 0, 1).getTime());
+        });
     });
 });
