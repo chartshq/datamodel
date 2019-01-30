@@ -46,6 +46,8 @@ describe('TemporalParser', () => {
 
             temParser = new TemporalParser(Object.assign({}, schema, { format: '%y' }));
             expect(temParser.parse('98')).to.equal(new Date(1998, 0, 1).getTime());
+
+            expect(temParser.parse('abcd')).to.equal(DataModel.InvalidAwareTypes.NA);
         });
     });
 });

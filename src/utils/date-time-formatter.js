@@ -393,11 +393,9 @@ DateTimeFormatter.getTokenDefinitions = function () {
                 let parsedVal = DateTimeFormatter.defaultNumberParser()(val);
                 let presentDate = new Date();
                 let presentYear = Math.trunc((presentDate.getFullYear()) / 100);
-                if (parsedVal instanceof Number) {
-                    result = `${(presentYear * 100) + parsedVal}`;
-                } else {
-                    result = `${presentYear}${parsedVal}`;
-                }
+
+                result = `${presentYear}${parsedVal}`;
+
                 if (convertToNativeDate(result).getFullYear() > presentDate.getFullYear()) {
                     result = `${presentYear - 1}${parsedVal}`;
                 }
