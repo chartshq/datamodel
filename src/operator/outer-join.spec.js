@@ -5,6 +5,7 @@ import { expect } from 'chai';
 import { fullOuterJoin, leftOuterJoin, rightOuterJoin } from './outer-join';
 import DataModel from '../index'
 ;
+import InvalidAwareTypes from '../invalid-aware-types';
 
 describe('Testing Outer Join', () => {
     const data1 = [
@@ -142,11 +143,11 @@ describe('Testing Outer Join', () => {
                         25,
                         'Hey',
                         'Wood',
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL
                     ],
                     [
                         '3',
@@ -154,11 +155,11 @@ describe('Testing Outer Join', () => {
                         20,
                         'White',
                         'the sun',
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL
                     ],
                     [
                         '4',
@@ -355,11 +356,11 @@ describe('Testing Outer Join', () => {
                         25,
                         'Hey',
                         'Wood',
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL
                     ],
                     [
                         '3',
@@ -367,11 +368,11 @@ describe('Testing Outer Join', () => {
                         20,
                         'White',
                         'the sun',
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL
                     ],
                     [
                         '4',

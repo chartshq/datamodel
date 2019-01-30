@@ -5,6 +5,7 @@ import { expect } from 'chai';
 import TemporalParser from './index';
 import { DimensionSubtype } from '../../../enums';
 import { DateTimeFormatter } from '../../../utils';
+import DataModel from '../../../';
 
 describe('TemporalParser', () => {
     const schema = {
@@ -32,14 +33,21 @@ describe('TemporalParser', () => {
             expect(temParser.parse(val)).to.equal(+new Date(val));
         });
 
-        it('should return current timestamp for invalid formatted date value', () => {
-            const dateStr = 'invalid format';
-            expect(temParser.parse(dateStr)).to.equal(Date.now());
+        it('should return default invalid type for invalid value', () => {
+            expect(temParser.parse(null)).to.eql(DataModel.InvalidAwareTypes.NULL);
+            expect(temParser.parse(undefined)).to.equal(DataModel.InvalidAwareTypes.NA);
+            expect(temParser.parse('abcd')).to.equal(DataModel.InvalidAwareTypes.NA);
         });
+        it('should return valid date for edge case', () => {
+            expect(temParser.parse('')).to.equal(DataModel.InvalidAwareTypes.NA);
 
-        it('should return null for invalid value', () => {
-            expect(temParser.parse(null)).to.be.null;
-            expect(temParser.parse(undefined)).to.be.null;
+            temParser = new TemporalParser(Object.assign({}, schema, { format: '%Y' }));
+            expect(temParser.parse('1998')).to.equal(new Date(1998, 0, 1).getTime());
+
+            temParser = new TemporalParser(Object.assign({}, schema, { format: '%y' }));
+            expect(temParser.parse('98')).to.equal(new Date(1998, 0, 1).getTime());
+
+            expect(temParser.parse('abcd')).to.equal(DataModel.InvalidAwareTypes.NA);
         });
     });
 });

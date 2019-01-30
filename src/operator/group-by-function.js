@@ -1,5 +1,10 @@
 import { isArray } from '../utils';
+import InvalidAwareTypes from '../invalid-aware-types';
 
+
+function getFilteredValues(arr) {
+    return arr.filter(item => !(item instanceof InvalidAwareTypes));
+}
 /**
  * Reducer function that returns the sum of all the values.
  *
@@ -8,14 +13,14 @@ import { isArray } from '../utils';
  * @return {number} Returns the sum of the array.
  */
 function sum (arr) {
-    if (isArray(arr)) {
-        const totalSum = arr.reduce((acc, curr) =>
-            ((curr === null || curr === undefined) ? acc : acc + +curr)
-        , null);
-
-        return Number.isNaN(totalSum) ? null : totalSum;
+    if (isArray(arr) && !(arr[0] instanceof Array)) {
+        const filteredNumber = getFilteredValues(arr);
+        const totalSum = filteredNumber.length ?
+                            filteredNumber.reduce((acc, curr) => acc + curr, 0)
+                            : InvalidAwareTypes.NULL;
+        return totalSum;
     }
-    return null;
+    return InvalidAwareTypes.NULL;
 }
 
 /**
@@ -26,12 +31,13 @@ function sum (arr) {
  * @return {number} Returns the mean value of the array.
  */
 function avg (arr) {
-    if (isArray(arr)) {
+    if (isArray(arr) && !(arr[0] instanceof Array)) {
         const totalSum = sum(arr);
         const len = arr.length || 1;
-        return (Number.isNaN(totalSum) || totalSum === null) ? null : totalSum / len;
+        return (Number.isNaN(totalSum) || totalSum instanceof InvalidAwareTypes) ?
+                 InvalidAwareTypes.NULL : totalSum / len;
     }
-    return null;
+    return InvalidAwareTypes.NULL;
 }
 
 /**
@@ -42,14 +48,13 @@ function avg (arr) {
  * @return {number} Returns the minimum value of the array.
  */
 function min (arr) {
-    if (isArray(arr)) {
+    if (isArray(arr) && !(arr[0] instanceof Array)) {
         // Filter out undefined, null and NaN values
-        const filteredValues = arr.filter(num =>
-            !(num === undefined || num === null || Number.isNaN(+num)));
+        const filteredValues = getFilteredValues(arr);
 
-        return (filteredValues.length) ? Math.min(...filteredValues) : null;
+        return (filteredValues.length) ? Math.min(...filteredValues) : InvalidAwareTypes.NULL;
     }
-    return null;
+    return InvalidAwareTypes.NULL;
 }
 
 /**
@@ -60,14 +65,13 @@ function min (arr) {
  * @return {number} Returns the maximum value of the array.
  */
 function max (arr) {
-    if (isArray(arr)) {
+    if (isArray(arr) && !(arr[0] instanceof Array)) {
         // Filter out undefined, null and NaN values
-        const filteredValues = arr.filter(num =>
-            !(num === undefined || num === null || Number.isNaN(+num)));
+        const filteredValues = getFilteredValues(arr);
 
-        return (filteredValues.length) ? Math.max(...filteredValues) : null;
+        return (filteredValues.length) ? Math.max(...filteredValues) : InvalidAwareTypes.NULL;
     }
-    return null;
+    return InvalidAwareTypes.NULL;
 }
 
 /**
@@ -103,7 +107,7 @@ function count (arr) {
     if (isArray(arr)) {
         return arr.length;
     }
-    return null;
+    return InvalidAwareTypes.NULL;
 }
 
 /**
