@@ -391,16 +391,17 @@ DateTimeFormatter.getTokenDefinitions = function () {
                     val = val.substring(l - 2, l);
                 }
                 let parsedVal = DateTimeFormatter.defaultNumberParser()(val);
-                let presentYear = Math.trunc(((new Date()).getFullYear()) / 100);
+                let presentDate = new Date();
+                let presentYear = Math.trunc((presentDate.getFullYear()) / 100);
                 if (parsedVal instanceof Number) {
                     result = `${(presentYear * 100) + parsedVal}`;
                 } else {
                     result = `${presentYear}${parsedVal}`;
                 }
-                if (new Date(result).getFullYear() > new Date().getFullYear()) {
+                if (convertToNativeDate(result).getFullYear() > presentDate.getFullYear()) {
                     result = `${presentYear - 1}${parsedVal}`;
                 }
-                return new Date(result).getFullYear();
+                return convertToNativeDate(result).getFullYear();
             },
             formatter (val) {
                 const d = convertToNativeDate(val);
@@ -607,6 +608,7 @@ DateTimeFormatter.prototype.parse = function (dateTimeStamp, options) {
     let param;
     let resolvedVal;
     let l;
+    let result = [];
 
     for (resolverKey in tokenResolver) {
         if (!{}.hasOwnProperty.call(tokenResolver, resolverKey)) { continue; }
@@ -635,7 +637,14 @@ DateTimeFormatter.prototype.parse = function (dateTimeStamp, options) {
         dtParamArr[dtParamSeq[resolverKey]] = resolvedVal;
     }
 
-    return dtParamArr;
+    if (dtParamArr.length && this.checkIfOnlyYear(dtParamArr.length))
+     {
+        result.unshift(dtParamArr[0], 0, 1); }
+    else {
+        result.unshift(...dtParamArr);
+    }
+
+    return result;
 };
 
 /*
@@ -711,11 +720,8 @@ DateTimeFormatter.prototype.getNativeDate = function (dateTimeStamp) {
     }
     else {
         const dtParams = this.dtParams = this.parse(dateTimeStamp);
-        let dateParms = [];
         if (dtParams.length) {
-            this.checkIfOnlyYear(dtParams.length) ? dateParms.unshift(null, dtParams[0], 0, 1)
-                                                    : dateParms.unshift(null, ...dtParams);
-            this.nativeDate = new (Function.prototype.bind.apply(Date, dateParms))();
+            this.nativeDate = new Date(...dtParams);
             date = this.nativeDate;
         }
     }
