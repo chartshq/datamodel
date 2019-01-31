@@ -2441,5 +2441,24 @@ describe('DataModel', () => {
             expect(newField.data()).to.deep.equal(expectedData);
             expect(newField.bins()).to.deep.equal([10, 11, 16, 20, 22]);
         });
+
+        it('should store derivation criteria info', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1);
+
+            const binnedDm = dataModel.bin('profit', { binSize: 10, name: 'BinnedField' });
+            expect(binnedDm.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.BIN);
+        });
     });
 });
