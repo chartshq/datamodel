@@ -319,16 +319,16 @@ export const getRootGroupByModel = (model) => {
 };
 
 export const getRootDataModel = (model) => {
-    if (model._parent) {
-        return getRootDataModel(model._parent);
+    while (model._parent) {
+        model = model._parent;
     }
     return model;
 };
 
 export const getPathToRootModel = (model, path = []) => {
-    if (model._parent !== null) {
+    while (model._parent) {
         path.push(model);
-        getPathToRootModel(model._parent, path);
+        model = model._parent;
     }
     return path;
 };
