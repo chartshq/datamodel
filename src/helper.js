@@ -153,10 +153,8 @@ export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) =
     );
     cloned._rowDiffset = rowDiffset;
     cloned.__calculateFieldspace().calculateFieldsConfig();
-    // Store reference to child model and selector function
-    if (cloneConfig.saveChild) {
-        persistDerivation(cloned, DM_DERIVATIVES.SELECT, { config: selectConfig }, selectFn);
-    }
+
+    persistDerivation(cloned, DM_DERIVATIVES.SELECT, { config: selectConfig }, selectFn);
 
     return cloned;
 };
@@ -171,15 +169,13 @@ export const cloneWithProject = (sourceDm, projField, config, allFields) => {
     //                         .filter(coll => projectionSet.indexOf(coll) !== -1).join();
     cloned._colIdentifier = projectionSet.join(',');
     cloned.__calculateFieldspace().calculateFieldsConfig();
-    // Store reference to child model and projection fields
-    if (config.saveChild) {
-        persistDerivation(
-            cloned,
-            DM_DERIVATIVES.PROJECT,
-            { projField, config, actualProjField: projectionSet },
-            null
-        );
-    }
+
+    persistDerivation(
+        cloned,
+        DM_DERIVATIVES.PROJECT,
+        { projField, config, actualProjField: projectionSet },
+        null
+    );
 
     return cloned;
 };
@@ -323,16 +319,16 @@ export const getRootGroupByModel = (model) => {
 };
 
 export const getRootDataModel = (model) => {
-    if (model._parent) {
-        return getRootDataModel(model._parent);
+    while (model._parent) {
+        model = model._parent;
     }
     return model;
 };
 
 export const getPathToRootModel = (model, path = []) => {
-    if (model._parent !== null) {
+    while (model._parent) {
         path.push(model);
-        getPathToRootModel(model._parent, path);
+        model = model._parent;
     }
     return path;
 };
