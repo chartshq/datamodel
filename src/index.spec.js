@@ -3,6 +3,7 @@
 
 import { expect } from 'chai';
 import { FilteringMode, DataFormat } from './enums';
+import { DM_DERIVATIVES } from './constants';
 import DataModel from './index';
 import pkg from '../package.json';
 import InvalidAwareTypes from './invalid-aware-types';
@@ -420,6 +421,16 @@ describe('DataModel', () => {
             expect(dataModel === projectedDataModel).to.be.false;
             expect(projectedDataModel.getData()).to.deep.equal(expected);
         });
+
+        it('should store derivation criteria info', () => {
+            const dataModel = new DataModel(data, schema);
+
+            let projectedDataModel = dataModel.project(['age', 'job'], { saveChild: true });
+            expect(projectedDataModel.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.PROJECT);
+
+            projectedDataModel = dataModel.project(['age', 'job'], { saveChild: false });
+            expect(projectedDataModel.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.PROJECT);
+        });
     });
 
     describe('#select', () => {
@@ -655,6 +666,16 @@ describe('DataModel', () => {
             };
 
             expect(selectedDm.getData()).to.eql(expData);
+        });
+
+        it('should store derivation criteria info', () => {
+            const dataModel = new DataModel(data, schema);
+
+            let selectedDm = dataModel.select(fields => fields.age.value < 40, { saveChild: true });
+            expect(selectedDm.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.SELECT);
+
+            selectedDm = dataModel.select(fields => fields.age.value < 40, { saveChild: false });
+            expect(selectedDm.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.SELECT);
         });
     });
 
@@ -1250,6 +1271,38 @@ describe('DataModel', () => {
             ).to.equal('Hey Jude');
         });
 
+        it('should store derivation criteria info', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 15, sales: 25, first: 'White', second: 'walls' },
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1);
+
+            let calDm = dataModel.calculateVariable({
+                name: 'NewField',
+                type: 'dimension'
+            }, ['first', 'second', (first, second) =>
+                `${first} ${second}`
+            ], { saveChild: true });
+            expect(calDm.getDerivations()[0].op).to.equal(DM_DERIVATIVES.CAL_VAR);
+
+            calDm = dataModel.calculateVariable({
+                name: 'NewField2',
+                type: 'dimension'
+            }, ['first', 'second', (first, second) =>
+                `${first} ${second}`
+            ], { saveChild: false });
+            expect(calDm.getDerivations()[0].op).to.equal(DM_DERIVATIVES.CAL_VAR);
+        });
+
         it('should return correct value from the callback function', () => {
             const data = [
                 { a: 10, aaa: 20, aaaa: 'd' },
@@ -1612,7 +1665,6 @@ describe('DataModel', () => {
                 expect(groupedDm.getData()).to.deep.equal(expData);
             });
 
-
             it('should group properly if def aggregation function is sum', () => {
                 const grouped = dataModel.groupBy(['first']);
                 const childData = grouped.getData().data;
@@ -1696,6 +1748,16 @@ describe('DataModel', () => {
 
                 expect(groupedDm.getData()).to.eql(expected);
                 unRegisterHandle();
+            });
+
+            it('should store derivation criteria info', () => {
+                const rootDm = new DataModel(data1, schema1);
+
+                let groupedDm = rootDm.groupBy(['first'], { profit: 'avg' }, { saveChild: true });
+                expect(groupedDm.getDerivations()[0].op).to.eql(DM_DERIVATIVES.GROUPBY);
+
+                groupedDm = rootDm.groupBy(['first'], { profit: 'avg' }, { saveChild: false });
+                expect(groupedDm.getDerivations()[0].op).to.eql(DM_DERIVATIVES.GROUPBY);
             });
         });
     });

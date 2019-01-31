@@ -239,17 +239,18 @@ class DataModel extends Relation {
         let params = [this, fieldsArr, reducers];
         const newDataModel = groupBy(...params);
 
+        persistDerivation(
+            newDataModel,
+            DM_DERIVATIVES.GROUPBY,
+            { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() },
+            reducers
+        );
+
         if (config.saveChild) {
             this._children.push(newDataModel);
-            persistDerivation(
-                newDataModel,
-                DM_DERIVATIVES.GROUPBY,
-                { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() },
-                reducers
-            );
         }
-
         newDataModel._parent = this;
+
         return newDataModel;
     }
 
@@ -478,9 +479,7 @@ class DataModel extends Relation {
         const [field] = createFields([computedValues], [schema], [schema.name]);
         clone.addField(field);
 
-        if (config.saveChild) {
-            persistDerivation(clone, DM_DERIVATIVES.CAL_VAR, { config: schema, fields: depVars }, retrieveFn);
-        }
+        persistDerivation(clone, DM_DERIVATIVES.CAL_VAR, { config: schema, fields: depVars }, retrieveFn);
 
         return clone;
     }
