@@ -1,36 +1,90 @@
-import { FieldType, DimensionSubtype } from './enums';
-import { Measure, Categorical, DateTime, DiscreteMeasure } from './fields';
+import { FieldType, DimensionSubtype, MeasureSubtype } from './enums';
+import {
+    Categorical,
+    Temporal,
+    Binned,
+    Continuous,
+    CategoricalParser,
+    TemporalParser,
+    BinnedParser,
+    ContinuousParser,
+    PartialField
+} from './fields';
 
 /**
  * Creates a field instance according to the provided data and schema.
- *
- * @todo Add logic for GEO dimension subtype.
  *
  * @param {Array} data - The field data array.
  * @param {Object} schema - The field schema object.
  * @return {Field} Returns the newly created field instance.
  */
-function createUnitField (data, schema) {
+function createUnitField(data, schema) {
+    data = data || [];
+    let partialField;
+
     switch (schema.type) {
     case FieldType.MEASURE:
         switch (schema.subtype) {
-        case 'discrete':
-            return new DiscreteMeasure(schema.name, data, schema, schema.bins);
+        case MeasureSubtype.CONTINUOUS:
+            partialField = new PartialField(schema.name, data, schema, new ContinuousParser());
+            return new Continuous(partialField, `0-${data.length - 1}`);
         default:
-            return new Measure(schema.name, data, schema);
+            partialField = new PartialField(schema.name, data, schema, new ContinuousParser());
+            return new Continuous(partialField, `0-${data.length - 1}`);
         }
     case FieldType.DIMENSION:
-    default:
         switch (schema.subtype) {
         case DimensionSubtype.CATEGORICAL:
-            return new Categorical(schema.name, data, schema);
+            partialField = new PartialField(schema.name, data, schema, new CategoricalParser());
+            return new Categorical(partialField, `0-${data.length - 1}`);
         case DimensionSubtype.TEMPORAL:
-            return new DateTime(schema.name, data, schema);
-        case DimensionSubtype.GEO:
-            return new Categorical(schema.name, data, schema);
+            partialField = new PartialField(schema.name, data, schema, new TemporalParser(schema));
+            return new Temporal(partialField, `0-${data.length - 1}`);
+        case DimensionSubtype.BINNED:
+            partialField = new PartialField(schema.name, data, schema, new BinnedParser());
+            return new Binned(partialField, `0-${data.length - 1}`);
         default:
-            return new Categorical(schema.name, data, schema);
+            partialField = new PartialField(schema.name, data, schema, new CategoricalParser());
+            return new Categorical(partialField, `0-${data.length - 1}`);
         }
+    default:
+        partialField = new PartialField(schema.name, data, schema, new CategoricalParser());
+        return new Categorical(partialField, `0-${data.length - 1}`);
+    }
+}
+
+
+/**
+ * Creates a field instance from partialField and rowDiffset.
+ *
+ * @param {PartialField} partialField - The corresponding partial field.
+ * @param {string} rowDiffset - The data subset config.
+ * @return {Field} Returns the newly created field instance.
+ */
+export function createUnitFieldFromPartial(partialField, rowDiffset) {
+    const { schema } = partialField;
+
+    switch (schema.type) {
+    case FieldType.MEASURE:
+        switch (schema.subtype) {
+        case MeasureSubtype.CONTINUOUS:
+            return new Continuous(partialField, rowDiffset);
+        default:
+            return new Continuous(partialField, rowDiffset);
+        }
+    case FieldType.DIMENSION:
+        switch (schema.subtype) {
+        case DimensionSubtype.CATEGORICAL:
+            return new Categorical(partialField, rowDiffset);
+        case DimensionSubtype.TEMPORAL:
+            return new Temporal(partialField, rowDiffset);
+        case DimensionSubtype.BINNED:
+            return new Binned(partialField, rowDiffset);
+        default:
+            return new Categorical(partialField, rowDiffset);
+        }
+    default:
+        return new Categorical(partialField, rowDiffset);
     }
 }
 
@@ -42,7 +96,7 @@ function createUnitField (data, schema) {
  * @param {Array} headers - The array of header names.
  * @return {Array.<Field>} Returns an array of newly created field instances.
  */
-function createFields (dataColumn, schema, headers) {
+export function createFields(dataColumn, schema, headers) {
     const headersObj = {};
 
     if (!(headers && headers.length)) {
@@ -55,5 +109,3 @@ function createFields (dataColumn, schema, headers) {
 
     return schema.map(item => createUnitField(dataColumn[headersObj[item.name]], item));
 }
-
-export default createFields;

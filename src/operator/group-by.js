@@ -2,6 +2,8 @@ import { extend2 } from '../utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import DataModel from '../export';
 import reducerStore from '../utils/reducer-store';
+import { defaultReducerName } from './group-by-function';
+import { FieldType } from '../enums';
 
 /**
  * This function sanitize the user given field and return a common Array structure field
@@ -12,9 +14,8 @@ import reducerStore from '../utils/reducer-store';
  */
 function getFieldArr (dataModel, fieldArr) {
     const retArr = [];
-    const fieldStore = dataModel.getPartialFieldspace();
+    const fieldStore = dataModel.getFieldspace();
     const dimensions = fieldStore.getDimension();
-    const measures = fieldStore.getMeasure();
 
     Object.entries(dimensions).forEach(([key]) => {
         if (fieldArr && fieldArr.length) {
@@ -26,17 +27,6 @@ function getFieldArr (dataModel, fieldArr) {
         }
     });
 
-    Object.entries(measures).forEach(([key]) => {
-        if (measures[key].subType() === 'discrete') {
-            if (fieldArr && fieldArr.length) {
-                if (fieldArr.indexOf(key) !== -1) {
-                    retArr.push(key);
-                }
-            } else {
-                retArr.push(key);
-            }
-        }
-    });
     return retArr;
 }
 
@@ -49,21 +39,21 @@ function getFieldArr (dataModel, fieldArr) {
  */
 function getReducerObj (dataModel, reducers = {}) {
     const retObj = {};
-    const pReducers = reducers;
-    const fieldStore = dataModel.getPartialFieldspace();
+    const fieldStore = dataModel.getFieldspace();
     const measures = fieldStore.getMeasure();
-    let reducer = reducerStore.defaultReducer();
-    if (typeof reducers === 'function') {
-        reducer = reducers;
-    }
-    Object.entries(measures).forEach(([key]) => {
-        if (typeof reducers[key] === 'string') {
-            pReducers[key] = reducerStore.resolve(pReducers[key]) ? reducerStore.resolve(pReducers[key]) : reducer;
+    const defReducer = reducerStore.defaultReducer();
+
+    Object.keys(measures).forEach((measureName) => {
+        if (typeof reducers[measureName] !== 'string') {
+            reducers[measureName] = measures[measureName].defAggFn();
         }
-        if (typeof reducers[key] !== 'function') {
-            pReducers[key] = undefined;
+        const reducerFn = reducerStore.resolve(reducers[measureName]);
+        if (reducerFn) {
+            retObj[measureName] = reducerFn;
+        } else {
+            retObj[measureName] = defReducer;
+            reducers[measureName] = defaultReducerName;
         }
-        retObj[key] = pReducers[key] || reducerStore.resolve(measures[key].defAggFn()) || reducer;
     });
     return retObj;
 }
@@ -80,7 +70,7 @@ function getReducerObj (dataModel, reducers = {}) {
 function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     const sFieldArr = getFieldArr(dataModel, fieldArr);
     const reducerObj = getReducerObj(dataModel, reducers);
-    const fieldStore = dataModel.getPartialFieldspace();
+    const fieldStore = dataModel.getFieldspace();
     const fieldStoreObj = fieldStore.fieldsObj();
     const dbName = fieldStore.name;
     const dimensionArr = [];
@@ -89,13 +79,18 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     const hashMap = {};
     const data = [];
     let newDataModel;
+
     // Prepare the schema
     Object.entries(fieldStoreObj).forEach(([key, value]) => {
         if (sFieldArr.indexOf(key) !== -1 || reducerObj[key]) {
-            schema.push(extend2({}, value.schema));
-            if (value.schema.type === 'measure' && value.schema.subtype !== 'discrete') {
+            schema.push(extend2({}, value.schema()));
+
+            switch (value.schema().type) {
+            case FieldType.MEASURE:
                 measureArr.push(key);
-            } else if (value.schema.type === 'dimension' || value.schema.subtype === 'discrete') {
+                break;
+            default:
+            case FieldType.DIMENSION:
                 dimensionArr.push(key);
             }
         }
@@ -105,29 +100,32 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     rowDiffsetIterator(dataModel._rowDiffset, (i) => {
         let hash = '';
         dimensionArr.forEach((_) => {
-            hash = `${hash}-${fieldStoreObj[_].data[i]}`;
+            hash = `${hash}-${fieldStoreObj[_].partialField.data[i]}`;
         });
         if (hashMap[hash] === undefined) {
             hashMap[hash] = rowCount;
             data.push({});
             dimensionArr.forEach((_) => {
-                data[rowCount][_] = fieldStoreObj[_].data[i];
+                data[rowCount][_] = fieldStoreObj[_].partialField.data[i];
             });
             measureArr.forEach((_) => {
-                data[rowCount][_] = [fieldStoreObj[_].data[i]];
+                data[rowCount][_] = [fieldStoreObj[_].partialField.data[i]];
             });
             rowCount += 1;
         } else {
             measureArr.forEach((_) => {
-                data[hashMap[hash]][_].push(fieldStoreObj[_].data[i]);
+                data[hashMap[hash]][_].push(fieldStoreObj[_].partialField.data[i]);
             });
         }
     });
+
     // reduction
+    let cachedStore = {};
+    let cloneProvider = () => dataModel.detachedRoot();
     data.forEach((row) => {
         const tuple = row;
         measureArr.forEach((_) => {
-            tuple[_] = reducerObj[_](row[_]);
+            tuple[_] = reducerObj[_](row[_], cloneProvider, cachedStore);
         });
     });
     if (existingDataModel) {

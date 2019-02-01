@@ -34,8 +34,8 @@ describe('Testing union', () => {
             const unionDataModel = union(dataModel1, dataModel2);
             expect(unionDataModel.getData()).to.deep.equal({
                 schema: [
-                { name: 'city', type: 'dimension' },
-                { name: 'state', type: 'dimension' },
+                { name: 'city', type: 'dimension', subtype: 'categorical' },
+                { name: 'state', type: 'dimension', subtype: 'categorical' },
                 ],
                 data: [
                 ['a', 'aa'],

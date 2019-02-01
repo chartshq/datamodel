@@ -10,11 +10,11 @@ export function getCommonSchema (fs1, fs2) {
     const retArr = [];
     const fs1Arr = [];
     fs1.fields.forEach((field) => {
-        fs1Arr.push(field.schema.name);
+        fs1Arr.push(field.schema().name);
     });
     fs2.fields.forEach((field) => {
-        if (fs1Arr.indexOf(field.schema.name) !== -1) {
-            retArr.push(field.schema.name);
+        if (fs1Arr.indexOf(field.schema().name) !== -1) {
+            retArr.push(field.schema().name);
         }
     });
     return retArr;

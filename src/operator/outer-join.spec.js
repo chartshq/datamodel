@@ -5,6 +5,7 @@ import { expect } from 'chai';
 import { fullOuterJoin, leftOuterJoin, rightOuterJoin } from './outer-join';
 import DataModel from '../index'
 ;
+import InvalidAwareTypes from '../invalid-aware-types';
 
 describe('Testing Outer Join', () => {
     const data1 = [
@@ -16,13 +17,12 @@ describe('Testing Outer Join', () => {
     const data2 = [
         { id: 1, netprofit: 10, netsales: 200, _first: 'Hello', _second: 'Jude' },
         { id: 4, netprofit: 200, netsales: 250, _first: 'Bollo', _second: 'Wood' },
-
     ];
 
     const schema1 = [
         {
             name: 'id',
-            type: 'dimention'
+            type: 'dimension'
         },
         {
             name: 'profit',
@@ -45,7 +45,7 @@ describe('Testing Outer Join', () => {
     const schema2 = [
         {
             name: 'id',
-            type: 'dimention'
+            type: 'dimension'
         },
         {
             name: 'netprofit',
@@ -73,45 +73,55 @@ describe('Testing Outer Join', () => {
                 schema: [
                     {
                         name: 'ModelA.id',
-                        type: 'dimention'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'profit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'sales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: 'first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'ModelB.id',
-                        type: 'dimention'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'netprofit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'netsales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: '_first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: '_second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     }
                 ],
                 data: [
@@ -133,11 +143,11 @@ describe('Testing Outer Join', () => {
                         25,
                         'Hey',
                         'Wood',
-                        '',
-                        null,
-                        null,
-                        '',
-                        ''
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL
                     ],
                     [
                         '3',
@@ -145,11 +155,11 @@ describe('Testing Outer Join', () => {
                         20,
                         'White',
                         'the sun',
-                        '',
-                        null,
-                        null,
-                        '',
-                        ''
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL
                     ],
                     [
                         '4',
@@ -182,45 +192,55 @@ describe('Testing Outer Join', () => {
                 schema: [
                     {
                         name: 'ModelB.id',
-                        type: 'dimention'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'netprofit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'netsales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: '_first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: '_second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'ModelA.id',
-                        type: 'dimention'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'profit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'sales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: 'first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     }
                 ],
                 data: [
@@ -266,45 +286,55 @@ describe('Testing Outer Join', () => {
                 schema: [
                     {
                         name: 'ModelA.id',
-                        type: 'dimention'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'profit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'sales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: 'first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'ModelB.id',
-                        type: 'dimention'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'netprofit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'netsales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: '_first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: '_second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     }
                 ],
                 data: [
@@ -326,11 +356,11 @@ describe('Testing Outer Join', () => {
                         25,
                         'Hey',
                         'Wood',
-                        '',
-                        null,
-                        null,
-                        '',
-                        ''
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL
                     ],
                     [
                         '3',
@@ -338,11 +368,11 @@ describe('Testing Outer Join', () => {
                         20,
                         'White',
                         'the sun',
-                        '',
-                        null,
-                        null,
-                        '',
-                        ''
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL,
+                        InvalidAwareTypes.NULL
                     ],
                     [
                         '4',

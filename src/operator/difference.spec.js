@@ -38,8 +38,8 @@ describe('Checking difference', () => {
             const differenceDataModel = difference(dataModel1, dataModel2);
             expect(differenceDataModel.getData()).to.deep.equal({
                 schema: [
-                { name: 'city', type: 'dimension' },
-                { name: 'state', type: 'dimension' },
+                { name: 'city', type: 'dimension', subtype: 'categorical' },
+                { name: 'state', type: 'dimension', subtype: 'categorical' },
                 ],
                 data: [
                 ['a', 'aa'],
@@ -47,6 +47,15 @@ describe('Checking difference', () => {
                 ],
                 uids: [0, 1]
             });
+        });
+
+        it('should return null for difference between two datamodels with different columns', () => {
+            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' })).project(['city', 'state']);
+            const dataModel2 = (new DataModel(data2, schema2, { name: 'ModelB' })).project(['city', 'sales']);
+
+            const differenceDataModel = difference(dataModel1, dataModel2);
+
+            expect(differenceDataModel).to.be.null;
         });
     });
 });

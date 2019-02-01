@@ -1,10 +1,12 @@
-/* global describe, it, context */
+/* global beforeEach, describe, it, context */
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { FilteringMode } from './enums';
+import { FilteringMode, DataFormat } from './enums';
+import { DM_DERIVATIVES } from './constants';
 import DataModel from './index';
 import pkg from '../package.json';
+import InvalidAwareTypes from './invalid-aware-types';
 
 function avg(...nums) {
     return nums.reduce((acc, next) => acc + next, 0) / nums.length;
@@ -14,6 +16,32 @@ describe('DataModel', () => {
     describe('#version', () => {
         it('should be same to the version value specified in package.json file', () => {
             expect(DataModel.version).to.equal(pkg.version);
+        });
+    });
+
+    describe('#configureInvalidAwareTypes', () => {
+        it('should update invalid values mapping with new configuration', () => {
+            const data = [
+                { age: 30, job: 'unemployed', marital: null },
+                { age: 'Age', job: 'services', marital: 'married' },
+                { age: 22, job: undefined, marital: 'single' }
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' },
+            ];
+            DataModel.configureInvalidAwareTypes({
+                undefined: DataModel.InvalidAwareTypes.NA
+            });
+
+            const dataModel = new DataModel(data, schema);
+            const dmData = dataModel.getData().data;
+
+            expect(dmData[0][2] instanceof DataModel.InvalidAwareTypes).to.be.true;
+            expect(dmData[0][2]).to.eql(DataModel.InvalidAwareTypes.NULL);
+            expect(dmData[2][1] instanceof DataModel.InvalidAwareTypes).to.be.true;
+            expect(dmData[2][1]).to.eql(DataModel.InvalidAwareTypes.NA);
         });
     });
 
@@ -58,6 +86,38 @@ describe('DataModel', () => {
         });
     });
 
+    context('Test for a failing data format type', () => {
+        let mockedDm = () => new DataModel([], [], { dataFormat: 'erroneous-data-type' });
+
+        it('should throw no coverter function found error', () => {
+            expect(mockedDm).to.throw('No converter function found for erroneous-data-type format');
+        });
+    });
+
+    context('should cache namespace values once it is computed', () => {
+        const data = [
+            { age: 30, job: 'unemployed', marital: 'married' },
+            { age: 33, job: 'services', marital: 'married' },
+            { age: 35, job: 'management', marital: 'single' }
+        ];
+        const schema = [
+            { name: 'age', type: 'measure' },
+            { name: 'job', type: 'dimension' },
+            { name: 'marital', type: 'dimension' },
+        ];
+        const dataModel = new DataModel(data, schema);
+        const fieldspace = dataModel.getFieldspace();
+
+        const fieldsObj = fieldspace.fieldsObj();
+        expect(fieldsObj).to.eql(fieldspace._cachedFieldsObj);
+
+        const measureFields = fieldspace.getMeasure();
+        expect(measureFields).to.eql(fieldspace._cachedMeasure);
+
+        const dimensionFields = fieldspace.getDimension();
+        expect(dimensionFields).to.eql(fieldspace._cachedDimension);
+    });
+
     describe('#getData', () => {
         it('should return the data in the specified format', () => {
             const schema = [
@@ -77,12 +137,12 @@ describe('DataModel', () => {
             });
             let expected = {
                 data: [
-                    ['Rousan', 804882600000],
-                    ['Sumant', 839097000000],
-                    ['Akash', 757535400000]
+                    ['Rousan', new Date(1995, 7 - 1, 5).getTime()],
+                    ['Sumant', new Date(1996, 8 - 1, 4).getTime()],
+                    ['Akash', new Date(1994, 1 - 1, 3).getTime()]
                 ],
                 schema: [
-                    { name: 'name', type: 'dimension' },
+                    { name: 'name', type: 'dimension', subtype: 'categorical' },
                     { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
                 ],
                 uids: [0, 1, 2]
@@ -94,11 +154,19 @@ describe('DataModel', () => {
             });
             expected = {
                 data: [
-                    ['Rousan', 'Sumant', 'Akash'],
-                    [804882600000, 839097000000, 757535400000]
+                    [
+                        'Rousan',
+                        'Sumant',
+                        'Akash'
+                    ],
+                    [
+                        new Date(1995, 7 - 1, 5).getTime(),
+                        new Date(1996, 8 - 1, 4).getTime(),
+                        new Date(1994, 1 - 1, 3).getTime()
+                    ]
                 ],
                 schema: [
-                    { name: 'name', type: 'dimension' },
+                    { name: 'name', type: 'dimension', subtype: 'categorical' },
                     { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
                 ],
                 uids: [0, 1, 2]
@@ -117,7 +185,7 @@ describe('DataModel', () => {
             });
             expected = {
                 schema: [
-                    { name: 'name', type: 'dimension' },
+                    { name: 'name', type: 'dimension', subtype: 'categorical' },
                     { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
                 ],
                 data: [
@@ -141,7 +209,7 @@ describe('DataModel', () => {
             });
             expected = {
                 schema: [
-                    { name: 'name', type: 'dimension' },
+                    { name: 'name', type: 'dimension', subtype: 'categorical' },
                     { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
                 ],
                 data: [
@@ -161,9 +229,9 @@ describe('DataModel', () => {
                 { performance: 'decent', horsepower: 30, weight: 0.5 }
             ];
             const schema = [
-                { name: 'performance', type: 'dimension' },
-                { name: 'horsepower', type: 'measure' },
-                { name: 'weight', type: 'measure' }
+                { name: 'performance', type: 'dimension', subtype: 'categorical' },
+                { name: 'horsepower', type: 'measure', subtype: 'continuous' },
+                { name: 'weight', type: 'measure', subtype: 'continuous' }
             ];
 
             const dm = new DataModel(data, schema);
@@ -171,15 +239,18 @@ describe('DataModel', () => {
                 schema: [
                     {
                         name: 'performance',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'horsepower',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous'
                     },
                     {
                         name: 'weight',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous'
                     }
                 ],
                 data: [
@@ -194,6 +265,35 @@ describe('DataModel', () => {
             expect(dm.getData({
                 sort: [['horsepower', 'asc']]
             })).to.deep.equal(expected);
+        });
+
+        it('should add a column named uid if withUid is true', () => {
+            const schema = [
+                { name: 'name', type: 'dimension' },
+                { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
+            ];
+
+            const data = [
+                { name: 'Rousan', birthday: '1995-07-05' },
+                { name: 'Sumant', birthday: '1996-08-04' },
+                { name: 'Akash', birthday: '1994-01-03' }
+            ];
+            const dataModel = new DataModel(data, schema);
+            const expected = {
+                data: [
+                    ['Rousan', new Date(1995, 7 - 1, 5).getTime(), 0],
+                    ['Sumant', new Date(1996, 8 - 1, 4).getTime(), 1],
+                    ['Akash', new Date(1994, 1 - 1, 3).getTime(), 2]
+                ],
+                schema: [
+                    { name: 'name', type: 'dimension', subtype: 'categorical' },
+                    { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' },
+                    { name: 'uid', type: 'identifier' }
+                ],
+                uids: [0, 1, 2]
+            };
+
+            expect(dataModel.getData({ withUid: true })).to.deep.equal(expected);
         });
     });
 
@@ -220,8 +320,8 @@ describe('DataModel', () => {
                     [35, 'management']
                 ],
                 schema: [
-                    { name: 'age', type: 'measure' },
-                    { name: 'job', type: 'dimension' },
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
                 ],
                 uids: [0, 1, 2]
             };
@@ -241,8 +341,8 @@ describe('DataModel', () => {
                     ['tertiary', 'single']
                 ],
                 schema: [
-                    { name: 'education', type: 'dimension' },
-                    { name: 'marital', type: 'dimension' }
+                    { name: 'education', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
                 uids: [0, 1, 2]
             };
@@ -262,8 +362,8 @@ describe('DataModel', () => {
                     [35, 'management']
                 ],
                 schema: [
-                    { name: 'age', type: 'measure' },
-                    { name: 'job', type: 'dimension' },
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
                 ],
                 uids: [0, 1, 2]
             };
@@ -274,8 +374,8 @@ describe('DataModel', () => {
                     ['tertiary', 'single']
                 ],
                 schema: [
-                    { name: 'education', type: 'dimension' },
-                    { name: 'marital', type: 'dimension' }
+                    { name: 'education', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
                 uids: [0, 1, 2]
             };
@@ -300,8 +400,38 @@ describe('DataModel', () => {
                 expect(sch.index).to.equal(fieldMap[sch.name].index);
             });
         });
-    });
 
+        it('should make projection by matching fields with the input regexp', () => {
+            const dataModel = new DataModel(data, schema);
+            const projectedDataModel = dataModel.project([/o/g, /age/g]);
+            const expected = {
+                schema: [
+                    { name: 'education', type: 'dimension', subtype: 'categorical' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'age', type: 'measure', subtype: 'continuous' }
+                ],
+                data: [
+                    ['tertiary', 'management', 30],
+                    ['secondary', 'blue-collar', 59],
+                    ['tertiary', 'management', 35]
+                ],
+                uids: [0, 1, 2]
+            };
+
+            expect(dataModel === projectedDataModel).to.be.false;
+            expect(projectedDataModel.getData()).to.deep.equal(expected);
+        });
+
+        it('should store derivation criteria info', () => {
+            const dataModel = new DataModel(data, schema);
+
+            let projectedDataModel = dataModel.project(['age', 'job'], { saveChild: true });
+            expect(projectedDataModel.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.PROJECT);
+
+            projectedDataModel = dataModel.project(['age', 'job'], { saveChild: false });
+            expect(projectedDataModel.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.PROJECT);
+        });
+    });
 
     describe('#select', () => {
         const data = [
@@ -317,6 +447,55 @@ describe('DataModel', () => {
             { name: 'marital', type: 'dimension' }
         ];
 
+        it('should not fail with null or invalid data', () => {
+            const dataaa = [
+                { age: 30, job: 'management', marital: null },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: null, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' },
+                { age: 28, job: null, marital: 'married' },
+            ];
+            const schemaa = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
+            ];
+
+            const expData = {
+                data: [
+                    [30, 'management', DataModel.InvalidAwareTypes.NULL],
+                    [28, DataModel.InvalidAwareTypes.NULL, 'married']
+                ],
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                uids: [0, 4]
+            };
+
+            const expData2 = {
+                data: [
+                    [59, 'blue-collar', 'married'],
+                    [57, 'self-employed', 'married'],
+                    [28, DataModel.InvalidAwareTypes.NULL, 'married']
+                ],
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                uids: [1, 3, 4]
+            };
+
+            const dataModel = new DataModel(dataaa, schemaa);
+            const selectedDm = dataModel.select(fields => fields.age.value < 40);
+            const selectDm2 = dataModel.select(fields => fields.marital.value === 'married');
+
+            expect(selectDm2.getData()).to.deep.equal(expData2);
+            expect(selectedDm.getData()).to.deep.equal(expData);
+        });
+
         it('should perform normal selection', () => {
             const dataModel = new DataModel(data, schema);
             const selectedDm = dataModel.select(fields => fields.age.value < 40);
@@ -326,7 +505,11 @@ describe('DataModel', () => {
                     [35, 'management', 'single'],
                     [28, 'blue-collar', 'married']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [0, 2, 4]
             };
 
@@ -354,14 +537,22 @@ describe('DataModel', () => {
                     [57, 'self-employed', 'married'],
                     [28, 'blue-collar', 'married']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [0, 1, 3, 4]
             });
             expect(rejected).to.deep.equal({
                 data: [
                     [35, 'management', 'single']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [2]
             });
             expect(selectionAll[0].getData()).to.deep.equal(selected);
@@ -381,8 +572,8 @@ describe('DataModel', () => {
                     [35, 'management']
                 ],
                 schema: [
-                    { name: 'age', type: 'measure' },
-                    { name: 'job', type: 'dimension' },
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
                 ],
                 uids: [0, 2]
             };
@@ -397,8 +588,8 @@ describe('DataModel', () => {
                     [35, 'management']
                 ],
                 schema: [
-                    { name: 'age', type: 'measure' },
-                    { name: 'job', type: 'dimension' },
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
                 ],
                 uids: [2]
             };
@@ -416,7 +607,11 @@ describe('DataModel', () => {
                     [35, 'management', 'single'],
                     [28, 'blue-collar', 'married']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [0, 2, 4]
             };
 
@@ -426,6 +621,61 @@ describe('DataModel', () => {
             // Check The return data
             expect(selectedDm.getData()).to.deep.equal(expData);
             expect(selectedDm.getFieldspace().fields[0].domain()).to.deep.equal([28, 35]);
+        });
+
+        it('should provide appropriate arguments to the predicate function', () => {
+            const dataModel = new DataModel(data, schema);
+
+            let selectedDm = dataModel.select((fields, i, cloneProvider, store) => {
+                if (!store.clonedDm) {
+                    store.clonedDm = cloneProvider();
+                }
+                if (!store.avgAge) {
+                    store.avgAge = store.clonedDm.groupBy([''], { age: 'avg' }).getData().data[0][0];
+                }
+
+                return fields.age.value > store.avgAge;
+            });
+            let expData = {
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                data: [
+                    [59, 'blue-collar', 'married'],
+                    [57, 'self-employed', 'married']
+                ],
+                uids: [1, 3]
+            };
+
+            expect(selectedDm.getData()).to.eql(expData);
+
+            selectedDm = dataModel.select((fields, i) => i < 2);
+            expData = {
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                data: [
+                    [30, 'management', 'married'],
+                    [59, 'blue-collar', 'married']
+                ],
+                uids: [0, 1]
+            };
+
+            expect(selectedDm.getData()).to.eql(expData);
+        });
+
+        it('should store derivation criteria info', () => {
+            const dataModel = new DataModel(data, schema);
+
+            let selectedDm = dataModel.select(fields => fields.age.value < 40, { saveChild: true });
+            expect(selectedDm.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.SELECT);
+
+            selectedDm = dataModel.select(fields => fields.age.value < 40, { saveChild: false });
+            expect(selectedDm.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.SELECT);
         });
     });
 
@@ -454,7 +704,11 @@ describe('DataModel', () => {
                     [35, 'management', 'single'],
                     [30, 'management', 'married']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [0, 1, 2, 3]
             };
 
@@ -494,7 +748,11 @@ describe('DataModel', () => {
                     [30, 'management', 'married'],
                     [28, 'blue-collar', 'married']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [0, 1, 2, 3, 4, 5]
             };
             expect(sortedDm._sortingDetails).to.deep.equal([
@@ -527,10 +785,10 @@ describe('DataModel', () => {
             ]);
             const expData = {
                 schema: [
-                    { name: 'Name', type: 'dimension' },
-                    { name: 'Age', type: 'measure' },
-                    { name: 'Gender', type: 'dimension' },
-                    { name: 'Location', type: 'dimension' },
+                    { name: 'Name', type: 'dimension', subtype: 'categorical' },
+                    { name: 'Age', type: 'measure', subtype: 'continuous' },
+                    { name: 'Gender', type: 'dimension', subtype: 'categorical' },
+                    { name: 'Location', type: 'dimension', subtype: 'categorical' },
                 ],
                 data: [
                     ['Shubham', 22, 'Male', 'Kolkata'],
@@ -575,7 +833,11 @@ describe('DataModel', () => {
                     [30, 'management', 'married'],
                     [28, 'blue-collar', 'married']
                 ],
-                schema,
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
                 uids: [0, 1, 2, 3, 4, 5]
             };
             expect(sortedDm.getData()).to.deep.equal(expData);
@@ -604,9 +866,9 @@ describe('DataModel', () => {
             let sortedDm = dataModel.sort(sortingDetails);
             let expected = {
                 schema: [
-                    { name: 'performance', type: 'dimension' },
-                    { name: 'horsepower', type: 'measure' },
-                    { name: 'weight', type: 'measure' }
+                    { name: 'performance', type: 'dimension', subtype: 'categorical' },
+                    { name: 'horsepower', type: 'measure', subtype: 'continuous' },
+                    { name: 'weight', type: 'measure', subtype: 'continuous' }
                 ],
                 data: [
                     ['decent', 30, 0.5],
@@ -628,9 +890,9 @@ describe('DataModel', () => {
             sortedDm = dataModel.sort(sortingDetails);
             expected = {
                 schema: [
-                    { name: 'performance', type: 'dimension' },
-                    { name: 'horsepower', type: 'measure' },
-                    { name: 'weight', type: 'measure' }
+                    { name: 'performance', type: 'dimension', subtype: 'categorical' },
+                    { name: 'horsepower', type: 'measure', subtype: 'continuous' },
+                    { name: 'weight', type: 'measure', subtype: 'continuous' }
                 ],
                 data: [
                     ['decent', 30, 0.5],
@@ -670,11 +932,11 @@ describe('DataModel', () => {
 
             expect((dataModel1.join(dataModel2)).getData()).to.deep.equal({
                 schema: [
-                    { name: 'profit', type: 'measure' },
-                    { name: 'sales', type: 'measure' },
-                    { name: 'ModelA.city', type: 'dimension' },
-                    { name: 'population', type: 'measure' },
-                    { name: 'ModelB.city', type: 'dimension' },
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'ModelA.city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'population', type: 'measure', subtype: 'continuous' },
+                    { name: 'ModelB.city', type: 'dimension', subtype: 'categorical' },
                 ],
                 data: [
                     [10, 20, 'a', 200, 'a'],
@@ -685,27 +947,26 @@ describe('DataModel', () => {
                 uids: [0, 1, 2, 3]
             });
             expect((dataModel1.join(dataModel2,
-                (dmFields1, dmFields2) => dmFields1.city.value === dmFields2.city.value))
-                            .getData()).to.deep.equal({
-                                schema: [
-                        { name: 'profit', type: 'measure' },
-                        { name: 'sales', type: 'measure' },
-                        { name: 'ModelA.city', type: 'dimension' },
-                        { name: 'population', type: 'measure' },
-                        { name: 'ModelB.city', type: 'dimension' },
-                                ],
-                                data: [
+                (dmFields1, dmFields2) => dmFields1.city.value === dmFields2.city.value)).getData()).to.deep.equal({
+                    schema: [
+                        { name: 'profit', type: 'measure', subtype: 'continuous' },
+                        { name: 'sales', type: 'measure', subtype: 'continuous' },
+                        { name: 'ModelA.city', type: 'dimension', subtype: 'categorical' },
+                        { name: 'population', type: 'measure', subtype: 'continuous' },
+                        { name: 'ModelB.city', type: 'dimension', subtype: 'categorical' },
+                    ],
+                    data: [
                         [10, 20, 'a', 200, 'a'],
                         [15, 25, 'b', 250, 'b'],
-                                ],
-                                uids: [0, 1]
-                            });
+                    ],
+                    uids: [0, 1]
+                });
             expect((dataModel1.naturalJoin(dataModel2)).getData()).to.deep.equal({
                 schema: [
-                    { name: 'profit', type: 'measure' },
-                    { name: 'sales', type: 'measure' },
-                    { name: 'city', type: 'dimension' },
-                    { name: 'population', type: 'measure' },
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'population', type: 'measure', subtype: 'continuous' },
                 ],
                 data: [
                     [10, 20, 'a', 200],
@@ -742,15 +1003,15 @@ describe('DataModel', () => {
             const k = dataModel1.naturalJoin(dataModel2);
             expect(k.getData()).to.deep.equal({
                 schema: [
-                    { name: 'profit', type: 'measure' },
-                    { name: 'sales', type: 'measure' },
-                    { name: 'city', type: 'dimension' },
-                    { name: 'type', type: 'dimension' },
-                    { name: 'population', type: 'measure' },
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'type', type: 'dimension', subtype: 'categorical' },
+                    { name: 'population', type: 'measure', subtype: 'continuous' },
                 ],
                 data: [
-                        [10, 20, 'a', 'aa', 200],
-                        [15, 25, 'b', 'aa', 250]
+                    [10, 20, 'a', 'aa', 200],
+                    [15, 25, 'b', 'aa', 250]
                 ],
                 uids: [0, 1]
             });
@@ -783,17 +1044,69 @@ describe('DataModel', () => {
             const k = dataModel1.naturalJoin(dataModel2);
             expect(k.getData()).to.deep.equal({
                 schema: [
-                    { name: 'profit', type: 'measure' },
-                    { name: 'sales', type: 'measure' },
-                    { name: 'city', type: 'dimension' },
-                    { name: 'type', type: 'dimension' },
-                    { name: 'population', type: 'measure' },
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'type', type: 'dimension', subtype: 'categorical' },
+                    { name: 'population', type: 'measure', subtype: 'continuous' },
                 ],
                 data: [
-                        [10, 20, 'a', 'aa', 200]
+                    [10, 20, 'a', 'aa', 200]
                 ],
                 uids: [0]
             });
+        });
+
+        it('should provide appropriate arguments to the predicate function', () => {
+            const data1 = [
+                { profit: 10, sales: 20, city: 'a' },
+                { profit: 15, sales: 25, city: 'b' },
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'city', type: 'dimension' },
+            ];
+            const data2 = [
+                { population: 200, city: 'a' },
+                { population: 250, city: 'b' },
+            ];
+            const schema2 = [
+                { name: 'population', type: 'measure' },
+                { name: 'city', type: 'dimension' }
+            ];
+            const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
+            const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
+
+            const joinedDm = dataModel1.join(dataModel2, (fields1, fields2, cloneProvider1, cloneProvider2, store) => {
+                if (!store.clonedDm1) {
+                    store.clonedDm1 = cloneProvider1();
+                }
+                if (!store.clonedDm2) {
+                    store.clonedDm2 = cloneProvider2();
+                }
+                if (!store.avgPopulation) {
+                    store.avgPopulation = store.clonedDm2.groupBy([''], { population: 'avg' }).getData().data[0][0];
+                }
+
+                return (fields1.profit.value * fields1.sales.value) > store.avgPopulation;
+            });
+
+            const expected = {
+                schema: [
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'ModelA.city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'population', type: 'measure', subtype: 'continuous' },
+                    { name: 'ModelB.city', type: 'dimension', subtype: 'categorical' }
+                ],
+                data: [
+                    [15, 25, 'b', 200, 'a'],
+                    [15, 25, 'b', 250, 'b']
+                ],
+                uids: [0, 1]
+            };
+            expect(joinedDm.getData()).to.eql(expected);
         });
     });
 
@@ -828,8 +1141,8 @@ describe('DataModel', () => {
 
             expect(dataModel1.difference(dataModel2).getData()).to.deep.equal({
                 schema: [
-                    { name: 'city', type: 'dimension' },
-                    { name: 'state', type: 'dimension' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'state', type: 'dimension', subtype: 'categorical' },
                 ],
                 data: [
                     ['a', 'aa'],
@@ -839,8 +1152,8 @@ describe('DataModel', () => {
             });
             expect(dataModel1.union(dataModel2).getData()).to.deep.equal({
                 schema: [
-                    { name: 'city', type: 'dimension' },
-                    { name: 'state', type: 'dimension' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'state', type: 'dimension', subtype: 'categorical' },
                 ],
                 data: [
                     ['a', 'aa'],
@@ -855,7 +1168,47 @@ describe('DataModel', () => {
         });
     });
 
-    describe('#caclulatedVariable', () => {
+    describe('#calculateVariable', () => {
+        it('should create a calculated field with empty dependency fields', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 15, sales: 25, first: 'White', second: 'walls' },
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1);
+            const newDm = dataModel.calculateVariable({
+                name: 'Song',
+                type: 'dimension'
+            }, [i => i]);
+
+            const songData = newDm.groupBy(['Song']);
+            const expected = {
+                schema: [
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'Song', type: 'dimension', subtype: 'categorical' }
+                ],
+                data: [
+                    [10, 20, '0'],
+                    [15, 25, '1'],
+                    [10, 20, '2'],
+                    [15, 25, '3']
+                ],
+                uids: [0, 1, 2, 3]
+            };
+
+            expect(
+                songData.getData()
+            ).to.eql(expected);
+        });
+
         it('should create a calculated measure', () => {
             const data1 = [
                 { profit: 10, sales: 20, city: 'a', state: 'aa' },
@@ -869,7 +1222,7 @@ describe('DataModel', () => {
                 { name: 'city', type: 'dimension' },
                 { name: 'state', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
+            const dataModel = new DataModel(data1, schema1);
 
             const next = dataModel.project(['profit', 'sales']).select(f => +f.profit > 10);
             const child = next.calculateVariable({
@@ -889,7 +1242,7 @@ describe('DataModel', () => {
                         name: 'Efficiency'
                     }, ['profit', 'sales', (profit, sales) => profit / sales]);
                 }
-            ).to.throw('Efficiency field already exists in model.');
+            ).to.throw('Efficiency field already exists in datamodel');
         });
 
         it('should create a calculated dimension', () => {
@@ -905,7 +1258,7 @@ describe('DataModel', () => {
                 { name: 'first', type: 'dimension' },
                 { name: 'second', type: 'dimension' },
             ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
+            const dataModel = new DataModel(data1, schema1);
             const newDm = dataModel.calculateVariable({
                 name: 'Song',
                 type: 'dimension'
@@ -918,7 +1271,39 @@ describe('DataModel', () => {
             ).to.equal('Hey Jude');
         });
 
-        it('should return correct value from the callback funciton', () => {
+        it('should store derivation criteria info', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 15, sales: 25, first: 'White', second: 'walls' },
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1);
+
+            let calDm = dataModel.calculateVariable({
+                name: 'NewField',
+                type: 'dimension'
+            }, ['first', 'second', (first, second) =>
+                `${first} ${second}`
+            ], { saveChild: true });
+            expect(calDm.getDerivations()[0].op).to.equal(DM_DERIVATIVES.CAL_VAR);
+
+            calDm = dataModel.calculateVariable({
+                name: 'NewField2',
+                type: 'dimension'
+            }, ['first', 'second', (first, second) =>
+                `${first} ${second}`
+            ], { saveChild: false });
+            expect(calDm.getDerivations()[0].op).to.equal(DM_DERIVATIVES.CAL_VAR);
+        });
+
+        it('should return correct value from the callback function', () => {
             const data = [
                 { a: 10, aaa: 20, aaaa: 'd' },
                 { a: 15, aaa: 25, aaaa: 'demo' },
@@ -942,33 +1327,175 @@ describe('DataModel', () => {
             const efficiency = childData[1][childData[1].length - 1];
             expect(efficiency).to.equal(41);
         });
-    });
 
-    describe('#propagate', () => {
-        it('should propagate variables through out the dag', () => {
+        it('should provide appropriate arguments to the predicate function', () => {
             const data1 = [
-                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-                { profit: 15, sales: 25, first: 'White', second: 'walls' },
+                { profit: 10, sales: 20, city: 'a', state: 'aa' },
+                { profit: 15, sales: 25, city: 'b', state: 'bb' },
+                { profit: 10, sales: 20, city: 'a', state: 'ab' },
+                { profit: 15, sales: 25, city: 'b', state: 'ba' },
             ];
             const schema1 = [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
-                { name: 'first', type: 'dimension' },
-                { name: 'second', type: 'dimension' },
+                { name: 'city', type: 'dimension' },
+                { name: 'state', type: 'dimension' },
             ];
+            const dm = new DataModel(data1, schema1);
 
-            let projetionFlag = false;
-            let selectionFlag = false;
-            let groupByFlag = false;
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
-            const projected = dataModel.project(['profit']);
-            const selected = dataModel.select(fields => fields.profit.valueOf() > 10);
-            const grouped = dataModel.groupBy(['first']);
+            let calculatedDm = dm.calculateVariable({
+                name: 'avgProfitOffset',
+                type: 'measure'
+            }, ['profit', (profit, i, cloneProvider, store) => {
+                if (!store.clonedDm) {
+                    store.clonedDm = cloneProvider();
+                }
+                if (!store.avgProfit) {
+                    store.avgProfit = store.clonedDm.groupBy([''], { profit: 'avg' }).getData().data[0][0];
+                }
+
+                return store.avgProfit - profit;
+            }]);
+
+            let expected = {
+                schema: [
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'state', type: 'dimension', subtype: 'categorical' },
+                    { name: 'avgProfitOffset', type: 'measure', subtype: 'continuous' }
+                ],
+                data: [
+                    [10, 20, 'a', 'aa', 2.5],
+                    [15, 25, 'b', 'bb', -2.5],
+                    [10, 20, 'a', 'ab', 2.5],
+                    [15, 25, 'b', 'ba', -2.5]
+                ],
+                uids: [0, 1, 2, 3]
+            };
+
+            expect(calculatedDm.getData()).to.eql(expected);
+
+            calculatedDm = dm.calculateVariable({
+                name: 'profitIndex',
+                type: 'measure'
+            }, ['profit', (profit, i) => profit * i]);
+
+            expected = {
+                schema: [
+                    { name: 'profit', type: 'measure', subtype: 'continuous' },
+                    { name: 'sales', type: 'measure', subtype: 'continuous' },
+                    { name: 'city', type: 'dimension', subtype: 'categorical' },
+                    { name: 'state', type: 'dimension', subtype: 'categorical' },
+                    { name: 'profitIndex', type: 'measure', subtype: 'continuous' }
+                ],
+                data: [
+                    [10, 20, 'a', 'aa', 0],
+                    [15, 25, 'b', 'bb', 15],
+                    [10, 20, 'a', 'ab', 20],
+                    [15, 25, 'b', 'ba', 45]
+                ],
+                uids: [0, 1, 2, 3]
+            };
+
+            expect(calculatedDm.getData()).to.eql(expected);
+        });
+
+        it('should throw an error if invalid column name passed in function to resolve value of new variable', () => {
+            const data = [
+                {
+                    name: 'Rousan',
+                    birthday: '1995-07-05',
+                    roll: 2
+                },
+                {
+                    name: 'Sumant',
+                    birthday: '1996-08-04',
+                    roll: 89
+                }
+            ];
+            const schema = [
+                {
+                    name: 'name',
+                    type: 'dimension'
+                },
+                {
+                    name: 'birthday',
+                    type: 'dimension',
+                    subtype: 'temporal',
+                    format: '%Y-%m-%d'
+                },
+                {
+                    name: 'roll',
+                    type: 'measure',
+                    defAggFn: 'avg'
+                }
+            ];
+            const dataModel = new DataModel(data, schema);
+            const mockedFn = () =>
+                dataModel.calculateVariable({
+                    name: 'age',
+                    type: 'measure'
+                }, ['country', c => c]);
+
+            expect(mockedFn).to.throw('country is not a valid column name');
+        });
+    });
+
+    describe('#propagate', () => {
+        const data1 = [
+            { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+            { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+            { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+            { profit: 15, sales: 25, first: 'White', second: 'walls' },
+        ];
+        const schema1 = [
+            { name: 'profit', type: 'measure' },
+            { name: 'sales', type: 'measure' },
+            { name: 'first', type: 'dimension' },
+            { name: 'second', type: 'dimension' },
+        ];
+        const propModel = new DataModel([{
+            first: 'Hey',
+            second: 'Jude'
+        }], [{
+            name: 'first',
+            type: 'dimension'
+        }, {
+            name: 'second',
+            type: 'dimension'
+        }]);
+        const propModel1 = new DataModel([{
+            first: 'Hey',
+            second: 'Jude',
+            count: 100
+        }], [{
+            name: 'first',
+            type: 'dimension'
+        }, {
+            name: 'second',
+            type: 'dimension'
+        }, {
+            name: 'count',
+            type: 'measure'
+        }]);
+
+        let dataModel;
+        let projectionFlag = false;
+        let selectionFlag = false;
+        let groupByFlag = false;
+        let projected;
+        let selected;
+        let grouped;
+
+        beforeEach(() => {
+            dataModel = new DataModel(data1, schema1);
+            projected = dataModel.project(['profit']);
+            selected = dataModel.select(fields => fields.profit.valueOf() > 10);
+            grouped = dataModel.groupBy(['first']);
             // setup listeners
             projected.on('propagation', () => {
-                projetionFlag = true;
+                projectionFlag = true;
             });
             selected.on('propagation', () => {
                 selectionFlag = true;
@@ -976,174 +1503,98 @@ describe('DataModel', () => {
             grouped.on('propagation', () => {
                 groupByFlag = true;
             });
+        });
 
-            const propModel = new DataModel([{
-                first: 'Hey',
-                second: 'Jude'
-            }], [{
-                name: 'first',
-                type: 'dimension'
-            }, {
-                name: 'second',
-                type: 'dimension'
-            }]);
-
+        it('should propagate variables through out the dag', () => {
             dataModel.propagate(propModel, {
-                action: 'reaction'
-            });
+                action: 'click'
+            }, true);
+
+            // unsubscribe callbacks for propagation event
+            projected.unsubscribe('propagation');
+
             expect(
-                projetionFlag && selectionFlag && groupByFlag
+                projectionFlag && selectionFlag && groupByFlag
+            ).to.be.true;
+        });
+
+        it('should successfully unsubscribe listener on a datamodel instance', () => {
+            // unsubscribe callback
+            selected.unsubscribe('propagation');
+
+            expect(selected._onPropagation.length).to.equal(0);
+        });
+
+        it('should register a mutable action and propagate variables through the dag', () => {
+            dataModel.propagate(propModel, {
+                action: 'highlight',
+                isMutableAction: true,
+                propagateInterpolatedValues: true,
+                sourceId: 'canvas-1',
+                applyOnSource: false,
+                propagateToSource: true,
+                criteria: {
+                    first: ['White'],
+                    sales: 25
+                }
+            }, true);
+
+            // unsubscribe callbacks for propagation event
+            projected.unsubscribe('propagation');
+
+            expect(
+                projectionFlag && selectionFlag && groupByFlag
+            ).to.be.true;
+            expect(dataModel._propagationNameSpace.mutableActions).to.have.key('highlight-canvas-1');
+        });
+
+        it('should handle multiple propagations with different configs', () => {
+            dataModel.propagate(propModel1, {
+                action: 'select',
+                propagateInterpolatedValues: true,
+                sourceId: 'canvas-1',
+                applyOnSource: false,
+                criteria: propModel1
+            }, true);
+
+            dataModel.propagate(propModel1, {
+                action: 'brush',
+                isMutableAction: true,
+                propagateInterpolatedValues: true,
+                sourceId: 'canvas-12',
+                applyOnSource: false,
+                criteria: propModel1
+            }, true);
+
+            dataModel.propagate(propModel1, {
+                action: 'hover',
+                isMutableAction: true,
+                propagateInterpolatedValues: true,
+                sourceId: 'canvas-123',
+                applyOnSource: false,
+                criteria: propModel1
+            }, true);
+
+            // unsubscribe callbacks for propagation event
+            projected.unsubscribe('propagation');
+
+            expect(
+                projectionFlag && selectionFlag && groupByFlag
+            ).to.be.true;
+            expect(dataModel._propagationNameSpace.mutableActions)
+                            .to.have.keys(['brush-canvas-12', 'hover-canvas-123']);
+            expect(dataModel._propagationNameSpace.immutableActions)
+                            .to.have.key('select-canvas-1');
+        });
+
+        it('should handle propagation if null is passed as an identifier', () => {
+            dataModel.propagate(null, { action: 'reaction', criteria: null }, true);
+
+            expect(
+                projectionFlag && selectionFlag && groupByFlag
             ).to.be.true;
         });
     });
-
-
-    describe('#bin', () => {
-        it('should bin the data when buckets are given', () => {
-            const data1 = [
-                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-                { profit: 18, sales: 25, first: 'White', second: 'walls' },
-                { profit: 21, sales: 25, first: 'White', second: 'walls' },
-                { profit: 18, sales: 25, first: 'White', second: 'walls' },
-                { profit: 21, sales: 25, first: 'White', second: 'walls' }
-            ];
-            const schema1 = [
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
-                { name: 'first', type: 'dimension' },
-                { name: 'second', type: 'dimension' },
-            ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
-
-            const buckets = {
-                start: 0,
-                stops: [5, 11, 16, 20, 30]
-            };
-            const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
-            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
-            let expectedData = ['5-11', '11-16', '11-16', '11-16', '5-11', '16-20', '20-30', '16-20', '20-30'];
-            expect(fieldData).to.deep.equal(expectedData);
-        });
-        it('should bin the data when buckets are given but data value having lesser and greater value', () => {
-            const data1 = [
-                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-                { profit: 5, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 5, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-                { profit: 18, sales: 25, first: 'White', second: 'walls' },
-                { profit: 21, sales: 25, first: 'White', second: 'walls' },
-                { profit: 18, sales: 25, first: 'White', second: 'walls' },
-                { profit: 32, sales: 25, first: 'White', second: 'walls' }
-            ];
-            const schema1 = [
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
-                { name: 'first', type: 'dimension' },
-                { name: 'second', type: 'dimension' },
-            ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
-
-            const buckets = {
-                start: 10,
-                stops: [11, 16, 20, 30]
-            };
-            const bin = dataModel.bin('profit', { buckets, name: 'sumField' });
-            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
-            let expectedData = ['10-11', '5-10', '5-10', '11-16', '10-11', '16-20', '20-30', '16-20', '30-32'];
-            expect(fieldData).to.deep.equal(expectedData);
-            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().mid)
-                            .to.deep.equal([7.5, 10.5, 13.5, 18, 25, 31]);
-            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().range)
-                            .to.deep.equal([5, 10, 11, 16, 20, 30, 32]);
-        });
-        it('should bin data when num of bins given', () => {
-            const data1 = [
-                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-                { profit: 18, sales: 25, first: 'White', second: 'walls' },
-                { profit: 21, sales: 25, first: 'White', second: 'walls' },
-                { profit: 18, sales: 25, first: 'White', second: 'walls' },
-                { profit: 21, sales: 25, first: 'White', second: 'walls' },
-                { profit: 21, sales: 25, first: 'White', second: 'walls' }
-            ];
-            const schema1 = [
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
-                { name: 'first', type: 'dimension' },
-                { name: 'second', type: 'dimension' },
-            ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
-            const bin = dataModel.bin('profit', { binCount: 2, name: 'sumField' });
-            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
-            let expData = ['10-16', '10-16', '10-16', '10-16', '10-16', '16-22', '16-22', '16-22', '16-22', '16-22'];
-            expect(fieldData).to.deep.equal(expData);
-        });
-        it('should bin data when binSize is given', () => {
-            const data1 = [
-                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-                { profit: 18, sales: 25, first: 'White', second: 'walls' },
-                { profit: 21, sales: 25, first: 'White', second: 'walls' },
-                { profit: 18, sales: 25, first: 'White', second: 'walls' },
-                { profit: 21, sales: 25, first: 'White', second: 'walls' },
-                { profit: 21, sales: 25, first: 'White', second: 'walls' }
-            ];
-            const schema1 = [
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
-                { name: 'first', type: 'dimension' },
-                { name: 'second', type: 'dimension' },
-            ];
-            const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
-            const bin = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
-            let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
-            let expData = ['10-15', '15-20', '15-20', '15-20', '10-15', '15-20', '20-25', '15-20', '20-25', '20-25'];
-            expect(expData).to.deep.equal(fieldData);
-            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().mid)
-                            .to.deep.equal([12.5, 17.5, 22.5]);
-            expect(bin.getFieldspace().fields.find(field => field.name === 'sumField').bins().range)
-                            .to.deep.equal([10, 15, 20, 25]);
-        });
-        // it('should return correct bins when binned after a selct operation', () => {
-        //     const data1 = [
-        //         { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
-        //         { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-        //         { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-        //         { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
-        //         { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
-        //         { profit: 18, sales: 25, first: 'White', second: 'walls' },
-        //         { profit: 21, sales: 25, first: 'White', second: 'walls' },
-        //         { profit: 18, sales: 25, first: 'White', second: 'walls' },
-        //         { profit: 21, sales: 25, first: 'White', second: 'walls' },
-        //         { profit: 21, sales: 25, first: 'White', second: 'walls' }
-        //     ];
-        //     const schema1 = [
-        //         { name: 'profit', type: 'measure' },
-        //         { name: 'sales', type: 'measure' },
-        //         { name: 'first', type: 'dimension' },
-        //         { name: 'second', type: 'dimension' },
-        //     ];
-        //     const dataModel = new DataModel(data1, schema1, { name: 'Yo' });
-
-        //     const dm2 = dataModel.select(feild => feild.sales.value === 25);
-        //     const bin = dm2.bin('profit', { binSize: 3, name: 'sumField' }, x => x[0]);
-        //     let fieldData = bin.getFieldspace().fields.find(field => field.name === 'sumField').data;
-        //     let profitData = bin.getFieldspace().fields.find(field => field.name === 'profit').data;
-        //     expect(fieldData).to.deep.equal(profitData);
-        // });
-    });
-
     context('Aggregation function context', () => {
         const data1 = [
             { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
@@ -1178,23 +1629,62 @@ describe('DataModel', () => {
                 const childData = grouped.getData().data;
                 expect(childData[0][0]).to.equal(15);
             });
+
+            it('should not fail with null or invalid data', () => {
+                const dataaa = [
+                    { age: 30, job: 'management', marital: null },
+                    { age: 59, job: 'blue-collar', marital: 'married' },
+                    { age: null, job: 'management', marital: 'single' },
+                    { age: 28, job: 'management', marital: 'single' },
+                    { age: null, job: 'management', marital: 'complex' },
+                    { age: 57, job: 'self-employed', marital: 'married' },
+                    { age: 28, job: null, marital: 'married' },
+                ];
+                const schemaa = [
+                    { name: 'age', type: 'measure' },
+                    { name: 'job', type: 'dimension' },
+                    { name: 'marital', type: 'dimension' }
+                ];
+
+                const expData = {
+                    data: [
+                        [30, DataModel.InvalidAwareTypes.NULL],
+                        [144, 'married'],
+                        [28, 'single'],
+                        [DataModel.InvalidAwareTypes.NULL, 'complex']
+                    ],
+                    schema: [
+                        { name: 'age', type: 'measure', subtype: 'continuous' },
+                        { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                    ],
+                    uids: [0, 1, 2, 3]
+                };
+
+                const dataModel2 = new DataModel(dataaa, schemaa);
+                const groupedDm = dataModel2.groupBy(['marital']);
+                expect(groupedDm.getData()).to.deep.equal(expData);
+            });
+
             it('should group properly if def aggregation function is sum', () => {
                 const grouped = dataModel.groupBy(['first']);
                 const childData = grouped.getData().data;
                 expect(childData[0][1]).to.equal(45);
             });
+
             it('should group properly if def aggregation function is min', () => {
                 DataModel.Reducers.defaultReducer('min');
                 const grouped = dataModel.groupBy(['first']);
                 const childData = grouped.getData().data;
                 expect(childData[0][1]).to.equal(45);
             });
+
             it('should group properly if def aggregation function is changed from first to min', () => {
                 DataModel.Reducers.defaultReducer('min');
                 const grouped = dataModel.groupBy(['first']);
                 const childData = grouped.getData().data;
                 expect(childData[0][1]).to.equal(45);
             });
+
             it('should group properly if def aggregation function is changed from min to first', () => {
                 DataModel.Reducers.defaultReducer('min');
                 const grouped = dataModel.groupBy(['first'], {
@@ -1203,6 +1693,7 @@ describe('DataModel', () => {
                 const childData = grouped.getData().data;
                 expect(childData[0][1]).to.equal(45);
             });
+
             it('should Register a global aggregation', () => {
                 DataModel.Reducers.register('mySum', (arr) => {
                     const isNestedArray = arr[0] instanceof Array;
@@ -1220,13 +1711,56 @@ describe('DataModel', () => {
                 const childData = grouped.getData().data;
                 expect(childData[0][1]).to.equal(4500);
             });
+
             it('should reset default fnc', () => {
                 DataModel.Reducers.defaultReducer('sum');
                 expect(DataModel.Reducers.defaultReducer()).to.equal(DataModel.Reducers.resolve('sum'));
             });
+
+            it('should provide appropriate arguments to the aggregation function', () => {
+                const unRegisterHandle = DataModel.Reducers.register('myReducer', (vals, cloneProvider, store) => {
+                    if (!store.clonedDm) {
+                        store.clonedDm = cloneProvider();
+                    }
+                    if (!store.avgProfit) {
+                        store.avgProfit = store.clonedDm.groupBy([''], { profit: 'avg' }).getData().data[0][0];
+                    }
+
+                    return DataModel.Stats.avg(vals) - store.avgProfit;
+                });
+                const dm = new DataModel(data1, schema1);
+                const groupedDm = dm.groupBy(['first'], {
+                    profit: 'myReducer',
+                });
+
+                const expected = {
+                    schema: [
+                        { name: 'profit', type: 'measure', defAggFn: 'avg', subtype: 'continuous' },
+                        { name: 'sales', type: 'measure', subtype: 'continuous' },
+                        { name: 'first', type: 'dimension', subtype: 'categorical' }
+                    ],
+                    data: [
+                        [1.25, 45, 'Hey'],
+                        [-1.25, 45, 'White']
+                    ],
+                    uids: [0, 1]
+                };
+
+                expect(groupedDm.getData()).to.eql(expected);
+                unRegisterHandle();
+            });
+
+            it('should store derivation criteria info', () => {
+                const rootDm = new DataModel(data1, schema1);
+
+                let groupedDm = rootDm.groupBy(['first'], { profit: 'avg' }, { saveChild: true });
+                expect(groupedDm.getDerivations()[0].op).to.eql(DM_DERIVATIVES.GROUPBY);
+
+                groupedDm = rootDm.groupBy(['first'], { profit: 'avg' }, { saveChild: false });
+                expect(groupedDm.getDerivations()[0].op).to.eql(DM_DERIVATIVES.GROUPBY);
+            });
         });
     });
-
 
     context('Checking api for updating parent child relationship', () => {
         const data1 = [
@@ -1306,6 +1840,625 @@ describe('DataModel', () => {
             it('should return average for 1D Array', () => {
                 expect(DataModel.Stats.avg([10, 12, 17])).to.equal(39 / 3);
             });
+        });
+    });
+
+    describe('#getParent', () => {
+        it('should return the parent DataModel', () => {
+            const schema = [
+                    { name: 'Name', type: 'dimension' },
+                    { name: 'HorsePower', type: 'measure' },
+                    { name: 'Origin', type: 'dimension' }
+            ];
+            const data = [
+                    { Name: 'chevrolet chevelle malibu', Horsepower: 130, Origin: 'USA' },
+                    { Name: 'citroen ds-21 pallas', Horsepower: 115, Origin: 'Europe' },
+                    { Name: 'datsun pl510', Horsepower: 88, Origin: 'Japan' },
+                    { Name: 'amc rebel sst', Horsepower: 150, Origin: 'USA' },
+            ];
+            const dt = new DataModel(data, schema);
+
+            const dt2 = dt.select(fields => fields.Origin.value === 'USA');
+            expect(dt2.getParent()).to.equal(dt);
+        });
+    });
+
+    describe('#getChildren', () => {
+        it('should return the immediate child DataModels', () => {
+            const schema = [
+                   { name: 'Name', type: 'dimension' },
+                   { name: 'HorsePower', type: 'measure' },
+                   { name: 'Origin', type: 'dimension' }
+            ];
+            const data = [
+                { Name: 'chevrolet chevelle malibu', Horsepower: 130, Origin: 'USA' },
+                { Name: 'citroen ds-21 pallas', Horsepower: 115, Origin: 'Europe' },
+                { Name: 'datsun pl510', Horsepower: 88, Origin: 'Japan' },
+                { Name: 'amc rebel sst', Horsepower: 150, Origin: 'USA' },
+            ];
+            const dt = new DataModel(data, schema);
+
+            const dm1 = dt.select(fields => fields.Origin.value === 'USA');
+            const dm2 = dt.select(fields => fields.Origin.value === 'Japan');
+            const dm3 = dt.groupBy(['Origin']);
+            expect(dt.getChildren().length).to.equal(3);
+            expect(dt.getChildren()[0]).to.equal(dm1);
+            expect(dt.getChildren()[1]).to.equal(dm2);
+            expect(dt.getChildren()[2]).to.equal(dm3);
+        });
+    });
+
+    describe('#getDerivations', () => {
+        it('should return in-between derivative operations', () => {
+            const schema = [
+                   { name: 'Name', type: 'dimension' },
+                   { name: 'HorsePower', type: 'measure' },
+                   { name: 'Origin', type: 'dimension' }
+            ];
+            const data = [
+                { Name: 'chevrolet chevelle malibu', Horsepower: 130, Origin: 'USA' },
+                { Name: 'citroen ds-21 pallas', Horsepower: 115, Origin: 'Europe' },
+                { Name: 'datsun pl510', Horsepower: 88, Origin: 'Japan' },
+                { Name: 'amc rebel sst', Horsepower: 150, Origin: 'USA' },
+            ];
+            const dt = new DataModel(data, schema);
+            const dt2 = dt.select(fields => fields.Origin.value === 'USA');
+            const dt3 = dt2.groupBy(['Origin'], { HorsePower: 'avg' });
+            const derivations = dt3.getDerivations();
+            expect(Array.isArray(derivations)).to.be.true;
+            expect(derivations[0].criteria).to.deep.equal({ HorsePower: 'avg' });
+        });
+    });
+
+    describe('#detachedRoot', () => {
+        const schema = [
+            {
+                name: 'name',
+                type: 'dimension'
+            },
+            {
+                name: 'birthday',
+                type: 'dimension',
+                subtype: 'temporal',
+                format: '%Y-%m-%d'
+            },
+            {
+                name: 'roll',
+                type: 'measure'
+            }
+        ];
+
+        const data = [
+            {
+                name: 'Rousan',
+                birthday: '1995-07-05',
+                roll: 2
+            },
+            {
+                name: 'Sumant',
+                birthday: '1996-08-04',
+                roll: 89
+            },
+            {
+                name: 'Ajay',
+                birthday: '1994-01-03',
+                roll: 31
+            },
+            {
+                name: 'Sushant',
+                birthday: '1994-01-03',
+                roll: 99
+            },
+            {
+                name: 'Samim',
+                birthday: '1994-01-03',
+                roll: 12
+            },
+            {
+                name: 'Akash',
+                birthday: '1994-01-03',
+                roll: 20
+            }
+        ];
+
+        let dm;
+
+        beforeEach(() => {
+            dm = new DataModel(data, schema);
+        });
+
+        it('should return a DataModel with different namespace', () => {
+            const actualPartialFieldspace = dm.getPartialFieldspace();
+            const detachedPartialFieldspace = dm.detachedRoot().getPartialFieldspace();
+
+            expect(actualPartialFieldspace.name).not.to.equal(detachedPartialFieldspace.name);
+        });
+
+        it('should return a DataModel with same data', () => {
+            expect(dm.getData()).to.eql(dm.detachedRoot().getData());
+        });
+    });
+
+    describe('#serialize', () => {
+        const schema = [
+            {
+                name: 'name',
+                type: 'dimension'
+            },
+            {
+                name: 'birthday',
+                type: 'dimension',
+                subtype: 'temporal',
+                format: '%Y-%m-%d'
+            },
+            {
+                name: 'roll',
+                type: 'measure'
+            }
+        ];
+
+        const data = [
+            {
+                name: 'Rousan',
+                birthday: '1995-07-05',
+                roll: 2
+            },
+            {
+                name: 'Sumant',
+                birthday: '1996-08-04',
+                roll: 89
+            },
+            {
+                name: 'Ajay',
+                birthday: '1994-01-03',
+                roll: 31
+            },
+            {
+                name: 'Sushant',
+                birthday: '1994-01-03',
+                roll: 99
+            },
+            {
+                name: 'Samim',
+                birthday: '1994-01-03',
+                roll: 12
+            },
+            {
+                name: 'Akash',
+                birthday: '1994-01-03',
+                roll: 20
+            }
+        ];
+
+        let dm;
+
+        beforeEach(() => {
+            dm = new DataModel(data, schema);
+        });
+
+        it('should return json data for FlatJSON data type', () => {
+            const expected = [
+                { name: 'Rousan', birthday: '1995-07-05', roll: 2 },
+                { name: 'Sumant', birthday: '1996-08-04', roll: 89 },
+                { name: 'Ajay', birthday: '1994-01-03', roll: 31 },
+                { name: 'Sushant', birthday: '1994-01-03', roll: 99 },
+                { name: 'Samim', birthday: '1994-01-03', roll: 12 },
+                { name: 'Akash', birthday: '1994-01-03', roll: 20 }
+            ];
+
+            expect(dm.serialize(DataFormat.FLAT_JSON)).to.eql(expected);
+        });
+
+        it('should return dsv string for DSVStr data type', () => {
+            let expected = [
+                'name,birthday,roll',
+                'Rousan,1995-07-05,2',
+                'Sumant,1996-08-04,89',
+                'Ajay,1994-01-03,31',
+                'Sushant,1994-01-03,99',
+                'Samim,1994-01-03,12',
+                'Akash,1994-01-03,20'
+            ].join('\n');
+
+            expect(dm.serialize(DataFormat.DSV_STR)).to.eql(expected);
+
+            expected = [
+                'name\tbirthday\troll',
+                'Rousan\t1995-07-05\t2',
+                'Sumant\t1996-08-04\t89',
+                'Ajay\t1994-01-03\t31',
+                'Sushant\t1994-01-03\t99',
+                'Samim\t1994-01-03\t12',
+                'Akash\t1994-01-03\t20'
+            ].join('\n');
+
+            expect(dm.serialize(DataFormat.DSV_STR, { fieldSeparator: '\t' })).to.eql(expected);
+        });
+
+        it('should return dsv array for DSVArr data type', () => {
+            const expected = [
+                ['name', 'birthday', 'roll'],
+                ['Rousan', '1995-07-05', 2],
+                ['Sumant', '1996-08-04', 89],
+                ['Ajay', '1994-01-03', 31],
+                ['Sushant', '1994-01-03', 99],
+                ['Samim', '1994-01-03', 12],
+                ['Akash', '1994-01-03', 20]
+            ];
+
+            expect(dm.serialize(DataFormat.DSV_ARR)).to.eql(expected);
+        });
+
+        it('should return data in input data format if type is not specified', () => {
+            const mockedSchema = [
+                {
+                    name: 'name',
+                    type: 'dimension'
+                },
+                {
+                    name: 'birthday',
+                    type: 'dimension',
+                    subtype: 'temporal',
+                    format: '%Y-%m-%d'
+                },
+                {
+                    name: 'roll',
+                    type: 'measure'
+                }
+            ];
+            const mockedData = 'name,birthday,roll\nRousan,1995-07-05,2\nSumant,1996-08-04,89\nAjay,1994-01-03,31';
+            dm = new DataModel(mockedData, mockedSchema, { dataFormat: DataFormat.DSV_STR });
+
+            const expected = [
+                'name,birthday,roll',
+                'Rousan,1995-07-05,2',
+                'Sumant,1996-08-04,89',
+                'Ajay,1994-01-03,31'
+            ].join('\n');
+
+            expect(dm.serialize()).to.eql(expected);
+        });
+
+        it('should throw an error if data type is not supported', () => {
+            const mockedFn = () => dm.serialize('erroneous-data-type');
+            expect(mockedFn).to.throw('Data type erroneous-data-type is not supported');
+        });
+    });
+
+    describe('#getName', () => {
+        const dataModel = new DataModel([], [], { name: 'ModelA' });
+
+        it('should return user-defined name of the datamodel instance', () => {
+            expect(dataModel.getName()).to.equal('ModelA');
+        });
+    });
+
+    describe('#isEmpty', () => {
+        const data = [
+            { age: 30, job: 'unemployed', marital: 'married' },
+            { age: 33, job: 'services', marital: 'married' },
+            { age: 35, job: 'management', marital: 'single' }
+        ];
+        const schema = [
+            { name: 'age', type: 'measure' },
+            { name: 'job', type: 'dimension' },
+            { name: 'marital', type: 'dimension' },
+        ];
+        const dataModel = new DataModel([], []);
+        const dataModel1 = new DataModel(data, schema);
+
+        it('should return true if datamodel instance has no data', () => {
+            expect(dataModel.isEmpty()).to.be.true;
+        });
+        it('should return false if datamodel instance has data', () => {
+            expect(dataModel1.isEmpty()).to.be.false;
+        });
+    });
+
+    describe('#bin', () => {
+        it('should bin the data when buckets are given', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dm = new DataModel(data1, schema1);
+
+            let binnedDm = dm.bin('profit', { buckets: [0, 5, 11, 16, 20, 30], name: 'sumField' });
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
+            let expectedData = ['5-11', '11-16', '11-16', '11-16', '5-11', '16-20', '20-30', '16-20', '20-30'];
+            expect(newField.data()).to.deep.equal(expectedData);
+            expect(newField.bins()).to.deep.equal([0, 5, 11, 16, 20, 30]);
+
+            binnedDm = dm.bin('profit', { buckets: [11, 16, 20], name: 'sumField1' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField1');
+            expectedData = ['10-11', '11-16', '11-16', '11-16', '10-11', '16-20', '20-22', '16-20', '20-22'];
+            expect(newField.data()).to.deep.equal(expectedData);
+            expect(newField.bins()).to.deep.equal([10, 11, 16, 20, 22]);
+        });
+
+        it('should bin the data when data has the same value as bucket\'s start or end', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dm = new DataModel(data1, schema1);
+
+            let binnedDm = dm.bin('profit', { buckets: [10, 13, 16, 20, 30], name: 'sumField' });
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
+            let expectedData = ['10-13', '13-16', '10-13', '16-20', '20-30'];
+            expect(newField.data()).to.deep.equal(expectedData);
+            expect(newField.bins()).to.deep.equal([10, 13, 16, 20, 30]);
+
+            binnedDm = dm.bin('profit', { buckets: [1, 13, 16, 20, 21], name: 'sumField1' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField1');
+            expectedData = ['1-13', '13-16', '1-13', '16-20', '21-22'];
+            expect(newField.data()).to.deep.equal(expectedData);
+            expect(newField.bins()).to.deep.equal([1, 13, 16, 20, 21, 22]);
+        });
+
+        it('should bin data when binsCount is given', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dm = new DataModel(data1, schema1);
+
+            let binnedDm = dm.bin('profit', { binsCount: 2, name: 'sumField' });
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
+            let expData = ['10-16', '10-16', '10-16', '10-16', '10-16', '16-22', '16-22', '16-22', '16-22', '16-22'];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal([10, 16, 22]);
+
+            binnedDm = dm.bin('profit', { binsCount: 2, start: 0, name: 'sumField1' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField1');
+            expData = ['0-11', '11-22', '11-22', '11-22', '0-11', '11-22', '11-22', '11-22', '11-22', '11-22'];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal([0, 11, 22]);
+
+            binnedDm = dm.bin('profit', { binsCount: 2, start: 15, name: 'sumField2' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField2');
+            expData = ['10-16', '10-16', '10-16', '10-16', '10-16', '16-22', '16-22', '16-22', '16-22', '16-22'];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal([10, 16, 22]);
+        });
+
+        it('should bin data when binSize is given', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dm = new DataModel(data1, schema1);
+
+            let binnedDm = dm.bin('profit', { binSize: 5, start: 1, end: 100, name: 'sumField' });
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
+            let expData = ['6-11', '11-16', '11-16', '11-16', '6-11', '16-21', '21-26', '16-21', '21-26', '21-26'];
+            let expBins = [1, 6, 11, 16, 21, 26, 31, 36, 41, 46, 51, 56, 61, 66, 71, 76, 81, 86, 91, 96, 101];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal(expBins);
+
+            binnedDm = dm.bin('profit', { binSize: 5, name: 'sumField1' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField1');
+            expData = ['10-15', '15-20', '15-20', '15-20', '10-15', '15-20', '20-25', '15-20', '20-25', '20-25'];
+            expBins = [10, 15, 20, 25];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal(expBins);
+
+            binnedDm = dm.bin('profit', { binSize: 5, start: 12, end: 89, name: 'sumField2' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField2');
+            expData = ['10-15', '15-20', '15-20', '15-20', '10-15', '15-20', '20-25', '15-20', '20-25', '20-25'];
+            expBins = [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal(expBins);
+        });
+
+        it('should bin data when negative values are present', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: -18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: -21, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: -14, sales: 25, first: 'White', second: 'walls' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dm = new DataModel(data1, schema1);
+
+            let binnedDm = dm.bin('profit', { buckets: [0, 6, 12, 20], name: 'sumField' });
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
+            let expData = ['6-12', '12-20', '12-20', '12-20', '6-12', '-21-0', '20-22', '12-20', '-21-0', '20-22',
+                '-21-0'];
+            let expBins = [-21, 0, 6, 12, 20, 22];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal(expBins);
+
+            binnedDm = dm.bin('profit', { binsCount: 5, start: 1, name: 'sumField1' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField1');
+            expData = ['6-15', '15-24', '15-24', '15-24', '6-15', '-21--12', '15-24', '15-24', '-21--12', '15-24',
+                '-21--12'];
+            expBins = [-21, -12, -3, 6, 15, 24];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal(expBins);
+
+            binnedDm = dm.bin('profit', { binSize: 10, start: -1, end: 30, name: 'sumField2' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField2');
+            expData = ['9-19', '9-19', '9-19', '9-19', '9-19', '-21--11', '19-29', '9-19', '-21--11', '19-29',
+                '-21--11'];
+            expBins = [-21, -11, -1, 9, 19, 29, 39];
+            expect(newField.data()).to.deep.equal(expData);
+            expect(newField.bins()).to.deep.equal(expBins);
+        });
+
+        it('should throw an error if the binned field already exists', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, { name: 'ModelA' });
+            const mockedBinErr = () => dataModel.bin('profit', { binSize: 10, name: 'sales' });
+
+            expect(mockedBinErr).to.throw('Field sales already exists');
+        });
+
+        it('should throw an error if the source field to create a binned field does not exists', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, { name: 'ModelA' });
+            const mockedBinErr = () => dataModel.bin('name', { binSize: 10, name: 'cost' });
+
+            expect(mockedBinErr).to.throw("Field name doesn't exist");
+        });
+
+        it('should assign a name to the binned field if not passed in config', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1, { name: 'ModelA' });
+            const binnedDm = dataModel.bin('profit', { binSize: 10 });
+
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'profit_binned');
+
+            expect(newField.partialField.name).to.equal('profit_binned');
+        });
+
+        it('should handle the null data values', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: 18, sales: 25, first: 'White', second: 'walls' },
+                { profit: 21, sales: 25, first: 'White', second: 'walls' },
+                { profit: null, sales: 25, first: 'White', second: 'walls' },
+                { profit: 12, sales: 20, first: 'Here comes', second: 'the sun' },
+                { profit: null, sales: 25, first: 'Norwegian', second: 'Wood' },
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dm = new DataModel(data1, schema1);
+
+            let binnedDm = dm.bin('profit', { buckets: [0, 5, 11, 16, 20, 30], name: 'sumField' });
+            let newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField');
+            let expectedData = ['5-11', '11-16', '11-16', '5-11', '16-20', '20-30',
+                InvalidAwareTypes.NULL, '11-16', InvalidAwareTypes.NULL];
+            expect(newField.data()).to.deep.equal(expectedData);
+            expect(newField.bins()).to.deep.equal([0, 5, 11, 16, 20, 30]);
+
+            binnedDm = dm.bin('profit', { buckets: [11, 16, 20], name: 'sumField1' });
+            newField = binnedDm.getFieldspace().fields.find(field => field.name() === 'sumField1');
+            expectedData = ['10-11', '11-16', '11-16', '10-11', '16-20', '20-22',
+                InvalidAwareTypes.NULL, '11-16', InvalidAwareTypes.NULL];
+            expect(newField.data()).to.deep.equal(expectedData);
+            expect(newField.bins()).to.deep.equal([10, 11, 16, 20, 22]);
+        });
+
+        it('should store derivation criteria info', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data1, schema1);
+
+            const binnedDm = dataModel.bin('profit', { binSize: 10, name: 'BinnedField' });
+            expect(binnedDm.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.BIN);
         });
     });
 });

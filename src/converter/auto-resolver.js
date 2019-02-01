@@ -1,7 +1,7 @@
 import FlatJSON from './flat-json';
 import DSVArr from './dsv-arr';
 import DSVStr from './dsv-str';
-import { isArray, isObject, isString } from '../utils';
+import { detectDataFormat } from '../utils';
 
 /**
  * Parses the input data and detect the format automatically.
@@ -11,19 +11,14 @@ import { isArray, isObject, isString } from '../utils';
  * @return {Array.<Object>} Returns an array of headers and column major data.
  */
 function Auto (data, options) {
-    let converter;
+    const converters = { FlatJSON, DSVStr, DSVArr };
+    const dataFormat = detectDataFormat(data);
 
-    if (isString(data)) {
-        converter = DSVStr;
-    } else if (isArray(data) && isArray(data[0])) {
-        converter = DSVArr;
-    } else if (isArray(data) && (data.length === 0 || isObject(data[0]))) {
-        converter = FlatJSON;
-    } else {
+    if (!dataFormat) {
         throw new Error('Couldn\'t detect the data format');
     }
 
-    return converter(data, options);
+    return converters[dataFormat](data, options);
 }
 
 export default Auto;

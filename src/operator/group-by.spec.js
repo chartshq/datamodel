@@ -44,6 +44,7 @@ describe('Test groupBy', () => {
                 sales: defReducer,
             });
         });
+
         it('should return default reducer when no reducer is passed in parameter', () => {
             const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
             expect(getReducerObj(dataModel1, {})).to.deep.equal({
@@ -51,19 +52,25 @@ describe('Test groupBy', () => {
                 sales: defReducer,
             });
         });
+
         it('should return given reducer passed in params', () => {
-            const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
-            /**
-             * sample function
-             * @return {number} 0
-             */
-            function abc() { return 0; }
+            const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
             expect(getReducerObj(dataModel1, {
-                profit: 'sum',
-                sales: abc,
+                profit: 'avg'
             })).to.deep.equal({
-                profit: fnList.sum,
-                sales: abc,
+                profit: fnList.avg,
+                sales: defReducer,
+            });
+        });
+
+        it('should return default reducer if input reducer does not exist', () => {
+            const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
+            expect(getReducerObj(dataModel1, {
+                profit: 'unknown',
+                sales: 'avg'
+            })).to.deep.equal({
+                profit: defReducer,
+                sales: fnList.avg,
             });
         });
     });
@@ -73,13 +80,32 @@ describe('Test groupBy', () => {
             const dataModel1 = (new DataModel(data1, schema1, { name: 'ModelA' }));
             const reqData = {
                 schema: [
-                { name: 'city', type: 'dimension' },
-                { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
+                { name: 'city', type: 'dimension', subtype: 'categorical' },
+                { name: 'profit', type: 'measure', subtype: 'continuous' },
+                { name: 'sales', type: 'measure', subtype: 'continuous' },
                 ],
                 data: [
                 ['a', 20, 40],
                 ['b', 30, 50],
+                ],
+                uids: [0, 1]
+            };
+            const compData = groupBy(dataModel1, ['city']).getData();
+            expect(compData).to.deep.equal(reqData);
+        });
+
+        it('should return a grouped dataModel after projection', () => {
+            const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' })
+                .project(['city', 'sales']);
+
+            const reqData = {
+                schema: [
+                { name: 'city', type: 'dimension', subtype: 'categorical' },
+                { name: 'sales', type: 'measure', subtype: 'continuous' },
+                ],
+                data: [
+                ['a', 40],
+                ['b', 50],
                 ],
                 uids: [0, 1]
             };

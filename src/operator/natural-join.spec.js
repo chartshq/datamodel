@@ -22,7 +22,7 @@ describe('Test Natural Join', () => {
     const schema1 = [
         {
             name: 'id',
-            type: 'dimention'
+            type: 'dimension'
         },
         {
             name: 'profit',
@@ -45,7 +45,7 @@ describe('Test Natural Join', () => {
     const schema2 = [
         {
             name: 'id',
-            type: 'dimention'
+            type: 'dimension'
         },
         {
             name: 'netprofit',
@@ -74,41 +74,50 @@ describe('Test Natural Join', () => {
                 schema: [
                     {
                         name: 'id',
-                        type: 'dimention'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'profit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'sales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: 'first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: 'netprofit',
                         type: 'measure',
+                        subtype: 'continuous',
                         defAggFn: 'avg'
                     },
                     {
                         name: 'netsales',
-                        type: 'measure'
+                        type: 'measure',
+                        subtype: 'continuous',
                     },
                     {
                         name: '_first',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     },
                     {
                         name: '_second',
-                        type: 'dimension'
+                        type: 'dimension',
+                        subtype: 'categorical'
                     }
                 ],
                 data: [

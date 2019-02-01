@@ -1,14 +1,14 @@
-import { FieldType, FilteringMode } from './enums';
-import Field from './fields/field';
+import { FieldType, FilteringMode, DimensionSubtype, MeasureSubtype, DataFormat } from './enums';
 import fieldStore from './field-store';
 import Value from './value';
 import {
     rowDiffsetIterator
 } from './operator';
 import { DM_DERIVATIVES, LOGICAL_OPERATORS } from './constants';
-import createFields from './field-creator';
+import { createFields, createUnitFieldFromPartial } from './field-creator';
 import defaultConfig from './default-config';
 import * as converter from './converter';
+import { extend2, detectDataFormat } from './utils';
 
 /**
  * Prepares the selection data.
@@ -16,7 +16,7 @@ import * as converter from './converter';
 function prepareSelectionData (fields, i) {
     const resp = {};
     for (let field of fields) {
-        resp[field.name] = new Value(field.data[i], field);
+        resp[field.name()] = new Value(field.partialField.data[i], field);
     }
     return resp;
 }
@@ -30,7 +30,7 @@ export function prepareJoinData (fields) {
 export const updateFields = ([rowDiffset, colIdentifier], partialFieldspace, fieldStoreName) => {
     let collID = colIdentifier.length ? colIdentifier.split(',') : [];
     let partialFieldMap = partialFieldspace.fieldsObj();
-    let newFields = collID.map(coll => new Field(partialFieldMap[coll], rowDiffset));
+    let newFields = collID.map(coll => createUnitFieldFromPartial(partialFieldMap[coll].partialField, rowDiffset));
     return fieldStore.createNamespace(newFields, fieldStoreName);
 };
 
@@ -51,15 +51,27 @@ export const persistDerivation = (model, operation, config = {}, criteriaFn) => 
     }
 };
 
-export const selectHelper = (rowDiffset, fields, selectFn, config) => {
+export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => {
     const newRowDiffSet = [];
     let lastInsertedValue = -1;
     let { mode } = config;
     let li;
-    let checker = index => selectFn(prepareSelectionData(fields, index), index);
+    let cachedStore = {};
+    let cloneProvider = () => sourceDm.detachedRoot();
+    const selectorHelperFn = index => selectFn(
+        prepareSelectionData(fields, index),
+        index,
+        cloneProvider,
+        cachedStore
+    );
+
+    let checker;
     if (mode === FilteringMode.INVERSE) {
-        checker = index => !selectFn(prepareSelectionData(fields, index));
+        checker = index => !selectorHelperFn(index);
+    } else {
+        checker = index => selectorHelperFn(index);
     }
+
     rowDiffsetIterator(rowDiffset, (i) => {
         if (checker(i)) {
             if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
@@ -136,14 +148,13 @@ export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) =
         cloned._rowDiffset,
         cloned.getPartialFieldspace().fields,
         selectFn,
-        selectConfig
+        selectConfig,
+        sourceDm
     );
     cloned._rowDiffset = rowDiffset;
     cloned.__calculateFieldspace().calculateFieldsConfig();
-    // Store reference to child model and selector function
-    if (cloneConfig.saveChild) {
-        persistDerivation(cloned, DM_DERIVATIVES.SELECT, { config: selectConfig }, selectFn);
-    }
+
+    persistDerivation(cloned, DM_DERIVATIVES.SELECT, { config: selectConfig }, selectFn);
 
     return cloned;
 };
@@ -158,20 +169,43 @@ export const cloneWithProject = (sourceDm, projField, config, allFields) => {
     //                         .filter(coll => projectionSet.indexOf(coll) !== -1).join();
     cloned._colIdentifier = projectionSet.join(',');
     cloned.__calculateFieldspace().calculateFieldsConfig();
-    // Store reference to child model and projection fields
-    if (config.saveChild) {
-        persistDerivation(
-            cloned,
-            DM_DERIVATIVES.PROJECT,
-            { projField, config, actualProjField: projectionSet },
-            null
-        );
-    }
+
+    persistDerivation(
+        cloned,
+        DM_DERIVATIVES.PROJECT,
+        { projField, config, actualProjField: projectionSet },
+        null
+    );
 
     return cloned;
 };
 
+export const sanitizeUnitSchema = (unitSchema) => {
+    // Do deep clone of the unit schema as the user might change it later.
+    unitSchema = extend2({}, unitSchema);
+    if (!unitSchema.type) {
+        unitSchema.type = FieldType.DIMENSION;
+    }
+
+    if (!unitSchema.subtype) {
+        switch (unitSchema.type) {
+        case FieldType.MEASURE:
+            unitSchema.subtype = MeasureSubtype.CONTINUOUS;
+            break;
+        default:
+        case FieldType.DIMENSION:
+            unitSchema.subtype = DimensionSubtype.CATEGORICAL;
+            break;
+        }
+    }
+
+    return unitSchema;
+};
+
+export const sanitizeSchema = schema => schema.map(unitSchema => sanitizeUnitSchema(unitSchema));
+
 export const updateData = (relation, data, schema, options) => {
+    schema = sanitizeSchema(schema);
     options = Object.assign(Object.assign({}, defaultConfig), options);
     const converterFn = converter[options.dataFormat];
 
@@ -188,6 +222,7 @@ export const updateData = (relation, data, schema, options) => {
     // If data is provided create the default colIdentifier and rowDiffset
     relation._rowDiffset = formattedData.length && formattedData[0].length ? `0-${formattedData[0].length - 1}` : '';
     relation._colIdentifier = (schema.map(_ => _.name)).join();
+    relation._dataFormat = options.dataFormat === DataFormat.AUTO ? detectDataFormat(data) : options.dataFormat;
     return relation;
 };
 
@@ -284,16 +319,16 @@ export const getRootGroupByModel = (model) => {
 };
 
 export const getRootDataModel = (model) => {
-    if (model._parent) {
-        return getRootDataModel(model._parent);
+    while (model._parent) {
+        model = model._parent;
     }
     return model;
 };
 
 export const getPathToRootModel = (model, path = []) => {
-    if (model._parent !== null) {
+    while (model._parent) {
         path.push(model);
-        getPathToRootModel(model._parent, path);
+        model = model._parent;
     }
     return path;
 };

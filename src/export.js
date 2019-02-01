@@ -19,6 +19,7 @@ import * as Stats from './stats';
 import * as enums from './enums';
 import { DateTimeFormatter } from './utils';
 import { DataFormat, FilteringMode } from './constants';
+import InvalidAwareTypes from './invalid-aware-types';
 import pkg from '../package.json';
 
 DataModel.Operators = {
@@ -42,6 +43,7 @@ Object.assign(DataModel, enums);
 DataModel.DateTimeFormatter = DateTimeFormatter;
 DataModel.DataFormat = DataFormat;
 DataModel.FilteringMode = FilteringMode;
+DataModel.InvalidAwareTypes = InvalidAwareTypes;
 DataModel.version = pkg.version;
 
 export default DataModel;

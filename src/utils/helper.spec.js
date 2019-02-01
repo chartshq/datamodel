@@ -2,7 +2,17 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { isArray, isObject, isCallable, isString, uniqueValues, isArrEqual } from './helper';
+import {
+    isArray,
+    isObject,
+    isCallable,
+    isString,
+    uniqueValues,
+    isArrEqual,
+    detectDataFormat,
+    formatNumber
+} from './helper';
+import { DataFormat } from '../enums';
 
 describe('Utils', () => {
     describe('#isArray', () => {
@@ -77,6 +87,37 @@ describe('Utils', () => {
             expect(isArrEqual({}, {})).to.be.false;
             expect(isArrEqual(2, 2)).to.be.true;
             expect(isArrEqual(undefined, undefined)).to.be.true;
+        });
+    });
+
+    describe('#detectDataFormat', () => {
+        it('should return the correct data format for the input data', () => {
+            let data = 'a,b,c\n1,2,3\na,b,c';
+            expect(detectDataFormat(data)).is.equal(DataFormat.DSV_STR);
+
+            data = [{ a: 1, b: 2, c: 3 }, { a: 4, b: 44, c: 222 }];
+            expect(detectDataFormat(data)).is.equal(DataFormat.FLAT_JSON);
+
+            data = [];
+            expect(detectDataFormat(data)).is.equal(DataFormat.FLAT_JSON);
+
+            data = [['a', 'b', 'c'], [1, 2, 3], [44, 55, 66]];
+            expect(detectDataFormat(data)).is.equal(DataFormat.DSV_ARR);
+        });
+
+        it('should return null for invalid formatted data', () => {
+            let data = {};
+            expect(detectDataFormat(data)).is.null;
+
+            data = 222;
+            expect(detectDataFormat(data)).is.null;
+        });
+    });
+
+    describe('#formatNumber', () => {
+        it('should return the passed value as result', () => {
+            expect(formatNumber(10)).is.equal(10);
+            expect(formatNumber(-10)).is.equal(-10);
         });
     });
 });

@@ -38,6 +38,7 @@ class Relation {
             // parent datamodel was passed as part of source
             this._colIdentifier = source._colIdentifier;
             this._rowDiffset = source._rowDiffset;
+            this._dataFormat = source._dataFormat;
             this._parent = source;
             this._partialFieldspace = this._parent._partialFieldspace;
             this._fieldStoreName = getUniqueId();
@@ -74,7 +75,7 @@ class Relation {
      *      ```
      */
     getSchema () {
-        return this.getFieldspace().fields.map(d => d.schema);
+        return this.getFieldspace().fields.map(d => d.schema());
     }
 
     /**
@@ -205,17 +206,17 @@ class Relation {
     }
 
     /**
-     * {@link link_to_selection | Selection} is a row filtering operation. It expects an predicate and an optional mode
+     * {@link link_to_selection | Selection} is a row filtering operation. It expects a predicate and an optional mode
      * which control which all rows should be included in the resultant DataModel instance.
      *
-     * {@link SelectionPredicate} is a function which returns a boolean value. For selection opearation the selection
+     * {@link SelectionPredicate} is a function which returns a boolean value. For selection operation the selection
      * function is called for each row of DataModel instance with the current row passed as argument.
      *
      * After executing {@link SelectionPredicate} the rows are labeled as either an entry of selection set or an entry
      * of rejection set.
      *
      * {@link FilteringMode} operates on the selection and rejection set to determine which one would reflect in the
-     * resulatant datamodel.
+     * resultant datamodel.
      *
      * @warning
      * Selection and rejection set is only a logical idea for concept explanation purpose.
@@ -242,14 +243,13 @@ class Relation {
      *
      * @public
      *
-     * @param {SelectionPredicate} selectFn - Predicate funciton which is called for each row with the current row
-     *      ```
-     *          function (row, i)  { ... }
-     *      ```
-     * @param {Object} [config] - The configuration object to control the inclusion exclusion of a row in resultant
-     *      DataModel instance
-     * @param {FilteringMode} [config.mode=FilteringMode.NORMAL] - The mode of the selection
-     *
+     * @param {Function} selectFn - The predicate function which is called for each row with the current row.
+     * ```
+     *  function (row, i, cloneProvider, store)  { ... }
+     * ```
+     * @param {Object} config - The configuration object to control the inclusion exclusion of a row in resultant
+     * DataModel instance.
+     * @param {FilteringMode} [config.mode=FilteringMode.NORMAL] - The mode of the selection.
      * @return {DataModel} Returns the new DataModel instance(s) after operation.
      */
     select (selectFn, config) {
@@ -299,7 +299,7 @@ class Relation {
      * ];
      * const data = [];
      *
-     * const dt = new DataModel(schema, data);
+     * const dt = new DataModel(data, schema);
      * console.log(dt.isEmpty());
      *
      * @public
@@ -358,7 +358,7 @@ class Relation {
      * Selection and rejection set is only a logical idea for concept explanation purpose.
      *
      * @example
-     *  const dm = new DataModel(schema, data);
+     *  const dm = new DataModel(data, schema);
      *
      *  // with projection mode NORMAL:
      *  const normDt = dt.project(["Name", "HorsePower"]);
@@ -433,9 +433,9 @@ class Relation {
 
     calculateFieldsConfig () {
         this._fieldConfig = this._fieldspace.fields.reduce((acc, fieldDef, i) => {
-            acc[fieldDef.name] = {
+            acc[fieldDef.name()] = {
                 index: i,
-                def: { name: fieldDef._ref.name, type: fieldDef._ref.fieldType, subtype: fieldDef._ref.subType() }
+                def: { name: fieldDef.name(), type: fieldDef.type(), subtype: fieldDef.subtype() }
             };
             return acc;
         }, {});
@@ -471,7 +471,7 @@ class Relation {
      *    { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
      * ]
      *
-     * const dt = new DataModel(schema, data);
+     * const dt = new DataModel(data, schema);
      *
      * const dt2 = dt.select(fields => fields.Origin.value === "USA")
      * dt.removeChild(dt2);
@@ -498,6 +498,91 @@ class Relation {
         persistDerivation(this, DM_DERIVATIVES.COMPOSE, null, criteriaQueue);
         this._parent = parent;
         parent._children.push(this);
+    }
+
+    /**
+     * Returns the parent {@link DataModel} instance.
+     *
+     * @example
+     * const schema = [
+     *    { name: 'Name', type: 'dimension' },
+     *    { name: 'HorsePower', type: 'measure' },
+     *    { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *    { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *    { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *    { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *    { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(data, schema);
+     *
+     * const dt2 = dt.select(fields => fields.Origin.value === "USA");
+     * const parentDm = dt2.getParent();
+     *
+     * @return {DataModel} Returns the parent DataModel instance.
+     */
+    getParent () {
+        return this._parent;
+    }
+
+    /**
+     * Returns the immediate child {@link DataModel} instances.
+     *
+     * @example
+     * const schema = [
+     *    { name: 'Name', type: 'dimension' },
+     *    { name: 'HorsePower', type: 'measure' },
+     *    { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *    { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *    { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *    { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *    { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(data, schema);
+     *
+     * const childDm1 = dt.select(fields => fields.Origin.value === "USA");
+     * const childDm2 = dt.select(fields => fields.Origin.value === "Japan");
+     * const childDm3 = dt.groupBy(["Origin"]);
+     *
+     * @return {DataModel[]} Returns the immediate child DataModel instances.
+     */
+    getChildren() {
+        return this._children;
+    }
+
+    /**
+     * Returns the in-between operation meta data while creating the current {@link DataModel} instance.
+     *
+     * @example
+     * const schema = [
+     *   { name: 'Name', type: 'dimension' },
+     *   { name: 'HorsePower', type: 'measure' },
+     *   { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *   { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *   { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *   { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *   { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(data, schema);
+     * const dt2 = dt.select(fields => fields.Origin.value === "USA");
+     * const dt3 = dt2.groupBy(["Origin"]);
+     * const derivations = dt3.getDerivations();
+     *
+     * @return {Any[]} Returns the derivation meta data.
+     */
+    getDerivations() {
+        return this._derivation;
     }
 }
 

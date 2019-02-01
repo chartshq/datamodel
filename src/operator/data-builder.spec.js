@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { dataBuilder } from './data-builder';
-import createFields from '../field-creator';
+import { createFields } from '../field-creator';
 
 function avg(...nums) {
     return nums.reduce((acc, next) => acc + next, 0) / nums.length;
@@ -294,9 +294,9 @@ describe('Checking dataBuilder', () => {
                 [2, 1, 1.5, 4, 5, 0.5]
             ];
             const schema = [
-                { name: 'performance', type: 'dimension' },
-                { name: 'horsepower', type: 'measure' },
-                { name: 'weight', type: 'measure' }
+                { name: 'performance', type: 'dimension', subtype: 'categorical' },
+                { name: 'horsepower', type: 'measure', subtype: 'continuous' },
+                { name: 'weight', type: 'measure', subtype: 'continuous' }
             ];
             const fieldsArr = createFields(data, schema);
 
@@ -311,9 +311,9 @@ describe('Checking dataBuilder', () => {
             );
             let expected = {
                 schema: [
-                    { name: 'performance', type: 'dimension' },
-                    { name: 'horsepower', type: 'measure' },
-                    { name: 'weight', type: 'measure' }
+                    { name: 'performance', type: 'dimension', subtype: 'categorical' },
+                    { name: 'horsepower', type: 'measure', subtype: 'continuous' },
+                    { name: 'weight', type: 'measure', subtype: 'continuous' }
                 ],
                 data: [
                     ['decent', 30, 0.5],
@@ -340,9 +340,9 @@ describe('Checking dataBuilder', () => {
             );
             expected = {
                 schema: [
-                    { name: 'performance', type: 'dimension' },
-                    { name: 'horsepower', type: 'measure' },
-                    { name: 'weight', type: 'measure' }
+                    { name: 'performance', type: 'dimension', subtype: 'categorical' },
+                    { name: 'horsepower', type: 'measure', subtype: 'continuous' },
+                    { name: 'weight', type: 'measure', subtype: 'continuous' }
                 ],
                 data: [
                     ['decent', 30, 0.5],
