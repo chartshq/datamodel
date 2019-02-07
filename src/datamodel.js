@@ -3,6 +3,7 @@
 import { FieldType, DimensionSubtype, DataFormat } from './enums';
 import {
     persistDerivation,
+    persistAncestorDerivation,
     getRootGroupByModel,
     propagateToAllDataModels,
     getRootDataModel,
@@ -245,11 +246,13 @@ class DataModel extends Relation {
             { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() },
             reducers
         );
+        persistAncestorDerivation(this, newDataModel);
 
         if (config.saveChild) {
-            this._children.push(newDataModel);
+            newDataModel.setParent(this);
+        } else {
+            newDataModel.setParent(null);
         }
-        newDataModel._parent = this;
 
         return newDataModel;
     }
@@ -463,7 +466,7 @@ class DataModel extends Relation {
             return fieldSpec.index;
         });
 
-        const clone = this.clone();
+        const clone = this.clone(config.saveChild);
 
         const fs = clone.getFieldspace().fields;
         const suppliedFields = depFieldIndices.map(idx => fs[idx]);
@@ -480,6 +483,7 @@ class DataModel extends Relation {
         clone.addField(field);
 
         persistDerivation(clone, DM_DERIVATIVES.CAL_VAR, { config: schema, fields: depVars }, retrieveFn);
+        persistAncestorDerivation(this, clone);
 
         return clone;
     }
@@ -631,10 +635,11 @@ class DataModel extends Relation {
                 bins
             }], [binFieldName])[0];
 
-        const clone = this.clone();
+        const clone = this.clone(config.saveChild);
         clone.addField(binField);
 
         persistDerivation(clone, DM_DERIVATIVES.BIN, { measureFieldName, config, binFieldName }, null);
+        persistAncestorDerivation(this, clone);
 
         return clone;
     }
