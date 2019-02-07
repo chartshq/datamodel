@@ -89,7 +89,7 @@ export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => 
 export const cloneWithAllFields = (model) => {
     const clonedDm = model.clone(false);
     const partialFieldspace = model.getPartialFieldspace();
-    clonedDm._colIdentifier = model.partialFieldspace.fields.map(f => f.name()).join(',');
+    clonedDm._colIdentifier = partialFieldspace.fields.map(f => f.name()).join(',');
 
     // flush out cached namespace values on addition of new fields
     partialFieldspace._cachedFieldsObj = null;
@@ -262,14 +262,14 @@ export const getDerivationArguments = (derivation) => {
     operation = derivation.op;
     switch (operation) {
     case DM_DERIVATIVES.SELECT:
-        params = [derivation[0].criteria];
+        params = [derivation.criteria];
         break;
     case DM_DERIVATIVES.PROJECT:
-        params = [derivation[0].meta.actualProjField];
+        params = [derivation.meta.actualProjField];
         break;
     case DM_DERIVATIVES.GROUPBY:
         operation = 'groupBy';
-        params = [derivation[0].meta.groupByString.split(','), derivation[0].criteria];
+        params = [derivation.meta.groupByString.split(','), derivation.criteria];
         break;
     default:
         operation = null;
