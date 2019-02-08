@@ -331,6 +331,62 @@ describe('DataModel', () => {
 
             expect(dataModel.getData({ withUid: true })).to.deep.equal(expected);
         });
+
+        it('should return all field data when getAllFields is true', () => {
+            const schema = [
+                { name: 'name', type: 'dimension' },
+                { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' },
+                { name: 'roll', type: 'measure' },
+            ];
+
+            const data = [
+                { name: 'Rousan', birthday: '1995-07-05', roll: 10 },
+                { name: 'Sumant', birthday: '1996-08-04', roll: 14 },
+                { name: 'Akash', birthday: '1994-01-03', roll: 11 }
+            ];
+            const dataModel = new DataModel(data, schema);
+            const dm = dataModel.project(['name', 'roll']);
+            const expected = {
+                schema: [
+                    {
+                        name: 'name',
+                        type: 'dimension',
+                        subtype: 'categorical'
+                    },
+                    {
+                        name: 'birthday',
+                        type: 'dimension',
+                        subtype: 'temporal',
+                        format: '%Y-%m-%d'
+                    },
+                    {
+                        name: 'roll',
+                        type: 'measure',
+                        subtype: 'continuous'
+                    }
+                ],
+                data: [
+                    [
+                        'Rousan',
+                        804882600000,
+                        10
+                    ],
+                    [
+                        'Sumant',
+                        839097000000,
+                        14
+                    ],
+                    [
+                        'Akash',
+                        757535400000,
+                        11
+                    ]
+                ],
+                uids: [0, 1, 2]
+            };
+
+            expect(dm.getData({ getAllFields: true })).to.deep.equal(expected);
+        });
     });
 
     describe('#project', () => {
