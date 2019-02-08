@@ -194,5 +194,29 @@ describe('Testing compose functionality', () => {
             composedDm = nestedComposedFn2(dataModel2);
             expect(normalDm.getData()).to.deep.equal(composedDm.getData());
         });
+
+        it('should keep child-parent relationship when saveChild is true', () => {
+            const dataModel = new DataModel(data1, schema1);
+            const composedFn = compose(
+                select(fields => fields.profit.value <= 15),
+                project(['id', 'profit', 'sales']),
+            );
+
+            const dm = composedFn(dataModel, { saveChild: true });
+            expect(dm.getParent()).to.be.equal(dataModel);
+            expect(dataModel.getChildren()[0]).to.be.equal(dm);
+        });
+
+        it('should remove child-parent relationship when saveChild is false', () => {
+            const dataModel = new DataModel(data1, schema1);
+            const composedFn = compose(
+                select(fields => fields.profit.value <= 15),
+                project(['id', 'profit', 'sales']),
+            );
+
+            const dm = composedFn(dataModel, { saveChild: false });
+            expect(dm.getParent()).to.be.null;
+            expect(dataModel.getChildren().length).to.be.equal(0);
+        });
     });
 });
