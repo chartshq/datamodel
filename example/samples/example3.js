@@ -14,7 +14,8 @@ const schema = [
     {
         name: 'roll',
         type: 'measure',
-        defAggFn: "avg"
+        defAggFn: "avg",
+        as: "roll2"
     }
 ];
 
@@ -57,21 +58,18 @@ const data = [
     {
         name: 'Akash',
         birthday: '1994-01-03',
-        roll: -10
+        roll: 120
     },
     {
         name: 'Rousan',
         birthday: '1995-07-06',
-        roll: -23
+        roll: 93
     }
 ];
 
+
 const dm = new DataModel(data, schema);
-
-// const groupedDm = dm.groupBy(['name']);
-
-const groupedDm2 = dm.select(fields => fields.name.value === "Rousan");
-
+const dm2 = dm.project(["name", "roll"]);
 // const schema = [
 //     { name: 'Name', type: 'dimension' },
 //     { name: 'HorsePower', type: 'measure' },

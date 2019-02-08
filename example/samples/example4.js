@@ -1,5 +1,5 @@
 /* eslint-disable */
-d3.json('./data/cars.json', (data) => {
+d3.csv('./data/cars.csv', (data) => {
     const jsonData = data,
         schema = [{
             name: 'Name',
@@ -9,7 +9,8 @@ d3.json('./data/cars.json', (data) => {
             type: 'measure',
             unit : 'cm',
             scale: '1000',
-            numberformat: '12-3-3'
+            numberformat: '12-3-3',
+            as: "MilesPerGallon"
         }, {
             name: 'Cylinders',
             type: 'dimension'
@@ -34,17 +35,9 @@ d3.json('./data/cars.json', (data) => {
         }];
 
     const rootData = new window.DataModel(jsonData, schema);
-
-    const groupedDm = rootData.groupBy(['Origin', 'Cylinders'])
-    const binnedDm = groupedDm.bin('Miles_per_Gallon', { binsCount: 10})
+    const groupedDm = rootData.groupBy(['Origin', 'Cylinders']);
+    const binnedDm = groupedDm.bin('MilesPerGallon', { binsCount: 10});
   });
-
-  dm.calculateVariable ({
-      name: "fieldName",
-      type: "measure|dimension"
-  }, ["existingField1", "existingField2", (existingField1, existingField2) => {
-      return "operation_value"
-  }])
 
 // load('../../js/cars.csv')
 //     .then((res) => {

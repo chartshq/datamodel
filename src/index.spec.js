@@ -45,6 +45,35 @@ describe('DataModel', () => {
         });
     });
 
+    describe('#getFieldsConfig', () => {
+        it('should return all field meta info', () => {
+            const schema = [
+                { name: 'name', type: 'dimension' },
+                { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
+            ];
+
+            const data = [
+                { name: 'Rousan', birthday: '1995-07-05', roll: 12 },
+                { name: 'Sumant', birthday: '1996-08-04', roll: 89 },
+                { name: 'Akash', birthday: '1994-01-03', roll: 33 }
+            ];
+            const dataModel = new DataModel(data, schema);
+            const expected = {
+                name: {
+                    index: 0,
+                    def: { name: 'name', type: 'dimension', subtype: 'categorical' },
+                },
+                birthday: {
+                    index: 1,
+                    def: { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
+                }
+            };
+
+            expect(dataModel.getFieldsConfig()).to.be.deep.equal(expected);
+        });
+    });
+
+
     describe('#clone', () => {
         it('should make a new copy of the current DataModel instance', () => {
             const data = [
@@ -85,6 +114,26 @@ describe('DataModel', () => {
             expect(edm._rowDiffset).to.equal('');
         });
     });
+
+    context('Test for resolving schema', () => {
+        it('should take field alternative name in schema', () => {
+            const data = [
+                { age: 30, job: 'unemployed', marital_status: 'married' },
+                { age: 33, job: 'services', marital_status: 'married' },
+                { age: 35, job: 'management', marital_status: 'single' }
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital_status', type: 'dimension', as: 'marital' },
+            ];
+            const dm = new DataModel(data, schema);
+
+            expect(dm.getFieldspace().fieldsObj().marital_status).to.be.undefined;
+            expect(!!dm.getFieldspace().fieldsObj().marital).to.be.true;
+        });
+    });
+
 
     context('Test for a failing data format type', () => {
         let mockedDm = () => new DataModel([], [], { dataFormat: 'erroneous-data-type' });
