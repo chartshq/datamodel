@@ -333,7 +333,7 @@ const propagateIdentifiers = (dataModel, propModel, config = {}, propModelInf = 
 };
 
 export const getRootGroupByModel = (model) => {
-    while (model._parent && model._derivation.find(d => d.op !== 'group')) {
+    while (model._parent && model._derivation.find(d => d.op !== DM_DERIVATIVES.GROUPBY)) {
         model = model._parent;
     }
     return model;
