@@ -436,9 +436,7 @@ class Relation {
         this._parent && this._parent.removeChild(this);
         this._parent = null;
         this._children.forEach((child) => {
-            if (child._parent === this) {
-                child._parent = null;
-            }
+            child._parent = null;
         });
         this._children = [];
     }
