@@ -18,7 +18,8 @@ export const DM_DERIVATIVES = {
     GROUPBY: 'group',
     COMPOSE: 'compose',
     CAL_VAR: 'calculatedVariable',
-    BIN: 'bin'
+    BIN: 'bin',
+    SORT: 'sort'
 };
 
 export const JOINS = {

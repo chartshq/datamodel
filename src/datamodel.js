@@ -305,7 +305,13 @@ class DataModel extends Relation {
      * @param {Array.<Array>} sortingDetails - Sorting details based on which the sorting will be performed.
      * @return {DataModel} Returns a new instance of DataModel with sorted data.
      */
-    sort (sortingDetails) {
+    sort (sortingDetails, config = { saveChild: false }) {
+        if (this._sortingDetails.length) {
+            const parent = this._parent;
+            this.dispose();
+            return parent.sort(sortingDetails, config);
+        }
+
         const rawData = this.getData({
             order: 'row',
             sort: sortingDetails
@@ -315,6 +321,14 @@ class DataModel extends Relation {
 
         const sortedDm = new this.constructor(dataInCSVArr, rawData.schema, { dataFormat: 'DSVArr' });
         sortedDm._sortingDetails = sortingDetails;
+        sortedDm._derivation = [...this._derivation];
+
+        persistDerivation(sortedDm, DM_DERIVATIVES.SORT, config, sortingDetails);
+
+        if (config.saveChild) {
+            this._children.push(sortedDm);
+        }
+        sortedDm._parent = this;
         return sortedDm;
     }
 
