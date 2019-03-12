@@ -39,7 +39,7 @@ DataModel can be used if you need an in-browser tabular data store for data anal
 Insert the DataModel build into the `<head>`:
 
 ```html
-<script src="https://cdn.charts.com/lib/datamodel/latest/datamodel.js" type="text/javascript"></script>
+<script src="https://cdn.muzejs.org/lib/datamodel/latest/datamodel.js" type="text/javascript"></script>
 ```
 
 ### NPM
@@ -144,7 +144,7 @@ console.log(projectDm.getData().schema);
 
 ## Documentation
 
-Find detailed documentation and API reference from [here](https://www.charts.com/muze/docs/introduction-to-datamodel).
+Find detailed documentation and API reference from [here](https://muzejs.org/docs/introduction-to-datamodel).
 
 ## Contributing
 
