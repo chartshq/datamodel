@@ -45,6 +45,35 @@ describe('DataModel', () => {
         });
     });
 
+    describe('#getFieldsConfig', () => {
+        it('should return all field meta info', () => {
+            const schema = [
+                { name: 'name', type: 'dimension' },
+                { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
+            ];
+
+            const data = [
+                { name: 'Rousan', birthday: '1995-07-05', roll: 12 },
+                { name: 'Sumant', birthday: '1996-08-04', roll: 89 },
+                { name: 'Akash', birthday: '1994-01-03', roll: 33 }
+            ];
+            const dataModel = new DataModel(data, schema);
+            const expected = {
+                name: {
+                    index: 0,
+                    def: { name: 'name', type: 'dimension', subtype: 'categorical' },
+                },
+                birthday: {
+                    index: 1,
+                    def: { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
+                }
+            };
+
+            expect(dataModel.getFieldsConfig()).to.be.deep.equal(expected);
+        });
+    });
+
+
     describe('#clone', () => {
         it('should make a new copy of the current DataModel instance', () => {
             const data = [
@@ -121,6 +150,26 @@ describe('DataModel', () => {
             expect(edm._rowDiffset).to.equal('');
         });
     });
+
+    context('Test for resolving schema', () => {
+        it('should take field alternative name in schema', () => {
+            const data = [
+                { age: 30, job: 'unemployed', marital_status: 'married' },
+                { age: 33, job: 'services', marital_status: 'married' },
+                { age: 35, job: 'management', marital_status: 'single' }
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital_status', type: 'dimension', as: 'marital' },
+            ];
+            const dm = new DataModel(data, schema);
+
+            expect(dm.getFieldspace().fieldsObj().marital_status).to.be.undefined;
+            expect(!!dm.getFieldspace().fieldsObj().marital).to.be.true;
+        });
+    });
+
 
     context('Test for a failing data format type', () => {
         let mockedDm = () => new DataModel([], [], { dataFormat: 'erroneous-data-type' });
@@ -828,9 +877,6 @@ describe('DataModel', () => {
             };
 
             expect(sortedDm).not.to.equal(dataModel);
-            expect(sortedDm._sortingDetails).to.deep.equal([
-                ['age', 'desc']
-            ]);
             expect(sortedDm.getData()).to.deep.equal(expData);
         });
 
@@ -870,10 +916,6 @@ describe('DataModel', () => {
                 ],
                 uids: [0, 1, 2, 3, 4, 5]
             };
-            expect(sortedDm._sortingDetails).to.deep.equal([
-                ['age', 'desc'],
-                ['job'],
-            ]);
             expect(sortedDm.getData()).to.deep.equal(expData);
         });
 
@@ -1020,6 +1062,54 @@ describe('DataModel', () => {
                 uids: [0, 1, 2, 3, 4, 5]
             };
             expect(sortedDm.getData()).to.deep.equal(expected);
+        });
+
+        it('should store derivation criteria info', () => {
+            const data = [
+                { age: 30, job: 'management', marital: 'married' },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' },
+                { age: 28, job: 'blue-collar', marital: 'married' },
+                { age: 30, job: 'blue-collar', marital: 'single' },
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
+            ];
+            const rootDm = new DataModel(data, schema);
+
+            const dm = rootDm.select(fields => fields.age.value > 30);
+            const sortedDm = dm.sort([['age', 'ASC']]);
+            expect(sortedDm.getDerivations()[0].op).to.eql(DM_DERIVATIVES.SORT);
+            expect(sortedDm.getAncestorDerivations()[0].op).to.eql(DM_DERIVATIVES.SELECT);
+        });
+
+        it('should control parent-child relationships on saveChild config', () => {
+            const data = [
+                { age: 30, job: 'management', marital: 'married' },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' },
+                { age: 28, job: 'blue-collar', marital: 'married' },
+                { age: 30, job: 'blue-collar', marital: 'single' },
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
+            ];
+
+            let rootDm = new DataModel(data, schema);
+            let dm = rootDm.sort([['age', 'ASC']], { saveChild: true });
+            expect(dm.getParent()).to.be.equal(rootDm);
+            expect(rootDm.getChildren()[0]).to.be.equal(dm);
+
+            rootDm = new DataModel(data, schema);
+            dm = rootDm.sort([['age', 'ASC']], { saveChild: false });
+            expect(dm.getParent()).to.be.null;
+            expect(rootDm.getChildren().length).to.be.equal(0);
         });
     });
 

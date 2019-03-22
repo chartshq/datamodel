@@ -76,7 +76,6 @@ class DataModel extends Relation {
         super(...args);
 
         this._onPropagation = [];
-        this._sortingDetails = [];
     }
 
     /**
@@ -309,12 +308,6 @@ class DataModel extends Relation {
      * @return {DataModel} Returns a new instance of DataModel with sorted data.
      */
     sort (sortingDetails, config = { saveChild: false }) {
-        if (this._sortingDetails.length) {
-            const parent = this._parent;
-            this.dispose();
-            return parent.sort(sortingDetails, config);
-        }
-
         const rawData = this.getData({
             order: 'row',
             sort: sortingDetails
@@ -323,15 +316,16 @@ class DataModel extends Relation {
         const dataInCSVArr = [header].concat(rawData.data);
 
         const sortedDm = new this.constructor(dataInCSVArr, rawData.schema, { dataFormat: 'DSVArr' });
-        sortedDm._sortingDetails = sortingDetails;
-        sortedDm._derivation = [...this._derivation];
 
         persistDerivation(sortedDm, DM_DERIVATIVES.SORT, config, sortingDetails);
+        persistAncestorDerivation(this, sortedDm);
 
         if (config.saveChild) {
-            this._children.push(sortedDm);
+            sortedDm.setParent(this);
+        } else {
+            sortedDm.setParent(null);
         }
-        sortedDm._parent = this;
+
         return sortedDm;
     }
 

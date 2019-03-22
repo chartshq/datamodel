@@ -219,6 +219,18 @@ export const sanitizeUnitSchema = (unitSchema) => {
 
 export const sanitizeSchema = schema => schema.map(unitSchema => sanitizeUnitSchema(unitSchema));
 
+export const resolveFieldName = (schema, dataHeader) => {
+    schema.forEach((unitSchema) => {
+        const fieldNameAs = unitSchema.as;
+        if (!fieldNameAs) { return; }
+
+        const idx = dataHeader.indexOf(unitSchema.name);
+        dataHeader[idx] = fieldNameAs;
+        unitSchema.name = fieldNameAs;
+        delete unitSchema.as;
+    });
+};
+
 export const updateData = (relation, data, schema, options) => {
     schema = sanitizeSchema(schema);
     options = Object.assign(Object.assign({}, defaultConfig), options);
@@ -229,6 +241,7 @@ export const updateData = (relation, data, schema, options) => {
     }
 
     const [header, formattedData] = converterFn(data, options);
+    resolveFieldName(schema, header);
     const fieldArr = createFields(formattedData, schema, header);
 
     // This will create a new fieldStore with the fields

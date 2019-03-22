@@ -415,10 +415,10 @@ class Relation {
     }
 
     calculateFieldsConfig () {
-        this._fieldConfig = this._fieldspace.fields.reduce((acc, fieldDef, i) => {
-            acc[fieldDef.name()] = {
+        this._fieldConfig = this._fieldspace.fields.reduce((acc, fieldObj, i) => {
+            acc[fieldObj.name()] = {
                 index: i,
-                def: { name: fieldDef.name(), type: fieldDef.type(), subtype: fieldDef.subtype() }
+                def: fieldObj.schema(),
             };
             return acc;
         }, {});
