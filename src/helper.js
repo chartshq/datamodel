@@ -35,20 +35,20 @@ export const updateFields = ([rowDiffset, colIdentifier], partialFieldspace, fie
 };
 
 export const persistDerivation = (model, operation, config = {}, criteriaFn) => {
-    let derivative;
-    if (operation !== DM_DERIVATIVES.COMPOSE) {
-        derivative = {
+    if (operation === DM_DERIVATIVES.COMPOSE) {
+        model._derivation.length = 0;
+        model._derivation.push(...criteriaFn);
+    } else {
+        model._derivation.push({
             op: operation,
             meta: config,
             criteria: criteriaFn
-        };
-        model._derivation.push(derivative);
+        });
     }
-    else {
-        derivative = [...criteriaFn];
-        model._derivation.length = 0;
-        model._derivation.push(...derivative);
-    }
+};
+
+export const persistAncestorDerivation = (sourceDm, newDm) => {
+    newDm._ancestorDerivation.push(...sourceDm._ancestorDerivation, ...sourceDm._derivation);
 };
 
 export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => {
@@ -84,6 +84,20 @@ export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => 
         }
     });
     return newRowDiffSet.join(',');
+};
+
+export const cloneWithAllFields = (model) => {
+    const clonedDm = model.clone(false);
+    const partialFieldspace = model.getPartialFieldspace();
+    clonedDm._colIdentifier = partialFieldspace.fields.map(f => f.name()).join(',');
+
+    // flush out cached namespace values on addition of new fields
+    partialFieldspace._cachedFieldsObj = null;
+    partialFieldspace._cachedDimension = null;
+    partialFieldspace._cachedMeasure = null;
+    clonedDm.__calculateFieldspace().calculateFieldsConfig();
+
+    return clonedDm;
 };
 
 export const filterPropagationModel = (model, propModels, config = {}) => {
@@ -127,13 +141,12 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
 
     let filteredModel;
     if (operation === LOGICAL_OPERATORS.AND) {
-        const clonedModel = model.clone(false, false);
-        filteredModel = clonedModel.select(fields => fns.every(fn => fn(fields)), {
+        filteredModel = cloneWithAllFields(model).select(fields => fns.every(fn => fn(fields)), {
             saveChild: false,
             mode: FilteringMode.ALL
         });
     } else {
-        filteredModel = model.clone(false, false).select(fields => fns.some(fn => fn(fields)), {
+        filteredModel = cloneWithAllFields(model).select(fields => fns.some(fn => fn(fields)), {
             mode: FilteringMode.ALL,
             saveChild: false
         });
@@ -155,6 +168,7 @@ export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) =
     cloned.__calculateFieldspace().calculateFieldsConfig();
 
     persistDerivation(cloned, DM_DERIVATIVES.SELECT, { config: selectConfig }, selectFn);
+    persistAncestorDerivation(sourceDm, cloned);
 
     return cloned;
 };
@@ -176,6 +190,7 @@ export const cloneWithProject = (sourceDm, projField, config, allFields) => {
         { projField, config, actualProjField: projectionSet },
         null
     );
+    persistAncestorDerivation(sourceDm, cloned);
 
     return cloned;
 };
@@ -241,26 +256,23 @@ export const fieldInSchema = (schema, field) => {
 };
 
 
-export const getOperationArguments = (child) => {
-    const derivation = child._derivation;
+export const getDerivationArguments = (derivation) => {
     let params = [];
     let operation;
-    if (derivation && derivation.length === 1) {
-        operation = derivation[0].op;
-        switch (operation) {
-        case DM_DERIVATIVES.SELECT:
-            params = [derivation[0].criteria];
-            break;
-        case DM_DERIVATIVES.PROJECT:
-            params = [derivation[0].meta.actualProjField];
-            break;
-        case DM_DERIVATIVES.GROUPBY:
-            operation = 'groupBy';
-            params = [derivation[0].meta.groupByString.split(','), derivation[0].criteria];
-            break;
-        default:
-            break;
-        }
+    operation = derivation.op;
+    switch (operation) {
+    case DM_DERIVATIVES.SELECT:
+        params = [derivation.criteria];
+        break;
+    case DM_DERIVATIVES.PROJECT:
+        params = [derivation.meta.actualProjField];
+        break;
+    case DM_DERIVATIVES.GROUPBY:
+        operation = 'groupBy';
+        params = [derivation.meta.groupByString.split(','), derivation.criteria];
+        break;
+    default:
+        operation = null;
     }
 
     return {
@@ -270,17 +282,26 @@ export const getOperationArguments = (child) => {
 };
 
 const applyExistingOperationOnModel = (propModel, dataModel) => {
-    const { operation, params } = getOperationArguments(dataModel);
+    const derivations = dataModel.getDerivations();
     let selectionModel = propModel[0];
     let rejectionModel = propModel[1];
-    if (operation && params.length) {
-        selectionModel = propModel[0][operation](...params, {
-            saveChild: false
-        });
-        rejectionModel = propModel[1][operation](...params, {
-            saveChild: false
-        });
-    }
+
+    derivations.forEach((derivation) => {
+        if (!derivation) {
+            return;
+        }
+
+        const { operation, params } = getDerivationArguments(derivation);
+        if (operation) {
+            selectionModel = selectionModel[operation](...params, {
+                saveChild: false
+            });
+            rejectionModel = rejectionModel[operation](...params, {
+                saveChild: false
+            });
+        }
+    });
+
     return [selectionModel, rejectionModel];
 };
 
@@ -312,8 +333,8 @@ const propagateIdentifiers = (dataModel, propModel, config = {}, propModelInf = 
 };
 
 export const getRootGroupByModel = (model) => {
-    if (model._parent && model._derivation.find(d => d.op !== 'group')) {
-        return getRootGroupByModel(model._parent);
+    while (model._parent && model._derivation.find(d => d.op !== DM_DERIVATIVES.GROUPBY)) {
+        model = model._parent;
     }
     return model;
 };
