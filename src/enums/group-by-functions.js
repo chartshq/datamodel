@@ -1,4 +1,10 @@
-export const GROUP_BY_FUNCTIONS = {
+/**
+ * Group by function names
+ *
+ * @readonly
+ * @enum {string}
+ */
+const GROUP_BY_FUNCTIONS = {
     SUM: 'sum',
     AVG: 'avg',
     MIN: 'min',
@@ -8,3 +14,5 @@ export const GROUP_BY_FUNCTIONS = {
     COUNT: 'count',
     STD: 'std'
 };
+
+export default GROUP_BY_FUNCTIONS;
