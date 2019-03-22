@@ -1,7 +1,8 @@
 import { isArray } from '../utils';
 import InvalidAwareTypes from '../invalid-aware-types';
+import { GROUP_BY_FUNCTIONS } from '../enums';
 
-
+const { SUM, AVG, FIRST, LAST, COUNT, STD, MIN, MAX } = GROUP_BY_FUNCTIONS;
 function getFilteredValues(arr) {
     return arr.filter(item => !(item instanceof InvalidAwareTypes));
 }
@@ -134,17 +135,17 @@ function std (arr) {
 
 
 const fnList = {
-    sum,
-    avg,
-    min,
-    max,
-    first,
-    last,
-    count,
-    std
+    [SUM]: sum,
+    [AVG]: avg,
+    [MIN]: min,
+    [MAX]: max,
+    [FIRST]: first,
+    [LAST]: last,
+    [COUNT]: count,
+    [STD]: std
 };
 
-const defaultReducerName = 'sum';
+const defaultReducerName = SUM;
 
 export {
     defaultReducerName,
