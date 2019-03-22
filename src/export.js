@@ -22,7 +22,7 @@ import { DataFormat, FilteringMode, DM_DERIVATIVES } from './constants';
 import InvalidAwareTypes from './invalid-aware-types';
 import pkg from '../package.json';
 
-DataModel.Operators = {
+const Operators = {
     compose,
     bin,
     select,
@@ -38,12 +38,17 @@ DataModel.Operators = {
     fullOuterJoin,
     union
 };
-DataModel.Stats = Stats;
-Object.assign(DataModel, enums, { DM_DERIVATIVES });
-DataModel.DateTimeFormatter = DateTimeFormatter;
-DataModel.DataFormat = DataFormat;
-DataModel.FilteringMode = FilteringMode;
-DataModel.InvalidAwareTypes = InvalidAwareTypes;
-DataModel.version = pkg.version;
+
+const version = pkg.version;
+Object.assign(DataModel, {
+    Operators,
+    Stats,
+    DM_DERIVATIVES,
+    DateTimeFormatter,
+    DataFormat,
+    FilteringMode,
+    InvalidAwareTypes,
+    version
+}, enums);
 
 export default DataModel;
