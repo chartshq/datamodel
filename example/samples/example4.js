@@ -1,17 +1,57 @@
-const data = [
-    { age: 30, job: 'management', marital: 'married' },
-    { age: 59, job: 'blue-collar', marital: 'married' },
-    { age: 35, job: 'management', marital: 'single' },
-    { age: 57, job: 'self-employed', marital: 'married' },
-    { age: 28, job: 'blue-collar', marital: 'married' },
-    { age: 30, job: 'blue-collar', marital: 'single' },
-];
-const schema = [
-    { name: 'age', type: 'measure' },
-    { name: 'job', type: 'dimension' },
-    { name: 'marital', type: 'dimension' }
-];
-const rootDm = new DataModel(data, schema);
+/* eslint-disable */
 
-const dm = rootDm.select(fields => fields.age.value > 30);
-const sortedDm = dm.sort([['age', 'ASC']]);
+d3.json('./data/cars.json', (data) => {
+    const jsonData = data,
+        schema = [
+            {
+                "name": "Name",
+                "type": "dimension"
+            },
+            {
+                "name": "Maker",
+                "type": "dimension"
+            },
+            {
+                "name": "Miles_per_Gallon",
+                "type": "measure",
+                "defAggFn": "avg"
+            },
+            {
+                "name": "Displacement",
+                "type": "measure",
+                "subtype": "continuous",
+                "defAggFn": "max"
+            },
+            {
+                "name": "Horsepower",
+                "type": "measure",
+                "defAggFn": "avg"
+            },
+            {
+                "name": "Weight_in_lbs",
+                "type": "measure",
+                "defAggFn": "min"
+            },
+            {
+                "name": "Acceleration",
+                "type": "measure",
+                "defAggFn": "avg"
+            },
+            {
+                "name": "Origin",
+                "type": "dimension"
+            },
+            {
+                "name": "Cylinders",
+                "type": "dimension"
+            },
+            {
+                "name": "Year",
+                "type": "dimension",
+                "subtype": "temporal",
+                "format": "%Y-%m-%d"
+            }
+        ]
+
+    dm = new DataModel(jsonData, schema);
+});
