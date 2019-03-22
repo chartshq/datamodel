@@ -3,6 +3,7 @@ import InvalidAwareTypes from '../invalid-aware-types';
 import { GROUP_BY_FUNCTIONS } from '../enums';
 
 const { SUM, AVG, FIRST, LAST, COUNT, STD, MIN, MAX } = GROUP_BY_FUNCTIONS;
+
 function getFilteredValues(arr) {
     return arr.filter(item => !(item instanceof InvalidAwareTypes));
 }

@@ -17,6 +17,7 @@ import {
 } from './operator';
 import * as Stats from './stats';
 import * as enums from './enums';
+import { DM_DERIVATIVES } from './constants';
 import { DateTimeFormatter } from './utils';
 import { DataFormat, FilteringMode } from './constants';
 import InvalidAwareTypes from './invalid-aware-types';
@@ -39,7 +40,7 @@ DataModel.Operators = {
     union
 };
 DataModel.Stats = Stats;
-Object.assign(DataModel, enums);
+Object.assign(DataModel, enums, { DM_DERIVATIVES });
 DataModel.DateTimeFormatter = DateTimeFormatter;
 DataModel.DataFormat = DataFormat;
 DataModel.FilteringMode = FilteringMode;
