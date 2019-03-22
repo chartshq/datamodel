@@ -17,9 +17,8 @@ import {
 } from './operator';
 import * as Stats from './stats';
 import * as enums from './enums';
-import { DM_DERIVATIVES } from './constants';
 import { DateTimeFormatter } from './utils';
-import { DataFormat, FilteringMode } from './constants';
+import { DataFormat, FilteringMode, DM_DERIVATIVES } from './constants';
 import InvalidAwareTypes from './invalid-aware-types';
 import pkg from '../package.json';
 
