@@ -1,4 +1,4 @@
-import { persistDerivation, persistAncestorDerivation } from '../helper';
+import { persistDerivations } from '../helper';
 import { DM_DERIVATIVES } from '../constants';
 
 /**
@@ -231,10 +231,15 @@ export const compose = (...operations) =>
             firstChild.dispose();
         }
 
-        persistDerivation(currentDM, DM_DERIVATIVES.COMPOSE, null, derivations);
         // reset all ancestorDerivation saved in-between compose
         currentDM._ancestorDerivation = [];
-        persistAncestorDerivation(dm, currentDM);
+        persistDerivations(
+            dm,
+            currentDM,
+            DM_DERIVATIVES.COMPOSE,
+            null,
+            derivations
+        );
 
         if (config.saveChild) {
             currentDM.setParent(dm);

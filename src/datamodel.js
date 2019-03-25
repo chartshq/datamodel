@@ -2,8 +2,7 @@
 
 import { FieldType, DimensionSubtype, DataFormat } from './enums';
 import {
-    persistDerivation,
-    persistAncestorDerivation,
+    persistDerivations,
     getRootGroupByModel,
     propagateToAllDataModels,
     getRootDataModel,
@@ -239,13 +238,13 @@ class DataModel extends Relation {
         let params = [this, fieldsArr, reducers];
         const newDataModel = groupBy(...params);
 
-        persistDerivation(
+        persistDerivations(
+            this,
             newDataModel,
             DM_DERIVATIVES.GROUPBY,
             { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() },
             reducers
         );
-        persistAncestorDerivation(this, newDataModel);
 
         if (config.saveChild) {
             newDataModel.setParent(this);
@@ -317,8 +316,13 @@ class DataModel extends Relation {
 
         const sortedDm = new this.constructor(dataInCSVArr, rawData.schema, { dataFormat: 'DSVArr' });
 
-        persistDerivation(sortedDm, DM_DERIVATIVES.SORT, config, sortingDetails);
-        persistAncestorDerivation(this, sortedDm);
+        persistDerivations(
+            this,
+            sortedDm,
+            DM_DERIVATIVES.SORT,
+            config,
+            sortingDetails
+        );
 
         if (config.saveChild) {
             sortedDm.setParent(this);
@@ -490,8 +494,13 @@ class DataModel extends Relation {
         const [field] = createFields([computedValues], [schema], [schema.name]);
         clone.addField(field);
 
-        persistDerivation(clone, DM_DERIVATIVES.CAL_VAR, { config: schema, fields: depVars }, retrieveFn);
-        persistAncestorDerivation(this, clone);
+        persistDerivations(
+            this,
+            clone,
+            DM_DERIVATIVES.CAL_VAR,
+            { config: schema, fields: depVars },
+            retrieveFn
+        );
 
         return clone;
     }
@@ -646,8 +655,13 @@ class DataModel extends Relation {
         const clone = this.clone(config.saveChild);
         clone.addField(binField);
 
-        persistDerivation(clone, DM_DERIVATIVES.BIN, { measureFieldName, config, binFieldName }, null);
-        persistAncestorDerivation(this, clone);
+        persistDerivations(
+            this,
+            clone,
+            DM_DERIVATIVES.BIN,
+             { measureFieldName, config, binFieldName },
+             null
+        );
 
         return clone;
     }
