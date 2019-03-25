@@ -1,5 +1,5 @@
 /* global beforeEach, describe, it, context */
-/* eslint-disable no-unused-expressions */
+/* eslint-disable no-unused-expressions, no-new */
 
 import { expect } from 'chai';
 import { FilteringMode, DataFormat } from './enums';
@@ -13,6 +13,39 @@ function avg(...nums) {
 }
 
 describe('DataModel', () => {
+    describe('#Constructor', () => {
+        it('should validate schema before use', () => {
+            const data = [
+                { age: 30, job: 'unemployed', marital: null },
+                { age: 'Age', job: 'services', marital: 'married' },
+                { age: 22, job: undefined, marital: 'single' }
+            ];
+            let schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'un-supported-type' },
+            ];
+            const mockedFn = () => {
+                new DataModel(data, schema);
+            };
+            expect(mockedFn).to.throw();
+
+            schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension', subtype: 'invalid-subtype' },
+            ];
+            expect(mockedFn).to.throw();
+
+            schema = [
+                { name: 'age', type: 'measure', subtype: 'invalid-subtype' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' },
+            ];
+            expect(mockedFn).to.throw();
+        });
+    });
+
     describe('#version', () => {
         it('should be same to the version value specified in package.json file', () => {
             expect(DataModel.version).to.equal(pkg.version);

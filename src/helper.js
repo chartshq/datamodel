@@ -227,7 +227,37 @@ export const sanitizeUnitSchema = (unitSchema) => {
     return unitSchema;
 };
 
-export const sanitizeSchema = schema => schema.map(unitSchema => sanitizeUnitSchema(unitSchema));
+export const validateUnitSchema = (unitSchema) => {
+    const supportedMeasureSubTypes = [MeasureSubtype.CONTINUOUS];
+    const supportedDimSubTypes = [
+        DimensionSubtype.CATEGORICAL,
+        DimensionSubtype.BINNED,
+        DimensionSubtype.TEMPORAL,
+        DimensionSubtype.GEO
+    ];
+    const { type, subtype } = unitSchema;
+
+    switch (type) {
+    case FieldType.DIMENSION:
+        if (supportedDimSubTypes.indexOf(subtype) === -1) {
+            throw new Error(`DataModel doesn't support field subtype: ${subtype}`);
+        }
+        break;
+    case FieldType.MEASURE:
+        if (supportedMeasureSubTypes.indexOf(subtype) === -1) {
+            throw new Error(`DataModel doesn't support field subtype: ${subtype}`);
+        }
+        break;
+    default:
+        throw new Error(`DataModel doesn't support field type: ${type}`);
+    }
+};
+
+export const sanitizeAndValidateSchema = schema => schema.map((unitSchema) => {
+    unitSchema = sanitizeUnitSchema(unitSchema);
+    validateUnitSchema(unitSchema);
+    return unitSchema;
+});
 
 export const resolveFieldName = (schema, dataHeader) => {
     schema.forEach((unitSchema) => {
@@ -242,7 +272,7 @@ export const resolveFieldName = (schema, dataHeader) => {
 };
 
 export const updateData = (relation, data, schema, options) => {
-    schema = sanitizeSchema(schema);
+    schema = sanitizeAndValidateSchema(schema);
     options = Object.assign(Object.assign({}, defaultConfig), options);
     const converterFn = converter[options.dataFormat];
 
