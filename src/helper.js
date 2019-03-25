@@ -34,7 +34,7 @@ export const updateFields = ([rowDiffset, colIdentifier], partialFieldspace, fie
     return fieldStore.createNamespace(newFields, fieldStoreName);
 };
 
-export const persistDerivation = (model, operation, config = {}, criteriaFn) => {
+export const persistCurrentDerivation = (model, operation, config = {}, criteriaFn) => {
     if (operation === DM_DERIVATIVES.COMPOSE) {
         model._derivation.length = 0;
         model._derivation.push(...criteriaFn);
@@ -49,6 +49,11 @@ export const persistDerivation = (model, operation, config = {}, criteriaFn) => 
 
 export const persistAncestorDerivation = (sourceDm, newDm) => {
     newDm._ancestorDerivation.push(...sourceDm._ancestorDerivation, ...sourceDm._derivation);
+};
+
+export const persistDerivations = (sourceDm, model, operation, config = {}, criteriaFn) => {
+    persistCurrentDerivation(model, operation, config, criteriaFn);
+    persistAncestorDerivation(sourceDm, model);
 };
 
 export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => {
@@ -167,8 +172,13 @@ export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) =
     cloned._rowDiffset = rowDiffset;
     cloned.__calculateFieldspace().calculateFieldsConfig();
 
-    persistDerivation(cloned, DM_DERIVATIVES.SELECT, { config: selectConfig }, selectFn);
-    persistAncestorDerivation(sourceDm, cloned);
+    persistDerivations(
+        sourceDm,
+        cloned,
+        DM_DERIVATIVES.SELECT,
+         { config: selectConfig },
+          selectFn
+    );
 
     return cloned;
 };
@@ -184,13 +194,13 @@ export const cloneWithProject = (sourceDm, projField, config, allFields) => {
     cloned._colIdentifier = projectionSet.join(',');
     cloned.__calculateFieldspace().calculateFieldsConfig();
 
-    persistDerivation(
+    persistDerivations(
+        sourceDm,
         cloned,
         DM_DERIVATIVES.PROJECT,
         { projField, config, actualProjField: projectionSet },
         null
     );
-    persistAncestorDerivation(sourceDm, cloned);
 
     return cloned;
 };
