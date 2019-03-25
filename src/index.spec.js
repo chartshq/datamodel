@@ -1,5 +1,5 @@
 /* global beforeEach, describe, it, context */
-/* eslint-disable no-unused-expressions */
+/* eslint-disable no-unused-expressions, no-new */
 
 import { expect } from 'chai';
 import { FilteringMode, DataFormat } from './enums';
@@ -13,6 +13,39 @@ function avg(...nums) {
 }
 
 describe('DataModel', () => {
+    describe('#Constructor', () => {
+        it('should validate schema before use', () => {
+            const data = [
+                { age: 30, job: 'unemployed', marital: null },
+                { age: 'Age', job: 'services', marital: 'married' },
+                { age: 22, job: undefined, marital: 'single' }
+            ];
+            let schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'un-supported-type' },
+            ];
+            const mockedFn = () => {
+                new DataModel(data, schema);
+            };
+            expect(mockedFn).to.throw();
+
+            schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension', subtype: 'invalid-subtype' },
+            ];
+            expect(mockedFn).to.throw();
+
+            schema = [
+                { name: 'age', type: 'measure', subtype: 'invalid-subtype' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' },
+            ];
+            expect(mockedFn).to.throw();
+        });
+    });
+
     describe('#version', () => {
         it('should be same to the version value specified in package.json file', () => {
             expect(DataModel.version).to.equal(pkg.version);
@@ -45,6 +78,35 @@ describe('DataModel', () => {
         });
     });
 
+    describe('#getFieldsConfig', () => {
+        it('should return all field meta info', () => {
+            const schema = [
+                { name: 'name', type: 'dimension' },
+                { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
+            ];
+
+            const data = [
+                { name: 'Rousan', birthday: '1995-07-05', roll: 12 },
+                { name: 'Sumant', birthday: '1996-08-04', roll: 89 },
+                { name: 'Akash', birthday: '1994-01-03', roll: 33 }
+            ];
+            const dataModel = new DataModel(data, schema);
+            const expected = {
+                name: {
+                    index: 0,
+                    def: { name: 'name', type: 'dimension', subtype: 'categorical' },
+                },
+                birthday: {
+                    index: 1,
+                    def: { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
+                }
+            };
+
+            expect(dataModel.getFieldsConfig()).to.be.deep.equal(expected);
+        });
+    });
+
+
     describe('#clone', () => {
         it('should make a new copy of the current DataModel instance', () => {
             const data = [
@@ -66,6 +128,42 @@ describe('DataModel', () => {
             expect(cloneRelation._colIdentifier).to.equal(dataModel._colIdentifier);
             expect(cloneRelation._rowDiffset).to.equal(dataModel._rowDiffset);
         });
+
+        it('should set parent-child relationship when saveChild is true', () => {
+            const data = [
+                { age: 30, job: 'unemployed', marital: 'married' },
+                { age: 33, job: 'services', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' }
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data, schema);
+
+            const cloneDm = dataModel.clone(true);
+            expect(cloneDm.getParent()).to.be.equal(dataModel);
+            expect(dataModel.getChildren()[0]).to.be.equal(cloneDm);
+        });
+
+        it('should remove parent-child relationship when saveChild is false', () => {
+            const data = [
+                { age: 30, job: 'unemployed', marital: 'married' },
+                { age: 33, job: 'services', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' }
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data, schema);
+
+            const cloneDm = dataModel.clone(false);
+            expect(cloneDm.getParent()).to.be.null;
+            expect(dataModel.getChildren().length).to.be.equal(0);
+        });
     });
 
     context('Test for empty DataModel', () => {
@@ -85,6 +183,26 @@ describe('DataModel', () => {
             expect(edm._rowDiffset).to.equal('');
         });
     });
+
+    context('Test for resolving schema', () => {
+        it('should take field alternative name in schema', () => {
+            const data = [
+                { age: 30, job: 'unemployed', marital_status: 'married' },
+                { age: 33, job: 'services', marital_status: 'married' },
+                { age: 35, job: 'management', marital_status: 'single' }
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital_status', type: 'dimension', as: 'marital' },
+            ];
+            const dm = new DataModel(data, schema);
+
+            expect(dm.getFieldspace().fieldsObj().marital_status).to.be.undefined;
+            expect(!!dm.getFieldspace().fieldsObj().marital).to.be.true;
+        });
+    });
+
 
     context('Test for a failing data format type', () => {
         let mockedDm = () => new DataModel([], [], { dataFormat: 'erroneous-data-type' });
@@ -295,6 +413,63 @@ describe('DataModel', () => {
 
             expect(dataModel.getData({ withUid: true })).to.deep.equal(expected);
         });
+
+        it('should return all field data when getAllFields is true', () => {
+            const data = [
+                { age: 30, job: 'unemployed', marital: 'married' },
+                { age: 33, job: 'services', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' }
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' },
+            ];
+            const dataModel = new DataModel(data, schema);
+            const dm = dataModel.project(['age', 'job']);
+            const expected = {
+                schema: [
+                    {
+                        name: 'age',
+                        type: 'measure',
+                        subtype: 'continuous'
+                    },
+                    {
+                        name: 'job',
+                        type: 'dimension',
+                        subtype: 'categorical'
+                    },
+                    {
+                        name: 'marital',
+                        type: 'dimension',
+                        subtype: 'categorical'
+                    }
+                ],
+                data: [
+                    [
+                        30,
+                        'unemployed',
+                        'married'
+                    ],
+                    [
+                        33,
+                        'services',
+                        'married'
+                    ],
+                    [
+                        35,
+                        'management',
+                        'single'
+                    ]
+                ],
+                uids: [
+                    0,
+                    1,
+                    2
+                ]
+            };
+            expect(dm.getData({ getAllFields: true })).to.deep.equal(expected);
+        });
     });
 
     describe('#project', () => {
@@ -425,11 +600,22 @@ describe('DataModel', () => {
         it('should store derivation criteria info', () => {
             const dataModel = new DataModel(data, schema);
 
-            let projectedDataModel = dataModel.project(['age', 'job'], { saveChild: true });
+            const dm = dataModel.select(fields => fields.age.value < 40);
+            const projectedDataModel = dm.project(['age', 'job']);
             expect(projectedDataModel.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.PROJECT);
+            expect(projectedDataModel.getAncestorDerivations()[0].op).to.be.equal(DM_DERIVATIVES.SELECT);
+        });
 
-            projectedDataModel = dataModel.project(['age', 'job'], { saveChild: false });
-            expect(projectedDataModel.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.PROJECT);
+        it('should control parent-child relationships on saveChild config', () => {
+            let rootDm = new DataModel(data, schema);
+            let dm = rootDm.project(['age', 'job'], { saveChild: true });
+            expect(dm.getParent()).to.be.equal(rootDm);
+            expect(rootDm.getChildren()[0]).to.be.equal(dm);
+
+            rootDm = new DataModel(data, schema);
+            dm = rootDm.project(['age', 'job'], { saveChild: false });
+            expect(dm.getParent()).to.be.null;
+            expect(rootDm.getChildren().length).to.be.equal(0);
         });
     });
 
@@ -671,11 +857,22 @@ describe('DataModel', () => {
         it('should store derivation criteria info', () => {
             const dataModel = new DataModel(data, schema);
 
-            let selectedDm = dataModel.select(fields => fields.age.value < 40, { saveChild: true });
+            const dm = dataModel.project(['age', 'job']);
+            const selectedDm = dm.select(fields => fields.age.value < 40);
             expect(selectedDm.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.SELECT);
+            expect(selectedDm.getAncestorDerivations()[0].op).to.be.equal(DM_DERIVATIVES.PROJECT);
+        });
 
-            selectedDm = dataModel.select(fields => fields.age.value < 40, { saveChild: false });
-            expect(selectedDm.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.SELECT);
+        it('should control parent-child relationships on saveChild config', () => {
+            let rootDm = new DataModel(data, schema);
+            let dm = rootDm.select(fields => fields.age.value < 40, { saveChild: true });
+            expect(dm.getParent()).to.be.equal(rootDm);
+            expect(rootDm.getChildren()[0]).to.be.equal(dm);
+
+            rootDm = new DataModel(data, schema);
+            dm = rootDm.select(fields => fields.age.value > 40, { saveChild: false });
+            expect(dm.getParent()).to.be.null;
+            expect(rootDm.getChildren().length).to.be.equal(0);
         });
     });
 
@@ -713,9 +910,6 @@ describe('DataModel', () => {
             };
 
             expect(sortedDm).not.to.equal(dataModel);
-            expect(sortedDm._sortingDetails).to.deep.equal([
-                ['age', 'desc']
-            ]);
             expect(sortedDm.getData()).to.deep.equal(expData);
         });
 
@@ -755,10 +949,6 @@ describe('DataModel', () => {
                 ],
                 uids: [0, 1, 2, 3, 4, 5]
             };
-            expect(sortedDm._sortingDetails).to.deep.equal([
-                ['age', 'desc'],
-                ['job'],
-            ]);
             expect(sortedDm.getData()).to.deep.equal(expData);
         });
 
@@ -905,6 +1095,54 @@ describe('DataModel', () => {
                 uids: [0, 1, 2, 3, 4, 5]
             };
             expect(sortedDm.getData()).to.deep.equal(expected);
+        });
+
+        it('should store derivation criteria info', () => {
+            const data = [
+                { age: 30, job: 'management', marital: 'married' },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' },
+                { age: 28, job: 'blue-collar', marital: 'married' },
+                { age: 30, job: 'blue-collar', marital: 'single' },
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
+            ];
+            const rootDm = new DataModel(data, schema);
+
+            const dm = rootDm.select(fields => fields.age.value > 30);
+            const sortedDm = dm.sort([['age', 'ASC']]);
+            expect(sortedDm.getDerivations()[0].op).to.eql(DM_DERIVATIVES.SORT);
+            expect(sortedDm.getAncestorDerivations()[0].op).to.eql(DM_DERIVATIVES.SELECT);
+        });
+
+        it('should control parent-child relationships on saveChild config', () => {
+            const data = [
+                { age: 30, job: 'management', marital: 'married' },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' },
+                { age: 28, job: 'blue-collar', marital: 'married' },
+                { age: 30, job: 'blue-collar', marital: 'single' },
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
+            ];
+
+            let rootDm = new DataModel(data, schema);
+            let dm = rootDm.sort([['age', 'ASC']], { saveChild: true });
+            expect(dm.getParent()).to.be.equal(rootDm);
+            expect(rootDm.getChildren()[0]).to.be.equal(dm);
+
+            rootDm = new DataModel(data, schema);
+            dm = rootDm.sort([['age', 'ASC']], { saveChild: false });
+            expect(dm.getParent()).to.be.null;
+            expect(rootDm.getChildren().length).to.be.equal(0);
         });
     });
 
@@ -1286,21 +1524,15 @@ describe('DataModel', () => {
             ];
             const dataModel = new DataModel(data1, schema1);
 
-            let calDm = dataModel.calculateVariable({
+            const dm = dataModel.project(['first', 'second']);
+            let calDm = dm.calculateVariable({
                 name: 'NewField',
                 type: 'dimension'
             }, ['first', 'second', (first, second) =>
                 `${first} ${second}`
-            ], { saveChild: true });
+            ]);
             expect(calDm.getDerivations()[0].op).to.equal(DM_DERIVATIVES.CAL_VAR);
-
-            calDm = dataModel.calculateVariable({
-                name: 'NewField2',
-                type: 'dimension'
-            }, ['first', 'second', (first, second) =>
-                `${first} ${second}`
-            ], { saveChild: false });
-            expect(calDm.getDerivations()[0].op).to.equal(DM_DERIVATIVES.CAL_VAR);
+            expect(calDm.getAncestorDerivations()[0].op).to.equal(DM_DERIVATIVES.PROJECT);
         });
 
         it('should return correct value from the callback function', () => {
@@ -1439,6 +1671,37 @@ describe('DataModel', () => {
                 }, ['country', c => c]);
 
             expect(mockedFn).to.throw('country is not a valid column name');
+        });
+
+        it('should control parent-child relationships on saveChild config', () => {
+            const data1 = [
+                { profit: 10, sales: 20, city: 'a', state: 'aa' },
+                { profit: 15, sales: 25, city: 'b', state: 'bb' },
+                { profit: 10, sales: 20, city: 'a', state: 'ab' },
+                { profit: 15, sales: 25, city: 'b', state: 'ba' },
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'city', type: 'dimension' },
+                { name: 'state', type: 'dimension' },
+            ];
+
+            let rootDm = new DataModel(data1, schema1);
+            let dm = rootDm.calculateVariable({
+                name: 'profitIndex',
+                type: 'measure'
+            }, ['profit', (profit, i) => profit * i], { saveChild: true });
+            expect(dm.getParent()).to.be.equal(rootDm);
+            expect(rootDm.getChildren()[0]).to.be.equal(dm);
+
+            rootDm = new DataModel(data1, schema1);
+            dm = rootDm.calculateVariable({
+                name: 'profitIndex2',
+                type: 'measure'
+            }, ['profit', (profit, i) => profit * i], { saveChild: false });
+            expect(dm.getParent()).to.be.null;
+            expect(rootDm.getChildren().length).to.be.equal(0);
         });
     });
 
@@ -1753,11 +2016,22 @@ describe('DataModel', () => {
             it('should store derivation criteria info', () => {
                 const rootDm = new DataModel(data1, schema1);
 
-                let groupedDm = rootDm.groupBy(['first'], { profit: 'avg' }, { saveChild: true });
+                const dm = rootDm.select(fields => fields.profit.value > 15);
+                const groupedDm = dm.groupBy(['first'], { profit: 'avg' });
                 expect(groupedDm.getDerivations()[0].op).to.eql(DM_DERIVATIVES.GROUPBY);
+                expect(groupedDm.getAncestorDerivations()[0].op).to.eql(DM_DERIVATIVES.SELECT);
+            });
 
-                groupedDm = rootDm.groupBy(['first'], { profit: 'avg' }, { saveChild: false });
-                expect(groupedDm.getDerivations()[0].op).to.eql(DM_DERIVATIVES.GROUPBY);
+            it('should control parent-child relationships on saveChild config', () => {
+                let rootDm = new DataModel(data1, schema1);
+                let dm = rootDm.groupBy(['first'], { profit: 'avg' }, { saveChild: true });
+                expect(dm.getParent()).to.be.equal(rootDm);
+                expect(rootDm.getChildren()[0]).to.be.equal(dm);
+
+                rootDm = new DataModel(data1, schema1);
+                dm = rootDm.groupBy(['first'], { profit: 'avg' }, { saveChild: false });
+                expect(dm.getParent()).to.be.null;
+                expect(rootDm.getChildren().length).to.be.equal(0);
             });
         });
     });
@@ -1790,42 +2064,31 @@ describe('DataModel', () => {
         ];
         const dataModel = new DataModel(data1, schema1);
         describe('#dispose', () => {
-            it('Should remove child on calling dispose', () => {
-                let dm2 = dataModel.select(fields => fields.profit.value < 150);
-                expect(dataModel._children.length).to.equal(1);
+            it('Should remove all references as gc can detect it as free object', () => {
+                const rootDm = new DataModel(data1, schema1);
+                const dm2 = rootDm.select(fields => fields.profit.value < 150);
+                const dm3 = dm2.project(['profit', 'sales']);
                 dm2.dispose();
-                expect(dataModel._children.length).to.equal(0);
+                expect(rootDm.getChildren().length).to.equal(0);
+                expect(dm3.getParent()).to.be.null;
             });
         });
 
-        describe('#addParent', () => {
-            it('Adding parent should save criteria in parent', () => {
-                let dm2 = dataModel.select(fields => fields.profit.value < 150);
-                let dm3 = dm2.groupBy(['sales'], {
-                    profit: null
-                });
-                let dm4 = dm3.project(['sales']);
-                let data = dm4.getData();
-                let projFields = ['first'];
-                let projectConfig = {};
-                let normalizedprojFields = [];
-                let criteriaQueue = [
-                    {
-                        op: 'select',
-                        meta: '',
-                        criteria: fields => fields.profit.value < 150
-                    },
-                    {
-                        op: 'project',
-                        meta: { projFields, projectConfig, normalizedprojFields },
-                        criteria: null
-                    }
-                ];
-                dm3.dispose();
-                dm4.addParent(dm2, criteriaQueue);
-                expect(dm2._children.length).to.equal(1);
-                expect(dm2._children[0].getData()).to.deep.equal(data);
-                expect(dm4._parent).to.equal(dm2);
+        describe('#setParent', () => {
+            it('should change parent and child relationships', () => {
+                const dm2 = dataModel.select(fields => fields.profit.value < 150);
+                const dm3 = dm2.groupBy(['sales'], { profit: 'avg' }, { saveChild: false });
+                dm3.setParent(dm2);
+                expect(dm3._parent).to.be.equal(dm2);
+                expect(dm2._children[0]).to.be.equal(dm3);
+            });
+
+            it('should reset parent-child relationships when passing null as parent', () => {
+                const dm2 = dataModel.select(fields => fields.profit.value < 150);
+                const dm3 = dm2.groupBy(['sales'], { profit: 'avg' }, { saveChild: true });
+                dm3.setParent(null);
+                expect(dm3._parent).to.be.null;
+                expect(dm2._children.length).to.be.equal(0);
             });
         });
     });
@@ -1907,6 +2170,29 @@ describe('DataModel', () => {
             const derivations = dt3.getDerivations();
             expect(Array.isArray(derivations)).to.be.true;
             expect(derivations[0].criteria).to.deep.equal({ HorsePower: 'avg' });
+        });
+    });
+
+    describe('#getAncestorDerivations', () => {
+        it('should return in-between ancestor derivative operations', () => {
+            const schema = [
+                   { name: 'Name', type: 'dimension' },
+                   { name: 'HorsePower', type: 'measure' },
+                   { name: 'Origin', type: 'dimension' }
+            ];
+            const data = [
+                { Name: 'chevrolet chevelle malibu', Horsepower: 130, Origin: 'USA' },
+                { Name: 'citroen ds-21 pallas', Horsepower: 115, Origin: 'Europe' },
+                { Name: 'datsun pl510', Horsepower: 88, Origin: 'Japan' },
+                { Name: 'amc rebel sst', Horsepower: 150, Origin: 'USA' },
+            ];
+            const dt = new DataModel(data, schema);
+            const dt2 = dt.select(fields => fields.Origin.value === 'USA');
+            const dt3 = dt2.groupBy(['Origin'], { HorsePower: 'avg' });
+            const ancDerivations = dt3.getAncestorDerivations();
+            expect(Array.isArray(ancDerivations)).to.be.true;
+            expect(ancDerivations.length).to.be.equal(1);
+            expect(ancDerivations[0].op).to.be.equal(DM_DERIVATIVES.SELECT);
         });
     });
 
@@ -2457,8 +2743,35 @@ describe('DataModel', () => {
             ];
             const dataModel = new DataModel(data1, schema1);
 
-            const binnedDm = dataModel.bin('profit', { binSize: 10, name: 'BinnedField' });
+            const dm = dataModel.project(['profit', 'sales']);
+            const binnedDm = dm.bin('profit', { binSize: 10, name: 'BinnedField' });
             expect(binnedDm.getDerivations()[0].op).to.be.equal(DM_DERIVATIVES.BIN);
+            expect(binnedDm.getAncestorDerivations()[0].op).to.be.equal(DM_DERIVATIVES.PROJECT);
+        });
+
+        it('should control parent-child relationships on saveChild config', () => {
+            const data1 = [
+                { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+                { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' }
+            ];
+            const schema1 = [
+                { name: 'profit', type: 'measure' },
+                { name: 'sales', type: 'measure' },
+                { name: 'first', type: 'dimension' },
+                { name: 'second', type: 'dimension' },
+            ];
+
+            let rootDm = new DataModel(data1, schema1);
+            let dm = rootDm.bin('profit', { binSize: 10, name: 'binnedProfit', saveChild: true });
+            expect(dm.getParent()).to.be.equal(rootDm);
+            expect(rootDm.getChildren()[0]).to.be.equal(dm);
+
+            rootDm = new DataModel(data1, schema1);
+            dm = rootDm.bin('sales', { binSize: 12, name: 'binnedSales', saveChild: false });
+            expect(dm.getParent()).to.be.null;
+            expect(rootDm.getChildren().length).to.be.equal(0);
         });
     });
 });
