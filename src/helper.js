@@ -235,21 +235,21 @@ export const validateUnitSchema = (unitSchema) => {
         DimensionSubtype.TEMPORAL,
         DimensionSubtype.GEO
     ];
-    const { type, subtype } = unitSchema;
+    const { type, subtype, name } = unitSchema;
 
     switch (type) {
     case FieldType.DIMENSION:
         if (supportedDimSubTypes.indexOf(subtype) === -1) {
-            throw new Error(`DataModel doesn't support field subtype: ${subtype}`);
+            throw new Error(`DataModel doesn't support dimension field subtype ${subtype} used for ${name} field`);
         }
         break;
     case FieldType.MEASURE:
         if (supportedMeasureSubTypes.indexOf(subtype) === -1) {
-            throw new Error(`DataModel doesn't support field subtype: ${subtype}`);
+            throw new Error(`DataModel doesn't support measure field subtype ${subtype} used for ${name} field`);
         }
         break;
     default:
-        throw new Error(`DataModel doesn't support field type: ${type}`);
+        throw new Error(`DataModel doesn't support field type ${type} used for ${name} field`);
     }
 };
 
