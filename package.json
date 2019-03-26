@@ -2,7 +2,7 @@
   "name": "datamodel",
   "description": "Relational algebra compliant in-memory tabular data store",
   "homepage": "https://github.com/chartshq/datamodel",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "license": "MIT",
   "main": "dist/datamodel.js",
   "keywords": [
@@ -17,6 +17,7 @@
     "tabular",
     "operation"
   ],
+  "author": "Muzejs.org (https://muzejs.org/)",
   "repository": {
     "type": "git",
     "url": "https://github.com/chartshq/datamodel.git"
