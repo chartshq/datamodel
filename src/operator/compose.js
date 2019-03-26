@@ -1,3 +1,5 @@
+import { persistDerivations } from '../helper';
+import { DM_DERIVATIVES } from '../constants';
 
 /**
  * DataModel's opearators are exposed as composable functional operators as well as chainable operators. Chainable
@@ -214,21 +216,35 @@ export const groupBy = (...args) => dm => dm.groupBy(...args);
 export const compose = (...operations) =>
     (dm, config = { saveChild: true }) => {
         let currentDM = dm;
-        let frstChild;
+        let firstChild;
         const derivations = [];
-        const saveChild = config.saveChild;
 
         operations.forEach((operation) => {
             currentDM = operation(currentDM);
             derivations.push(...currentDM._derivation);
-            if (!frstChild) {
-                frstChild = currentDM;
+            if (!firstChild) {
+                firstChild = currentDM;
             }
         });
 
-        saveChild && currentDM.addParent(dm, derivations);
-        if (derivations.length > 1) {
-            frstChild.dispose();
+        if (firstChild && firstChild !== currentDM) {
+            firstChild.dispose();
+        }
+
+        // reset all ancestorDerivation saved in-between compose
+        currentDM._ancestorDerivation = [];
+        persistDerivations(
+            dm,
+            currentDM,
+            DM_DERIVATIVES.COMPOSE,
+            null,
+            derivations
+        );
+
+        if (config.saveChild) {
+            currentDM.setParent(dm);
+        } else {
+            currentDM.setParent(null);
         }
 
         return currentDM;
