@@ -2,7 +2,7 @@
 
 import { FieldType, DimensionSubtype, DataFormat, FilteringMode } from './enums';
 import {
-    persistDerivation,
+    persistDerivations,
     getRootGroupByModel,
     propagateToAllDataModels,
     getRootDataModel,
@@ -23,6 +23,7 @@ import { createBinnedFieldData } from './operator/bucket-creator';
 import Relation from './relation';
 import reducerStore from './utils/reducer-store';
 import { createFields } from './field-creator';
+import InvalidAwareTypes from './invalid-aware-types';
 
 /**
  * DataModel is an in-browser representation of tabular data. It supports
@@ -77,7 +78,6 @@ class DataModel extends Relation {
         super(...args);
 
         this._onPropagation = [];
-        this._sortingDetails = [];
     }
 
     /**
@@ -91,6 +91,21 @@ class DataModel extends Relation {
      */
     static get Reducers () {
         return reducerStore;
+    }
+
+    /**
+     * Configure null, undefined, invalid values in the source data
+     *
+     * @public
+     *
+     * @param {Object} [config] - Configuration to control how null, undefined and non-parsable values are
+     * represented in DataModel.
+     * @param {string} [config.undefined] - Define how an undefined value will be represented.
+     * @param {string} [config.null] - Define how a null value will be represented.
+     * @param {string} [config.invalid] - Define how a non-parsable value will be represented.
+     */
+    static configureInvalidAwareTypes (config) {
+        return InvalidAwareTypes.invalidAwareVals(config);
     }
 
     /**
@@ -226,17 +241,20 @@ class DataModel extends Relation {
         let params = [this, fieldsArr, reducers];
         const newDataModel = groupBy(...params);
 
+        persistDerivations(
+            this,
+            newDataModel,
+            DM_DERIVATIVES.GROUPBY,
+            { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() },
+            reducers
+        );
+
         if (config.saveChild) {
-            this._children.push(newDataModel);
-            persistDerivation(
-                newDataModel,
-                DM_DERIVATIVES.GROUPBY,
-                { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() },
-                reducers
-            );
+            newDataModel.setParent(this);
+        } else {
+            newDataModel.setParent(null);
         }
 
-        newDataModel._parent = this;
         return newDataModel;
     }
 
@@ -291,7 +309,7 @@ class DataModel extends Relation {
      * @param {Array.<Array>} sortingDetails - Sorting details based on which the sorting will be performed.
      * @return {DataModel} Returns a new instance of DataModel with sorted data.
      */
-    sort (sortingDetails) {
+    sort (sortingDetails, config = { saveChild: false }) {
         const rawData = this.getData({
             order: 'row',
             sort: sortingDetails
@@ -300,7 +318,21 @@ class DataModel extends Relation {
         const dataInCSVArr = [header].concat(rawData.data);
 
         const sortedDm = new this.constructor(dataInCSVArr, rawData.schema, { dataFormat: 'DSVArr' });
-        sortedDm._sortingDetails = sortingDetails;
+
+        persistDerivations(
+            this,
+            sortedDm,
+            DM_DERIVATIVES.SORT,
+            config,
+            sortingDetails
+        );
+
+        if (config.saveChild) {
+            sortedDm.setParent(this);
+        } else {
+            sortedDm.setParent(null);
+        }
+
         return sortedDm;
     }
 
@@ -449,7 +481,7 @@ class DataModel extends Relation {
             return fieldSpec.index;
         });
 
-        const clone = this.clone();
+        const clone = this.clone(config.saveChild);
 
         const fs = clone.getFieldspace().fields;
         const suppliedFields = depFieldIndices.map(idx => fs[idx]);
@@ -465,9 +497,13 @@ class DataModel extends Relation {
         const [field] = createFields([computedValues], [schema], [schema.name]);
         clone.addField(field);
 
-        if (config.saveChild) {
-            persistDerivation(clone, DM_DERIVATIVES.CAL_VAR, { config: schema, fields: depVars }, retrieveFn);
-        }
+        persistDerivations(
+            this,
+            clone,
+            DM_DERIVATIVES.CAL_VAR,
+            { config: schema, fields: depVars },
+            retrieveFn
+        );
 
         return clone;
     }
@@ -619,10 +655,16 @@ class DataModel extends Relation {
                 bins
             }], [binFieldName])[0];
 
-        const clone = this.clone();
+        const clone = this.clone(config.saveChild);
         clone.addField(binField);
 
-        persistDerivation(clone, DM_DERIVATIVES.BIN, { measureFieldName, config, binFieldName }, null);
+        persistDerivations(
+            this,
+            clone,
+            DM_DERIVATIVES.BIN,
+             { measureFieldName, config, binFieldName },
+             null
+        );
 
         return clone;
     }

@@ -1,8 +1,9 @@
-const DataModel = window.DataModel;
+/* eslint-disable */
 
-const schema = [
-    {
-        name: 'name',
+d3.json('../data/cars.json', (data) => {
+    let jsonData = data;
+    const schema = [{
+        name: 'Name',
         type: 'dimension'
     },
     {
@@ -14,7 +15,8 @@ const schema = [
     {
         name: 'roll',
         type: 'measure',
-        defAggFn: "avg"
+        defAggFn: "avg",
+        as: "roll2"
     }
 ];
 
@@ -25,52 +27,59 @@ const data = [
         roll: 2
     },
     {
-        name: 'Sumant',
-        birthday: '1996-08-04',
-        roll: 89
+        name: 'Miles_per_Gallon',
+        type: 'measure'
+    },
+
+    {
+        name: 'Displacement',
+        type: 'measure'
     },
     {
-        name: 'Ajay',
-        birthday: '1994-01-03',
-        roll: 31
+        name: 'Horsepower',
+        type: 'measure'
     },
     {
-        name: 'Sushant',
-        birthday: '1994-01-03',
-        roll: 99
+        name: 'Weight_in_lbs',
+        type: 'measure'
     },
     {
-        name: 'Samim',
-        birthday: '1994-01-03',
-        roll: 12
+        name: 'Acceleration',
+        type: 'measure'
     },
     {
-        name: 'Akash',
-        birthday: '1994-01-03',
-        roll: 20
-    },
-    {
-        name: 'Rousan',
-        birthday: '1995-07-06',
-        roll: 10
+        name: 'Origin',
+        type: 'dimension'
     },
     {
         name: 'Akash',
         birthday: '1994-01-03',
-        roll: -10
+        roll: 120
     },
     {
         name: 'Rousan',
         birthday: '1995-07-06',
-        roll: -23
+        roll: 93
     }
 ];
 
+
 const dm = new DataModel(data, schema);
+const dm2 = dm.project(["name", "roll"]);
+// const schema = [
+//     { name: 'Name', type: 'dimension' },
+//     { name: 'HorsePower', type: 'measure' },
+//     { name: 'Origin', type: 'dimension' }
+// ];
+// const data = [
+//     { Name: 'chevrolet chevelle malibu', Horsepower: 130, Origin: 'USA' },
+//     { Name: 'citroen ds-21 pallas', Horsepower: 115, Origin: 'Europe' },
+//     { Name: 'datsun pl510', Horsepower: 88, Origin: 'Japan' },
+//     { Name: 'amc rebel sst', Horsepower: 150, Origin: 'USA' },
+// ];
+// const dt = new DataModel(schema, data);
 
-const groupedDm = rootData.groupBy(['Origin', 'Cylinders'])
-const binnedDm = groupedDm.bin('Miles_per_Gallon', { binsCount: 10})
-
+// const dt2 = dt.select(fields => fields.Origin.value === 'USA');
 
 // const selectedDm = dm.select(fields => fields.roll.value > 10 || fields.roll.value < 0);
 
@@ -126,16 +135,11 @@ const binnedDm = groupedDm.bin('Miles_per_Gallon', { binsCount: 10})
 // const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
 // const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
 
-// const joinedDm = dataModel1.join(dataModel2, (f1, f2, cloneProvider1, cloneProvider2, store) => {
-//     if (!store.clonedDm1) {
-//         store.clonedDm1 = cloneProvider1();
-//     }
-//     if (!store.clonedDm2) {
-//         store.clonedDm2 = cloneProvider2();
-//     }
-//     if (!store.avgPopulation) {
-//         store.avgPopulation = store.clonedDm2.groupBy([""], { population: "avg" }).getData().data[0][0];
-//     }
+    let rootData = new DataModel(jsonData, schema);
+    let dm = rootData.project(["Origin", "Acceleration"]);
+    let dm5 = DataModel.Operators.compose(
+        DataModel.Operators.groupBy(["Origin"]),
+        DataModel.Operators.select(f => f.Acceleration.value > 1000)
+    )(dm);
+});
 
-//     return (f1.profit.value * f1.sales.value) > store.avgPopulation;
-// });

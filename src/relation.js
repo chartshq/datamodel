@@ -1,7 +1,6 @@
 import { FilteringMode } from './enums';
 import { getUniqueId } from './utils';
 import {
-    persistDerivation,
     updateFields,
     cloneWithSelect,
     cloneWithProject,
@@ -9,7 +8,6 @@ import {
     getNormalizedProFields
 } from './helper';
 import { crossProduct, difference, naturalJoinFilter, union } from './operator';
-import { DM_DERIVATIVES } from './constants';
 
 /**
  * Relation provides the definitions of basic operators of relational algebra like *selection*, *projection*, *union*,
@@ -39,6 +37,7 @@ class Relation {
 
         this._parent = null;
         this._derivation = [];
+        this._ancestorDerivation = [];
         this._children = [];
 
         if (params.length === 1 && ((source = params[0]) instanceof Relation)) {
@@ -306,7 +305,7 @@ class Relation {
      * ];
      * const data = [];
      *
-     * const dt = new DataModel(schema, data);
+     * const dt = new DataModel(data, schema);
      * console.log(dt.isEmpty());
      *
      * @public
@@ -324,31 +323,14 @@ class Relation {
      * @param {boolean} [saveChild=true] - Whether the cloned instance would be recorded in the parent instance.
      * @return {DataModel} - Returns the newly cloned DataModel instance.
      */
-    clone (saveChild = true, linkParent = true) {
-        let retDataModel;
-        if (linkParent === false) {
-            const dataObj = this.getData({
-                getAllFields: true
-            });
-            const data = dataObj.data;
-            const schema = dataObj.schema;
-            const jsonData = data.map((row) => {
-                const rowObj = {};
-                schema.forEach((field, i) => {
-                    rowObj[field.name] = row[i];
-                });
-                return rowObj;
-            });
-            retDataModel = new this.constructor(jsonData, schema);
-        }
-        else {
-            retDataModel = new this.constructor(this);
-        }
-
+    clone (saveChild = true) {
+        const clonedDm = new this.constructor(this);
         if (saveChild) {
-            this._children.push(retDataModel);
+            clonedDm.setParent(this);
+        } else {
+            clonedDm.setParent(null);
         }
-        return retDataModel;
+        return clonedDm;
     }
 
     /**
@@ -365,7 +347,7 @@ class Relation {
      * Selection and rejection set is only a logical idea for concept explanation purpose.
      *
      * @example
-     *  const dm = new DataModel(schema, data);
+     *  const dm = new DataModel(data, schema);
      *
      *  // with projection mode NORMAL:
      *  const normDt = dt.project(["Name", "HorsePower"]);
@@ -430,10 +412,10 @@ class Relation {
     }
 
     calculateFieldsConfig () {
-        this._fieldConfig = this._fieldspace.fields.reduce((acc, fieldDef, i) => {
-            acc[fieldDef.name()] = {
+        this._fieldConfig = this._fieldspace.fields.reduce((acc, fieldObj, i) => {
+            acc[fieldObj.name()] = {
                 index: i,
-                def: { name: fieldDef.name(), type: fieldDef.type(), subtype: fieldDef.subtype() }
+                def: fieldObj.schema(),
             };
             return acc;
         }, {});
@@ -448,8 +430,12 @@ class Relation {
      * @public
      */
     dispose () {
-        this._parent.removeChild(this);
+        this._parent && this._parent.removeChild(this);
         this._parent = null;
+        this._children.forEach((child) => {
+            child._parent = null;
+        });
+        this._children = [];
     }
 
     /**
@@ -469,7 +455,7 @@ class Relation {
      *    { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
      * ]
      *
-     * const dt = new DataModel(schema, data);
+     * const dt = new DataModel(data, schema);
      *
      * const dt2 = dt.select(fields => fields.Origin.value === "USA")
      * dt.removeChild(dt2);
@@ -484,18 +470,127 @@ class Relation {
     }
 
     /**
-     * Adds the specified {@link DataModel} as a parent for the current {@link DataModel} instance.
-     *
-     * The optional criteriaQueue is an array containing the history of transaction performed on parent
-     *  {@link DataModel} to get the current one.
+     * Sets the specified {@link DataModel} as a parent for the current {@link DataModel} instance.
      *
      * @param {DataModel} parent - The datamodel instance which will act as parent.
-     * @param {Array} criteriaQueue - Queue contains in-between operation meta-data.
      */
-    addParent (parent, criteriaQueue = []) {
-        persistDerivation(this, DM_DERIVATIVES.COMPOSE, null, criteriaQueue);
+    setParent (parent) {
+        this._parent && this._parent.removeChild(this);
         this._parent = parent;
-        parent._children.push(this);
+        parent && parent._children.push(this);
+    }
+
+    /**
+     * Returns the parent {@link DataModel} instance.
+     *
+     * @example
+     * const schema = [
+     *    { name: 'Name', type: 'dimension' },
+     *    { name: 'HorsePower', type: 'measure' },
+     *    { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *    { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *    { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *    { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *    { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(data, schema);
+     *
+     * const dt2 = dt.select(fields => fields.Origin.value === "USA");
+     * const parentDm = dt2.getParent();
+     *
+     * @return {DataModel} Returns the parent DataModel instance.
+     */
+    getParent () {
+        return this._parent;
+    }
+
+    /**
+     * Returns the immediate child {@link DataModel} instances.
+     *
+     * @example
+     * const schema = [
+     *    { name: 'Name', type: 'dimension' },
+     *    { name: 'HorsePower', type: 'measure' },
+     *    { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *    { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *    { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *    { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *    { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(data, schema);
+     *
+     * const childDm1 = dt.select(fields => fields.Origin.value === "USA");
+     * const childDm2 = dt.select(fields => fields.Origin.value === "Japan");
+     * const childDm3 = dt.groupBy(["Origin"]);
+     *
+     * @return {DataModel[]} Returns the immediate child DataModel instances.
+     */
+    getChildren () {
+        return this._children;
+    }
+
+    /**
+     * Returns the in-between operation meta data while creating the current {@link DataModel} instance.
+     *
+     * @example
+     * const schema = [
+     *   { name: 'Name', type: 'dimension' },
+     *   { name: 'HorsePower', type: 'measure' },
+     *   { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *   { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *   { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *   { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *   { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(data, schema);
+     * const dt2 = dt.select(fields => fields.Origin.value === "USA");
+     * const dt3 = dt2.groupBy(["Origin"]);
+     * const derivations = dt3.getDerivations();
+     *
+     * @return {Any[]} Returns the derivation meta data.
+     */
+    getDerivations () {
+        return this._derivation;
+    }
+
+    /**
+     * Returns the in-between operation meta data happened from root {@link DataModel} to current instance.
+     *
+     * @example
+     * const schema = [
+     *   { name: 'Name', type: 'dimension' },
+     *   { name: 'HorsePower', type: 'measure' },
+     *   { name: "Origin", type: 'dimension' }
+     * ];
+     *
+     * const data = [
+     *   { Name: "chevrolet chevelle malibu", Horsepower: 130, Origin: "USA" },
+     *   { Name: "citroen ds-21 pallas", Horsepower: 115, Origin: "Europe" },
+     *   { Name: "datsun pl510", Horsepower: 88, Origin: "Japan" },
+     *   { Name: "amc rebel sst", Horsepower: 150, Origin: "USA"},
+     * ]
+     *
+     * const dt = new DataModel(data, schema);
+     * const dt2 = dt.select(fields => fields.Origin.value === "USA");
+     * const dt3 = dt2.groupBy(["Origin"]);
+     * const ancDerivations = dt3.getAncestorDerivations();
+     *
+     * @return {Any[]} Returns the previous derivation meta data.
+     */
+    getAncestorDerivations () {
+        return this._ancestorDerivation;
     }
 }
 

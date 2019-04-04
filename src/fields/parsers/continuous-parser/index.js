@@ -1,4 +1,5 @@
 import FieldParser from '../field-parser';
+import InvalidAwareTypes from '../../../invalid-aware-types';
 
 /**
  * A FieldParser which parses the continuous values.
@@ -16,7 +17,14 @@ export default class ContinuousParser extends FieldParser {
    * @return {string} Returns the number value.
    */
     parse (val) {
-        val = parseFloat(val, 10);
-        return Number.isNaN(val) ? null : val;
+        let result;
+        // check if invalid date value
+        if (!InvalidAwareTypes.isInvalid(val)) {
+            let parsedVal = parseFloat(val, 10);
+            result = Number.isNaN(parsedVal) ? InvalidAwareTypes.NA : parsedVal;
+        } else {
+            result = InvalidAwareTypes.getInvalidType(val);
+        }
+        return result;
     }
 }

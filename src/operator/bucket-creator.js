@@ -1,4 +1,5 @@
 import { rowDiffsetIterator } from './row-diffset-iterator';
+import InvalidAwareTypes from '../invalid-aware-types';
 
 const generateBuckets = (binSize, start, end) => {
     const buckets = [];
@@ -77,8 +78,8 @@ export function createBinnedFieldData (measureField, rowDiffset, config) {
     const binnedData = [];
     rowDiffsetIterator(rowDiffset, (i) => {
         const datum = measureField.partialField.data[i];
-        if (datum === null) {
-            binnedData.push(null);
+        if (datum instanceof InvalidAwareTypes) {
+            binnedData.push(datum);
             return;
         }
 

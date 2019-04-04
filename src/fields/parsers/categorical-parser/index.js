@@ -1,4 +1,5 @@
 import FieldParser from '../field-parser';
+import InvalidAwareTypes from '../../../invalid-aware-types';
 
 /**
  * A FieldParser which parses the categorical values.
@@ -16,6 +17,13 @@ export default class CategoricalParser extends FieldParser {
    * @return {string} Returns the stringified value.
    */
     parse (val) {
-        return (val === undefined || val === null) ? null : String(val).trim();
+        let result;
+        // check if invalid date value
+        if (!InvalidAwareTypes.isInvalid(val)) {
+            result = String(val).trim();
+        } else {
+            result = InvalidAwareTypes.getInvalidType(val);
+        }
+        return result;
     }
 }

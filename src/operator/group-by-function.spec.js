@@ -3,6 +3,7 @@
 
 import { expect } from 'chai';
 import { fnList } from './group-by-function';
+import InvalidAwareTypes from '../invalid-aware-types';
 
 
 describe('groupBy function tests', () => {
@@ -11,19 +12,16 @@ describe('groupBy function tests', () => {
             expect(fnList.sum([10, 12, 17])).to.equal(39);
         });
         it('should return null for nested array', () => {
-            expect(fnList.sum([[10, 12], [9, 16]])).to.be.null;
+            expect(fnList.sum([[10, 12], [9, 16]])).eql(InvalidAwareTypes.NULL);
         });
         it('should return null for an empty Array', () => {
-            expect(fnList.sum([])).to.be.null;
+            expect(fnList.sum([])).eql(InvalidAwareTypes.NULL);
         });
         it('should return null for an empty input', () => {
-            expect(fnList.sum()).to.be.null;
-        });
-        it('should treat false as value 0', () => {
-            expect(fnList.sum([null, undefined, false])).to.equal(0);
+            expect(fnList.sum()).eql(InvalidAwareTypes.NULL);
         });
         it('should filter out null and undefined values', () => {
-            expect(fnList.sum([10, 12, 17, null, undefined])).to.equal(39);
+            expect(fnList.sum([10, 12, 17, InvalidAwareTypes.NULL, InvalidAwareTypes.NULL])).to.equal(39);
         });
     });
     describe('#avg', () => {
@@ -31,13 +29,13 @@ describe('groupBy function tests', () => {
             expect(fnList.avg([10, 12, 17])).to.equal(39 / 3);
         });
         it('should return null for nested array', () => {
-            expect(fnList.avg([[10, 12], [9, 16]])).to.be.null;
+            expect(fnList.avg([[10, 12], [9, 16]])).eql(InvalidAwareTypes.NULL);
         });
         it('should return null for an empty Array', () => {
-            expect(fnList.avg([])).to.be.null;
+            expect(fnList.avg([])).eql(InvalidAwareTypes.NULL);
         });
         it('should return null for an empty input', () => {
-            expect(fnList.avg()).to.be.null;
+            expect(fnList.avg()).eql(InvalidAwareTypes.NULL);
         });
     });
     describe('#min', () => {
@@ -45,13 +43,13 @@ describe('groupBy function tests', () => {
             expect(fnList.min([10, 12, 17])).to.equal(10);
         });
         it('should return null for nested Array', () => {
-            expect(fnList.min([[10, 12], [9, 16]])).to.be.null;
+            expect(fnList.min([[10, 12], [9, 16]])).eql(InvalidAwareTypes.NULL);
         });
         it('should return null for empty Array', () => {
-            expect(fnList.min([])).to.be.null;
+            expect(fnList.min([])).eql(InvalidAwareTypes.NULL);
         });
         it('should return null for an empty input', () => {
-            expect(fnList.min()).to.be.null;
+            expect(fnList.min()).eql(InvalidAwareTypes.NULL);
         });
     });
     describe('#max', () => {
@@ -59,13 +57,13 @@ describe('groupBy function tests', () => {
             expect(fnList.max([10, 12, 17])).to.equal(17);
         });
         it('should return null for nested Array', () => {
-            expect(fnList.max([[10, 12], [15, 17]])).to.be.null;
+            expect(fnList.max([[10, 12], [15, 17]])).eql(InvalidAwareTypes.NULL);
         });
         it('should return null for empty Array', () => {
-            expect(fnList.max([])).to.be.null;
+            expect(fnList.max([])).eql(InvalidAwareTypes.NULL);
         });
         it('should return null for an empty input', () => {
-            expect(fnList.max()).to.be.null;
+            expect(fnList.max()).eql(InvalidAwareTypes.NULL);
         });
     });
     describe('#first', () => {
@@ -89,7 +87,7 @@ describe('groupBy function tests', () => {
             expect(fnList.count([])).to.equal(0);
         });
         it('should return null for an empty input', () => {
-            expect(fnList.count()).to.be.null;
+            expect(fnList.count()).eql(InvalidAwareTypes.NULL);
         });
     });
     describe('#std', () => {

@@ -383,14 +383,23 @@ DateTimeFormatter.getTokenDefinitions = function () {
             // Short year like 90 for 1990
             name: 'y',
             index: 0,
-            extract () { return '(\\d{4})'; },
+            extract () { return '(\\d{2})'; },
             parser (val) {
+                let result;
                 if (val) {
                     const l = val.length;
                     val = val.substring(l - 2, l);
                 }
+                let parsedVal = DateTimeFormatter.defaultNumberParser()(val);
+                let presentDate = new Date();
+                let presentYear = Math.trunc((presentDate.getFullYear()) / 100);
 
-                return DateTimeFormatter.defaultNumberParser()(val);
+                result = `${presentYear}${parsedVal}`;
+
+                if (convertToNativeDate(result).getFullYear() > presentDate.getFullYear()) {
+                    result = `${presentYear - 1}${parsedVal}`;
+                }
+                return convertToNativeDate(result).getFullYear();
             },
             formatter (val) {
                 const d = convertToNativeDate(val);
@@ -597,6 +606,7 @@ DateTimeFormatter.prototype.parse = function (dateTimeStamp, options) {
     let param;
     let resolvedVal;
     let l;
+    let result = [];
 
     for (resolverKey in tokenResolver) {
         if (!{}.hasOwnProperty.call(tokenResolver, resolverKey)) { continue; }
@@ -625,7 +635,14 @@ DateTimeFormatter.prototype.parse = function (dateTimeStamp, options) {
         dtParamArr[dtParamSeq[resolverKey]] = resolvedVal;
     }
 
-    return dtParamArr;
+    if (dtParamArr.length && this.checkIfOnlyYear(dtParamArr.length))
+     {
+        result.unshift(dtParamArr[0], 0, 1); }
+    else {
+        result.unshift(...dtParamArr);
+    }
+
+    return result;
 };
 
 /*
@@ -693,17 +710,24 @@ DateTimeFormatter.prototype.extractTokenValue = function (dateTimeStamp) {
  * @return {Date} : Native JS Date
  */
 DateTimeFormatter.prototype.getNativeDate = function (dateTimeStamp) {
-    if (dateTimeStamp instanceof Date) {
-        return dateTimeStamp;
-    } else if (isFinite(dateTimeStamp) && !!this.format) {
-        return new Date(dateTimeStamp);
+    let date = null;
+    if (Number.isFinite(dateTimeStamp)) {
+        date = new Date(dateTimeStamp);
+    } else if (!this.format && Date.parse(dateTimeStamp)) {
+        date = new Date(dateTimeStamp);
     }
+    else {
+        const dtParams = this.dtParams = this.parse(dateTimeStamp);
+        if (dtParams.length) {
+            this.nativeDate = new Date(...dtParams);
+            date = this.nativeDate;
+        }
+    }
+    return date;
+};
 
-    const dtParams = this.dtParams = this.parse(dateTimeStamp);
-
-    dtParams.unshift(null);
-    this.nativeDate = new (Function.prototype.bind.apply(Date, dtParams))();
-    return this.nativeDate;
+DateTimeFormatter.prototype.checkIfOnlyYear = function(len) {
+    return len === 1 && this.format.match(/y|Y/g).length;
 };
 
 /*
