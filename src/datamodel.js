@@ -21,6 +21,7 @@ import Relation from './relation';
 import reducerStore from './utils/reducer-store';
 import { createFields } from './field-creator';
 import InvalidAwareTypes from './invalid-aware-types';
+import Value from './value';
 
 /**
  * DataModel is an in-browser representation of tabular data. It supports
@@ -209,6 +210,22 @@ class DataModel extends Relation {
         return dataGenerated;
     }
 
+    /**
+     * Returns the unique ids in an array.
+     *
+     * @return {Array} Returns an array of ids.
+     */
+    getUids () {
+        const rowDiffset = this._rowDiffset;
+        const diffSets = rowDiffset.split(',');
+        const ids = [];
+        diffSets.forEach((set) => {
+            let [start, end] = set.split('-').map(Number);
+            end = end !== undefined ? end : start;
+            ids.push(...Array(end - start + 1).fill().map((_, idx) => start + idx));
+        });
+        return ids;
+    }
     /**
      * Groups the data using particular dimensions and by reducing measures. It expects a list of dimensions using which
      * it projects the datamodel and perform aggregations to reduce the duplicate tuples. Refer this
@@ -404,9 +421,13 @@ class DataModel extends Relation {
         const fieldName = field.name();
         this._colIdentifier += `,${fieldName}`;
         const partialFieldspace = this._partialFieldspace;
+        const cachedValueObjects = partialFieldspace._cachedValueObjects;
 
         if (!partialFieldspace.fieldsObj()[field.name()]) {
             partialFieldspace.fields.push(field);
+            cachedValueObjects.forEach((obj, i) => {
+                obj[field.name()] = new Value(field.partialField.data[i], field);
+            });
         } else {
             const fieldIndex = partialFieldspace.fields.findIndex(fieldinst => fieldinst.name() === fieldName);
             fieldIndex >= 0 && (partialFieldspace.fields[fieldIndex] = field);

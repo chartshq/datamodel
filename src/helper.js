@@ -56,39 +56,54 @@ export const persistDerivations = (sourceDm, model, operation, config = {}, crit
     persistAncestorDerivation(sourceDm, model);
 };
 
+const generateRowDiffset = (rowDiffset, i, lastInsertedValue) => {
+    if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
+        const li = rowDiffset.length - 1;
+        rowDiffset[li] = `${rowDiffset[li].split('-')[0]}-${i}`;
+    } else {
+        rowDiffset.push(`${i}`);
+    }
+};
+
 export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => {
-    const newRowDiffSet = [];
+    let newRowDiffSet = [];
+    const rejRowDiffSet = [];
     let lastInsertedValue = -1;
+    let lastInsertedValueRej = -1;
     let { mode } = config;
-    let li;
     let cachedStore = {};
     let cloneProvider = () => sourceDm.detachedRoot();
     const selectorHelperFn = index => selectFn(
-        prepareSelectionData(fields, index),
+        fields[index],
         index,
         cloneProvider,
         cachedStore
     );
 
-    let checker;
-    if (mode === FilteringMode.INVERSE) {
-        checker = index => !selectorHelperFn(index);
-    } else {
-        checker = index => selectorHelperFn(index);
+    const checker = mode === FilteringMode.INVERSE ? index => !selectorHelperFn(index) :
+        index => selectorHelperFn(index);
+
+    const passFn = (i) => {
+        if (checker(i)) {
+            generateRowDiffset(newRowDiffSet, i, lastInsertedValue);
+            lastInsertedValue = i;
+            return true;
+        }
+        return false;
+    };
+
+    if (mode === FilteringMode.ALL) {
+        rowDiffsetIterator(rowDiffset, (i) => {
+            if (!passFn(i)) {
+                generateRowDiffset(rejRowDiffSet, i, lastInsertedValueRej);
+                lastInsertedValueRej = i;
+            }
+        });
+        return [newRowDiffSet.join(','), rejRowDiffSet.join(',')];
     }
 
-    rowDiffsetIterator(rowDiffset, (i) => {
-        if (checker(i)) {
-            if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
-                li = newRowDiffSet.length - 1;
-                newRowDiffSet[li] = `${newRowDiffSet[li].split('-')[0]}-${i}`;
-            } else {
-                newRowDiffSet.push(`${i}`);
-            }
-            lastInsertedValue = i;
-        }
-    });
-    return newRowDiffSet.join(',');
+    rowDiffsetIterator(rowDiffset, passFn);
+    return [newRowDiffSet.join(',')];
 };
 
 export const cloneWithAllFields = (model) => {
@@ -147,12 +162,10 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
     let filteredModel;
     if (operation === LOGICAL_OPERATORS.AND) {
         filteredModel = cloneWithAllFields(model).select(fields => fns.every(fn => fn(fields)), {
-            saveChild: false,
-            mode: FilteringMode.ALL
+            saveChild: false
         });
     } else {
         filteredModel = cloneWithAllFields(model).select(fields => fns.some(fn => fn(fields)), {
-            mode: FilteringMode.ALL,
             saveChild: false
         });
     }
@@ -162,16 +175,29 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
 
 export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) => {
     const cloned = sourceDm.clone(cloneConfig.saveChild);
-    const rowDiffset = selectHelper(
+    const [rowDiffset, rejRowDiffSet] = selectHelper(
         cloned._rowDiffset,
-        cloned.getPartialFieldspace().fields,
+        cloned.getPartialFieldspace()._cachedValueObjects,
         selectFn,
         selectConfig,
         sourceDm
     );
     cloned._rowDiffset = rowDiffset;
     cloned.__calculateFieldspace().calculateFieldsConfig();
-
+    let oDm = cloned;
+    if (selectConfig.mode === FilteringMode.ALL) {
+        const rejCloned = sourceDm.clone(cloneConfig.saveChild);
+        rejCloned._rowDiffset = rejRowDiffSet;
+        rejCloned.__calculateFieldspace().calculateFieldsConfig();
+        persistDerivations(
+            sourceDm,
+            rejCloned,
+            DM_DERIVATIVES.SELECT,
+             { config: selectConfig },
+              selectFn
+        );
+        oDm = [cloned, rejCloned];
+    }
     persistDerivations(
         sourceDm,
         cloned,
@@ -180,7 +206,7 @@ export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) =
           selectFn
     );
 
-    return cloned;
+    return oDm;
 };
 
 export const cloneWithProject = (sourceDm, projField, config, allFields) => {
@@ -287,8 +313,17 @@ export const updateData = (relation, data, schema, options) => {
     // This will create a new fieldStore with the fields
     const nameSpace = fieldStore.createNamespace(fieldArr, options.name);
     relation._partialFieldspace = nameSpace;
+
     // If data is provided create the default colIdentifier and rowDiffset
     relation._rowDiffset = formattedData.length && formattedData[0].length ? `0-${formattedData[0].length - 1}` : '';
+
+    // This stores the value objects which is passed to the filter method when selection operation is done.
+    const valueObjects = [];
+    rowDiffsetIterator(relation._rowDiffset, (i) => {
+        valueObjects[i] = prepareSelectionData(nameSpace.fields, i);
+    });
+    nameSpace._cachedValueObjects = valueObjects;
+
     relation._colIdentifier = (schema.map(_ => _.name)).join();
     relation._dataFormat = options.dataFormat === DataFormat.AUTO ? detectDataFormat(data) : options.dataFormat;
     return relation;
@@ -336,8 +371,7 @@ export const getDerivationArguments = (derivation) => {
 
 const applyExistingOperationOnModel = (propModel, dataModel) => {
     const derivations = dataModel.getDerivations();
-    let selectionModel = propModel[0];
-    let rejectionModel = propModel[1];
+    let selectionModel = propModel;
 
     derivations.forEach((derivation) => {
         if (!derivation) {
@@ -349,13 +383,10 @@ const applyExistingOperationOnModel = (propModel, dataModel) => {
             selectionModel = selectionModel[operation](...params, {
                 saveChild: false
             });
-            rejectionModel = rejectionModel[operation](...params, {
-                saveChild: false
-            });
         }
     });
 
-    return [selectionModel, rejectionModel];
+    return selectionModel;
 };
 
 const getFilteredModel = (propModel, path) => {
@@ -380,8 +411,8 @@ const propagateIdentifiers = (dataModel, propModel, config = {}, propModelInf = 
 
     const children = dataModel._children;
     children.forEach((child) => {
-        let [selectionModel, rejectionModel] = applyExistingOperationOnModel(propModel, child);
-        propagateIdentifiers(child, [selectionModel, rejectionModel], config, propModelInf);
+        const selectionModel = applyExistingOperationOnModel(propModel, child);
+        propagateIdentifiers(child, selectionModel, config, propModelInf);
     });
 };
 

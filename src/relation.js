@@ -40,6 +40,7 @@ class Relation {
             this._rowDiffset = source._rowDiffset;
             this._dataFormat = source._dataFormat;
             this._parent = source;
+            this._dataObjects = this._parent._dataObjects;
             this._partialFieldspace = this._parent._partialFieldspace;
             this._fieldStoreName = getUniqueId();
             this.__calculateFieldspace().calculateFieldsConfig();
@@ -260,32 +261,13 @@ class Relation {
         config = Object.assign({}, defConfig, config);
 
         const cloneConfig = { saveChild: config.saveChild };
-        let oDm;
 
-        if (config.mode === FilteringMode.ALL) {
-            const selectDm = cloneWithSelect(
-                this,
-                selectFn,
-                { mode: FilteringMode.NORMAL },
-                cloneConfig
-            );
-            const rejectDm = cloneWithSelect(
-                this,
-                selectFn,
-                { mode: FilteringMode.INVERSE },
-                cloneConfig
-            );
-            oDm = [selectDm, rejectDm];
-        } else {
-            oDm = cloneWithSelect(
-                this,
-                selectFn,
-                config,
-                cloneConfig
-            );
-        }
-
-        return oDm;
+        return cloneWithSelect(
+            this,
+            selectFn,
+            config,
+            cloneConfig
+        );
     }
 
     /**
