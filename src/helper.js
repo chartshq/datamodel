@@ -132,7 +132,8 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
     let fns = [];
     const operation = config.operation || LOGICAL_OPERATORS.AND;
     const filterByMeasure = config.filterByMeasure || false;
-    const modelFieldsConfig = model.getFieldsConfig();
+    const clonedModel = cloneWithAllFields(model);
+    const modelFieldsConfig = clonedModel.getFieldsConfig();
 
     if (!propModels.length) {
         fns = [() => false];
@@ -143,6 +144,7 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
             const fieldsConfig = dataModel.getFieldsConfig();
             const dimensions = Object.keys(dataModel.getFieldspace().getDimension())
                 .filter(d => d in modelFieldsConfig);
+            const dLen = dimensions.length;
             const indices = dimensions.map(d =>
                 fieldsConfig[d].index);
             const measures = Object.keys(dataModel.getFieldspace().getMeasure())
@@ -156,29 +158,32 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
             const valuesMap = {};
 
             keyFn = (arr, row, idx) => row[arr[idx]];
-            data.forEach((row) => {
-                const key = getKey(indices, row, keyFn);
-                valuesMap[key] = 1;
-            });
+            if (dLen) {
+                data.forEach((row) => {
+                    const key = getKey(indices, row, keyFn);
+                    valuesMap[key] = 1;
+                });
+            }
+
             keyFn = (arr, fields, idx) => fields[arr[idx]].value;
             return data.length ? (fields) => {
-                const key = getKey(dimensions, fields, keyFn);
+                const present = dLen ? valuesMap[getKey(dimensions, fields, keyFn)] : true;
                 if (filterByMeasure) {
                     return measures.every(field => fields[field].value >= domain[field][0] &&
-                        fields[field].value <= domain[field][1]) && valuesMap[key];
+                        fields[field].value <= domain[field][1]) && present;
                 }
-                return valuesMap[key];
+                return present;
             } : () => false;
         })(propModel));
     }
 
     let filteredModel;
     if (operation === LOGICAL_OPERATORS.AND) {
-        filteredModel = cloneWithAllFields(model).select(fields => fns.every(fn => fn(fields)), {
+        filteredModel = clonedModel.select(fields => fns.every(fn => fn(fields)), {
             saveChild: false
         });
     } else {
-        filteredModel = cloneWithAllFields(model).select(fields => fns.some(fn => fn(fields)), {
+        filteredModel = clonedModel.select(fields => fns.some(fn => fn(fields)), {
             saveChild: false
         });
     }
