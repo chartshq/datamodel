@@ -120,42 +120,55 @@ export const cloneWithAllFields = (model) => {
     return clonedDm;
 };
 
+const getKey = (arr, data, fn) => {
+    let key = fn(arr, data, 0);
+    for (let i = 1, len = arr.length; i < len; i++) {
+        key = `${key},${fn(arr, data, i)}`;
+    }
+    return key;
+};
+
 export const filterPropagationModel = (model, propModels, config = {}) => {
+    let fns = [];
     const operation = config.operation || LOGICAL_OPERATORS.AND;
     const filterByMeasure = config.filterByMeasure || false;
-    let fns = [];
+    const modelFieldsConfig = model.getFieldsConfig();
+
     if (!propModels.length) {
         fns = [() => false];
     } else {
         fns = propModels.map(propModel => ((dataModel) => {
+            let keyFn;
             const dataObj = dataModel.getData();
-            const schema = dataObj.schema;
             const fieldsConfig = dataModel.getFieldsConfig();
+            const dimensions = Object.keys(dataModel.getFieldspace().getDimension())
+                .filter(d => d in modelFieldsConfig);
+            const indices = dimensions.map(d =>
+                fieldsConfig[d].index);
+            const measures = Object.keys(dataModel.getFieldspace().getMeasure())
+                .filter(d => d in modelFieldsConfig);
             const fieldsSpace = dataModel.getFieldspace().fieldsObj();
             const data = dataObj.data;
-            const domain = Object.values(fieldsConfig).reduce((acc, v) => {
-                acc[v.def.name] = fieldsSpace[v.def.name].domain();
+            const domain = measures.reduce((acc, v) => {
+                acc[v] = fieldsSpace[v].domain();
                 return acc;
             }, {});
+            const valuesMap = {};
 
-            return (fields) => {
-                const include = !data.length ? false : data.some(row => schema.every((propField) => {
-                    if (!(propField.name in fields)) {
-                        return true;
-                    }
-                    const value = fields[propField.name].valueOf();
-                    if (filterByMeasure && propField.type === FieldType.MEASURE) {
-                        return value >= domain[propField.name][0] && value <= domain[propField.name][1];
-                    }
-
-                    if (propField.type !== FieldType.DIMENSION) {
-                        return true;
-                    }
-                    const idx = fieldsConfig[propField.name].index;
-                    return row[idx] === fields[propField.name].valueOf();
-                }));
-                return include;
-            };
+            keyFn = (arr, row, idx) => row[arr[idx]];
+            data.forEach((row) => {
+                const key = getKey(indices, row, keyFn);
+                valuesMap[key] = 1;
+            });
+            keyFn = (arr, fields, idx) => fields[arr[idx]].value;
+            return data.length ? (fields) => {
+                const key = getKey(dimensions, fields, keyFn);
+                if (filterByMeasure) {
+                    return measures.every(field => fields[field].value >= domain[field][0] &&
+                        fields[field].value <= domain[field][1]) && valuesMap[key];
+                }
+                return valuesMap[key];
+            } : () => false;
         })(propModel));
     }
 
