@@ -40,7 +40,6 @@ class Relation {
             this._rowDiffset = source._rowDiffset;
             this._dataFormat = source._dataFormat;
             this._parent = source;
-            this._dataObjects = this._parent._dataObjects;
             this._partialFieldspace = this._parent._partialFieldspace;
             this._fieldStoreName = getUniqueId();
             this.__calculateFieldspace().calculateFieldsConfig();
