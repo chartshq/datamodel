@@ -55,27 +55,52 @@ export const persistDerivations = (sourceDm, model, operation, config = {}, crit
     persistAncestorDerivation(sourceDm, model);
 };
 
-export const selectRowDiffsetIterator = (rowDiffset, checker) => {
-    let li;
-    let lastInsertedValue = -1;
+const selectModeMap = {
+    [FilteringMode.NORMAL]: {
+        diffIndex: ['rowDiffset'],
+        calcDiff: [true, false]
+    },
+    [FilteringMode.INVERSE]: {
+        diffIndex: ['rejectRowDiffset'],
+        calcDiff: [false, true]
+    },
+    [FilteringMode.ALL]: {
+        diffIndex: ['rowDiffset', 'rejectRowDiffset'],
+        calcDiff: [true, true]
+    }
+};
+
+const generateRowDiffset = (rowDiffset, i, lastInsertedValue) => {
+    if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
+        const li = rowDiffset.length - 1;
+
+        rowDiffset[li] = `${rowDiffset[li].split('-')[0]}-${i}`;
+    } else {
+        rowDiffset.push(`${i}`);
+    }
+};
+
+export const selectRowDiffsetIterator = (rowDiffset, checker, mode) => {
+    let lastInsertedValueSel = -1;
+    let lastInsertedValueRej = -1;
     const newRowDiffSet = [];
+    const rejRowDiffSet = [];
+
+    const [shouldSelect, shouldReject] = selectModeMap[mode].calcDiff;
 
     rowDiffsetIterator(rowDiffset, (i) => {
-        if (checker(i)) {
-            if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
-                li = newRowDiffSet.length - 1;
-                newRowDiffSet[li] = `${newRowDiffSet[li].split('-')[0]}-${i}`;
-            } else {
-                newRowDiffSet.push(`${i}`);
-            }
-            lastInsertedValue = i;
-        }
+        const checkerResult = checker(i);
+        checkerResult && shouldSelect && generateRowDiffset(newRowDiffSet, i, lastInsertedValueSel);
+        !checkerResult && shouldReject && generateRowDiffset(rejRowDiffSet, i, lastInsertedValueRej);
     });
-    return newRowDiffSet.join(',');
+    return {
+        rowDiffset: newRowDiffSet.join(','),
+        rejectRowDiffset: rejRowDiffSet.join(',')
+    };
 };
 
 
-export const rowSplitDiffsetIterator = (rowDiffset, checker, dimensionArr, fieldStoreObj) => {
+export const rowSplitDiffsetIterator = (rowDiffset, checker, mode, dimensionArr, fieldStoreObj) => {
     let li;
     const splitRowDiffset = {};
     const dimensionMap = {};
@@ -114,10 +139,10 @@ export const rowSplitDiffsetIterator = (rowDiffset, checker, dimensionArr, field
 
 
 export const selectHelper = (clonedDm, selectFn, config, sourceDm, iterator) => {
-    let { mode } = config;
     let cachedStore = {};
     let cloneProvider = () => sourceDm.detachedRoot();
 
+    const { mode } = config;
     const rowDiffset = clonedDm._rowDiffset;
     const fields = clonedDm.getPartialFieldspace().fields;
     const selectorHelperFn = index => selectFn(
@@ -127,13 +152,7 @@ export const selectHelper = (clonedDm, selectFn, config, sourceDm, iterator) => 
         cachedStore
     );
 
-    let checker;
-    if (mode === FilteringMode.INVERSE) {
-        checker = index => !selectorHelperFn(index);
-    } else {
-        checker = index => selectorHelperFn(index);
-    }
-    return iterator(rowDiffset, checker);
+    return iterator(rowDiffset, selectorHelperFn, mode);
 };
 
 export const cloneWithAllFields = (model) => {
@@ -236,11 +255,8 @@ export const splitWithSelect = (sourceDm, dimensionArr, reducerFn = val => val, 
             if (saveChild) {
                 persistDerivations(sourceDm, cloned, DM_DERIVATIVES.SELECT, config, derivationFormula);
             }
-            // const newDM = dimensionMap[e];
-            // newDM.dataModel = cloned;
-            // clonedDMs.push(newDM);
             cloned._derivation[cloned._derivation.length - 1].meta = dimensionMap[e];
-            // cloned.derivation.keys = dimensionMap[e];
+
             clonedDMs.push(cloned);
         }
     });
@@ -248,27 +264,40 @@ export const splitWithSelect = (sourceDm, dimensionArr, reducerFn = val => val, 
 
     return clonedDMs;
 };
+export const addDiffsetToClonedDm = (clonedDm, rowDiffset, sourceDm, selectConfig, selectFn) => {
+    clonedDm._rowDiffset = rowDiffset;
+    clonedDm.__calculateFieldspace().calculateFieldsConfig();
+    persistDerivations(
+        sourceDm,
+        clonedDm,
+        DM_DERIVATIVES.SELECT,
+         { config: selectConfig },
+          selectFn
+    );
+};
 
 
 export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) => {
+    let extraCloneDm = {};
+
+    const { mode } = selectConfig;
     const cloned = sourceDm.clone(cloneConfig.saveChild);
-    const rowDiffset = selectHelper(
+    const setOfRowDiffsets = selectHelper(
         cloned,
         selectFn,
         selectConfig,
         sourceDm,
         selectRowDiffsetIterator
     );
-    cloned._rowDiffset = rowDiffset;
-    cloned.__calculateFieldspace().calculateFieldsConfig();
+    const diffIndex = selectModeMap[mode].diffIndex;
 
-    persistDerivations(
-        sourceDm,
-        cloned,
-        DM_DERIVATIVES.SELECT,
-         { config: selectConfig },
-          selectFn
-    );
+    addDiffsetToClonedDm(cloned, setOfRowDiffsets[diffIndex[0]], sourceDm, selectConfig, selectFn);
+
+    if (diffIndex.length > 1) {
+        extraCloneDm = sourceDm.clone(cloneConfig.saveChild);
+        addDiffsetToClonedDm(extraCloneDm, setOfRowDiffsets[diffIndex[1]], sourceDm, selectConfig, selectFn);
+        return [cloned, extraCloneDm];
+    }
 
     return cloned;
 };
