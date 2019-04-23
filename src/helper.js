@@ -59,6 +59,7 @@ export const persistDerivations = (sourceDm, model, operation, config = {}, crit
 const generateRowDiffset = (rowDiffset, i, lastInsertedValue) => {
     if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
         const li = rowDiffset.length - 1;
+
         rowDiffset[li] = `${rowDiffset[li].split('-')[0]}-${i}`;
     } else {
         rowDiffset.push(`${i}`);
@@ -122,6 +123,7 @@ export const cloneWithAllFields = (model) => {
 
 const getKey = (arr, data, fn) => {
     let key = fn(arr, data, 0);
+
     for (let i = 1, len = arr.length; i < len; i++) {
         key = `${key},${fn(arr, data, i)}`;
     }
@@ -168,6 +170,7 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
             keyFn = (arr, fields, idx) => fields[arr[idx]].value;
             return data.length ? (fields) => {
                 const present = dLen ? valuesMap[getKey(dimensions, fields, keyFn)] : true;
+
                 if (filterByMeasure) {
                     return measures.every(field => fields[field].value >= domain[field][0] &&
                         fields[field].value <= domain[field][1]) && present;
@@ -205,6 +208,7 @@ export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) =
     let oDm = cloned;
     if (selectConfig.mode === FilteringMode.ALL) {
         const rejCloned = sourceDm.clone(cloneConfig.saveChild);
+
         rejCloned._rowDiffset = rejRowDiffSet;
         rejCloned.__calculateFieldspace().calculateFieldsConfig();
         persistDerivations(

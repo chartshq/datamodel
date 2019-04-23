@@ -221,8 +221,10 @@ class DataModel extends Relation {
 
         if (rowDiffset.length) {
             const diffSets = rowDiffset.split(',');
+
             diffSets.forEach((set) => {
                 let [start, end] = set.split('-').map(Number);
+
                 end = end !== undefined ? end : start;
                 ids.push(...Array(end - start + 1).fill().map((_, idx) => start + idx));
             });
