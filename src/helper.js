@@ -128,6 +128,7 @@ export const rowSplitDiffsetIterator = (rowDiffset, checker, mode, dimensionArr,
             } else {
                 splitRowDiffset[hash].push(`${i}`);
             }
+            generateRowDiffset(splitRowDiffset[hash], i, lastInsertedValue);
             lastInsertedValue = i;
         }
     });
@@ -169,54 +170,72 @@ export const cloneWithAllFields = (model) => {
     return clonedDm;
 };
 
+const getKey = (arr, data, fn) => {
+    let key = fn(arr, data, 0);
+
+    for (let i = 1, len = arr.length; i < len; i++) {
+        key = `${key},${fn(arr, data, i)}`;
+    }
+    return key;
+};
+
 export const filterPropagationModel = (model, propModels, config = {}) => {
+    let fns = [];
     const operation = config.operation || LOGICAL_OPERATORS.AND;
     const filterByMeasure = config.filterByMeasure || false;
-    let fns = [];
+    const clonedModel = cloneWithAllFields(model);
+    const modelFieldsConfig = clonedModel.getFieldsConfig();
+
     if (!propModels.length) {
         fns = [() => false];
     } else {
         fns = propModels.map(propModel => ((dataModel) => {
+            let keyFn;
             const dataObj = dataModel.getData();
-            const schema = dataObj.schema;
             const fieldsConfig = dataModel.getFieldsConfig();
+            const dimensions = Object.keys(dataModel.getFieldspace().getDimension())
+                .filter(d => d in modelFieldsConfig);
+            const dLen = dimensions.length;
+            const indices = dimensions.map(d =>
+                fieldsConfig[d].index);
+            const measures = Object.keys(dataModel.getFieldspace().getMeasure())
+                .filter(d => d in modelFieldsConfig);
             const fieldsSpace = dataModel.getFieldspace().fieldsObj();
             const data = dataObj.data;
-            const domain = Object.values(fieldsConfig).reduce((acc, v) => {
-                acc[v.def.name] = fieldsSpace[v.def.name].domain();
+            const domain = measures.reduce((acc, v) => {
+                acc[v] = fieldsSpace[v].domain();
                 return acc;
             }, {});
+            const valuesMap = {};
 
-            return (fields) => {
-                const include = !data.length ? false : data.some(row => schema.every((propField) => {
-                    if (!(propField.name in fields)) {
-                        return true;
-                    }
-                    const value = fields[propField.name].valueOf();
-                    if (filterByMeasure && propField.type === FieldType.MEASURE) {
-                        return value >= domain[propField.name][0] && value <= domain[propField.name][1];
-                    }
+            keyFn = (arr, row, idx) => row[arr[idx]];
+            if (dLen) {
+                data.forEach((row) => {
+                    const key = getKey(indices, row, keyFn);
+                    valuesMap[key] = 1;
+                });
+            }
 
-                    if (propField.type !== FieldType.DIMENSION) {
-                        return true;
-                    }
-                    const idx = fieldsConfig[propField.name].index;
-                    return row[idx] === fields[propField.name].valueOf();
-                }));
-                return include;
-            };
+            keyFn = (arr, fields, idx) => fields[arr[idx]].value;
+            return data.length ? (fields) => {
+                const present = dLen ? valuesMap[getKey(dimensions, fields, keyFn)] : true;
+
+                if (filterByMeasure) {
+                    return measures.every(field => fields[field].value >= domain[field][0] &&
+                        fields[field].value <= domain[field][1]) && present;
+                }
+                return present;
+            } : () => false;
         })(propModel));
     }
 
     let filteredModel;
     if (operation === LOGICAL_OPERATORS.AND) {
-        filteredModel = cloneWithAllFields(model).select(fields => fns.every(fn => fn(fields)), {
-            saveChild: false,
-            mode: FilteringMode.ALL
+        filteredModel = clonedModel.select(fields => fns.every(fn => fn(fields)), {
+            saveChild: false
         });
     } else {
-        filteredModel = cloneWithAllFields(model).select(fields => fns.some(fn => fn(fields)), {
-            mode: FilteringMode.ALL,
+        filteredModel = clonedModel.select(fields => fns.some(fn => fn(fields)), {
             saveChild: false
         });
     }
@@ -411,8 +430,17 @@ export const updateData = (relation, data, schema, options) => {
     // This will create a new fieldStore with the fields
     const nameSpace = fieldStore.createNamespace(fieldArr, options.name);
     relation._partialFieldspace = nameSpace;
+
     // If data is provided create the default colIdentifier and rowDiffset
     relation._rowDiffset = formattedData.length && formattedData[0].length ? `0-${formattedData[0].length - 1}` : '';
+
+    // This stores the value objects which is passed to the filter method when selection operation is done.
+    const valueObjects = [];
+    rowDiffsetIterator(relation._rowDiffset, (i) => {
+        valueObjects[i] = prepareSelectionData(nameSpace.fields, i);
+    });
+    nameSpace._cachedValueObjects = valueObjects;
+
     relation._colIdentifier = (schema.map(_ => _.name)).join();
     relation._dataFormat = options.dataFormat === DataFormat.AUTO ? detectDataFormat(data) : options.dataFormat;
     return relation;
@@ -460,8 +488,7 @@ export const getDerivationArguments = (derivation) => {
 
 const applyExistingOperationOnModel = (propModel, dataModel) => {
     const derivations = dataModel.getDerivations();
-    let selectionModel = propModel[0];
-    let rejectionModel = propModel[1];
+    let selectionModel = propModel;
 
     derivations.forEach((derivation) => {
         if (!derivation) {
@@ -473,13 +500,10 @@ const applyExistingOperationOnModel = (propModel, dataModel) => {
             selectionModel = selectionModel[operation](...params, {
                 saveChild: false
             });
-            rejectionModel = rejectionModel[operation](...params, {
-                saveChild: false
-            });
         }
     });
 
-    return [selectionModel, rejectionModel];
+    return selectionModel;
 };
 
 const getFilteredModel = (propModel, path) => {
@@ -504,8 +528,8 @@ const propagateIdentifiers = (dataModel, propModel, config = {}, propModelInf = 
 
     const children = dataModel._children;
     children.forEach((child) => {
-        let [selectionModel, rejectionModel] = applyExistingOperationOnModel(propModel, child);
-        propagateIdentifiers(child, [selectionModel, rejectionModel], config, propModelInf);
+        const selectionModel = applyExistingOperationOnModel(propModel, child);
+        propagateIdentifiers(child, selectionModel, config, propModelInf);
     });
 };
 

@@ -82,6 +82,8 @@
     "ut": "karma start karma.conf.js",
     "utd": "karma start --single-run false --browsers Chrome karma.conf.js ",
     "build": "webpack --mode production",
+    "build:dev": "webpack --mode development",
+    "build:prod": "webpack --mode production",
     "start": "webpack-dev-server --config webpack.config.dev.js --mode development --open",
     "lint": "eslint ./src",
     "lint-errors": "eslint --quiet ./src",
