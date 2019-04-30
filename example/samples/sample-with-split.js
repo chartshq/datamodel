@@ -41,7 +41,7 @@ d3.json('./data/cars.json', (data) => {
         }];
     window.datamodel = new DataModel(jsonData, schema);
 
-    const splitDms = datamodel.splitByRow(['Origin']);
+    const splitDms = datamodel.splitByRow(['Year']);
     console.log(splitDms);
 
     const splitDmsMultipleDimensions = datamodel.splitByRow(['Origin', 'Cylinders']);

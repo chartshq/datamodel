@@ -102,13 +102,14 @@ export const selectRowDiffsetIterator = (rowDiffset, checker, mode) => {
 
 export const rowSplitDiffsetIterator = (rowDiffset, checker, mode, dimensionArr, fieldStoreObj) => {
     let li;
+    let lastInsertedValue = {};
     const splitRowDiffset = {};
     const dimensionMap = {};
 
     rowDiffsetIterator(rowDiffset, (i) => {
         if (checker(i)) {
             let hash = '';
-            let lastInsertedValue = -1;
+
             let dimensionSet = { keys: {} };
 
             dimensionArr.forEach((_) => {
@@ -119,19 +120,15 @@ export const rowSplitDiffsetIterator = (rowDiffset, checker, mode, dimensionArr,
 
             if (splitRowDiffset[hash] === undefined) {
                 splitRowDiffset[hash] = [];
+                lastInsertedValue[hash] = -1;
                 dimensionMap[hash] = dimensionSet;
             }
 
-            if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
-                li = splitRowDiffset[hash].length - 1;
-                splitRowDiffset[hash][li] = `${splitRowDiffset[hash][li].split('-')[0]}-${i}`;
-            } else {
-                splitRowDiffset[hash].push(`${i}`);
-            }
-            generateRowDiffset(splitRowDiffset[hash], i, lastInsertedValue);
-            lastInsertedValue = i;
+            generateRowDiffset(splitRowDiffset[hash], i, lastInsertedValue[hash]);
+            lastInsertedValue[hash] = i;
         }
     });
+
     return {
         splitRowDiffset,
         dimensionMap
