@@ -1858,6 +1858,7 @@ describe('DataModel', () => {
             ).to.be.true;
         });
     });
+
     context('Aggregation function context', () => {
         const data1 = [
             { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
@@ -2772,6 +2773,63 @@ describe('DataModel', () => {
             dm = rootDm.bin('sales', { binSize: 12, name: 'binnedSales', saveChild: false });
             expect(dm.getParent()).to.be.null;
             expect(rootDm.getChildren().length).to.be.equal(0);
+        });
+    });
+
+    context('Split DataModels context', () => {
+        const data1 = [
+            { profit: 10, sales: 20, first: 'Hey', second: 'Jude', week: 1 },
+            { profit: 20, sales: 25, first: 'Hey', second: 'Wood', week: 1 },
+            { profit: 10, sales: 20, first: 'White', second: 'the sun', week: 1 },
+            { profit: 15, sales: 25, first: 'White', second: 'walls', week: 1 },
+            { profit: 25, sales: 35, first: 'White', second: 'walls', week: 2 },
+        ];
+        const schema1 = [
+            {
+                name: 'profit',
+                type: 'measure',
+                defAggFn: 'avg'
+            },
+            {
+                name: 'sales',
+                type: 'measure'
+            },
+            {
+                name: 'first',
+                type: 'dimension'
+            },
+            {
+                name: 'second',
+                type: 'dimension'
+            },
+            {
+                name: 'week',
+                type: 'dimension'
+            },
+        ];
+        const dataModel = new DataModel(data1, schema1);
+
+        describe('#splitByRow', () => {
+            it('should split the datamodels by one facet', () => {
+                const splitDMs = dataModel.splitByRow(['first']);
+                expect(splitDMs.length).to.equal(2);
+            });
+
+            it('should split the datamodels by multiple facets', () => {
+                const splitDMs = dataModel.splitByRow(['first', 'second']);
+                expect(splitDMs.length).to.equal(4);
+            });
+        });
+        describe('#splitByColumn', () => {
+            it('should split the datamodels by one common and one unique field', () => {
+                const splitDMs = dataModel.splitByColumn([], [['second'], ['week'], ['first', 'sales']]);
+                expect(splitDMs.length).to.equal(3);
+            });
+
+            it('should split the datamodels by multiple facets', () => {
+                const splitDMs = dataModel.splitByColumn(['first'], [['week'], ['second']]);
+                expect(splitDMs.length).to.equal(2);
+            });
         });
     });
 });

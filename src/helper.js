@@ -101,7 +101,6 @@ export const selectRowDiffsetIterator = (rowDiffset, checker, mode) => {
 
 
 export const rowSplitDiffsetIterator = (rowDiffset, checker, mode, dimensionArr, fieldStoreObj) => {
-    let li;
     let lastInsertedValue = {};
     const splitRowDiffset = {};
     const dimensionMap = {};
