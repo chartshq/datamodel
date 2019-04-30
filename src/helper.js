@@ -13,10 +13,11 @@ import { extend2, detectDataFormat } from './utils';
 /**
  * Prepares the selection data.
  */
-function prepareSelectionData (fields, i) {
+function prepareSelectionData (fields, formattedData, rawData, i) {
     const resp = {};
-    for (let field of fields) {
-        resp[field.name()] = new Value(field.partialField.data[i], field);
+
+    for (const [key, field] of fields.entries()) {
+        resp[field.name()] = new Value(formattedData[key][i], rawData[key][i], field);
     }
     return resp;
 }
@@ -63,8 +64,11 @@ export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => 
     let li;
     let cachedStore = {};
     let cloneProvider = () => sourceDm.detachedRoot();
+
+    const rawFieldsData = fields.map(field => field.data());
+    const formattedFieldsData = fields.map(field => field.formattedData());
     const selectorHelperFn = index => selectFn(
-        prepareSelectionData(fields, index),
+        prepareSelectionData(fields, formattedFieldsData, rawFieldsData, index),
         index,
         cloneProvider,
         cachedStore

@@ -12,12 +12,21 @@ class Value {
    * @param {*} val - the primitive value from the field cell.
    * @param {string | Field} field - The field from which the value belongs.
    */
-    constructor (val, field) {
-        Object.defineProperty(this, '_value', {
+    constructor (parsedVal, val, field) {
+        const descriptorConfig = {
             enumerable: false,
             configurable: false,
             writable: false,
-            value: val
+        };
+        Object.defineProperties(this, {
+            _value: {
+                ...descriptorConfig,
+                value: val
+            },
+            _parsedValue: {
+                ...descriptorConfig,
+                value: parsedVal
+            }
         });
 
         this.field = field;
@@ -30,6 +39,10 @@ class Value {
    */
     get value () {
         return this._value;
+    }
+
+    get parsedValue () {
+        return this._parsedValue;
     }
 
   /**
