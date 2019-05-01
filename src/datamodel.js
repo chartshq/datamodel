@@ -833,20 +833,16 @@ class DataModel extends Relation {
         const normalizedProjFieldSets = [[commonFields]];
 
         config = Object.assign({}, defConfig, config);
+        uniqueFields = uniqueFields.length ? uniqueFields : [[]];
 
-        if (uniqueFields.length) {
-            uniqueFields.forEach((fieldSet, i) => {
-                normalizedProjFieldSets[i] = getNormalizedProFields(
-                    [...commonFields, ...fieldSet],
-                    allFields,
-                    fieldConfig);
-            });
-        } else {
-            normalizedProjFieldSets[0] = getNormalizedProFields(
-                [...commonFields],
+
+        uniqueFields.forEach((fieldSet, i) => {
+            normalizedProjFieldSets[i] = getNormalizedProFields(
+                [...commonFields, ...fieldSet],
                 allFields,
                 fieldConfig);
-        }
+        });
+
         return splitWithProject(this, normalizedProjFieldSets, config, allFields);
     }
 
