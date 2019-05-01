@@ -264,6 +264,7 @@ class Relation {
             saveChild: true
         };
         config = Object.assign({}, defConfig, config);
+        config.mode = config.mode || defConfig.mode;
 
         const cloneConfig = { saveChild: config.saveChild };
 
