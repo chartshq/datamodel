@@ -22,9 +22,11 @@ function prepareSelectionData (fields, formattedData, rawData, i) {
     return resp;
 }
 
-export function prepareJoinData (fields) {
+export function prepareJoinData (fields, fieldInstance) {
     const resp = {};
-    Object.keys(fields).forEach((key) => { resp[key] = new Value(fields[key], key); });
+    const formattedData = fieldInstance.fields.map(field => field.formattedData());
+
+    Object.keys(fields).forEach((key, index) => { resp[key] = new Value(formattedData[index][0], fields[key], key); });
     return resp;
 }
 

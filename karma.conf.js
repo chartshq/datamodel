@@ -6,6 +6,7 @@ module.exports = function (config) {
             'test.webpack.js',
         ],
         webpack: {
+            mode: 'development',
             devtool: 'inline-source-map',
             module: {
                 rules: [

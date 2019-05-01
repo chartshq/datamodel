@@ -13,18 +13,17 @@ class Value {
    * @param {string | Field} field - The field from which the value belongs.
    */
     constructor (parsedVal, val, field) {
-        const descriptorConfig = {
-            enumerable: false,
-            configurable: false,
-            writable: false,
-        };
         Object.defineProperties(this, {
             _value: {
-                ...descriptorConfig,
+                enumerable: false,
+                configurable: false,
+                writable: false,
                 value: val
             },
             _parsedValue: {
-                ...descriptorConfig,
+                enumerable: false,
+                configurable: false,
+                writable: false,
                 value: parsedVal
             }
         });
@@ -41,6 +40,9 @@ class Value {
         return this._value;
     }
 
+    /**
+     * Returns the parsed value of field
+     */
     get parsedValue () {
         return this._parsedValue;
     }

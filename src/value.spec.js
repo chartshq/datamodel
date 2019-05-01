@@ -13,12 +13,13 @@ describe('Value', () => {
     let anotherValue;
 
     beforeEach(() => {
-        value = new Value(fieldValue, fieldName);
-        anotherValue = new Value(anotherFieldValue, anotherFieldName);
+        value = new Value(fieldValue, fieldValue, fieldName);
+        anotherValue = new Value(anotherFieldValue, anotherFieldValue, anotherFieldName);
     });
 
     it('should hold primitive value of a field cell', () => {
         expect(value.value).to.equal(fieldValue);
+        expect(value.parsedValue).to.equal(fieldValue);
         expect(value.field).to.equal(fieldName);
     });
 

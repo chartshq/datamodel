@@ -79,8 +79,8 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
             let cloneProvider1 = () => dm1.detachedRoot();
             let cloneProvider2 = () => dm2.detachedRoot();
 
-            const dm1Fields = prepareJoinData(userArg[dm1FieldStoreName]);
-            const dm2Fields = prepareJoinData(userArg[dm2FieldStoreName]);
+            const dm1Fields = prepareJoinData(userArg[dm1FieldStoreName], dm1FieldStore);
+            const dm2Fields = prepareJoinData(userArg[dm2FieldStoreName], dm2FieldStore);
             if (applicableFilterFn(dm1Fields, dm2Fields, cloneProvider1, cloneProvider2, cachedStore)) {
                 const tupleObj = {};
                 tuple.forEach((cellVal, iii) => {
