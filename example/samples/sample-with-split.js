@@ -44,6 +44,7 @@ d3.json('./data/cars.json', (data) => {
     const splitDms = datamodel.splitByRow(['Year']);
     console.log(splitDms);
 
+
     const splitDmsMultipleDimensions = datamodel.splitByRow(['Year', 'Cylinders']);
     console.log(splitDmsMultipleDimensions);
 
@@ -55,6 +56,11 @@ d3.json('./data/cars.json', (data) => {
 
     const projectDm = datamodel.splitByColumn(['Origin'], [['Acceleration'], ['Horsepower']]);
     console.log(projectDm);
+
+    const splitDms2 = datamodel.splitByRow(['Year']).map(e=>{
+       return e.splitByColumn(['Origin'], []);
+    });
+    console.log(splitDms2);
 
 
     const compose = window.DataModel.Operators.compose;
