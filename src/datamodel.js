@@ -824,7 +824,6 @@ class DataModel extends Relation {
      * @return {Array}  Returns the new DataModel instances after operation.
      */
     splitByColumn (commonFields = [], uniqueFields = [], config) {
-        let i = 0;
         const defConfig = {
             mode: FilteringMode.NORMAL,
             saveChild: true
@@ -835,14 +834,19 @@ class DataModel extends Relation {
 
         config = Object.assign({}, defConfig, config);
 
-        do {
-            normalizedProjFieldSets[i] = getNormalizedProFields(
-                [...commonFields, ...(uniqueFields[i] || [])],
+        if (uniqueFields.length) {
+            uniqueFields.forEach((fieldSet, i) => {
+                normalizedProjFieldSets[i] = getNormalizedProFields(
+                    [...commonFields, ...fieldSet],
+                    allFields,
+                    fieldConfig);
+            });
+        } else {
+            normalizedProjFieldSets[0] = getNormalizedProFields(
+                [...commonFields],
                 allFields,
                 fieldConfig);
-            i++;
-        } while (uniqueFields.length === i);
-
+        }
         return splitWithProject(this, normalizedProjFieldSets, config, allFields);
     }
 
