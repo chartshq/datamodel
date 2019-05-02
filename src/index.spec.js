@@ -7,6 +7,7 @@ import { DM_DERIVATIVES } from './constants';
 import DataModel from './index';
 import pkg from '../package.json';
 import InvalidAwareTypes from './invalid-aware-types';
+import { getDerivationArguments } from './helper';
 
 function avg(...nums) {
     return nums.reduce((acc, next) => acc + next, 0) / nums.length;
@@ -2872,11 +2873,19 @@ describe('DataModel', () => {
                 expect(splitDMs.length).to.equal(1);
             });
 
+            it('should split be able to give the same datamodel using derivation formula', () => {
+                const splitDMs = dataModel.splitByRow(['first'], fields => fields.first.value === 'Hey');
+                const { operation, params } = getDerivationArguments(splitDMs[0]._derivation[0]);
+
+                expect(dataModel[operation](...params).getData().data).to.deep.equal(splitDMs[0].getData().data);
+            });
+
             it('should split the datamodels with a selection function with inverse mode', () => {
                 const splitDMs = dataModel.splitByRow(['first', 'second'],
                     fields => fields.first.value === 'Hey', { mode: 'inverse' });
                 expect(splitDMs.length).to.equal(2);
             });
+
             it('should split the datamodels with a selection function with undefined mode', () => {
                 const splitDMs = dataModel.splitByRow(['first', 'second'],
                     fields => fields.first.value === 'Hey', { mode: undefined });
