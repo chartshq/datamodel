@@ -854,6 +854,33 @@ describe('DataModel', () => {
             expect(selectedDm.getData()).to.eql(expData);
         });
 
+        it('should store provide proper selected datamodel with undefined mode', () => {
+            const dataModel = new DataModel(data, schema);
+
+            const dm = dataModel.project(['age', 'job', 'marital'], { mode: undefined });
+            const selectedDm = dm.select(fields => fields.age.value < 40);
+
+            const expData = {
+                data: [
+                    [30, 'management', 'married'],
+                    [35, 'management', 'single'],
+                    [28, 'blue-collar', 'married']
+                ],
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                uids: [0, 2, 4]
+            };
+
+            // check project is not applied on the same DataModel
+            expect(dataModel === selectedDm).to.be.false;
+            expect(selectedDm._rowDiffset).to.equal('0,2,4');
+            // Check The return data
+            expect(selectedDm.getData()).to.deep.equal(expData);
+        });
+
         it('should store derivation criteria info', () => {
             const dataModel = new DataModel(data, schema);
 
@@ -2848,6 +2875,11 @@ describe('DataModel', () => {
             it('should split the datamodels with a selection function with inverse mode', () => {
                 const splitDMs = dataModel.splitByRow(['first', 'second'],
                     fields => fields.first.value === 'Hey', { mode: 'inverse' });
+                expect(splitDMs.length).to.equal(2);
+            });
+            it('should split the datamodels with a selection function with undefined mode', () => {
+                const splitDMs = dataModel.splitByRow(['first', 'second'],
+                    fields => fields.first.value === 'Hey', { mode: undefined });
                 expect(splitDMs.length).to.equal(2);
             });
         });
