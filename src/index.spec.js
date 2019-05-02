@@ -2886,6 +2886,10 @@ describe('DataModel', () => {
                 expect(splitDMs.length).to.equal(2);
             });
 
+            it('should throw an error if the required fields are not present in the schema', () => {
+                expect(() => dataModel.splitByRow(['firstTwp'])).to.throw("Field firstTwp doesn't exist in the schema");
+            });
+
             it('should split the datamodels with a selection function with undefined mode', () => {
                 const splitDMs = dataModel.splitByRow(['first', 'second'],
                     fields => fields.first.value === 'Hey', { mode: undefined });
