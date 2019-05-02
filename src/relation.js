@@ -1,6 +1,12 @@
 import { FilteringMode } from './enums';
 import { getUniqueId } from './utils';
-import { updateFields, cloneWithSelect, cloneWithProject, updateData } from './helper';
+import {
+    updateFields,
+    cloneWithSelect,
+    cloneWithProject,
+    updateData,
+    getNormalizedProFields
+} from './helper';
 import { crossProduct, difference, naturalJoinFilter, union } from './operator';
 
 /**
@@ -258,9 +264,9 @@ class Relation {
             saveChild: true
         };
         config = Object.assign({}, defConfig, config);
+        config.mode = config.mode || defConfig.mode;
 
         const cloneConfig = { saveChild: config.saveChild };
-
         return cloneWithSelect(
             this,
             selectFn,
@@ -360,17 +366,8 @@ class Relation {
         const fieldConfig = this.getFieldsConfig();
         const allFields = Object.keys(fieldConfig);
         const { mode } = config;
+        const normalizedProjField = getNormalizedProFields(projField, allFields, fieldConfig);
 
-        let normalizedProjField = projField.reduce((acc, field) => {
-            if (field.constructor.name === 'RegExp') {
-                acc.push(...allFields.filter(fieldName => fieldName.search(field) !== -1));
-            } else if (field in fieldConfig) {
-                acc.push(field);
-            }
-            return acc;
-        }, []);
-
-        normalizedProjField = Array.from(new Set(normalizedProjField)).map(field => field.trim());
         let dataModel;
 
         if (mode === FilteringMode.ALL) {

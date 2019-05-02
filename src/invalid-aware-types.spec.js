@@ -39,5 +39,6 @@ describe('Null/Empty/Invalid Values Representation', () => {
         expect(dmData[1][0]).to.eql(DataModel.InvalidAwareTypes.NULL);
         expect(dmData[1][2] instanceof DataModel.InvalidAwareTypes).to.be.true;
         expect(dmData[1][2]).to.eql(DataModel.InvalidAwareTypes.NULL);
+        expect(dmData[1][2].value()).to.eql('null');
     });
 });
