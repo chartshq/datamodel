@@ -858,8 +858,8 @@ describe('DataModel', () => {
         it('should store provide proper selected datamodel with undefined mode', () => {
             const dataModel = new DataModel(data, schema);
 
-            const dm = dataModel.project(['age', 'job', 'marital'], { mode: undefined });
-            const selectedDm = dm.select(fields => fields.age.value < 40);
+            const dm = dataModel.project(['age', 'job', 'marital']);
+            const selectedDm = dm.select(fields => fields.age.value < 40, { mode: undefined });
 
             const expData = {
                 data: [

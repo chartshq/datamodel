@@ -267,7 +267,6 @@ class Relation {
         config.mode = config.mode || defConfig.mode;
 
         const cloneConfig = { saveChild: config.saveChild };
-
         return cloneWithSelect(
             this,
             selectFn,

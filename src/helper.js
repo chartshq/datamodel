@@ -295,7 +295,6 @@ export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) =
     let extraCloneDm = {};
 
     let { mode } = selectConfig;
-    mode = mode || FilteringMode.NORMAL;
 
     const cloned = sourceDm.clone(cloneConfig.saveChild);
     const setOfRowDiffsets = selectHelper(
