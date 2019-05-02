@@ -797,14 +797,14 @@ class DataModel extends Relation {
      *
      * @example
      *  // without predicate function:
-     *  const splitDt = dt.splitByColumn(['Origin'], [['Acceleration'], ['Horsepower']])
+     *  const splitDt = dt.splitByColumn( [['Acceleration'], ['Horsepower']], ['Origin'])
      *  console.log(splitDt));
      * // This should give two unique DataModel instances, both having the field 'Origin' and
      * // one each having 'Acceleration' and 'Horsepower' fields respectively
      *
      * @example
      *  // without predicate function:
-     *  const splitDtInv = dt.splitByColumn(['Origin', 'Cylinders'], [['Acceleration'], ['Horsepower'],
+     *  const splitDtInv = dt.splitByColumn( [['Acceleration'], ['Horsepower'],['Origin', 'Cylinders'],
      *                           {mode: 'inverse'})
      *  console.log(splitDtInv));
      * // This should give DataModel instances in the following way:
@@ -816,14 +816,14 @@ class DataModel extends Relation {
      *
      * @public
      *
-     * @param {Array} commonFields - Set of common fields included in all datamModel instances
      * @param {Array} uniqueFields - Set of unique fields included in each datamModel instance
+     * @param {Array} commonFields - Set of common fields included in all datamModel instances
      * @param {Object} config - The configuration object
      * @param {string} [config.saveChild] - Configuration to save child or not
      * @param {string}[config.mode=FilteringMode.NORMAL] -The mode of the selection.
      * @return {Array}  Returns the new DataModel instances after operation.
      */
-    splitByColumn (commonFields = [], uniqueFields = [], config) {
+    splitByColumn (uniqueFields = [], commonFields = [], config) {
         const defConfig = {
             mode: FilteringMode.NORMAL,
             saveChild: true
@@ -838,7 +838,7 @@ class DataModel extends Relation {
 
         uniqueFields.forEach((fieldSet, i) => {
             normalizedProjFieldSets[i] = getNormalizedProFields(
-                [...commonFields, ...fieldSet],
+                [...fieldSet, ...commonFields],
                 allFields,
                 fieldConfig);
         });

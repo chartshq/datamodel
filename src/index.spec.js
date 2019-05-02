@@ -2822,12 +2822,12 @@ describe('DataModel', () => {
         });
         describe('#splitByColumn', () => {
             it('should split the datamodels by one common and one unique field', () => {
-                const splitDMs = dataModel.splitByColumn([], [['second'], ['week'], ['first', 'sales']]);
+                const splitDMs = dataModel.splitByColumn([['second'], ['week'], ['first', 'sales']], []);
                 expect(splitDMs.length).to.equal(3);
             });
 
             it('should split the datamodels by multiple facets', () => {
-                const splitDMs = dataModel.splitByColumn(['first'], [['week'], ['second']]);
+                const splitDMs = dataModel.splitByColumn([['week'], ['second']], ['first']);
                 expect(splitDMs.length).to.equal(2);
             });
         });
