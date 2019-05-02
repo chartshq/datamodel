@@ -1859,6 +1859,26 @@ describe('DataModel', () => {
         });
     });
 
+    describe('#getUIDs', () => {
+        const data1 = [
+            { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
+            { profit: 15, sales: 25, first: 'Norwegian', second: 'Wood' },
+            { profit: 10, sales: 20, first: 'Here comes', second: 'the sun' },
+            { profit: 15, sales: 25, first: 'White', second: 'walls' },
+        ];
+        const schema1 = [
+            { name: 'profit', type: 'measure' },
+            { name: 'sales', type: 'measure' },
+            { name: 'first', type: 'dimension' },
+            { name: 'second', type: 'dimension' },
+        ];
+        const propModel = new DataModel(data1, schema1);
+
+        it('should give proper uids for default datamodel', () => {
+            expect(propModel.getUids()).to.deep.equal([0, 1, 2, 3]);
+        });
+    });
+
     context('Aggregation function context', () => {
         const data1 = [
             { profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
@@ -2818,6 +2838,17 @@ describe('DataModel', () => {
             it('should split the datamodels by multiple facets', () => {
                 const splitDMs = dataModel.splitByRow(['first', 'second']);
                 expect(splitDMs.length).to.equal(4);
+            });
+
+            it('should split the datamodels with a selection function', () => {
+                const splitDMs = dataModel.splitByRow(['first'], fields => fields.first.value === 'Hey');
+                expect(splitDMs.length).to.equal(1);
+            });
+
+            it('should split the datamodels with a selection function with inverse mode', () => {
+                const splitDMs = dataModel.splitByRow(['first', 'second'],
+                    fields => fields.first.value === 'Hey', { mode: 'inverse' });
+                expect(splitDMs.length).to.equal(2);
             });
         });
         describe('#splitByColumn', () => {
