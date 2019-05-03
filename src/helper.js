@@ -568,6 +568,7 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
         criterias = [{
             criteria: []
         }];
+        criteria = [];
     } else {
         let actionCriterias = Object.values(propagationNameSpace.mutableActions);
         if (propagateToSource !== false) {
