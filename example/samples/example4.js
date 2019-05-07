@@ -53,6 +53,9 @@ d3.json('./data/cars.json', (data) => {
     ];
 
     const dm = new DataModel(data, schema);
-    const selectedDateParsed = dm.select(fields => fields.Year.parsedValue === '1978-01-01');
-    const selectedDateRaw = dm.select(fields => fields.Year.value === -19800000);
+    window.selectedDateParsed = dm.select(fields => {
+        console.log(fields.Year.parsedValue);
+        return fields.Year.parsedValue === '1970-01-01';
+    });
+    window.selectedDateRaw = dm.select(fields => fields.Year.value === -19800000);
 });

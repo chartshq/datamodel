@@ -49,7 +49,6 @@ export const persistCurrentDerivation = (model, operation, config = {}, criteria
         });
     }
 };
-
 export const persistAncestorDerivation = (sourceDm, newDm) => {
     newDm._ancestorDerivation.push(...sourceDm._ancestorDerivation, ...sourceDm._derivation);
 };
@@ -59,16 +58,95 @@ export const persistDerivations = (sourceDm, model, operation, config = {}, crit
     persistAncestorDerivation(sourceDm, model);
 };
 
-export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => {
+const selectModeMap = {
+    [FilteringMode.NORMAL]: {
+        diffIndex: ['rowDiffset'],
+        calcDiff: [true, false]
+    },
+    [FilteringMode.INVERSE]: {
+        diffIndex: ['rejectRowDiffset'],
+        calcDiff: [false, true]
+    },
+    [FilteringMode.ALL]: {
+        diffIndex: ['rowDiffset', 'rejectRowDiffset'],
+        calcDiff: [true, true]
+    }
+};
+
+const generateRowDiffset = (rowDiffset, i, lastInsertedValue) => {
+    if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
+        const li = rowDiffset.length - 1;
+
+        rowDiffset[li] = `${rowDiffset[li].split('-')[0]}-${i}`;
+    } else {
+        rowDiffset.push(`${i}`);
+    }
+};
+
+export const selectRowDiffsetIterator = (rowDiffset, checker, mode) => {
+    let lastInsertedValueSel = -1;
+    let lastInsertedValueRej = -1;
     const newRowDiffSet = [];
-    let lastInsertedValue = -1;
-    let { mode } = config;
-    let li;
+    const rejRowDiffSet = [];
+
+    const [shouldSelect, shouldReject] = selectModeMap[mode].calcDiff;
+
+    rowDiffsetIterator(rowDiffset, (i) => {
+        const checkerResult = checker(i);
+        checkerResult && shouldSelect && generateRowDiffset(newRowDiffSet, i, lastInsertedValueSel);
+        !checkerResult && shouldReject && generateRowDiffset(rejRowDiffSet, i, lastInsertedValueRej);
+    });
+    return {
+        rowDiffset: newRowDiffSet.join(','),
+        rejectRowDiffset: rejRowDiffSet.join(',')
+    };
+};
+
+
+export const rowSplitDiffsetIterator = (rowDiffset, checker, mode, dimensionArr, fieldStoreObj) => {
+    let lastInsertedValue = {};
+    const splitRowDiffset = {};
+    const dimensionMap = {};
+
+    rowDiffsetIterator(rowDiffset, (i) => {
+        if (checker(i)) {
+            let hash = '';
+
+            let dimensionSet = { keys: {} };
+
+            dimensionArr.forEach((_) => {
+                const data = fieldStoreObj[_].partialField.data[i];
+                hash = `${hash}-${data}`;
+                dimensionSet.keys[_] = data;
+            });
+
+            if (splitRowDiffset[hash] === undefined) {
+                splitRowDiffset[hash] = [];
+                lastInsertedValue[hash] = -1;
+                dimensionMap[hash] = dimensionSet;
+            }
+
+            generateRowDiffset(splitRowDiffset[hash], i, lastInsertedValue[hash]);
+            lastInsertedValue[hash] = i;
+        }
+    });
+
+    return {
+        splitRowDiffset,
+        dimensionMap
+    };
+};
+
+
+export const selectHelper = (clonedDm, selectFn, config, sourceDm, iterator) => {
     let cachedStore = {};
     let cloneProvider = () => sourceDm.detachedRoot();
-
-    const rawFieldsData = fields.map(field => field.data());
+    const { mode } = config;
+    const rowDiffset = clonedDm._rowDiffset;
+    const fields = clonedDm.getPartialFieldspace().fields;
     const formattedFieldsData = fields.map(field => field.formattedData());
+    const rawFieldsData = fields.map(field => field.data());
+
     const selectorHelperFn = index => selectFn(
         prepareSelectionData(fields, formattedFieldsData, rawFieldsData, index),
         index,
@@ -76,25 +154,7 @@ export const selectHelper = (rowDiffset, fields, selectFn, config, sourceDm) => 
         cachedStore
     );
 
-    let checker;
-    if (mode === FilteringMode.INVERSE) {
-        checker = index => !selectorHelperFn(index);
-    } else {
-        checker = index => selectorHelperFn(index);
-    }
-
-    rowDiffsetIterator(rowDiffset, (i) => {
-        if (checker(i)) {
-            if (lastInsertedValue !== -1 && i === (lastInsertedValue + 1)) {
-                li = newRowDiffSet.length - 1;
-                newRowDiffSet[li] = `${newRowDiffSet[li].split('-')[0]}-${i}`;
-            } else {
-                newRowDiffSet.push(`${i}`);
-            }
-            lastInsertedValue = i;
-        }
-    });
-    return newRowDiffSet.join(',');
+    return iterator(rowDiffset, selectorHelperFn, mode);
 };
 
 export const cloneWithAllFields = (model) => {
@@ -111,54 +171,72 @@ export const cloneWithAllFields = (model) => {
     return clonedDm;
 };
 
+const getKey = (arr, data, fn) => {
+    let key = fn(arr, data, 0);
+
+    for (let i = 1, len = arr.length; i < len; i++) {
+        key = `${key},${fn(arr, data, i)}`;
+    }
+    return key;
+};
+
 export const filterPropagationModel = (model, propModels, config = {}) => {
+    let fns = [];
     const operation = config.operation || LOGICAL_OPERATORS.AND;
     const filterByMeasure = config.filterByMeasure || false;
-    let fns = [];
+    const clonedModel = cloneWithAllFields(model);
+    const modelFieldsConfig = clonedModel.getFieldsConfig();
+
     if (!propModels.length) {
         fns = [() => false];
     } else {
         fns = propModels.map(propModel => ((dataModel) => {
+            let keyFn;
             const dataObj = dataModel.getData();
-            const schema = dataObj.schema;
             const fieldsConfig = dataModel.getFieldsConfig();
+            const dimensions = Object.keys(dataModel.getFieldspace().getDimension())
+                .filter(d => d in modelFieldsConfig);
+            const dLen = dimensions.length;
+            const indices = dimensions.map(d =>
+                fieldsConfig[d].index);
+            const measures = Object.keys(dataModel.getFieldspace().getMeasure())
+                .filter(d => d in modelFieldsConfig);
             const fieldsSpace = dataModel.getFieldspace().fieldsObj();
             const data = dataObj.data;
-            const domain = Object.values(fieldsConfig).reduce((acc, v) => {
-                acc[v.def.name] = fieldsSpace[v.def.name].domain();
+            const domain = measures.reduce((acc, v) => {
+                acc[v] = fieldsSpace[v].domain();
                 return acc;
             }, {});
+            const valuesMap = {};
 
-            return (fields) => {
-                const include = !data.length ? false : data.some(row => schema.every((propField) => {
-                    if (!(propField.name in fields)) {
-                        return true;
-                    }
-                    const value = fields[propField.name].valueOf();
-                    if (filterByMeasure && propField.type === FieldType.MEASURE) {
-                        return value >= domain[propField.name][0] && value <= domain[propField.name][1];
-                    }
+            keyFn = (arr, row, idx) => row[arr[idx]];
+            if (dLen) {
+                data.forEach((row) => {
+                    const key = getKey(indices, row, keyFn);
+                    valuesMap[key] = 1;
+                });
+            }
 
-                    if (propField.type !== FieldType.DIMENSION) {
-                        return true;
-                    }
-                    const idx = fieldsConfig[propField.name].index;
-                    return row[idx] === fields[propField.name].valueOf();
-                }));
-                return include;
-            };
+            keyFn = (arr, fields, idx) => fields[arr[idx]].value;
+            return data.length ? (fields) => {
+                const present = dLen ? valuesMap[getKey(dimensions, fields, keyFn)] : true;
+
+                if (filterByMeasure) {
+                    return measures.every(field => fields[field].value >= domain[field][0] &&
+                        fields[field].value <= domain[field][1]) && present;
+                }
+                return present;
+            } : () => false;
         })(propModel));
     }
 
     let filteredModel;
     if (operation === LOGICAL_OPERATORS.AND) {
-        filteredModel = cloneWithAllFields(model).select(fields => fns.every(fn => fn(fields)), {
-            saveChild: false,
-            mode: FilteringMode.ALL
+        filteredModel = clonedModel.select(fields => fns.every(fn => fn(fields)), {
+            saveChild: false
         });
     } else {
-        filteredModel = cloneWithAllFields(model).select(fields => fns.some(fn => fn(fields)), {
-            mode: FilteringMode.ALL,
+        filteredModel = clonedModel.select(fields => fns.some(fn => fn(fields)), {
             saveChild: false
         });
     }
@@ -166,25 +244,81 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
     return filteredModel;
 };
 
-export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) => {
-    const cloned = sourceDm.clone(cloneConfig.saveChild);
-    const rowDiffset = selectHelper(
-        cloned._rowDiffset,
-        cloned.getPartialFieldspace().fields,
-        selectFn,
-        selectConfig,
-        sourceDm
-    );
-    cloned._rowDiffset = rowDiffset;
-    cloned.__calculateFieldspace().calculateFieldsConfig();
 
+export const splitWithSelect = (sourceDm, dimensionArr, reducerFn = val => val, config) => {
+    const {
+        saveChild,
+    } = config;
+    const fieldStoreObj = sourceDm.getFieldspace().fieldsObj();
+
+    const {
+        splitRowDiffset,
+        dimensionMap
+    } = selectHelper(
+        sourceDm.clone(saveChild),
+        reducerFn,
+        config,
+        sourceDm,
+        (...params) => rowSplitDiffsetIterator(...params, dimensionArr, fieldStoreObj)
+        );
+
+    const clonedDMs = [];
+    Object.keys(splitRowDiffset).sort().forEach((e) => {
+        if (splitRowDiffset[e]) {
+            const cloned = sourceDm.clone(saveChild);
+            const derivation = dimensionMap[e];
+            cloned._rowDiffset = splitRowDiffset[e].join(',');
+            cloned.__calculateFieldspace().calculateFieldsConfig();
+
+            const derivationFormula = fields => dimensionArr.every(_ => fields[_].value === derivation.keys[_]);
+            // Store reference to child model and selector function
+            if (saveChild) {
+                persistDerivations(sourceDm, cloned, DM_DERIVATIVES.SELECT, config, derivationFormula);
+            }
+            cloned._derivation[cloned._derivation.length - 1].meta = dimensionMap[e];
+
+            clonedDMs.push(cloned);
+        }
+    });
+
+
+    return clonedDMs;
+};
+export const addDiffsetToClonedDm = (clonedDm, rowDiffset, sourceDm, selectConfig, selectFn) => {
+    clonedDm._rowDiffset = rowDiffset;
+    clonedDm.__calculateFieldspace().calculateFieldsConfig();
     persistDerivations(
         sourceDm,
-        cloned,
+        clonedDm,
         DM_DERIVATIVES.SELECT,
          { config: selectConfig },
           selectFn
     );
+};
+
+
+export const cloneWithSelect = (sourceDm, selectFn, selectConfig, cloneConfig) => {
+    let extraCloneDm = {};
+
+    let { mode } = selectConfig;
+
+    const cloned = sourceDm.clone(cloneConfig.saveChild);
+    const setOfRowDiffsets = selectHelper(
+        cloned,
+        selectFn,
+        selectConfig,
+        sourceDm,
+        selectRowDiffsetIterator
+    );
+    const diffIndex = selectModeMap[mode].diffIndex;
+
+    addDiffsetToClonedDm(cloned, setOfRowDiffsets[diffIndex[0]], sourceDm, selectConfig, selectFn);
+
+    if (diffIndex.length > 1) {
+        extraCloneDm = sourceDm.clone(cloneConfig.saveChild);
+        addDiffsetToClonedDm(extraCloneDm, setOfRowDiffsets[diffIndex[1]], sourceDm, selectConfig, selectFn);
+        return [cloned, extraCloneDm];
+    }
 
     return cloned;
 };
@@ -210,6 +344,11 @@ export const cloneWithProject = (sourceDm, projField, config, allFields) => {
 
     return cloned;
 };
+
+
+export const splitWithProject = (sourceDm, projFieldSet, config, allFields) =>
+    projFieldSet.map(projFields =>
+        cloneWithProject(sourceDm, projFields, config, allFields));
 
 export const sanitizeUnitSchema = (unitSchema) => {
     // Do deep clone of the unit schema as the user might change it later.
@@ -293,8 +432,19 @@ export const updateData = (relation, data, schema, options) => {
     // This will create a new fieldStore with the fields
     const nameSpace = fieldStore.createNamespace(fieldArr, options.name);
     relation._partialFieldspace = nameSpace;
+
     // If data is provided create the default colIdentifier and rowDiffset
     relation._rowDiffset = formattedData.length && formattedData[0].length ? `0-${formattedData[0].length - 1}` : '';
+
+    // This stores the value objects which is passed to the filter method when selection operation is done.
+    const valueObjects = [];
+    const rawFieldsData = nameSpace.fields.map(field => field.data());
+    const formattedFieldsData = nameSpace.fields.map(field => field.formattedData());
+    rowDiffsetIterator(relation._rowDiffset, (i) => {
+        valueObjects[i] = prepareSelectionData(nameSpace.fields, formattedFieldsData, rawFieldsData, i);
+    });
+    nameSpace._cachedValueObjects = valueObjects;
+
     relation._colIdentifier = (schema.map(_ => _.name)).join();
     relation._dataFormat = options.dataFormat === DataFormat.AUTO ? detectDataFormat(data) : options.dataFormat;
     return relation;
@@ -342,8 +492,7 @@ export const getDerivationArguments = (derivation) => {
 
 const applyExistingOperationOnModel = (propModel, dataModel) => {
     const derivations = dataModel.getDerivations();
-    let selectionModel = propModel[0];
-    let rejectionModel = propModel[1];
+    let selectionModel = propModel;
 
     derivations.forEach((derivation) => {
         if (!derivation) {
@@ -355,13 +504,10 @@ const applyExistingOperationOnModel = (propModel, dataModel) => {
             selectionModel = selectionModel[operation](...params, {
                 saveChild: false
             });
-            rejectionModel = rejectionModel[operation](...params, {
-                saveChild: false
-            });
         }
     });
 
-    return [selectionModel, rejectionModel];
+    return selectionModel;
 };
 
 const getFilteredModel = (propModel, path) => {
@@ -386,8 +532,8 @@ const propagateIdentifiers = (dataModel, propModel, config = {}, propModelInf = 
 
     const children = dataModel._children;
     children.forEach((child) => {
-        let [selectionModel, rejectionModel] = applyExistingOperationOnModel(propModel, child);
-        propagateIdentifiers(child, [selectionModel, rejectionModel], config, propModelInf);
+        const selectionModel = applyExistingOperationOnModel(propModel, child);
+        propagateIdentifiers(child, selectionModel, config, propModelInf);
     });
 };
 
@@ -430,6 +576,7 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
         criterias = [{
             criteria: []
         }];
+        criteria = [];
     } else {
         let actionCriterias = Object.values(propagationNameSpace.mutableActions);
         if (propagateToSource !== false) {
@@ -539,4 +686,17 @@ export const addToPropNamespace = (propagationNameSpace, config = {}, model) => 
     }
 
     return this;
+};
+
+
+export const getNormalizedProFields = (projField, allFields, fieldConfig) => {
+    const normalizedProjField = projField.reduce((acc, field) => {
+        if (field.constructor.name === 'RegExp') {
+            acc.push(...allFields.filter(fieldName => fieldName.search(field) !== -1));
+        } else if (field in fieldConfig) {
+            acc.push(field);
+        }
+        return acc;
+    }, []);
+    return Array.from(new Set(normalizedProjField)).map(field => field.trim());
 };
