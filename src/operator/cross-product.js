@@ -66,21 +66,25 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
             userArg[dm2FieldStoreName] = {};
             dm1FieldStore.fields.forEach((field) => {
                 tuple.push(field.partialField.data[i]);
-                userArg[dm1FieldStoreName][field.name()] = field.partialField.data[i];
+                userArg[dm1FieldStoreName][field.name()] = {};
+                userArg[dm1FieldStoreName][field.name()].rawValue = field.partialField.data[i];
+                userArg[dm1FieldStoreName][field.name()].formattedValue = field.formattedData()[i];
             });
             dm2FieldStore.fields.forEach((field) => {
                 if (!(commonSchemaList.indexOf(field.schema().name) !== -1 && replaceCommonSchema)) {
                     tuple.push(field.partialField.data[ii]);
                 }
-                userArg[dm2FieldStoreName][field.name()] = field.partialField.data[ii];
+                userArg[dm2FieldStoreName][field.name()] = {};
+                userArg[dm2FieldStoreName][field.name()].rawValue = field.partialField.data[ii];
+                userArg[dm2FieldStoreName][field.name()].formattedValue = field.formattedData()[ii];
             });
 
             let cachedStore = {};
             let cloneProvider1 = () => dm1.detachedRoot();
             let cloneProvider2 = () => dm2.detachedRoot();
 
-            const dm1Fields = prepareJoinData(userArg[dm1FieldStoreName], dm1FieldStore);
-            const dm2Fields = prepareJoinData(userArg[dm2FieldStoreName], dm2FieldStore);
+            const dm1Fields = prepareJoinData(userArg[dm1FieldStoreName]);
+            const dm2Fields = prepareJoinData(userArg[dm2FieldStoreName]);
             if (applicableFilterFn(dm1Fields, dm2Fields, cloneProvider1, cloneProvider2, cachedStore)) {
                 const tupleObj = {};
                 tuple.forEach((cellVal, iii) => {

@@ -34,7 +34,8 @@ d3.json('./data/cars.json', (data) => {
         {
             "name": "Acceleration",
             "type": "measure",
-            "defAggFn": "avg"
+            "defAggFn": "avg",
+            "numberFormat": (val) => `$${val}`
         },
         {
             "name": "Origin",
@@ -53,9 +54,13 @@ d3.json('./data/cars.json', (data) => {
     ];
 
     const dm = new DataModel(data, schema);
-    window.selectedDateParsed = dm.select(fields => {
-        console.log(fields.Year.parsedValue);
-        return fields.Year.parsedValue === '1970-01-01';
+    const selectedDateParsed = dm.select(fields => {
+        return fields.Year.value === '1970-01-01';
     });
-    window.selectedDateRaw = dm.select(fields => fields.Year.value === -19800000);
+
+    const selectedDateRaw = dm.select(fields => fields.Year.internalValue === -19800000);
+    const newField = dm.calculateVariable({
+        name: 'newField',
+        type: 'measure'
+    }, ['Horsepower', 'Weight_in_lbs', (hp, weight) => hp / weight ]);
 });

@@ -19,8 +19,8 @@ export function naturalJoinFilter (dm1, dm2) {
     return (dm1Fields, dm2Fields) => {
         let retainTuple = true;
         commonSchemaArr.forEach((fieldName) => {
-            if (dm1Fields[fieldName].value ===
-                dm2Fields[fieldName].value && retainTuple) {
+            if (dm1Fields[fieldName].internalValue ===
+                dm2Fields[fieldName].internalValue && retainTuple) {
                 retainTuple = true;
             } else {
                 retainTuple = false;

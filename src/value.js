@@ -12,19 +12,27 @@ class Value {
    * @param {*} val - the primitive value from the field cell.
    * @param {string | Field} field - The field from which the value belongs.
    */
-    constructor (parsedVal, val, field) {
+    constructor (value, rawValue, field) {
+        const numberFormatFn = field.numberFormat && field.numberFormat();
+
         Object.defineProperties(this, {
             _value: {
                 enumerable: false,
                 configurable: false,
                 writable: false,
-                value: val
+                value
             },
-            _parsedValue: {
+            _formattedValue: {
                 enumerable: false,
                 configurable: false,
                 writable: false,
-                value: parsedVal
+                value: numberFormatFn ? numberFormatFn(value) : value
+            },
+            _internalValue: {
+                enumerable: false,
+                configurable: false,
+                writable: false,
+                value: rawValue
             }
         });
 
@@ -43,8 +51,15 @@ class Value {
     /**
      * Returns the parsed value of field
      */
-    get parsedValue () {
-        return this._parsedValue;
+    get formattedValue () {
+        return this._formattedValue;
+    }
+
+    /**
+     * Returns the internal value of field
+     */
+    get internalValue () {
+        return this._internalValue;
     }
 
   /**

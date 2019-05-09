@@ -22,11 +22,12 @@ function prepareSelectionData (fields, formattedData, rawData, i) {
     return resp;
 }
 
-export function prepareJoinData (fields, fieldInstance) {
+export function prepareJoinData (fields) {
     const resp = {};
-    const formattedData = fieldInstance.fields.map(field => field.formattedData());
 
-    Object.keys(fields).forEach((key, index) => { resp[key] = new Value(formattedData[index][0], fields[key], key); });
+    Object.keys(fields).forEach((key) => {
+        resp[key] = new Value(fields[key].formattedValue, fields[key].rawValue, key);
+    });
     return resp;
 }
 
@@ -217,13 +218,13 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
                 });
             }
 
-            keyFn = (arr, fields, idx) => fields[arr[idx]].value;
+            keyFn = (arr, fields, idx) => fields[arr[idx]].internalValue;
             return data.length ? (fields) => {
                 const present = dLen ? valuesMap[getKey(dimensions, fields, keyFn)] : true;
 
                 if (filterByMeasure) {
-                    return measures.every(field => fields[field].value >= domain[field][0] &&
-                        fields[field].value <= domain[field][1]) && present;
+                    return measures.every(field => fields[field].internalValue >= domain[field][0] &&
+                        fields[field].internalValue <= domain[field][1]) && present;
                 }
                 return present;
             } : () => false;
@@ -438,10 +439,11 @@ export const updateData = (relation, data, schema, options) => {
 
     // This stores the value objects which is passed to the filter method when selection operation is done.
     const valueObjects = [];
-    const rawFieldsData = nameSpace.fields.map(field => field.data());
-    const formattedFieldsData = nameSpace.fields.map(field => field.formattedData());
+    const { fields } = nameSpace;
+    const rawFieldsData = fields.map(field => field.data());
+    const formattedFieldsData = fields.map(field => field.formattedData());
     rowDiffsetIterator(relation._rowDiffset, (i) => {
-        valueObjects[i] = prepareSelectionData(nameSpace.fields, formattedFieldsData, rawFieldsData, i);
+        valueObjects[i] = prepareSelectionData(fields, formattedFieldsData, rawFieldsData, i);
     });
     nameSpace._cachedValueObjects = valueObjects;
 

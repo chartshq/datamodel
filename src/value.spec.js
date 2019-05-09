@@ -19,7 +19,8 @@ describe('Value', () => {
 
     it('should hold primitive value of a field cell', () => {
         expect(value.value).to.equal(fieldValue);
-        expect(value.parsedValue).to.equal(fieldValue);
+        expect(value.formattedValue).to.equal(fieldValue);
+        expect(value.internalValue).to.equal(fieldValue);
         expect(value.field).to.equal(fieldName);
     });
 
