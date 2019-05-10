@@ -25,9 +25,9 @@ function prepareSelectionData (fields, formattedData, rawData, i) {
 export function prepareJoinData (fields) {
     const resp = {};
 
-    Object.keys(fields).forEach((key) => {
+    for (const key in fields) {
         resp[key] = new Value(fields[key].formattedValue, fields[key].rawValue, key);
-    });
+    }
     return resp;
 }
 
@@ -271,7 +271,7 @@ export const splitWithSelect = (sourceDm, dimensionArr, reducerFn = val => val, 
             cloned._rowDiffset = splitRowDiffset[e].join(',');
             cloned.__calculateFieldspace().calculateFieldsConfig();
 
-            const derivationFormula = fields => dimensionArr.every(_ => fields[_].value === derivation.keys[_]);
+            const derivationFormula = fields => dimensionArr.every(_ => fields[_].internalValue === derivation.keys[_]);
             // Store reference to child model and selector function
             if (saveChild) {
                 persistDerivations(sourceDm, cloned, DM_DERIVATIVES.SELECT, config, derivationFormula);
@@ -701,4 +701,18 @@ export const getNormalizedProFields = (projField, allFields, fieldConfig) => {
         return acc;
     }, []);
     return Array.from(new Set(normalizedProjField)).map(field => field.trim());
+};
+
+/**
+ * Get the numberFormatted value if numberFormat present,
+ * else returns the supplied value.
+ * @param {Object} field Field Instance
+ * @param {Number|String} value
+ * @return {Number|String}
+ */
+export const getNumberFormattedVal = (field, value) => {
+    if (field.numberFormat) {
+        return field.numberFormat()(value);
+    }
+    return value;
 };

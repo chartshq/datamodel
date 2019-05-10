@@ -66,17 +66,19 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
             userArg[dm2FieldStoreName] = {};
             dm1FieldStore.fields.forEach((field) => {
                 tuple.push(field.partialField.data[i]);
-                userArg[dm1FieldStoreName][field.name()] = {};
-                userArg[dm1FieldStoreName][field.name()].rawValue = field.partialField.data[i];
-                userArg[dm1FieldStoreName][field.name()].formattedValue = field.formattedData()[i];
+                userArg[dm1FieldStoreName][field.name()] = {
+                    rawValue: field.partialField.data[i],
+                    formattedValue: field.formattedData()[i],
+                };
             });
             dm2FieldStore.fields.forEach((field) => {
                 if (!(commonSchemaList.indexOf(field.schema().name) !== -1 && replaceCommonSchema)) {
                     tuple.push(field.partialField.data[ii]);
                 }
-                userArg[dm2FieldStoreName][field.name()] = {};
-                userArg[dm2FieldStoreName][field.name()].rawValue = field.partialField.data[ii];
-                userArg[dm2FieldStoreName][field.name()].formattedValue = field.formattedData()[ii];
+                userArg[dm2FieldStoreName][field.name()] = {
+                    rawValue: field.partialField.data[ii],
+                    formattedValue: field.formattedData()[ii],
+                };
             });
 
             let cachedStore = {};

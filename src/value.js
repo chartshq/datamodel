@@ -1,3 +1,5 @@
+import { getNumberFormattedVal } from './helper';
+
 /**
  * The wrapper class on top of the primitive value of a field.
  *
@@ -13,7 +15,7 @@ class Value {
    * @param {string | Field} field - The field from which the value belongs.
    */
     constructor (value, rawValue, field) {
-        const numberFormatFn = field.numberFormat && field.numberFormat();
+        const formattedValue = getNumberFormattedVal(field, value);
 
         Object.defineProperties(this, {
             _value: {
@@ -26,7 +28,7 @@ class Value {
                 enumerable: false,
                 configurable: false,
                 writable: false,
-                value: numberFormatFn ? numberFormatFn(value) : value
+                value: formattedValue
             },
             _internalValue: {
                 enumerable: false,
