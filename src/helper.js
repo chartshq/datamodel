@@ -448,14 +448,14 @@ export const fieldInSchema = (schema, field) => {
     for (; i < schema.length; ++i) {
         if (field === schema[i].name) {
             return {
+                name: field,
                 type: schema[i].subtype || schema[i].type,
-                index: i
+                index: i,
             };
         }
     }
     return null;
 };
-
 
 export const getDerivationArguments = (derivation) => {
     let params = [];
