@@ -162,25 +162,40 @@ function applyStandardSort (data, schema, sortingDetails) {
 }
 
 /**
- * Creates a map between sorter field value and corresponding rows.
+ * Creates a map based on grouping.
  *
+ * @param {Array} depColumns - The dependency columns' info.
  * @param {Array} data - The input data.
- * @param {Object} fSorter - The sorter field info.
+ * @param {Array} schema - The data schema.
+ * @param {Array} sortingDetails - The sorting details for standard sorting.
  * @return {Map} Returns a map.
  */
-function makeSorterGroupMap (data, fSorter) {
-    return data.reduce((acc, currRow, currIdx) => {
-        const fVal = currRow[fSorter.index];
+const makeGroupMapAndSort = (depColumns, data, schema, sortingDetails) => {
+    if (depColumns.length === 0) { return data; }
 
+    const targetCol = depColumns[0];
+    const map = new Map();
+
+    data.reduce((acc, currRow) => {
+        const fVal = currRow[targetCol.index];
         if (acc.has(fVal)) {
-            acc.get(fVal).push(currIdx);
+            acc.get(fVal).push(currRow);
         } else {
-            acc.set(fVal, [currIdx]);
+            acc.set(fVal, [currRow]);
         }
-
         return acc;
-    }, new Map());
-}
+    }, map);
+
+    for (let [key, val] of map) {
+        const nMap = makeGroupMapAndSort(depColumns.slice(1), val, schema, sortingDetails);
+        map.set(key, nMap);
+        if (Array.isArray(nMap)) {
+            applyStandardSort(nMap, schema, sortingDetails);
+        }
+    }
+
+    return map;
+};
 
 /**
  * Sorts the data by retaining the position/order of a particular field.
@@ -188,18 +203,32 @@ function makeSorterGroupMap (data, fSorter) {
  * @param {Array} data - The input data array.
  * @param {Array} schema - The data schema.
  * @param {Array} sortingDetails - An array containing the sorting configs.
+ * @param {Array} depColumns - The dependency column list.
  * @return {Array} Returns the sorted data.
  */
-function applyGroupSort (data, schema, sortingDetails) {
-    if (sortingDetails.length <= 1) { return data; }
+function applyGroupSort (data, schema, sortingDetails, depColumns) {
+    sortingDetails = sortingDetails.filter((detail) => {
+        if (detail[1] === null) {
+            depColumns.push(detail[0]);
+            return false;
+        }
+        return true;
+    });
+    if (sortingDetails.length === 0) { return data; }
 
-    const mainFieldInfo = fieldInSchema(schema, sortingDetails[0][0]);
-    const mainFieldData = data.map(row => row[mainFieldInfo.index]);
+    depColumns = depColumns.map(c => fieldInSchema(schema, c));
 
-    applyStandardSort(data, schema, sortingDetails);
+    const sortedGroupMap = makeGroupMapAndSort(depColumns, data, schema, sortingDetails);
+    return data.map((row) => {
+        let i = 0;
+        let nextMap = sortedGroupMap;
 
-    const groupMap = makeSorterGroupMap(data, mainFieldInfo);
-    return mainFieldData.map(datum => groupMap.get(datum).shift()).map(idx => data[idx]);
+        while (!Array.isArray(nextMap)) {
+            nextMap = nextMap.get(row[depColumns[i++].index]);
+        }
+
+        return nextMap.shift();
+    });
 }
 
 /**
@@ -221,7 +250,7 @@ export function sortData (dataObj, sortingDetails) {
     const groupSortingDetails = sortingDetails.slice(groupSortingIdx);
 
     applyStandardSort(data, schema, standardSortingDetails);
-    data = applyGroupSort(data, schema, groupSortingDetails);
+    data = applyGroupSort(data, schema, groupSortingDetails, standardSortingDetails.map(detail => detail[0]));
 
     dataObj.uids = data.map(row => row.pop());
     dataObj.data = data;
