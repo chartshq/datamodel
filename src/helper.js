@@ -257,7 +257,7 @@ export const splitWithSelect = (sourceDm, dimensionArr, reducerFn = val => val, 
         );
 
     const clonedDMs = [];
-    Object.keys(splitRowDiffset).sort().forEach((e) => {
+    Object.keys(splitRowDiffset).forEach((e) => {
         if (splitRowDiffset[e]) {
             const cloned = sourceDm.clone(saveChild);
             const derivation = dimensionMap[e];
