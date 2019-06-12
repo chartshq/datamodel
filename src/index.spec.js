@@ -980,6 +980,163 @@ describe('DataModel', () => {
             expect(sortedDm.getData()).to.deep.equal(expData);
         });
 
+        it('should retain the order when null is provided for a field', () => {
+            const data = [
+                { age: 30, job: 'management', marital: 'married' },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' },
+                { age: 28, job: 'blue-collar', marital: 'married' },
+                { age: 30, job: 'blue-collar', marital: 'single' },
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
+            ];
+            const dataModel = new DataModel(data, schema);
+
+            const sortedDm = dataModel.sort([
+                ['job', null],
+            ]);
+            const expData = {
+                data: [
+                    [30, 'management', 'married'],
+                    [59, 'blue-collar', 'married'],
+                    [35, 'management', 'single'],
+                    [57, 'self-employed', 'married'],
+                    [28, 'blue-collar', 'married'],
+                    [30, 'blue-collar', 'single'],
+                ],
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                uids: [0, 1, 2, 3, 4, 5]
+            };
+            expect(sortedDm.getData()).to.deep.equal(expData);
+        });
+
+        it('should perform multi sort without sorting first field', () => {
+            const data = [
+                { age: 30, job: 'management', marital: 'married' },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' },
+                { age: 28, job: 'blue-collar', marital: 'married' },
+                { age: 30, job: 'blue-collar', marital: 'single' },
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
+            ];
+            const dataModel = new DataModel(data, schema);
+
+            const sortedDm = dataModel.sort([
+                ['job', null],
+                ['age', 'desc'],
+            ]);
+            const expData = {
+                data: [
+                    [35, 'management', 'single'],
+                    [59, 'blue-collar', 'married'],
+                    [30, 'management', 'married'],
+                    [57, 'self-employed', 'married'],
+                    [30, 'blue-collar', 'single'],
+                    [28, 'blue-collar', 'married']
+                ],
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                uids: [0, 1, 2, 3, 4, 5]
+            };
+            expect(sortedDm.getData()).to.deep.equal(expData);
+        });
+
+        it('should perform multi sort without sorting second field', () => {
+            const data = [
+                { age: 30, job: 'management', marital: 'married' },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' },
+                { age: 28, job: 'blue-collar', marital: 'married' },
+                { age: 30, job: 'blue-collar', marital: 'single' },
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
+            ];
+            const dataModel = new DataModel(data, schema);
+
+            const sortedDm = dataModel.sort([
+                ['job', 'asc'],
+                ['marital', null],
+                ['age', 'asc'],
+            ]);
+            const expData = {
+                data: [
+                    [28, 'blue-collar', 'married'],
+                    [59, 'blue-collar', 'married'],
+                    [30, 'blue-collar', 'single'],
+                    [30, 'management', 'married'],
+                    [35, 'management', 'single'],
+                    [57, 'self-employed', 'married']
+                ],
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                uids: [0, 1, 2, 3, 4, 5]
+            };
+            expect(sortedDm.getData()).to.deep.equal(expData);
+        });
+
+        it('should perform multi sort while having multiple null sorted fields', () => {
+            const data = [
+                { age: 30, job: 'management', marital: 'married' },
+                { age: 59, job: 'blue-collar', marital: 'married' },
+                { age: 35, job: 'management', marital: 'single' },
+                { age: 57, job: 'self-employed', marital: 'married' },
+                { age: 28, job: 'blue-collar', marital: 'married' },
+                { age: 30, job: 'blue-collar', marital: 'single' },
+            ];
+            const schema = [
+                { name: 'age', type: 'measure' },
+                { name: 'job', type: 'dimension' },
+                { name: 'marital', type: 'dimension' }
+            ];
+            const dataModel = new DataModel(data, schema);
+
+            const sortedDm = dataModel.sort([
+                ['job', null],
+                ['marital', null],
+                ['age', 'desc'],
+            ]);
+            const expData = {
+                data: [
+                    [30, 'management', 'married'],
+                    [59, 'blue-collar', 'married'],
+                    [35, 'management', 'single'],
+                    [57, 'self-employed', 'married'],
+                    [28, 'blue-collar', 'married'],
+                    [30, 'blue-collar', 'single']
+                ],
+                schema: [
+                    { name: 'age', type: 'measure', subtype: 'continuous' },
+                    { name: 'job', type: 'dimension', subtype: 'categorical' },
+                    { name: 'marital', type: 'dimension', subtype: 'categorical' }
+                ],
+                uids: [0, 1, 2, 3, 4, 5]
+            };
+            expect(sortedDm.getData()).to.deep.equal(expData);
+        });
+
         it('should perform sort with string data', () => {
             const data = [
                 { Name: 'Shubham', Age: '22', Gender: 'Male', Location: 'Kolkata' },
