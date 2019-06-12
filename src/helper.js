@@ -264,7 +264,7 @@ export const splitWithSelect = (sourceDm, dimensionArr, reducerFn = val => val, 
         );
 
     const clonedDMs = [];
-    Object.keys(splitRowDiffset).sort().forEach((e) => {
+    Object.keys(splitRowDiffset).forEach((e) => {
         if (splitRowDiffset[e]) {
             const cloned = sourceDm.clone(saveChild);
             const derivation = dimensionMap[e];
@@ -458,14 +458,14 @@ export const fieldInSchema = (schema, field) => {
     for (; i < schema.length; ++i) {
         if (field === schema[i].name) {
             return {
+                name: field,
                 type: schema[i].subtype || schema[i].type,
-                index: i
+                index: i,
             };
         }
     }
     return null;
 };
-
 
 export const getDerivationArguments = (derivation) => {
     let params = [];
