@@ -431,11 +431,13 @@ class DataModel extends Relation {
         this._colIdentifier += `,${fieldName}`;
         const partialFieldspace = this._partialFieldspace;
         const cachedValueObjects = partialFieldspace._cachedValueObjects;
+        const formattedData = field.formattedData();
+        const rawData = field.partialField.data;
 
         if (!partialFieldspace.fieldsObj()[field.name()]) {
             partialFieldspace.fields.push(field);
             cachedValueObjects.forEach((obj, i) => {
-                obj[field.name()] = new Value(field.partialField.data[i], field);
+                obj[field.name()] = new Value(formattedData[i], rawData[i], field);
             });
         } else {
             const fieldIndex = partialFieldspace.fields.findIndex(fieldinst => fieldinst.name() === fieldName);

@@ -13,17 +13,21 @@ import { extend2, detectDataFormat } from './utils';
 /**
  * Prepares the selection data.
  */
-function prepareSelectionData (fields, i) {
+function prepareSelectionData (fields, formattedData, rawData, i) {
     const resp = {};
-    for (let field of fields) {
-        resp[field.name()] = new Value(field.partialField.data[i], field);
+
+    for (const [key, field] of fields.entries()) {
+        resp[field.name()] = new Value(formattedData[key][i], rawData[key][i], field);
     }
     return resp;
 }
 
 export function prepareJoinData (fields) {
     const resp = {};
-    Object.keys(fields).forEach((key) => { resp[key] = new Value(fields[key], key); });
+
+    for (const key in fields) {
+        resp[key] = new Value(fields[key].formattedValue, fields[key].rawValue, key);
+    }
     return resp;
 }
 
@@ -141,8 +145,11 @@ export const selectHelper = (clonedDm, selectFn, config, sourceDm, iterator) => 
     const { mode } = config;
     const rowDiffset = clonedDm._rowDiffset;
     const fields = clonedDm.getPartialFieldspace().fields;
+    const formattedFieldsData = fields.map(field => field.formattedData());
+    const rawFieldsData = fields.map(field => field.data());
+
     const selectorHelperFn = index => selectFn(
-        prepareSelectionData(fields, index),
+        prepareSelectionData(fields, formattedFieldsData, rawFieldsData, index),
         index,
         cloneProvider,
         cachedStore
@@ -211,13 +218,13 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
                 });
             }
 
-            keyFn = (arr, fields, idx) => fields[arr[idx]].value;
+            keyFn = (arr, fields, idx) => fields[arr[idx]].internalValue;
             return data.length ? (fields) => {
                 const present = dLen ? valuesMap[getKey(dimensions, fields, keyFn)] : true;
 
                 if (filterByMeasure) {
-                    return measures.every(field => fields[field].value >= domain[field][0] &&
-                        fields[field].value <= domain[field][1]) && present;
+                    return measures.every(field => fields[field].internalValue >= domain[field][0] &&
+                        fields[field].internalValue <= domain[field][1]) && present;
                 }
                 return present;
             } : () => false;
@@ -257,14 +264,14 @@ export const splitWithSelect = (sourceDm, dimensionArr, reducerFn = val => val, 
         );
 
     const clonedDMs = [];
-    Object.keys(splitRowDiffset).sort().forEach((e) => {
+    Object.keys(splitRowDiffset).forEach((e) => {
         if (splitRowDiffset[e]) {
             const cloned = sourceDm.clone(saveChild);
             const derivation = dimensionMap[e];
             cloned._rowDiffset = splitRowDiffset[e].join(',');
             cloned.__calculateFieldspace().calculateFieldsConfig();
 
-            const derivationFormula = fields => dimensionArr.every(_ => fields[_].value === derivation.keys[_]);
+            const derivationFormula = fields => dimensionArr.every(_ => fields[_].internalValue === derivation.keys[_]);
             // Store reference to child model and selector function
             if (saveChild) {
                 persistDerivations(sourceDm, cloned, DM_DERIVATIVES.SELECT, config, derivationFormula);
@@ -432,8 +439,11 @@ export const updateData = (relation, data, schema, options) => {
 
     // This stores the value objects which is passed to the filter method when selection operation is done.
     const valueObjects = [];
+    const { fields } = nameSpace;
+    const rawFieldsData = fields.map(field => field.data());
+    const formattedFieldsData = fields.map(field => field.formattedData());
     rowDiffsetIterator(relation._rowDiffset, (i) => {
-        valueObjects[i] = prepareSelectionData(nameSpace.fields, i);
+        valueObjects[i] = prepareSelectionData(fields, formattedFieldsData, rawFieldsData, i);
     });
     nameSpace._cachedValueObjects = valueObjects;
 
@@ -448,14 +458,14 @@ export const fieldInSchema = (schema, field) => {
     for (; i < schema.length; ++i) {
         if (field === schema[i].name) {
             return {
+                name: field,
                 type: schema[i].subtype || schema[i].type,
-                index: i
+                index: i,
             };
         }
     }
     return null;
 };
-
 
 export const getDerivationArguments = (derivation) => {
     let params = [];
@@ -691,4 +701,18 @@ export const getNormalizedProFields = (projField, allFields, fieldConfig) => {
         return acc;
     }, []);
     return Array.from(new Set(normalizedProjField)).map(field => field.trim());
+};
+
+/**
+ * Get the numberFormatted value if numberFormat present,
+ * else returns the supplied value.
+ * @param {Object} field Field Instance
+ * @param {Number|String} value
+ * @return {Number|String}
+ */
+export const getNumberFormattedVal = (field, value) => {
+    if (field.numberFormat) {
+        return field.numberFormat()(value);
+    }
+    return value;
 };
