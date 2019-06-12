@@ -99,7 +99,7 @@ export default class Temporal extends Dimension {
 
     /**
      * Returns the formatted version of the underlying field data
-     * If data is of type invalid or has missing type use the raw value
+     * If data is of type invalid or has missing format use the raw value
      * @public
      * @override
      * @return {Array} Returns the formatted data.

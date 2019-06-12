@@ -122,7 +122,7 @@ describe('Temporal', () => {
             expect(tempField.formattedData()).to.eql(expected);
         });
 
-        it('should use the raw date value if type is missing in schema', () => {
+        it('should use the raw date value if format is missing in schema', () => {
             const schemaWithoutType = {
                 name: 'Date',
                 type: 'dimension',
