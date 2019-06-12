@@ -111,13 +111,28 @@ describe('Temporal', () => {
     });
 
     describe('#formattedData', () => {
+        const data1 = ['2017-03-01', '2017-03-02', '2017-03-03', '2018-01-06', '2019-11-07', null, '2017-03-02'];
+
         it('should return the formatted data', () => {
-            const data1 = ['2017-03-01', '2017-03-02', '2017-03-03', '2018-01-06', '2019-11-07', null, '2017-03-02'];
             temParser = new TemporalParser(schema);
             partField = new PartialField(schema.name, data1, schema, temParser);
             rowDiffset = '1-2,4-5';
             tempField = new Temporal(partField, rowDiffset);
             const expected = ['2017-03-02', '2017-03-03', '2019-11-07', DataModel.InvalidAwareTypes.NULL];
+            expect(tempField.formattedData()).to.eql(expected);
+        });
+
+        it('should use the raw date value if type is missing in schema', () => {
+            const schemaWithoutType = {
+                name: 'Date',
+                type: 'dimension',
+                subtype: DimensionSubtype.TEMPORAL
+            };
+            temParser = new TemporalParser(schemaWithoutType);
+            partField = new PartialField(schema.name, data1, schemaWithoutType, temParser);
+            rowDiffset = '1-2,4-5';
+            tempField = new Temporal(partField, rowDiffset);
+            const expected = [1488412800000, 1488499200000, 1573084800000, DataModel.InvalidAwareTypes.NULL];
             expect(tempField.formattedData()).to.eql(expected);
         });
     });
