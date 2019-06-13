@@ -24,8 +24,25 @@ describe('FlatJSON Converter', () => {
                     c: 9
                 }
             ];
+            const schema = [
+                {
+                    name: 'a',
+                    type: 'measure',
+                    subtype: 'continuous'
+                },
+                {
+                    name: 'b',
+                    type: 'measure',
+                    subtype: 'continuous'
+                },
+                {
+                    name: 'c',
+                    type: 'measure',
+                    subtype: 'continuous'
+                }
+            ];
 
-            const parsedData = FlatJSON(data);
+            const parsedData = FlatJSON(data, schema);
             const expected = [['a', 'b', 'c'], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
 
             expect(parsedData).to.deep.equal(expected);
@@ -33,8 +50,9 @@ describe('FlatJSON Converter', () => {
 
         it('should handle the empty JSON data', () => {
             const data = [];
+            const schema = [];
 
-            const parsedData = FlatJSON(data);
+            const parsedData = FlatJSON(data, schema);
             const expected = [[], []];
 
             expect(parsedData).to.deep.equal(expected);

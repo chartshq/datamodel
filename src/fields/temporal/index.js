@@ -110,8 +110,11 @@ export default class Temporal extends Dimension {
 
         rowDiffsetIterator(this.rowDiffset, (i) => {
             const datum = this.partialField.data[i];
-            if (datum instanceof InvalidAwareTypes || (Number.isFinite(datum) && !dataFormat)) {
-                data.push(datum);
+            // If value is of invalid type or format is missing
+            if (InvalidAwareTypes.isInvalid(datum) || (!dataFormat && Number.isFinite(datum))) {
+                // Use the invalid map value or the raw value
+                const parsedDatum = InvalidAwareTypes.getInvalidType(datum) || datum;
+                data.push(parsedDatum);
             } else {
                 data.push(DateTimeFormatter.formatAs(datum, dataFormat));
             }

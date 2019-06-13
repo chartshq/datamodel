@@ -10,7 +10,7 @@ import { detectDataFormat } from '../utils';
  * @param {Object} options - An optional config specific to data format.
  * @return {Array.<Object>} Returns an array of headers and column major data.
  */
-function Auto (data, options) {
+function Auto (data, schema, options) {
     const converters = { FlatJSON, DSVStr, DSVArr };
     const dataFormat = detectDataFormat(data);
 
@@ -18,7 +18,7 @@ function Auto (data, options) {
         throw new Error('Couldn\'t detect the data format');
     }
 
-    return converters[dataFormat](data, options);
+    return converters[dataFormat](data, schema, options);
 }
 
 export default Auto;

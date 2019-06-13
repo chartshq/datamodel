@@ -1,10 +1,30 @@
-/* global describe, it */
+/* global describe, it, beforeEach */
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
 import DSVStr from './dsv-str';
 
 describe('DSVStr Converter', () => {
+    let schema;
+    beforeEach(() => {
+        schema = [
+            {
+                name: 'a',
+                type: 'measure',
+                subtype: 'continuous'
+            },
+            {
+                name: 'b',
+                type: 'measure',
+                subtype: 'continuous'
+            },
+            {
+                name: 'c',
+                type: 'measure',
+                subtype: 'continuous'
+            }
+        ];
+    });
     describe('#DSVStr', () => {
         it('should parse the DSV string data with header names', () => {
             const data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9';
@@ -13,7 +33,7 @@ describe('DSVStr Converter', () => {
                 fieldSeparator: ','
             };
 
-            const parsedData = DSVStr(data, option);
+            const parsedData = DSVStr(data, schema, option);
             const expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
 
             expect(parsedData).to.deep.equal(expected);
@@ -26,7 +46,7 @@ describe('DSVStr Converter', () => {
                 fieldSeparator: ','
             };
 
-            const parsedData = DSVStr(data, option);
+            const parsedData = DSVStr(data, [], option);
             const expected = [[], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
 
             expect(parsedData).to.deep.equal(expected);
@@ -39,7 +59,7 @@ describe('DSVStr Converter', () => {
                 fieldSeparator: '|'
             };
 
-            const parsedData = DSVStr(data, option);
+            const parsedData = DSVStr(data, schema, option);
             const expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
 
             expect(parsedData).to.deep.equal(expected);
@@ -48,15 +68,15 @@ describe('DSVStr Converter', () => {
         it('should parse the DSV string data with default options', () => {
             // With header names
             let data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9';
-            let parsedData = DSVStr(data);
+            let parsedData = DSVStr(data, schema);
             let expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
             expect(parsedData).to.deep.equal(expected);
 
             // Without header names
             data = '1,2,3\n4,5,6\n7,8,9';
-            parsedData = DSVStr(data);
-            expected = [['1', '2', '3'], [['4', '7'], ['5', '8'], ['6', '9']]];
-            expect(parsedData).to.deep.equal(expected);
+            const mockedFn = () => DSVStr(data);
+
+            expect(mockedFn).to.throw('Schema missing or is in an unsupported format');
         });
     });
 });
