@@ -22,7 +22,7 @@ import DSVArr from './dsv-arr';
  * 7,8,9
  * `
  */
-function DSVStr (str, options) {
+function DSVStr (str, schema, options) {
     const defaultOption = {
         firstRowHeader: true,
         fieldSeparator: ','
@@ -30,7 +30,7 @@ function DSVStr (str, options) {
     options = Object.assign({}, defaultOption, options);
 
     const dsv = d3Dsv(options.fieldSeparator);
-    return DSVArr(dsv.parseRows(str), options);
+    return DSVArr(dsv.parseRows(str), schema, options);
 }
 
 export default DSVStr;

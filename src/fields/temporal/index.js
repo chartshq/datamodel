@@ -98,20 +98,25 @@ export default class Temporal extends Dimension {
     }
 
     /**
-     * Returns the formatted version of the underlying field data.
-     *
+     * Returns the formatted version of the underlying field data
+     * If data is of type invalid or has missing format use the raw value
      * @public
      * @override
      * @return {Array} Returns the formatted data.
      */
     formattedData () {
         const data = [];
+        const dataFormat = this.format();
+
         rowDiffsetIterator(this.rowDiffset, (i) => {
             const datum = this.partialField.data[i];
-            if (datum instanceof InvalidAwareTypes) {
-                data.push(datum);
+            // If value is of invalid type or format is missing
+            if (InvalidAwareTypes.isInvalid(datum) || (!dataFormat && Number.isFinite(datum))) {
+                // Use the invalid map value or the raw value
+                const parsedDatum = InvalidAwareTypes.getInvalidType(datum) || datum;
+                data.push(parsedDatum);
             } else {
-                data.push(DateTimeFormatter.formatAs(datum, this.format()));
+                data.push(DateTimeFormatter.formatAs(datum, dataFormat));
             }
         });
         return data;

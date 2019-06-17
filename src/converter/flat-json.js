@@ -26,24 +26,29 @@ import { columnMajor } from '../utils';
  *    }
  * ];
  */
-function FlatJSON (arr) {
+function FlatJSON (arr, schema) {
+    if (!Array.isArray(schema)) {
+        throw new Error('Schema missing or is in an unsupported format');
+    }
+
     const header = {};
     let i = 0;
     let insertionIndex;
     const columns = [];
     const push = columnMajor(columns);
+    const schemaFieldsName = schema.map(unitSchema => unitSchema.name);
 
     arr.forEach((item) => {
         const fields = [];
-        for (let key in item) {
-            if (key in header) {
-                insertionIndex = header[key];
+        schemaFieldsName.forEach((unitSchema) => {
+            if (unitSchema in header) {
+                insertionIndex = header[unitSchema];
             } else {
-                header[key] = i++;
+                header[unitSchema] = i++;
                 insertionIndex = i - 1;
             }
-            fields[insertionIndex] = item[key];
-        }
+            fields[insertionIndex] = item[unitSchema];
+        });
         push(...fields);
     });
 

@@ -17,27 +17,28 @@ import { columnMajor } from '../utils';
  *    [7, 8, 9]
  * ];
  */
-function DSVArr (arr, options) {
+function DSVArr (arr, schema, options) {
+    if (!Array.isArray(schema)) {
+        throw new Error('Schema missing or is in an unsupported format');
+    }
     const defaultOption = {
         firstRowHeader: true,
     };
+    const schemaFields = schema.map(unitSchema => unitSchema.name);
     options = Object.assign({}, defaultOption, options);
 
-    let header;
     const columns = [];
     const push = columnMajor(columns);
 
     if (options.firstRowHeader) {
-        // If header present then mutate the array.
+        // If header present then remove the first header row.
         // Do in-place mutation to save space.
-        header = arr.splice(0, 1)[0];
-    } else {
-        header = [];
+        arr.splice(0, 1)[0];
     }
 
     arr.forEach(field => push(...field));
 
-    return [header, columns];
+    return [schemaFields, columns];
 }
 
 export default DSVArr;

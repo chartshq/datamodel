@@ -426,7 +426,7 @@ export const updateData = (relation, data, schema, options) => {
         throw new Error(`No converter function found for ${options.dataFormat} format`);
     }
 
-    const [header, formattedData] = converterFn(data, options);
+    const [header, formattedData] = converterFn(data, schema, options);
     resolveFieldName(schema, header);
     const fieldArr = createFields(formattedData, schema, header);
 
