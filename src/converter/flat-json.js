@@ -27,7 +27,7 @@ import { columnMajor } from '../utils';
  * ];
  */
 function FlatJSON (arr, schema) {
-    if (!schema || !Array.isArray(schema)) {
+    if (!Array.isArray(schema)) {
         throw new Error('Schema missing or is in an unsupported format');
     }
 

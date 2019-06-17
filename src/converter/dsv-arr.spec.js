@@ -81,5 +81,17 @@ describe('DSVArr Converter', () => {
             expected = [['a', 'b', 'c'], [[4, 7], [5, 8], [6, 9]]];
             expect(parsedData).to.deep.equal(expected);
         });
+
+        it('should throw error if schema is not an array', () => {
+            const data = [
+                ['a', 'b', 'c'],
+                [1, 2, 3],
+                [4, 5, 6],
+                [7, 8, 9],
+            ];
+            const mockedparsedDataFn = () => DSVArr(data, 'schema');
+
+            expect(mockedparsedDataFn).to.throw('Schema missing or is in an unsupported format');
+        });
     });
 });

@@ -18,7 +18,7 @@ import { columnMajor } from '../utils';
  * ];
  */
 function DSVArr (arr, schema, options) {
-    if (!schema || !Array.isArray(schema)) {
+    if (!Array.isArray(schema)) {
         throw new Error('Schema missing or is in an unsupported format');
     }
     const defaultOption = {
@@ -38,10 +38,7 @@ function DSVArr (arr, schema, options) {
 
     arr.forEach(field => push(...field));
 
-    if (schemaFields) {
-        return [schemaFields, columns];
-    }
-    return columns;
+    return [schemaFields, columns];
 }
 
 export default DSVArr;
