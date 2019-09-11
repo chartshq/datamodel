@@ -2,7 +2,7 @@
   "name": "datamodel",
   "description": "Relational algebra compliant in-memory tabular data store",
   "homepage": "https://github.com/chartshq/datamodel",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "license": "MIT",
   "main": "dist/datamodel.js",
   "keywords": [
@@ -38,6 +38,14 @@
     {
       "name": "Ujjal Kumar Dutta",
       "email": "duttaujjalkumar@live.com"
+    },
+    {
+      "name": "Ranajit Banerjee",
+      "email": "ranajit.113124@gmail.com"
+    },
+    {
+      "name": "Adarsh Lilha",
+      "email": "adarshlilha@gmail.com"
     }
   ],
   "dependencies": {
