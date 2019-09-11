@@ -264,7 +264,7 @@ export const splitWithSelect = (sourceDm, dimensionArr, reducerFn = val => val, 
         );
 
     const clonedDMs = [];
-    Object.keys(splitRowDiffset).forEach((e) => {
+    Object.keys(splitRowDiffset).sort().forEach((e) => {
         if (splitRowDiffset[e]) {
             const cloned = sourceDm.clone(saveChild);
             const derivation = dimensionMap[e];
@@ -477,6 +477,9 @@ export const getDerivationArguments = (derivation) => {
         break;
     case DM_DERIVATIVES.PROJECT:
         params = [derivation.meta.actualProjField];
+        break;
+    case DM_DERIVATIVES.SORT:
+        params = [derivation.criteria];
         break;
     case DM_DERIVATIVES.GROUPBY:
         operation = 'groupBy';
