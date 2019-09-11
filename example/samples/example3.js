@@ -1,145 +1,151 @@
-/* eslint-disable */
-
-d3.json('../data/cars.json', (data) => {
-    let jsonData = data;
-    const schema = [{
-        name: 'Name',
-        type: 'dimension'
-    },
-    {
-        name: 'birthday',
-        type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
-    },
-    {
-        name: 'roll',
-        type: 'measure',
-        defAggFn: "avg",
-        as: "roll2"
-    }
-];
-
 const data = [
     {
-        name: 'Rousan',
-        birthday: '1995-07-05',
-        roll: 2
+      "xvalue": -19800000,
+      "xvalue0": 63052200000,
+      "xdim": -19800000,
+      "yvalue": undefined,
     },
     {
-        name: 'Miles_per_Gallon',
-        type: 'measure'
-    },
-
-    {
-        name: 'Displacement',
-        type: 'measure'
+      "xvalue": 63052200000,
+      "xvalue0": 126210600000,
+      "xdim": 63052200000
     },
     {
-        name: 'Horsepower',
-        type: 'measure'
+      "xvalue": 126210600000,
+      "xvalue0": 189282600000,
+      "xdim": 126210600000
     },
     {
-        name: 'Weight_in_lbs',
-        type: 'measure'
+      "xvalue": 189282600000,
+      "xvalue0": 252441000000,
+      "xdim": 189282600000
     },
     {
-        name: 'Acceleration',
-        type: 'measure'
+      "xvalue": 252441000000,
+      "xvalue0": 315513000000,
+      "xdim": 252441000000
     },
     {
-        name: 'Origin',
-        type: 'dimension'
+      "xvalue": 315513000000,
+      "xvalue0": 378671400000,
+      "xdim": 315513000000
     },
     {
-        name: 'Akash',
-        birthday: '1994-01-03',
-        roll: 120
-    },
-    {
-        name: 'Rousan',
-        birthday: '1995-07-06',
-        roll: 93
+      "xvalue": 378671400000,
+      "xdim": 378671400000
     }
-];
+  ]
 
+const schema = [
+    {
+      "name": "yvalue",
+      "type": "measure"
+    },
+    {
+      "name": "xvalue",
+      "type": "measure"
+    },
+    {
+      "name": "yvalue0",
+      "type": "measure"
+    },
+    {
+      "name": "xvalue0",
+      "type": "measure"
+    },
+    {
+      "name": "xdim",
+      "type": "dimension",
+      "subtype": "temporal"
+    },
+    {
+      "name": "ydim",
+      "type": "dimension",
+      "subtype": "temporal"
+    }
+  ]
 
-const dm = new DataModel(data, schema);
-const dm2 = dm.project(["name", "roll"]);
-// const schema = [
-//     { name: 'Name', type: 'dimension' },
-//     { name: 'HorsePower', type: 'measure' },
-//     { name: 'Origin', type: 'dimension' }
-// ];
-// const data = [
-//     { Name: 'chevrolet chevelle malibu', Horsepower: 130, Origin: 'USA' },
-//     { Name: 'citroen ds-21 pallas', Horsepower: 115, Origin: 'Europe' },
-//     { Name: 'datsun pl510', Horsepower: 88, Origin: 'Japan' },
-//     { Name: 'amc rebel sst', Horsepower: 150, Origin: 'USA' },
-// ];
-// const dt = new DataModel(schema, data);
+window.a = new DataModel(data, schema);
 
-// const dt2 = dt.select(fields => fields.Origin.value === 'USA');
+const jsonData1 = [
+    {
+      "yvalue": 0,
+      "yvalue0": 50,
+      "ydim": 0
+    },
+    {
+      "yvalue": 50,
+      "yvalue0": 100,
+      "ydim": 50
+    },
+    {
+      "yvalue": 100,
+      "yvalue0": 150,
+      "ydim": 100
+    },
+    {
+      "yvalue": 150,
+      "yvalue0": 200,
+      "ydim": 150
+    },
+    {
+      "yvalue": 200,
+      "yvalue0": 250,
+      "ydim": 200
+    },
+    {
+      "yvalue": 250,
+      "yvalue0": 300,
+      "ydim": 250
+    },
+    {
+      "yvalue": 300,
+      "yvalue0": 350,
+      "ydim": 300
+    },
+    {
+      "yvalue": 350,
+      "yvalue0": 400,
+      "ydim": 350
+    },
+    {
+      "yvalue": 400,
+      "yvalue0": 450,
+      "ydim": 400
+    },
+    {
+      "yvalue": 450,
+      "ydim": 450
+    }
+  ];
 
-// const selectedDm = dm.select(fields => fields.roll.value > 10 || fields.roll.value < 0);
+const schema1 = [
+    {
+      "name": "yvalue",
+      "type": "measure"
+    },
+    {
+      "name": "xvalue",
+      "type": "measure"
+    },
+    {
+      "name": "yvalue0",
+      "type": "measure"
+    },
+    {
+      "name": "xvalue0",
+      "type": "measure"
+    },
+    {
+      "name": "xdim",
+      "type": "dimension",
+      "subtype": "categorical"
+    },
+    {
+      "name": "ydim",
+      "type": "dimension",
+      "subtype": "categorical"
+    }
+  ];
 
-
-
-// debugger;
-
-// const groupedDm = dm.groupBy(["name"], {
-//     roll: (vals, cloneProvider, store) => {
-//         if (!store.clonedDm) {
-//             store.clonedDm = cloneProvider();
-//         }
-//         if (!store.avgRoll) {
-//             store.avgRoll = store.clonedDm.groupBy([""], { roll: "avg" }).getData().data[0][0];
-//         }
-
-//         return DataModel.Stats.avg(vals) - store.avgRoll;
-//     }
-// });
-// const calDm = dm.calculateVariable({
-//     name: "abc",
-//     type: "measure"
-// }, ["roll", (roll, i, cloneProvider, store) => {
-//     if (!store.clonedDm) {
-//         store.clonedDm = cloneProvider();
-//     }
-//     if (!store.avgRoll) {
-//         store.avgRoll = store.clonedDm.groupBy([""], {roll: "avg"}).getData().data[0][0];
-//     }
-
-//     return store.avgRoll - roll;
-// }]);
-
-// const DataModel = window.DataModel;
-
-// const data1 = [
-//     { profit: 10, sales: 20, city: 'a' },
-//     { profit: 15, sales: 25, city: 'b' },
-// ];
-// const schema1 = [
-//     { name: 'profit', type: 'measure' },
-//     { name: 'sales', type: 'measure' },
-//     { name: 'city', type: 'dimension' },
-// ];
-// const data2 = [
-//     { population: 200, city: 'a' },
-//     { population: 250, city: 'b' },
-// ];
-// const schema2 = [
-//     { name: 'population', type: 'measure' },
-//     { name: 'city', type: 'dimension' },
-// ];
-// const dataModel1 = new DataModel(data1, schema1, { name: 'ModelA' });
-// const dataModel2 = new DataModel(data2, schema2, { name: 'ModelB' });
-
-    let rootData = new DataModel(jsonData, schema);
-    let dm = rootData.project(["Origin", "Acceleration"]);
-    let dm5 = DataModel.Operators.compose(
-        DataModel.Operators.groupBy(["Origin"]),
-        DataModel.Operators.select(f => f.Acceleration.value > 1000)
-    )(dm);
-});
-
+  window.b = new DataModel(jsonData1, schema1);

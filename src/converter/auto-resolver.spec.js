@@ -1,10 +1,31 @@
-/* global describe, it */
+/* global describe, it, beforeEach */
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
 import Auto from './auto-resolver';
 
 describe('Auto Converter', () => {
+    let schema;
+    beforeEach(() => {
+        schema = [
+            {
+                name: 'a',
+                type: 'measure',
+                subtype: 'continuous'
+            },
+            {
+                name: 'b',
+                type: 'measure',
+                subtype: 'continuous'
+            },
+            {
+                name: 'c',
+                type: 'measure',
+                subtype: 'continuous'
+            }
+        ];
+    });
+
     describe('#Auto', () => {
         it('should detect the JSON data', () => {
             const data = [
@@ -24,13 +45,13 @@ describe('Auto Converter', () => {
                     c: 9
                 }
             ];
-            const emptyData = [];
 
-            let parsedData = Auto(data);
+            const emptyData = [];
+            let parsedData = Auto(data, schema);
             let expected = [['a', 'b', 'c'], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
             expect(parsedData).to.deep.equal(expected);
 
-            parsedData = Auto(emptyData);
+            parsedData = Auto(emptyData, []);
             expected = [[], []];
             expect(parsedData).to.deep.equal(expected);
         });
@@ -42,7 +63,7 @@ describe('Auto Converter', () => {
                 [4, 5, 6],
                 [7, 8, 9]
             ];
-            let parsedData = Auto(data);
+            let parsedData = Auto(data, schema);
             let expected = [['a', 'b', 'c'], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
             expect(parsedData).to.deep.equal(expected);
 
@@ -51,26 +72,26 @@ describe('Auto Converter', () => {
                 [4, 5, 6],
                 [7, 8, 9]
             ];
-            parsedData = Auto(data, { firstRowHeader: false });
+            parsedData = Auto(data, [], { firstRowHeader: false });
             expected = [[], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
             expect(parsedData).to.deep.equal(expected);
         });
 
         it('should detect the DSV string data', () => {
             let data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9';
-            let parsedData = Auto(data);
+            let parsedData = Auto(data, schema);
             let expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
             expect(parsedData).to.deep.equal(expected);
 
             data = '1,2,3\n4,5,6\n7,8,9';
-            parsedData = Auto(data, { firstRowHeader: false });
+            parsedData = Auto(data, [], { firstRowHeader: false });
             expected = [[], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
             expect(parsedData).to.deep.equal(expected);
         });
 
         it('should throw error on invalid data', () => {
             let data;
-            const mockFn = () => { Auto(data); };
+            const mockFn = () => { Auto(data, schema); };
             const errMSG = 'Couldn\'t detect the data format';
 
             data = 2;

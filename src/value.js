@@ -1,3 +1,5 @@
+import { getNumberFormattedVal } from './helper';
+
 /**
  * The wrapper class on top of the primitive value of a field.
  *
@@ -12,12 +14,28 @@ class Value {
    * @param {*} val - the primitive value from the field cell.
    * @param {string | Field} field - The field from which the value belongs.
    */
-    constructor (val, field) {
-        Object.defineProperty(this, '_value', {
-            enumerable: false,
-            configurable: false,
-            writable: false,
-            value: val
+    constructor (value, rawValue, field) {
+        const formattedValue = getNumberFormattedVal(field, value);
+
+        Object.defineProperties(this, {
+            _value: {
+                enumerable: false,
+                configurable: false,
+                writable: false,
+                value
+            },
+            _formattedValue: {
+                enumerable: false,
+                configurable: false,
+                writable: false,
+                value: formattedValue
+            },
+            _internalValue: {
+                enumerable: false,
+                configurable: false,
+                writable: false,
+                value: rawValue
+            }
         });
 
         this.field = field;
@@ -30,6 +48,20 @@ class Value {
    */
     get value () {
         return this._value;
+    }
+
+    /**
+     * Returns the parsed value of field
+     */
+    get formattedValue () {
+        return this._formattedValue;
+    }
+
+    /**
+     * Returns the internal value of field
+     */
+    get internalValue () {
+        return this._internalValue;
     }
 
   /**
