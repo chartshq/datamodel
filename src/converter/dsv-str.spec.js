@@ -47,7 +47,7 @@ describe('DSVStr Converter', () => {
             };
 
             const parsedData = DSVStr(data, [], option);
-            const expected = [[], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
+            const expected = [[], []];
 
             expect(parsedData).to.deep.equal(expected);
         });

@@ -30,14 +30,27 @@ function DSVArr (arr, schema, options) {
     const columns = [];
     const push = columnMajor(columns);
 
+    let headers =  schemaFields;
     if (options.firstRowHeader) {
         // If header present then remove the first header row.
         // Do in-place mutation to save space.
+        headers = arr[0]
         arr.splice(0, 1)[0];
     }
 
-    arr.forEach(field => push(...field));
-
+    arr.forEach(fields => {
+        const field = []
+        schemaFields.forEach(schemaField => {
+            let y =  headers.indexOf(schemaField);
+            if(fields[y] === undefined){
+                field.push(null)
+            } else {
+                field.push(fields[y])
+            }
+            return schemaField;
+        })
+        return push(...field)
+    });
     return [schemaFields, columns];
 }
 
