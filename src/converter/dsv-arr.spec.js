@@ -35,7 +35,7 @@ describe('DSVArr Converter', () => {
                 [7, 8, 9],
             ];
         });
-        describe('header is present',() => {
+        describe('header is present', () => {
             it('should parse data with default options', () => {
                 const parsedData = DSVArr(data, schema);
                 const expected = [['a', 'b', 'c'], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
@@ -46,7 +46,7 @@ describe('DSVArr Converter', () => {
                 const option = {
                     firstRowHeader: true
                 };
-                
+
                 const parsedData = DSVArr(data, schema, option);
                 const expected = [['a', 'b', 'c'], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
                 expect(parsedData).to.deep.equal(expected);
@@ -61,11 +61,12 @@ describe('DSVArr Converter', () => {
                     }
                 ];
                 let parsedData = DSVArr(data, schema);
-                let expected = [ [ 'a' ], [ [ 1, 4, 7 ] ] ];
+                let expected = [['a'], [[1, 4, 7]]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
-            it('should parse data with only the fields present in schema but different order from data', () => {
+            it(`should parse data with only the fields present in schema
+            but different order from data`, () => {
                 schema = [
                     {
                         name: 'b',
@@ -79,7 +80,7 @@ describe('DSVArr Converter', () => {
                     }
                 ];
                 let parsedData = DSVArr(data, schema);
-                let expected = [ [ 'b', 'a' ], [ [ 2, 5, 8 ], [ 1, 4, 7 ] ] ];
+                let expected = [['b', 'a'], [[2, 5, 8], [1, 4, 7]]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -106,33 +107,34 @@ describe('DSVArr Converter', () => {
                         subtype: 'continuous'
                     }
                 ];
-    
+
                 const parsedData = DSVArr(data, schema1);
-                const expected = [['a', 'b','d','c'], [[1,4,7],[2,5,8],[null,null,null],[3,6,9]]];
+                const expected = [['a', 'b', 'd', 'c'], [[1, 4, 7], [2, 5, 8], [null, null, null], [3, 6, 9]]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
-            it('should parse data with only the fields present in schema with extra fields from headers and shuffled order', () => {
+            it(`should parse data with only the fields present in schema
+            with extra fields from headers and shuffled order`, () => {
                 let schema1 = [
                     {
                         name: 'd',
                         type: 'measure',
                         subtype: 'continuous'
-                    },{
+                    }, {
                         name: 'a',
                         type: 'measure',
                         subtype: 'continuous'
                     }
                 ];
-    
+
                 const parsedData = DSVArr(data, schema1);
-                const expected = [['d', 'a'], [[null,null,null],[1,4,7]]];
+                const expected = [['d', 'a'], [[null, null, null], [1, 4, 7]]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
             it('should parse data with no fields in schema', () => {
                 let schema1 = [];
-    
+
                 const parsedData = DSVArr(data, schema1);
                 const expected = [[], []];
                 expect(parsedData).to.deep.equal(expected);
@@ -140,13 +142,11 @@ describe('DSVArr Converter', () => {
 
             it('should throw error if schema is not an array', () => {
                 const mockedparsedDataFn = () => DSVArr(data, 'schema');
-    
+
                 expect(mockedparsedDataFn).to.throw('Schema missing or is in an unsupported format');
             });
-            
-        })
-        describe('header is not present',() => {
-            let data;
+        });
+        describe('header is not present', () => {
             beforeEach(() => {
                 data = [
                     [1, 2, 3],
@@ -158,15 +158,14 @@ describe('DSVArr Converter', () => {
                 const option = {
                     firstRowHeader: false
                 };
-    
+
                 const parsedData = DSVArr(data, schema, option);
                 const expected = [['a', 'b', 'c'], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
-    
+
                 expect(parsedData).to.deep.equal(expected);
             });
 
             it('should parse data with only the fields present in schema', () => {
-    
                 const option = {
                     firstRowHeader: false
                 };
@@ -178,7 +177,7 @@ describe('DSVArr Converter', () => {
                     }
                 ];
                 let parsedData = DSVArr(data, schema, option);
-                let expected = [ [ 'a' ], [ [ 1, 4, 7 ] ] ];
+                let expected = [['a'], [[1, 4, 7]]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -208,10 +207,10 @@ describe('DSVArr Converter', () => {
                 const option = {
                     firstRowHeader: false
                 };
-    
+
                 const parsedData = DSVArr(data, schema1, option);
-                const expected = [['a','b','d','c'],[[1,4,7],[2,5,8],[3,6,9],[null,null,null]]];
-                
+                const expected = [['a', 'b', 'd', 'c'], [[1, 4, 7], [2, 5, 8], [3, 6, 9], [null, null, null]]];
+
                 expect(parsedData).to.eql(expected);
             });
 
@@ -220,10 +219,10 @@ describe('DSVArr Converter', () => {
                 const option = {
                     firstRowHeader: false
                 };
-    
+
                 const parsedData = DSVArr(data, schema1, option);
                 const expected = [[], []];
-    
+
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -232,9 +231,9 @@ describe('DSVArr Converter', () => {
                     firstRowHeader: false
                 };
                 const mockedparsedDataFn = () => DSVArr(data, 'schema', option);
-    
+
                 expect(mockedparsedDataFn).to.throw('Schema missing or is in an unsupported format');
             });
-        })
+        });
     });
 });

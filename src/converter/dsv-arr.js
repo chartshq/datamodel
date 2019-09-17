@@ -17,7 +17,7 @@ import { columnMajor } from '../utils';
  *    [7, 8, 9]
  * ];
  */
-function DSVArr (arr, schema, options) {
+function DSVArr(arr, schema, options) {
     if (!Array.isArray(schema)) {
         throw new Error('Schema missing or is in an unsupported format');
     }
@@ -30,26 +30,26 @@ function DSVArr (arr, schema, options) {
     const columns = [];
     const push = columnMajor(columns);
 
-    let headers =  schemaFields;
+    let headers = schemaFields;
     if (options.firstRowHeader) {
         // If header present then remove the first header row.
         // Do in-place mutation to save space.
-        headers = arr[0]
+        headers = arr[0];
         arr.splice(0, 1)[0];
     }
 
-    arr.forEach(fields => {
-        const field = []
-        schemaFields.forEach(schemaField => {
-            let y =  headers.indexOf(schemaField);
-            if(fields[y] === undefined){
-                field.push(null)
+    arr.forEach((fields) => {
+        const field = [];
+        schemaFields.forEach((schemaField) => {
+            let y = headers.indexOf(schemaField);
+            if (fields[y] === undefined) {
+                field.push(null);
             } else {
-                field.push(fields[y])
+                field.push(fields[y]);
             }
             return schemaField;
-        })
-        return push(...field)
+        });
+        return push(...field);
     });
     return [schemaFields, columns];
 }
