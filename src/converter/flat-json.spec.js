@@ -111,30 +111,31 @@ describe('FlatJSON Converter', () => {
             ];
 
             const parsedData = FlatJSON(data, schema);
-            const expected = [['a', 'b', 'd', 'c'], [[1, 4, 7], [2, 5, 8], [undefined, undefined, undefined], [3, 6, 9]]];
+            const expected = [['a', 'b', 'd', 'c'], [[1, 4, 7], [2, 5, 8],
+            [undefined, undefined, undefined], [3, 6, 9]]];
 
             expect(parsedData).to.deep.equal(expected);
         });
 
         it(`should parse data with only the fields present in schema
             with extra fields from headers and shuffled order`, () => {
-                let schema1 = [
-                    {
-                        name: 'd',
-                        type: 'measure',
-                        subtype: 'continuous'
-                    }, {
-                        name: 'a',
-                        type: 'measure',
-                        subtype: 'continuous'
-                    }
-                ];
+            let schema1 = [
+                {
+                    name: 'd',
+                    type: 'measure',
+                    subtype: 'continuous'
+                }, {
+                    name: 'a',
+                    type: 'measure',
+                    subtype: 'continuous'
+                }
+            ];
 
-                const parsedData = FlatJSON(data, schema1);
-                const expected = [['d', 'a'], [[undefined, undefined, undefined], [1, 4, 7]]];
+            const parsedData = FlatJSON(data, schema1);
+            const expected = [['d', 'a'], [[undefined, undefined, undefined], [1, 4, 7]]];
 
-                expect(parsedData).to.deep.equal(expected);
-            });
+            expect(parsedData).to.deep.equal(expected);
+        });
 
         it('should handle the empty JSON data', () => {
             data = [];

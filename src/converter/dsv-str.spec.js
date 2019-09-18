@@ -28,12 +28,12 @@ describe('DSVStr Converter', () => {
     describe('#DSVStr', () => {
         let data;
         beforeEach(() => {
-            data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9'
+            data = 'a,b,c\n1,2,3\n4,5,6\n7,8,9';
         });
         describe('header is present', () => {
             it('should parse data with default options', () => {
                 const parsedData = DSVStr(data, schema);
-                const expected = [['a', 'b', 'c'], [['1','4','7'], ['2', '5', '8'], ['3', '6', '9']]];
+                const expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -43,7 +43,7 @@ describe('DSVStr Converter', () => {
                 };
 
                 const parsedData = DSVStr(data, schema, option);
-                const expected = [['a', 'b', 'c'], [['1','4','7'], ['2', '5', '8'], ['3', '6', '9']]];
+                const expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -56,7 +56,7 @@ describe('DSVStr Converter', () => {
                     }
                 ];
                 let parsedData = DSVStr(data, schema);
-                let expected = [['a'], [['1','4','7']]];
+                let expected = [['a'], [['1', '4', '7']]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -66,10 +66,10 @@ describe('DSVStr Converter', () => {
                     firstRowHeader: true,
                     fieldSeparator: '|'
                 };
-    
+
                 const parsedData = DSVStr(data1, schema, option);
                 const expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
-    
+
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -88,7 +88,7 @@ describe('DSVStr Converter', () => {
                     }
                 ];
                 let parsedData = DSVStr(data, schema);
-                let expected = [['b', 'a'], [['2', '5', '8'], ['1','4','7']]];
+                let expected = [['b', 'a'], [['2', '5', '8'], ['1', '4', '7']]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -117,7 +117,8 @@ describe('DSVStr Converter', () => {
                 ];
 
                 const parsedData = DSVStr(data, schema1);
-                const expected = [['a', 'b', 'd', 'c'], [['1','4','7'], ['2', '5', '8'], [undefined, undefined, undefined], ['3', '6', '9']]];
+                const expected = [['a', 'b', 'd', 'c'], [['1', '4', '7'], ['2', '5', '8'],
+                [undefined, undefined, undefined], ['3', '6', '9']]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -136,7 +137,7 @@ describe('DSVStr Converter', () => {
                 ];
 
                 const parsedData = DSVStr(data, schema1);
-                const expected = [['d', 'a'], [[undefined, undefined, undefined], ['1','4','7']]];
+                const expected = [['d', 'a'], [[undefined, undefined, undefined], ['1', '4', '7']]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -164,7 +165,7 @@ describe('DSVStr Converter', () => {
                 };
 
                 const parsedData = DSVStr(data, schema, option);
-                const expected = [['a', 'b', 'c'], [['1','4','7'], ['2', '5', '8'], ['3', '6', '9']]];
+                const expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
 
                 expect(parsedData).to.deep.equal(expected);
             });
@@ -181,7 +182,7 @@ describe('DSVStr Converter', () => {
                     }
                 ];
                 let parsedData = DSVStr(data, schema, option);
-                let expected = [['a'], [['1','4','7']]];
+                let expected = [['a'], [['1', '4', '7']]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -213,7 +214,8 @@ describe('DSVStr Converter', () => {
                 };
 
                 const parsedData = DSVStr(data, schema1, option);
-                const expected = [['a', 'b', 'd', 'c'], [['1','4','7'], ['2', '5', '8'], ['3', '6', '9'], [undefined, undefined, undefined]]];
+                const expected = [['a', 'b', 'd', 'c'], [['1', '4', '7'], ['2', '5', '8'],
+                ['3', '6', '9'], [undefined, undefined, undefined]]];
 
                 expect(parsedData).to.eql(expected);
             });
@@ -236,10 +238,10 @@ describe('DSVStr Converter', () => {
                     firstRowHeader: false,
                     fieldSeparator: '|'
                 };
-    
+
                 const parsedData = DSVStr(data1, schema, option);
                 const expected = [['a', 'b', 'c'], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
-    
+
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -254,4 +256,3 @@ describe('DSVStr Converter', () => {
         });
     });
 });
-3

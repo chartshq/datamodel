@@ -37,14 +37,14 @@ function DSVArr(arr, schema, options) {
         headers = arr.splice(0, 1)[0];
     }
     // create a map of the headers
-    const headerMap = headers.reduce((acc, h, i) => {
-        return Object.assign(acc, {[h]: i});
-    }, {});
+    const headerMap = headers.reduce((acc, h, i) => (
+        Object.assign(acc, { [h]: i })
+    ), {});
 
     arr.forEach((fields) => {
         const field = [];
         schemaFields.forEach((schemaField) => {
-            let headIndex = headerMap[schemaField];
+            const headIndex = headerMap[schemaField];
             field.push(fields[headIndex]);
         });
         return push(...field);
