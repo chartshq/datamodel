@@ -73,7 +73,7 @@ describe('Auto Converter', () => {
                 [7, 8, 9]
             ];
             parsedData = Auto(data, [], { firstRowHeader: false });
-            expected = [[], [[1, 4, 7], [2, 5, 8], [3, 6, 9]]];
+            expected = [[], []];
             expect(parsedData).to.deep.equal(expected);
         });
 
@@ -85,7 +85,7 @@ describe('Auto Converter', () => {
 
             data = '1,2,3\n4,5,6\n7,8,9';
             parsedData = Auto(data, [], { firstRowHeader: false });
-            expected = [[], [['1', '4', '7'], ['2', '5', '8'], ['3', '6', '9']]];
+            expected = [[], []];
             expect(parsedData).to.deep.equal(expected);
         });
 
