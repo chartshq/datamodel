@@ -1,2 +1,2 @@
-const context = require.context('./src', true, /\.spec\.js$/);
+const context = require.context('./src/converter', true, /\.spec\.js$/);
 context.keys().forEach(context);

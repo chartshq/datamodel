@@ -109,7 +109,7 @@ describe('DSVArr Converter', () => {
                 ];
 
                 const parsedData = DSVArr(data, schema1);
-                const expected = [['a', 'b', 'd', 'c'], [[1, 4, 7], [2, 5, 8], [null, null, null], [3, 6, 9]]];
+                const expected = [['a', 'b', 'd', 'c'], [[1, 4, 7], [2, 5, 8], [undefined, undefined, undefined], [3, 6, 9]]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -128,7 +128,7 @@ describe('DSVArr Converter', () => {
                 ];
 
                 const parsedData = DSVArr(data, schema1);
-                const expected = [['d', 'a'], [[null, null, null], [1, 4, 7]]];
+                const expected = [['d', 'a'], [[undefined, undefined, undefined], [1, 4, 7]]];
                 expect(parsedData).to.deep.equal(expected);
             });
 
@@ -209,7 +209,7 @@ describe('DSVArr Converter', () => {
                 };
 
                 const parsedData = DSVArr(data, schema1, option);
-                const expected = [['a', 'b', 'd', 'c'], [[1, 4, 7], [2, 5, 8], [3, 6, 9], [null, null, null]]];
+                const expected = [['a', 'b', 'd', 'c'], [[1, 4, 7], [2, 5, 8], [3, 6, 9], [undefined, undefined, undefined]]];
 
                 expect(parsedData).to.eql(expected);
             });

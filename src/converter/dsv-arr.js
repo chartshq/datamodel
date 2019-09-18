@@ -48,8 +48,8 @@ function DSVArr(arr, schema, options) {
         const field = [];
         schemaFields.forEach((schemaField) => {
             let y = headerMap[schemaField];
-            if (fields[y] === undefined) {
-                field.push(null);
+            if (y === undefined) {
+                field.push(undefined);
             } else {
                 field.push(fields[y]);
             }
