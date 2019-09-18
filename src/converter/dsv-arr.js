@@ -34,26 +34,18 @@ function DSVArr(arr, schema, options) {
     if (options.firstRowHeader) {
         // If header present then remove the first header row.
         // Do in-place mutation to save space.
-        headers = arr[0];
-        arr.splice(0, 1)[0];
+        headers = arr.splice(0, 1)[0];
     }
     // create a map of the headers
-    let headerMap = {}
-    headers.map((h,i) => {
-        headerMap[h] = i;
-        return h
-    })
+    const headerMap = headers.reduce((acc, h, i) => {
+        return Object.assign(acc, {[h]: i});
+    }, {});
 
     arr.forEach((fields) => {
         const field = [];
         schemaFields.forEach((schemaField) => {
-            let y = headerMap[schemaField];
-            if (y === undefined) {
-                field.push(undefined);
-            } else {
-                field.push(fields[y]);
-            }
-            return schemaField;
+            let headIndex = headerMap[schemaField];
+            field.push(fields[headIndex]);
         });
         return push(...field);
     });
