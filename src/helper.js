@@ -420,7 +420,7 @@ export const resolveFieldName = (schema, dataHeader) => {
 export const updateData = (relation, data, schema, options) => {
     schema = sanitizeAndValidateSchema(schema);
     options = Object.assign(Object.assign({}, defaultConfig), options);
-    const converter = converterStore().get(options.dataFormat);
+    const converter = converterStore.get(options.dataFormat);
     
 
     if (!converter) {

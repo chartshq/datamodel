@@ -63,16 +63,16 @@ class DataConverterStore {
 
 }
 
-const converterStore = (function (){
+const converterStore = (function () {
     let store = null;
 
-    const getStore = () => {
+    function getStore () {
         if (store === null) {
             store = new DataConverterStore();
         }
         return store;
     }
     return getStore();
-});
+}());
 
 export default converterStore;

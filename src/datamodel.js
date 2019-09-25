@@ -99,7 +99,7 @@ class DataModel extends Relation {
      * Converters are functions that transforms data in various format tpo datamodel consumabe format.
      */
     static get Converters(){
-        return converterStore();
+        return converterStore;
     }
     /**
      * Configure null, undefined, invalid values in the source data
