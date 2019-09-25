@@ -17,6 +17,7 @@ import {
 } from './operator';
 import * as Stats from './stats';
 import * as enums from './enums';
+import { DataConverter } from './converter'
 import { DateTimeFormatter } from './utils';
 import { DataFormat, FilteringMode, DM_DERIVATIVES } from './constants';
 import InvalidAwareTypes from './invalid-aware-types';
@@ -48,7 +49,8 @@ Object.assign(DataModel, {
     DataFormat,
     FilteringMode,
     InvalidAwareTypes,
-    version
+    version,
+    DataConverter
 }, enums);
 
 export default DataModel;

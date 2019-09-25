@@ -25,6 +25,7 @@ import reducerStore from './utils/reducer-store';
 import { createFields } from './field-creator';
 import InvalidAwareTypes from './invalid-aware-types';
 import Value from './value';
+import { converterStore } from './converter'
 
 /**
  * DataModel is an in-browser representation of tabular data. It supports
@@ -94,6 +95,12 @@ class DataModel extends Relation {
         return reducerStore;
     }
 
+    /**
+     * Converters are functions that transforms data in various format tpo datamodel consumabe format.
+     */
+    static get Converters(){
+        return converterStore();
+    }
     /**
      * Configure null, undefined, invalid values in the source data
      *
