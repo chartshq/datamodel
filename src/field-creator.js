@@ -58,56 +58,23 @@ import { fieldRegistry } from './fields'
 function createUnitField(data, schema) {
     data = data || [];
 
-    switch (schema.type) {
-    case FieldType.MEASURE:
-        if(fieldRegistry.has(schema.subtype)){
-            let field =  fieldRegistry.get(schema.subtype)
-                            .BUILDER
-                            .fieldName(schema.name)
-                            .schema(schema)
-                            .data(data)
-                            .rowDiffset(`0-${data.length - 1}`)
-                            .build()
-            return field;
-        }
-        else {
-            let field =  fieldRegistry.get(MeasureSubtype.CONTINUOUS)
-                            .BUILDER
-                            .fieldName(schema.name)
-                            .schema(schema)
-                            .data(data)
-                            .rowDiffset(`0-${data.length - 1}`)
-                            .build()
-            return field;
-        }
-    case FieldType.DIMENSION:
-        if(fieldRegistry.has(schema.subtype)){
-            let field =  fieldRegistry.get(schema.subtype)
-                            .BUILDER
-                            .fieldName(schema.name)
-                            .schema(schema)
-                            .data(data)
-                            .rowDiffset(`0-${data.length - 1}`)
-                            .build()
-            return field;
-        }else {
-            let field =  fieldRegistry.get(DimensionSubtype.CATEGORICAL)
-                            .BUILDER
-                            .fieldName(schema.name)
-                            .schema(schema)
-                            .data(data)
-                            .rowDiffset(`0-${data.length - 1}`)
-                            .build()
-            return field;
-        }
-    default:
-        return fieldRegistry.get(DimensionSubtype.CATEGORICAL)
+    if(fieldRegistry.has(schema.subtype)){
+        return fieldRegistry.get(schema.subtype)
                 .BUILDER
                 .fieldName(schema.name)
                 .schema(schema)
                 .data(data)
                 .rowDiffset(`0-${data.length - 1}`)
                 .build()
+    } else {
+        return fieldRegistry.get(schema.type === FieldType.MEASURE ? MeasureSubtype.CONTINUOUS : DimensionSubtype.CATEGORICAL)
+                .BUILDER
+                .fieldName(schema.name)
+                .schema(schema)
+                .data(data)
+                .rowDiffset(`0-${data.length - 1}`)
+                .build()
+        
     }
 }
 
@@ -122,46 +89,19 @@ function createUnitField(data, schema) {
 export function createUnitFieldFromPartial(partialField, rowDiffset) {
     const { schema } = partialField;
 
-    switch (schema.type) {
-    case FieldType.MEASURE:
-        if(fieldRegistry.has(schema.subtype)){
-            let field =  fieldRegistry.get(schema.subtype)
-                            .BUILDER
-                            .partialField(partialField)
-                            .rowDiffset(rowDiffset)
-                            .build()
-            return field;
-        }
-        else {
-            let field =  fieldRegistry.get(MeasureSubtype.CONTINUOUS)
-                            .BUILDER
-                            .partialField(partialField)
-                            .rowDiffset(rowDiffset)
-                            .build()
-            return field;
-        }
-    case FieldType.DIMENSION:
-        if(fieldRegistry.has(schema.subtype)){
-            let field =  fieldRegistry.get(schema.subtype)
-                            .BUILDER
-                            .partialField(partialField)
-                            .rowDiffset(rowDiffset)
-                            .build()
-            return field;
-        }else {
-            let field =  fieldRegistry.get(DimensionSubtype.CATEGORICAL)
-                            .BUILDER
-                            .partialField(partialField)
-                            .rowDiffset(rowDiffset)
-                            .build()
-            return field;
-        }
-    default:
-        return fieldRegistry.get(DimensionSubtype.CATEGORICAL)
+    if(fieldRegistry.has(schema.subtype)){
+        return fieldRegistry.get(schema.subtype)
                 .BUILDER
                 .partialField(partialField)
                 .rowDiffset(rowDiffset)
                 .build()
+    } else {
+        return fieldRegistry.get(schema.type === FieldType.MEASURE ? MeasureSubtype.CONTINUOUS : DimensionSubtype.CATEGORICAL)
+                .BUILDER
+                .partialField(partialField)
+                .rowDiffset(rowDiffset)
+                .build()
+        
     }
 }
 
