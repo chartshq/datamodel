@@ -1,4 +1,6 @@
 import { rowDiffsetIterator } from '../../operator/row-diffset-iterator';
+import PartialField from '../partial-field'
+import FieldParser from '../parsers/field-parser';
 
 /**
  * In {@link DataModel}, every tabular data consists of column, a column is stored as field.
@@ -124,5 +126,49 @@ export default class Field {
      */
     formattedData () {
         throw new Error('Not yet implemented');
+    }
+
+    static get BUILDER(){
+        const builder = {
+            _params : {},
+            _context : this,
+            fieldName : function(name) {
+                this._params.name = name;
+                return this;
+            },
+            schema : function(schema){
+                this._params.schema = schema;
+                return this;
+            },
+            data : function(data){
+                this._params.data = data;
+                return this;
+            },
+            parser : function(parser){
+                this._params.parser = parser;
+                return this;
+            },
+            partialField : function(partialField){
+                this._params.partialField = partialField
+                return this;
+            },
+            rowDiffset : function(rowDiffset){
+                this._params.rowDiffset = rowDiffset
+                return this;
+            },
+            build : function(){
+                let partialField = null;
+                if(this._params.partialField instanceof PartialField){
+                    partialField = this._params.partialField
+                }else if(this._params.schema && this.params.data && this.params.parser instanceof FieldParser){
+                    partialField = new PartialField(this._params.schema.name,this.params.data,this.params.schema,this.params.parser)
+                }
+                else {
+                    throw new Error("Invalid Field parameters")
+                }
+                return new this._context(partialField,this._params.rowDiffset);
+            }
+        }
+        return builder;
     }
 }
