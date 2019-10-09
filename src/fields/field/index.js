@@ -148,10 +148,6 @@ export default class Field {
                 this._params.data = data;
                 return this;
             },
-            parser : function(parser){
-                this._params.parser = parser;
-                return this;
-            },
             partialField : function(partialField){
                 this._params.partialField = partialField
                 return this;
@@ -165,7 +161,7 @@ export default class Field {
                 if(this._params.partialField instanceof PartialField){
                     partialField = this._params.partialField
                 }else if(this._params.schema && this.params.data && this.params.parser instanceof FieldParser){
-                    partialField = new PartialField(this._params.schema.name,this.params.data,this.params.schema,this.params.parser)
+                    partialField = new PartialField(this._params.schema.name, this.params.data, this.params.schema, this._context.parser())
                 }
                 else {
                     throw new Error("Invalid Field parameters")
