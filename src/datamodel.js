@@ -26,6 +26,7 @@ import { createFields } from './field-creator';
 import InvalidAwareTypes from './invalid-aware-types';
 import Value from './value';
 import { converterStore } from './converter'
+import { fieldRegistry } from './fields'
 
 /**
  * DataModel is an in-browser representation of tabular data. It supports
@@ -101,6 +102,14 @@ class DataModel extends Relation {
     static get Converters(){
         return converterStore;
     }
+
+    /**
+     * Register new type of fields
+     */
+    static get FieldTypes(){
+        return fieldRegistry;
+    }
+
     /**
      * Configure null, undefined, invalid values in the source data
      *

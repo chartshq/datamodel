@@ -11,6 +11,8 @@ import {
     PartialField
 } from './fields';
 
+import { fieldRegistry } from './fields'
+
 /**
  * Creates a field instance according to the provided data and schema.
  *
@@ -18,38 +20,94 @@ import {
  * @param {Object} schema - The field schema object.
  * @return {Field} Returns the newly created field instance.
  */
+// function createUnitField(data, schema) {
+//     data = data || [];
+//     let partialField;
+
+//     switch (schema.type) {
+//     case FieldType.MEASURE:
+//         switch (schema.subtype) {
+//         case MeasureSubtype.CONTINUOUS:
+//             partialField = new PartialField(schema.name, data, schema, new ContinuousParser());
+//             return new Continuous(partialField, `0-${data.length - 1}`);
+//         default:
+//             partialField = new PartialField(schema.name, data, schema, new ContinuousParser());
+//             return new Continuous(partialField, `0-${data.length - 1}`);
+//         }
+//     case FieldType.DIMENSION:
+//         switch (schema.subtype) {
+//         case DimensionSubtype.CATEGORICAL:
+//             partialField = new PartialField(schema.name, data, schema, new CategoricalParser());
+//             return new Categorical(partialField, `0-${data.length - 1}`);
+//         case DimensionSubtype.TEMPORAL:
+//             partialField = new PartialField(schema.name, data, schema, new TemporalParser(schema));
+//             return new Temporal(partialField, `0-${data.length - 1}`);
+//         case DimensionSubtype.BINNED:
+//             partialField = new PartialField(schema.name, data, schema, new BinnedParser());
+//             return new Binned(partialField, `0-${data.length - 1}`);
+//         default:
+//             partialField = new PartialField(schema.name, data, schema, new CategoricalParser());
+//             return new Categorical(partialField, `0-${data.length - 1}`);
+//         }
+//     default:
+//         partialField = new PartialField(schema.name, data, schema, new CategoricalParser());
+//         return new Categorical(partialField, `0-${data.length - 1}`);
+//     }
+// }
+
 function createUnitField(data, schema) {
     data = data || [];
-    let partialField;
 
     switch (schema.type) {
     case FieldType.MEASURE:
-        switch (schema.subtype) {
-        case MeasureSubtype.CONTINUOUS:
-            partialField = new PartialField(schema.name, data, schema, new ContinuousParser());
-            return new Continuous(partialField, `0-${data.length - 1}`);
-        default:
-            partialField = new PartialField(schema.name, data, schema, new ContinuousParser());
-            return new Continuous(partialField, `0-${data.length - 1}`);
+        if(fieldRegistry.has(schema.subtype)){
+            let field =  fieldRegistry.get(schema.subtype)
+                            .BUILDER
+                            .fieldName(schema.name)
+                            .schema(schema)
+                            .data(data)
+                            .rowDiffset(`0-${data.length - 1}`)
+                            .build()
+            return field;
+        }
+        else {
+            let field =  fieldRegistry.get(MeasureSubtype.CONTINUOUS)
+                            .BUILDER
+                            .fieldName(schema.name)
+                            .schema(schema)
+                            .data(data)
+                            .rowDiffset(`0-${data.length - 1}`)
+                            .build()
+            return field;
         }
     case FieldType.DIMENSION:
-        switch (schema.subtype) {
-        case DimensionSubtype.CATEGORICAL:
-            partialField = new PartialField(schema.name, data, schema, new CategoricalParser());
-            return new Categorical(partialField, `0-${data.length - 1}`);
-        case DimensionSubtype.TEMPORAL:
-            partialField = new PartialField(schema.name, data, schema, new TemporalParser(schema));
-            return new Temporal(partialField, `0-${data.length - 1}`);
-        case DimensionSubtype.BINNED:
-            partialField = new PartialField(schema.name, data, schema, new BinnedParser());
-            return new Binned(partialField, `0-${data.length - 1}`);
-        default:
-            partialField = new PartialField(schema.name, data, schema, new CategoricalParser());
-            return new Categorical(partialField, `0-${data.length - 1}`);
+        if(fieldRegistry.has(schema.subtype)){
+            let field =  fieldRegistry.get(schema.subtype)
+                            .BUILDER
+                            .fieldName(schema.name)
+                            .schema(schema)
+                            .data(data)
+                            .rowDiffset(`0-${data.length - 1}`)
+                            .build()
+            return field;
+        }else {
+            let field =  fieldRegistry.get(DimensionSubtype.CATEGORICAL)
+                            .BUILDER
+                            .fieldName(schema.name)
+                            .schema(schema)
+                            .data(data)
+                            .rowDiffset(`0-${data.length - 1}`)
+                            .build()
+            return field;
         }
     default:
-        partialField = new PartialField(schema.name, data, schema, new CategoricalParser());
-        return new Categorical(partialField, `0-${data.length - 1}`);
+        return fieldRegistry.get(DimensionSubtype.CATEGORICAL)
+                .BUILDER
+                .fieldName(schema.name)
+                .schema(schema)
+                .data(data)
+                .rowDiffset(`0-${data.length - 1}`)
+                .build()
     }
 }
 
@@ -66,25 +124,44 @@ export function createUnitFieldFromPartial(partialField, rowDiffset) {
 
     switch (schema.type) {
     case FieldType.MEASURE:
-        switch (schema.subtype) {
-        case MeasureSubtype.CONTINUOUS:
-            return new Continuous(partialField, rowDiffset);
-        default:
-            return new Continuous(partialField, rowDiffset);
+        if(fieldRegistry.has(schema.subtype)){
+            let field =  fieldRegistry.get(schema.subtype)
+                            .BUILDER
+                            .partialField(partialField)
+                            .rowDiffset(rowDiffset)
+                            .build()
+            return field;
+        }
+        else {
+            let field =  fieldRegistry.get(MeasureSubtype.CONTINUOUS)
+                            .BUILDER
+                            .partialField(partialField)
+                            .rowDiffset(rowDiffset)
+                            .build()
+            return field;
         }
     case FieldType.DIMENSION:
-        switch (schema.subtype) {
-        case DimensionSubtype.CATEGORICAL:
-            return new Categorical(partialField, rowDiffset);
-        case DimensionSubtype.TEMPORAL:
-            return new Temporal(partialField, rowDiffset);
-        case DimensionSubtype.BINNED:
-            return new Binned(partialField, rowDiffset);
-        default:
-            return new Categorical(partialField, rowDiffset);
+        if(fieldRegistry.has(schema.subtype)){
+            let field =  fieldRegistry.get(schema.subtype)
+                            .BUILDER
+                            .partialField(partialField)
+                            .rowDiffset(rowDiffset)
+                            .build()
+            return field;
+        }else {
+            let field =  fieldRegistry.get(DimensionSubtype.CATEGORICAL)
+                            .BUILDER
+                            .partialField(partialField)
+                            .rowDiffset(rowDiffset)
+                            .build()
+            return field;
         }
     default:
-        return new Categorical(partialField, rowDiffset);
+        return fieldRegistry.get(DimensionSubtype.CATEGORICAL)
+                .BUILDER
+                .partialField(partialField)
+                .rowDiffset(rowDiffset)
+                .build()
     }
 }
 

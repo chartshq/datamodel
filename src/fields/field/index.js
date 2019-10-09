@@ -160,8 +160,8 @@ export default class Field {
                 let partialField = null;
                 if(this._params.partialField instanceof PartialField){
                     partialField = this._params.partialField
-                }else if(this._params.schema && this.params.data && this.params.parser instanceof FieldParser){
-                    partialField = new PartialField(this._params.schema.name, this.params.data, this.params.schema, this._context.parser())
+                }else if(this._params.schema && this._params.data ){
+                    partialField = new PartialField(this._params.name, this._params.data, this._params.schema, this._context.parser())
                 }
                 else {
                     throw new Error("Invalid Field parameters")

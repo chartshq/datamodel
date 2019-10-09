@@ -22,7 +22,7 @@ import { DateTimeFormatter } from './utils';
 import { DataFormat, FilteringMode, DM_DERIVATIVES } from './constants';
 import InvalidAwareTypes from './invalid-aware-types';
 import pkg from '../package.json';
-import * as Fields from './fields';
+import * as FieldsUtility from './fields';
 
 const Operators = {
     compose,
@@ -52,7 +52,7 @@ Object.assign(DataModel, {
     InvalidAwareTypes,
     version,
     DataConverter,
-    Fields
+    FieldsUtility
 }, enums);
 
 export default DataModel;

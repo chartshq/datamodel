@@ -7,27 +7,29 @@ import { DimensionSubtype ,MeasureSubtype} from '../enums'
 
 class FieldTypeRegistry{
     constructor(){
-        this._measures = new Map();
-        this._dimensions =  new Map();
+        this._fieldType =  new Map();
     }
 
-    registerMeasure(subtype,measure){
-        this._measures.set(subtype,measure);
+    registerFieldType(subtype,dimension){
+        this._fieldType.set(subtype,dimension);
         return this;
     }
 
-    registerDimension(subtype,dimension){
-        this._dimensions.set(subtype,dimension);
-        return this;
+    has(type){
+        return this._fieldType.has(type);
+    }
+
+    get(type){
+        return this._fieldType.get(type);
     }
 }
 
 const registerDefaultFields  = (store) => {
     store
-    .registerDimension(DimensionSubtype.CATEGORICAL,Categorical)
-    .registerDimension(DimensionSubtype.TEMPORAL,Temporal)
-    .registerDimension(DimensionSubtype.BINNED,Binned)
-    .registerMeasure(MeasureSubtype.CONTINUOUS,Continuous)
+    .registerFieldType(DimensionSubtype.CATEGORICAL,Categorical)
+    .registerFieldType(DimensionSubtype.TEMPORAL,Temporal)
+    .registerFieldType(DimensionSubtype.BINNED,Binned)
+    .registerFieldType(MeasureSubtype.CONTINUOUS,Continuous)
 }
 
 const fieldRegistry = (function () {
