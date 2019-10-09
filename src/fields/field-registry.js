@@ -21,7 +21,7 @@ class FieldTypeRegistry{
     }
 }
 
-export const fieldRegistry = (function () {
+const fieldRegistry = (function () {
     let store = null;
 
     function getStore () {
@@ -32,5 +32,7 @@ export const fieldRegistry = (function () {
     }
     return getStore();
 }());
+
+export default fieldRegistry;
 
 

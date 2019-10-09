@@ -11,4 +11,4 @@ export { default as TemporalParser } from './parsers/temporal-parser';
 export { default as BinnedParser } from './parsers/binned-parser';
 export { default as ContinuousParser } from './parsers/continuous-parser';
 export { default as PartialField } from './partial-field';
-export { default as FieldRegistry } from './FieldRegistry'
+export { default as fieldRegistry } from './field-registry';
