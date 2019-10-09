@@ -31,6 +31,6 @@ export default class PartialField {
      * @return {Array} Returns the sanitized data.
      */
     _sanitize (data) {
-        return data.map(datum => this.parser.parse(datum));
+        return data.map(datum => this.parser.parse(datum, { format : this.schema.format }));
     }
 }

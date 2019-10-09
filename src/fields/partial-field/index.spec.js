@@ -19,7 +19,7 @@ describe('PartialField', () => {
     let temParser;
 
     beforeEach(() => {
-        temParser = new TemporalParser(schema);
+        temParser = new TemporalParser();
         partField = new PartialField(schema.name, data, schema, temParser);
     });
 
@@ -31,7 +31,7 @@ describe('PartialField', () => {
         });
 
         it('should sanitize the input data before use', () => {
-            const expected = data.map(d => temParser.parse(d));
+            const expected = data.map(d => temParser.parse(d,{ format:schema.format }));
             expect(partField.data).to.eql(expected);
         });
     });

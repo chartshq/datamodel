@@ -34,6 +34,10 @@ export default class Field {
         this.rowDiffset = rowDiffset;
     }
 
+    static parser(){
+        throw new Error("Not yet implemented")
+    }
+
     /**
      * Generates the field type specific domain.
      *

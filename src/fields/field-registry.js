@@ -1,8 +1,9 @@
-export { default as Field } from './field';
-export { default as Categorical } from './categorical';
-export { default as Temporal } from './temporal';
-export { default as Binned } from './binned';
-export { default as Continuous } from './continuous';
+import  Categorical  from './categorical';
+import  Temporal  from './temporal';
+import  Binned  from './binned';
+import  Continuous  from './continuous';
+import { DimensionSubtype ,MeasureSubtype} from '../enums'
+
 
 class FieldTypeRegistry{
     constructor(){
@@ -21,12 +22,21 @@ class FieldTypeRegistry{
     }
 }
 
+const registerDefaultFields  = (store) => {
+    store
+    .registerDimension(DimensionSubtype.CATEGORICAL,Categorical)
+    .registerDimension(DimensionSubtype.TEMPORAL,Temporal)
+    .registerDimension(DimensionSubtype.BINNED,Binned)
+    .registerMeasure(MeasureSubtype.CONTINUOUS,Continuous)
+}
+
 const fieldRegistry = (function () {
     let store = null;
 
     function getStore () {
         if (store === null) {
             store = new FieldTypeRegistry();
+            registerDefaultFields(store);
         }
         return store;
     }
@@ -34,5 +44,6 @@ const fieldRegistry = (function () {
 }());
 
 export default fieldRegistry;
+
 
 
