@@ -24,10 +24,8 @@ class DataConverterStore {
      * @param  {Array<DataConverter>} converters : contains array of converter instance
      * @return { Map<String,DataConverter> }
      */
-    converters(converters) {
-        if (converters.length) {
-            converters.forEach(converter => this.store.set(converter.type, converter));
-        }
+    converters(converters = []) {
+        converters.forEach(converter => this.store.set(converter.type, converter));
         return this.store;
     }
 
@@ -39,8 +37,9 @@ class DataConverterStore {
     register(converter) {
         if (converter instanceof DataConverter) {
             this.store.set(converter.type, converter);
+            return this;
         }
-        return this;
+        return null;
     }
 
     /**
@@ -67,12 +66,10 @@ const converterStore = (function () {
     let store = null;
 
     function getStore () {
-        if (store === null) {
-            store = new DataConverterStore();
-        }
+        store = new DataConverterStore();
         return store;
     }
-    return getStore();
+    return store || getStore();
 }());
 
 export default converterStore;

@@ -34,15 +34,12 @@ const registerDefaultFields = (store) => {
 
 const fieldRegistry = (function () {
     let store = null;
-
     function getStore () {
-        if (store === null) {
-            store = new FieldTypeRegistry();
-            registerDefaultFields(store);
-        }
+        store = new FieldTypeRegistry();
+        registerDefaultFields(store);
         return store;
     }
-    return getStore();
+    return store || getStore();
 }());
 
 export default fieldRegistry;
