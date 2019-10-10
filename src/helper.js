@@ -7,7 +7,7 @@ import {
 import { DM_DERIVATIVES, LOGICAL_OPERATORS } from './constants';
 import { createFields, createUnitFieldFromPartial } from './field-creator';
 import defaultConfig from './default-config';
-import  { converterStore } from './converter';
+import { converterStore } from './converter';
 import { extend2, detectDataFormat } from './utils';
 
 /**
@@ -421,7 +421,7 @@ export const updateData = (relation, data, schema, options) => {
     schema = sanitizeAndValidateSchema(schema);
     options = Object.assign(Object.assign({}, defaultConfig), options);
     const converter = converterStore.get(options.dataFormat);
-    
+
 
     if (!converter) {
         throw new Error(`No converter function found for ${options.dataFormat} format`);

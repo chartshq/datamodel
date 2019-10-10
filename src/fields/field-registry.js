@@ -1,36 +1,36 @@
-import  Categorical  from './categorical';
-import  Temporal  from './temporal';
-import  Binned  from './binned';
-import  Continuous  from './continuous';
-import { DimensionSubtype ,MeasureSubtype} from '../enums'
+import Categorical from './categorical';
+import Temporal from './temporal';
+import Binned from './binned';
+import Continuous from './continuous';
+import { DimensionSubtype, MeasureSubtype } from '../enums';
 
 
-class FieldTypeRegistry{
-    constructor(){
-        this._fieldType =  new Map();
+class FieldTypeRegistry {
+    constructor() {
+        this._fieldType = new Map();
     }
 
-    registerFieldType(subtype,dimension){
-        this._fieldType.set(subtype,dimension);
+    registerFieldType(subtype, dimension) {
+        this._fieldType.set(subtype, dimension);
         return this;
     }
 
-    has(type){
+    has(type) {
         return this._fieldType.has(type);
     }
 
-    get(type){
+    get(type) {
         return this._fieldType.get(type);
     }
 }
 
-const registerDefaultFields  = (store) => {
+const registerDefaultFields = (store) => {
     store
-    .registerFieldType(DimensionSubtype.CATEGORICAL,Categorical)
-    .registerFieldType(DimensionSubtype.TEMPORAL,Temporal)
-    .registerFieldType(DimensionSubtype.BINNED,Binned)
-    .registerFieldType(MeasureSubtype.CONTINUOUS,Continuous)
-}
+                    .registerFieldType(DimensionSubtype.CATEGORICAL, Categorical)
+                    .registerFieldType(DimensionSubtype.TEMPORAL, Temporal)
+                    .registerFieldType(DimensionSubtype.BINNED, Binned)
+                    .registerFieldType(MeasureSubtype.CONTINUOUS, Continuous);
+};
 
 const fieldRegistry = (function () {
     let store = null;
@@ -46,6 +46,4 @@ const fieldRegistry = (function () {
 }());
 
 export default fieldRegistry;
-
-
 

@@ -29,10 +29,10 @@ export default class TemporalParser extends FieldParser {
      * @param {string|number} val - The value of the field.
      * @return {number} Returns the millisecond value.
      */
-    parse (val, { format } ) {
+    parse (val, { format }) {
         let result;
         // check if invalid date value
-        if(!this._dtf){
+        if (!this._dtf) {
             this._dtf = new DateTimeFormatter(format);
         }
         if (!InvalidAwareTypes.isInvalid(val)) {

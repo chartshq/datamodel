@@ -1,17 +1,17 @@
 /**
  * Interface for all data converters
  */
-export default class DataConverter{
-    constructor(type){
+export default class DataConverter {
+    constructor(type) {
         this._type = type;
     }
 
-    get type(){
+    get type() {
         return this._type;
     }
 
-    convert(data,schema,options){
-        throw new Error("Convert method not implemented.")
+    convert() {
+        throw new Error('Convert method not implemented.');
     }
 
 }

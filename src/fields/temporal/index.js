@@ -2,7 +2,7 @@ import { rowDiffsetIterator } from '../../operator/row-diffset-iterator';
 import Dimension from '../dimension';
 import { DateTimeFormatter } from '../../utils';
 import InvalidAwareTypes from '../../invalid-aware-types';
-import TemporalParser from '../parsers/temporal-parser'
+import TemporalParser from '../parsers/temporal-parser';
 
 /**
  * Represents temporal field subtype.
@@ -123,8 +123,8 @@ export default class Temporal extends Dimension {
         return data;
     }
 
-    static parser(){
+    static parser() {
         return new TemporalParser();
-     }
+    }
 }
 

@@ -1,5 +1,5 @@
 import Dimension from '../dimension';
-import BinnedParser from '../parsers/binned-parser'
+import BinnedParser from '../parsers/binned-parser';
 
 /**
  * Represents binned field subtype.
@@ -31,7 +31,7 @@ export default class Binned extends Dimension {
         return this.partialField.schema.bins;
     }
 
-    static parser(){
+    static parser() {
         return new BinnedParser();
     }
 }

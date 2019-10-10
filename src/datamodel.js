@@ -25,8 +25,8 @@ import reducerStore from './utils/reducer-store';
 import { createFields } from './field-creator';
 import InvalidAwareTypes from './invalid-aware-types';
 import Value from './value';
-import { converterStore } from './converter'
-import { fieldRegistry } from './fields'
+import { converterStore } from './converter';
+import { fieldRegistry } from './fields';
 
 /**
  * DataModel is an in-browser representation of tabular data. It supports
@@ -99,14 +99,14 @@ class DataModel extends Relation {
     /**
      * Converters are functions that transforms data in various format tpo datamodel consumabe format.
      */
-    static get Converters(){
+    static get Converters() {
         return converterStore;
     }
 
     /**
      * Register new type of fields
      */
-    static get FieldTypes(){
+    static get FieldTypes() {
         return fieldRegistry;
     }
 

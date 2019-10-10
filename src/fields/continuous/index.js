@@ -2,7 +2,7 @@ import { rowDiffsetIterator } from '../../operator/row-diffset-iterator';
 import { MeasureSubtype } from '../../enums';
 import Measure from '../measure';
 import InvalidAwareTypes from '../../invalid-aware-types';
-import ContinuousParser from '../parsers/continuous-parser'
+import ContinuousParser from '../parsers/continuous-parser';
 
 /**
  * Represents continuous field subtype.
@@ -52,7 +52,7 @@ export default class Continuous extends Measure {
         return [min, max];
     }
 
-    static parser(){
-       return new ContinuousParser();
+    static parser() {
+        return new ContinuousParser();
     }
 }

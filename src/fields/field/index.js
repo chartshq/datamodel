@@ -1,6 +1,5 @@
 import { rowDiffsetIterator } from '../../operator/row-diffset-iterator';
-import PartialField from '../partial-field'
-import FieldParser from '../parsers/field-parser';
+import PartialField from '../partial-field';
 
 /**
  * In {@link DataModel}, every tabular data consists of column, a column is stored as field.
@@ -34,8 +33,8 @@ export default class Field {
         this.rowDiffset = rowDiffset;
     }
 
-    static parser(){
-        throw new Error("Not yet implemented")
+    static parser() {
+        throw new Error('Not yet implemented');
     }
 
     /**
@@ -132,43 +131,46 @@ export default class Field {
         throw new Error('Not yet implemented');
     }
 
-    static get BUILDER(){
+    static get BUILDER() {
         const builder = {
-            _params : {},
-            _context : this,
-            fieldName : function(name) {
+            _params: {},
+            _context: this,
+            fieldName(name) {
                 this._params.name = name;
                 return this;
             },
-            schema : function(schema){
+            schema(schema) {
                 this._params.schema = schema;
                 return this;
             },
-            data : function(data){
+            data(data) {
                 this._params.data = data;
                 return this;
             },
-            partialField : function(partialField){
-                this._params.partialField = partialField
+            partialField(partialField) {
+                this._params.partialField = partialField;
                 return this;
             },
-            rowDiffset : function(rowDiffset){
-                this._params.rowDiffset = rowDiffset
+            rowDiffset(rowDiffset) {
+                this._params.rowDiffset = rowDiffset;
                 return this;
             },
-            build : function(){
+            build() {
                 let partialField = null;
-                if(this._params.partialField instanceof PartialField){
-                    partialField = this._params.partialField
-                }else if(this._params.schema && this._params.data ){
-                    partialField = new PartialField(this._params.name, this._params.data, this._params.schema, this._context.parser())
+                if (this._params.partialField instanceof PartialField) {
+                    partialField = this._params.partialField;
+                } else if (this._params.schema && this._params.data) {
+                    partialField = new PartialField(this._params.name,
+                                        this._params.data,
+                                        this._params.schema,
+                                        this._context.parser());
                 }
                 else {
-                    throw new Error("Invalid Field parameters")
+                    throw new Error('Invalid Field parameters');
                 }
-                return new this._context(partialField,this._params.rowDiffset);
+                return new this._context(partialField, this._params.rowDiffset);
             }
-        }
+        };
         return builder;
     }
 }
