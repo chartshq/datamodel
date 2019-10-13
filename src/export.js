@@ -13,7 +13,8 @@ import {
   leftOuterJoin,
   rightOuterJoin,
   fullOuterJoin,
-  union
+  union,
+  rowDiffsetIterator
 } from './operator';
 import * as Stats from './stats';
 import * as enums from './enums';
@@ -38,7 +39,8 @@ const Operators = {
     leftOuterJoin,
     rightOuterJoin,
     fullOuterJoin,
-    union
+    union,
+    rowDiffsetIterator
 };
 
 const version = pkg.version;
