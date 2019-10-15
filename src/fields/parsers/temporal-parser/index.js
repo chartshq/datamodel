@@ -10,17 +10,6 @@ import InvalidAwareTypes from '../../../invalid-aware-types';
  * @implements {FieldParser}
  */
 export default class TemporalParser extends FieldParser {
-    /**
-     * Initialize a new instance.
-     *
-     * @public
-     * @param {Object} schema - The schema object for the corresponding field.
-     */
-    // constructor (schema) {
-    //     super();
-    //     this.schema = schema;
-    //     this._dtf = new DateTimeFormatter(format);
-    // }
 
     /**
      * Parses a single value of a field and returns the millisecond value.

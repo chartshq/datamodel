@@ -1,8 +1,5 @@
 import DataConverter from './model/dataConverter';
-import DSVStringConverter from './defaultConverters/dsvStringConverter';
-import JSONConverter from './defaultConverters/jsonConverter';
-import DSVArrayConverter from './defaultConverters/dsvArrayConverter';
-import AutoDataConverter from './defaultConverters/autoCoverter';
+import { DSVStringConverter, DSVArrayConverter, JSONConverter, AutoDataConverter } from './defaultConverters';
 
 class DataConverterStore {
     constructor() {
@@ -20,7 +17,7 @@ class DataConverterStore {
     }
 
     /**
-     *
+     * Sets the given converters in the store and returns the store
      * @param  {Array<DataConverter>} converters : contains array of converter instance
      * @return { Map<String,DataConverter> }
      */
@@ -30,7 +27,7 @@ class DataConverterStore {
     }
 
     /**
-     *
+     * Registers a Converter of type DataConverter
      * @param {DataConverter} converter : converter Instance
      * @returns self
      */
@@ -43,7 +40,7 @@ class DataConverterStore {
     }
 
     /**
-     *
+     * Rempves a converter from store
      * @param {DataConverter} converter : converter Instance
      * @returns self
      */
