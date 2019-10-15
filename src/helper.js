@@ -7,7 +7,8 @@ import {
 import { DM_DERIVATIVES, LOGICAL_OPERATORS } from './constants';
 import { createFields, createUnitFieldFromPartial } from './field-creator';
 import defaultConfig from './default-config';
-import * as converter from './converter';
+import { converterStore } from './converter';
+import { fieldRegistry } from './fields';
 import { extend2, detectDataFormat } from './utils';
 
 /**
@@ -374,27 +375,12 @@ export const sanitizeUnitSchema = (unitSchema) => {
 };
 
 export const validateUnitSchema = (unitSchema) => {
-    const supportedMeasureSubTypes = [MeasureSubtype.CONTINUOUS];
-    const supportedDimSubTypes = [
-        DimensionSubtype.CATEGORICAL,
-        DimensionSubtype.BINNED,
-        DimensionSubtype.TEMPORAL,
-        DimensionSubtype.GEO
-    ];
     const { type, subtype, name } = unitSchema;
-
-    switch (type) {
-    case FieldType.DIMENSION:
-        if (supportedDimSubTypes.indexOf(subtype) === -1) {
-            throw new Error(`DataModel doesn't support dimension field subtype ${subtype} used for ${name} field`);
-        }
-        break;
-    case FieldType.MEASURE:
-        if (supportedMeasureSubTypes.indexOf(subtype) === -1) {
+    if (type === FieldType.DIMENSION || type === FieldType.MEASURE) {
+        if (!fieldRegistry.has(subtype)) {
             throw new Error(`DataModel doesn't support measure field subtype ${subtype} used for ${name} field`);
         }
-        break;
-    default:
+    } else {
         throw new Error(`DataModel doesn't support field type ${type} used for ${name} field`);
     }
 };
@@ -420,13 +406,14 @@ export const resolveFieldName = (schema, dataHeader) => {
 export const updateData = (relation, data, schema, options) => {
     schema = sanitizeAndValidateSchema(schema);
     options = Object.assign(Object.assign({}, defaultConfig), options);
-    const converterFn = converter[options.dataFormat];
+    const converter = converterStore.get(options.dataFormat);
 
-    if (!(converterFn && typeof converterFn === 'function')) {
+
+    if (!converter) {
         throw new Error(`No converter function found for ${options.dataFormat} format`);
     }
 
-    const [header, formattedData] = converterFn(data, schema, options);
+    const [header, formattedData] = converter.convert(data, schema, options);
     resolveFieldName(schema, header);
     const fieldArr = createFields(formattedData, schema, header);
 

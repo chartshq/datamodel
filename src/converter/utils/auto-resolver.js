@@ -1,7 +1,7 @@
 import FlatJSON from './flat-json';
 import DSVArr from './dsv-arr';
 import DSVStr from './dsv-str';
-import { detectDataFormat } from '../utils';
+import { detectDataFormat } from '../../utils';
 
 /**
  * Parses the input data and detect the format automatically.
