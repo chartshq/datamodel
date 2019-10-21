@@ -4,7 +4,7 @@ import Value from './value';
 import {
     rowDiffsetIterator
 } from './operator';
-import { DM_DERIVATIVES, LOGICAL_OPERATORS } from './constants';
+import { DM_DERIVATIVES, LOGICAL_OPERATORS, ROW_ID } from './constants';
 import { createFields, createUnitFieldFromPartial } from './field-creator';
 import defaultConfig from './default-config';
 import { converterStore } from './converter';
@@ -145,12 +145,10 @@ export const selectHelper = (clonedDm, selectFn, config, sourceDm, iterator) => 
     let cloneProvider = () => sourceDm.detachedRoot();
     const { mode } = config;
     const rowDiffset = clonedDm._rowDiffset;
-    const fields = clonedDm.getPartialFieldspace().fields;
-    const formattedFieldsData = fields.map(field => field.formattedData());
-    const rawFieldsData = fields.map(field => field.data());
+    const cachedValueObjects = clonedDm._partialFieldspace._cachedValueObjects;
 
     const selectorHelperFn = index => selectFn(
-        prepareSelectionData(fields, formattedFieldsData, rawFieldsData, index),
+        cachedValueObjects[index],
         index,
         cloneProvider,
         cachedStore
@@ -182,6 +180,20 @@ const getKey = (arr, data, fn) => {
     return key;
 };
 
+const keyFn = (arr, fields, idx, rowId) => {
+    const val = fields[arr[idx]].internalValue;
+    return arr[idx] === ROW_ID ? rowId : val;
+};
+
+const boundsChecker = {
+    [MeasureSubtype.CONTINUOUS]: (val, domain) => {
+        const domainArr = domain[0] instanceof Array ? domain : [domain];
+        return domainArr.some(dom => val >= dom[0] && val <= dom[1]);
+    }
+};
+
+const isWithinDomain = (value, domain, fieldType) => boundsChecker[fieldType](value, domain);
+
 export const filterPropagationModel = (model, propModels, config = {}) => {
     let fns = [];
     const operation = config.operation || LOGICAL_OPERATORS.AND;
@@ -192,40 +204,28 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
     if (!propModels.length) {
         fns = [() => false];
     } else {
-        fns = propModels.map(propModel => ((dataModel) => {
-            let keyFn;
-            const dataObj = dataModel.getData();
-            const fieldsConfig = dataModel.getFieldsConfig();
-            const dimensions = Object.keys(dataModel.getFieldspace().getDimension())
-                .filter(d => d in modelFieldsConfig);
-            const dLen = dimensions.length;
-            const indices = dimensions.map(d =>
-                fieldsConfig[d].index);
-            const measures = Object.keys(dataModel.getFieldspace().getMeasure())
-                .filter(d => d in modelFieldsConfig);
-            const fieldsSpace = dataModel.getFieldspace().fieldsObj();
-            const data = dataObj.data;
-            const domain = measures.reduce((acc, v) => {
-                acc[v] = fieldsSpace[v].domain();
-                return acc;
-            }, {});
+        fns = propModels.map(propModel => ((criteria = {}) => {
+            const { identifiers = [[], []], range } = criteria;
+            const [fieldNames = [], values = []] = identifiers;
+            const dLen = fieldNames.length;
             const valuesMap = {};
 
-            keyFn = (arr, row, idx) => row[arr[idx]];
             if (dLen) {
-                data.forEach((row) => {
-                    const key = getKey(indices, row, keyFn);
+                for (let i = 1, len = identifiers.length; i < len; i++) {
+                    const row = identifiers[i];
+                    const key = row.join();
                     valuesMap[key] = 1;
-                });
+                }
             }
-
-            keyFn = (arr, fields, idx) => fields[arr[idx]].internalValue;
-            return data.length ? (fields) => {
-                const present = dLen ? valuesMap[getKey(dimensions, fields, keyFn)] : true;
+            const rangeKeys = Object.keys(range || {});
+            return values.length || rangeKeys.length ? (fields, i) => {
+                const present = dLen ? valuesMap[getKey(fieldNames, fields, keyFn, i)] : true;
 
                 if (filterByMeasure) {
-                    return measures.every(field => fields[field].internalValue >= domain[field][0] &&
-                        fields[field].internalValue <= domain[field][1]) && present;
+                    return rangeKeys.every((field) => {
+                        const val = fields[field].internalValue;
+                        return isWithinDomain(val, range[field], modelFieldsConfig[field].def.subtype);
+                    }) && present;
                 }
                 return present;
             } : () => false;

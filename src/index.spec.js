@@ -1903,30 +1903,30 @@ describe('DataModel', () => {
             { name: 'first', type: 'dimension' },
             { name: 'second', type: 'dimension' },
         ];
-        const propModel = new DataModel([{
-            first: 'Hey',
-            second: 'Jude'
-        }], [{
-            name: 'first',
-            type: 'dimension'
-        }, {
-            name: 'second',
-            type: 'dimension'
-        }]);
-        const propModel1 = new DataModel([{
-            first: 'Hey',
-            second: 'Jude',
-            count: 100
-        }], [{
-            name: 'first',
-            type: 'dimension'
-        }, {
-            name: 'second',
-            type: 'dimension'
-        }, {
-            name: 'count',
-            type: 'measure'
-        }]);
+
+        const propModel = {
+            fields: [{
+                name: 'first',
+                type: 'dimension'
+            }, {
+                name: 'second',
+                type: 'dimension'
+            }],
+            data: [
+                ['first', 'second'],
+                ['Hey', 'Jude']
+            ]
+        };
+
+        const propModel1 = {
+            fields: [{
+                name: 'sales',
+                type: 'measure'
+            }],
+            range: {
+                sales: [20, 25]
+            }
+        };
 
         let dataModel;
         let projectionFlag = false;
