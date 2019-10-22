@@ -580,7 +580,7 @@ class DataModel extends Relation {
             }, config));
 
         if (isMutableAction) {
-            propagateImmutableActions(propagationNameSpace, rootModels, {
+            propagateImmutableActions(propagationNameSpace, rootModel, {
                 config,
                 propConfig
             }, this);

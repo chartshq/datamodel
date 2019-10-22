@@ -185,11 +185,14 @@ const keyFn = (arr, fields, idx, rowId) => {
     return arr[idx] === ROW_ID ? rowId : val;
 };
 
+const domainChecker = (val, domain) => {
+    const domainArr = domain[0] instanceof Array ? domain : [domain];
+    return domainArr.some(dom => val >= dom[0] && val <= dom[1]);
+};
+
 const boundsChecker = {
-    [MeasureSubtype.CONTINUOUS]: (val, domain) => {
-        const domainArr = domain[0] instanceof Array ? domain : [domain];
-        return domainArr.some(dom => val >= dom[0] && val <= dom[1]);
-    }
+    [MeasureSubtype.CONTINUOUS]: domainChecker,
+    [DimensionSubtype.TEMPORAL]: domainChecker
 };
 
 const isWithinDomain = (value, domain, fieldType) => boundsChecker[fieldType](value, domain);
@@ -197,7 +200,7 @@ const isWithinDomain = (value, domain, fieldType) => boundsChecker[fieldType](va
 export const filterPropagationModel = (model, propModels, config = {}) => {
     let fns = [];
     const operation = config.operation || LOGICAL_OPERATORS.AND;
-    const filterByMeasure = config.filterByMeasure || false;
+    const filterByMeasure = config.filterByMeasure;
     const clonedModel = cloneWithAllFields(model);
     const modelFieldsConfig = clonedModel.getFieldsConfig();
 
@@ -206,28 +209,39 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
     } else {
         fns = propModels.map(propModel => ((criteria = {}) => {
             const { identifiers = [[], []], range } = criteria;
-            const [fieldNames = [], values = []] = identifiers;
+            let [fieldNames = [], values = []] = identifiers;
+            const indices = fieldNames.reduce((map, name, i) => {
+                map[name] = i;
+                return map;
+            }, {});
+            fieldNames = fieldNames.filter(field => field in modelFieldsConfig);
             const dLen = fieldNames.length;
             const valuesMap = {};
 
             if (dLen) {
                 for (let i = 1, len = identifiers.length; i < len; i++) {
                     const row = identifiers[i];
-                    const key = row.join();
+                    const key = `${fieldNames.map((field) => {
+                        const idx = indices[field];
+                        return row[idx];
+                    })}`;
                     valuesMap[key] = 1;
                 }
             }
-            const rangeKeys = Object.keys(range || {});
-            return values.length || rangeKeys.length ? (fields, i) => {
+            let rangeKeys = Object.keys(range || {}).filter(field => field in modelFieldsConfig);
+            const hasData = values.length || rangeKeys.length;
+
+            if (!filterByMeasure) {
+                rangeKeys = rangeKeys.filter(field => modelFieldsConfig[field].def.type !== FieldType.MEASURE);
+            }
+
+            return hasData ? (fields, i) => {
                 const present = dLen ? valuesMap[getKey(fieldNames, fields, keyFn, i)] : true;
 
-                if (filterByMeasure) {
-                    return rangeKeys.every((field) => {
-                        const val = fields[field].internalValue;
-                        return isWithinDomain(val, range[field], modelFieldsConfig[field].def.subtype);
-                    }) && present;
-                }
-                return present;
+                return rangeKeys.every((field) => {
+                    const val = fields[field].internalValue;
+                    return isWithinDomain(val, range[field], modelFieldsConfig[field].def.subtype);
+                }) && present;
             } : () => false;
         })(propModel));
     }
@@ -564,7 +578,7 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
 
     let criterias = [];
 
-    if (identifiers === null && config.persistent !== true) {
+    if (identifiers === null) {
         criterias = [{
             criteria: []
         }];
@@ -613,9 +627,10 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
     }, config);
 
     const rootGroupByModel = rootModels.groupByModel;
+
     if (propagateInterpolatedValues && rootGroupByModel) {
         propModel = filterPropagationModel(rootGroupByModel, criteria, {
-            filterByMeasure: propagateInterpolatedValues
+            filterByMeasure: true
         });
         propagateIdentifiers(rootGroupByModel, propModel, propConfig);
     }
@@ -636,7 +651,7 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
     });
 };
 
-export const propagateImmutableActions = (propagationNameSpace, rootModels, propagationInf) => {
+export const propagateImmutableActions = (propagationNameSpace, rootModel, propagationInf) => {
     const immutableActions = propagationNameSpace.immutableActions;
 
     for (const action in immutableActions) {
@@ -647,7 +662,10 @@ export const propagateImmutableActions = (propagationNameSpace, rootModels, prop
             propagationInf.propConfig.filterImmutableAction(actionConf, propagationInf.config) : true;
         if (actionConf.sourceId !== propagationSourceId && filterImmutableAction) {
             const criteriaModel = actionConf.criteria;
-            propagateToAllDataModels(criteriaModel, rootModels, {
+            propagateToAllDataModels(criteriaModel, {
+                model: rootModel,
+                groupByModel: getRootGroupByModel(actionInf.model)
+            }, {
                 propagationNameSpace,
                 propagateToSource: false,
                 sourceId: propagationSourceId
