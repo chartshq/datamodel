@@ -574,7 +574,9 @@ class DataModel extends Relation {
         };
 
         addToNameSpace && addToPropNamespace(propagationNameSpace, config, this);
-        propagateToAllDataModels(identifiers, rootModels, { propagationNameSpace, sourceId: propagationSourceId },
+        propagateToAllDataModels(identifiers, rootModels, { propagationNameSpace,
+            sourceId: propagationSourceId,
+            propagationSource: this },
             Object.assign({
                 payload
             }, config));

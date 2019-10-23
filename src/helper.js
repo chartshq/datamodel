@@ -171,18 +171,19 @@ export const cloneWithAllFields = (model) => {
     return clonedDm;
 };
 
-const getKey = (arr, data, fn) => {
-    let key = fn(arr, data, 0);
+const getKey = (arr, data, fn, rowId) => {
+    let key = fn(arr, data, 0, rowId);
 
     for (let i = 1, len = arr.length; i < len; i++) {
-        key = `${key},${fn(arr, data, i)}`;
+        key = `${key},${fn(arr, data, i, rowId)}`;
     }
     return key;
 };
 
 const keyFn = (arr, fields, idx, rowId) => {
-    const val = fields[arr[idx]].internalValue;
-    return arr[idx] === ROW_ID ? rowId : val;
+    const field = arr[idx];
+    const val = field === ROW_ID ? rowId : fields[field].internalValue;
+    return val;
 };
 
 const domainChecker = (val, domain) => {
@@ -200,21 +201,22 @@ const isWithinDomain = (value, domain, fieldType) => boundsChecker[fieldType](va
 export const filterPropagationModel = (model, propModels, config = {}) => {
     let fns = [];
     const operation = config.operation || LOGICAL_OPERATORS.AND;
-    const filterByMeasure = config.filterByMeasure;
-    const clonedModel = cloneWithAllFields(model);
+    const { filterByDim = true, filterByMeasure = false, clone = true } = config;
+    const clonedModel = clone ? cloneWithAllFields(model) : model;
     const modelFieldsConfig = clonedModel.getFieldsConfig();
 
     if (!propModels.length) {
         fns = [() => false];
     } else {
-        fns = propModels.map(propModel => ((criteria = {}) => {
+        fns = propModels.map(propModel => (({ criteria = {} }) => {
             const { identifiers = [[], []], range } = criteria;
             let [fieldNames = [], values = []] = identifiers;
             const indices = fieldNames.reduce((map, name, i) => {
                 map[name] = i;
                 return map;
             }, {});
-            fieldNames = fieldNames.filter(field => field in modelFieldsConfig);
+            fieldNames = fieldNames.filter(field => (field in modelFieldsConfig &&
+                modelFieldsConfig[field].def.type === FieldType.DIMENSION) || field === ROW_ID);
             const dLen = fieldNames.length;
             const valuesMap = {};
 
@@ -235,8 +237,15 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
                 rangeKeys = rangeKeys.filter(field => modelFieldsConfig[field].def.type !== FieldType.MEASURE);
             }
 
+            if (!filterByDim) {
+                rangeKeys = rangeKeys.filter(field => modelFieldsConfig[field].def.type !== FieldType.DIMENSION);
+            }
+
             return hasData ? (fields, i) => {
-                const present = dLen ? valuesMap[getKey(fieldNames, fields, keyFn, i)] : true;
+                let present = true;
+                if (filterByDim) {
+                    present = dLen ? valuesMap[getKey(fieldNames, fields, keyFn, i)] : true;
+                }
 
                 return rangeKeys.every((field) => {
                     const val = fields[field].internalValue;
@@ -248,11 +257,11 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
 
     let filteredModel;
     if (operation === LOGICAL_OPERATORS.AND) {
-        filteredModel = clonedModel.select(fields => fns.every(fn => fn(fields)), {
+        filteredModel = clonedModel.select((fields, i) => fns.every(fn => fn(fields, i)), {
             saveChild: false
         });
     } else {
-        filteredModel = clonedModel.select(fields => fns.some(fn => fn(fields)), {
+        filteredModel = clonedModel.select((fields, i) => fns.some(fn => fn(fields, i)), {
             saveChild: false
         });
     }
@@ -527,6 +536,7 @@ const getFilteredModel = (propModel, path) => {
 const propagateIdentifiers = (dataModel, propModel, config = {}, propModelInf = {}) => {
     const nonTraversingModel = propModelInf.nonTraversingModel;
     const excludeModels = propModelInf.excludeModels || [];
+    const criterias = propModelInf.criteria;
 
     if (dataModel === nonTraversingModel) {
         return;
@@ -538,7 +548,16 @@ const propagateIdentifiers = (dataModel, propModel, config = {}, propModelInf = 
 
     const children = dataModel._children;
     children.forEach((child) => {
-        const selectionModel = applyExistingOperationOnModel(propModel, child);
+        const matchingCriteria = criterias.filter(val => val.groupedModel === child);
+        let selectionModel = applyExistingOperationOnModel(propModel, child);
+
+        if (matchingCriteria.length) {
+            selectionModel = filterPropagationModel(selectionModel, matchingCriteria, {
+                filterByDim: false,
+                filterByMeasure: true,
+                clone: false
+            });
+        }
         propagateIdentifiers(child, selectionModel, config, propModelInf);
     });
 };
@@ -567,13 +586,22 @@ export const getPathToRootModel = (model, path = []) => {
 
 export const propagateToAllDataModels = (identifiers, rootModels, propagationInf, config) => {
     let criteria;
-    let propModel;
     const { propagationNameSpace, propagateToSource } = propagationInf;
     const propagationSourceId = propagationInf.sourceId;
-    const propagateInterpolatedValues = config.propagateInterpolatedValues;
     const filterFn = (entry) => {
         const filter = config.filterFn || (() => true);
         return filter(entry, config);
+    };
+    const addGroupedModel = ({ config: conf, model }) => {
+        const { criteria: crit } = conf;
+        let groupedModel;
+
+        if (crit !== null && crit.fields.some(d => d.type === FieldType.MEASURE)) {
+            groupedModel = getRootGroupByModel(model);
+        }
+        return Object.assign({}, conf, {
+            groupedModel
+        });
     };
 
     let criterias = [];
@@ -589,7 +617,7 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
             actionCriterias = actionCriterias.filter(d => d.config.sourceId !== propagationSourceId);
         }
 
-        const filteredCriteria = actionCriterias.filter(filterFn).map(action => action.config.criteria);
+        const filteredCriteria = actionCriterias.filter(filterFn);
 
         const excludeModels = [];
 
@@ -601,7 +629,7 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
                 if (actionConf.applyOnSource === false && actionConf.action === config.action &&
                         actionConf.sourceId !== propagationSourceId) {
                     excludeModels.push(actionInf.model);
-                    criteria = sourceActionCriterias.filter(d => d !== actionInf).map(d => d.config.criteria);
+                    criteria = sourceActionCriterias.filter(d => d !== actionInf).map(addGroupedModel);
                     criteria.length && criterias.push({
                         criteria,
                         models: actionInf.model,
@@ -612,7 +640,11 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
         }
 
 
-        criteria = [].concat(...[...filteredCriteria, identifiers]).filter(d => d !== null);
+        criteria = [].concat(...[...filteredCriteria.map(addGroupedModel), {
+            criteria: identifiers,
+            groupedModel: identifiers !== null && identifiers.fields.some(d => d.type === FieldType.MEASURE) ?
+                getRootGroupByModel(propagationInf.propagationSource) : null
+        }]).filter(d => d !== null);
         criterias.push({
             criteria,
             excludeModels: [...excludeModels, ...config.excludeModels || []]
@@ -626,17 +658,9 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
         propagationSourceId
     }, config);
 
-    const rootGroupByModel = rootModels.groupByModel;
-
-    if (propagateInterpolatedValues && rootGroupByModel) {
-        propModel = filterPropagationModel(rootGroupByModel, criteria, {
-            filterByMeasure: true
-        });
-        propagateIdentifiers(rootGroupByModel, propModel, propConfig);
-    }
-
     criterias.forEach((inf) => {
-        const propagationModel = filterPropagationModel(rootModel, inf.criteria);
+        const { criteria: crit } = inf;
+        const propagationModel = filterPropagationModel(rootModel, crit);
         const path = inf.path;
 
         if (path) {
@@ -645,7 +669,7 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
         } else {
             propagateIdentifiers(rootModel, propagationModel, propConfig, {
                 excludeModels: inf.excludeModels,
-                nonTraversingModel: propagateInterpolatedValues && rootGroupByModel
+                criteria: crit
             });
         }
     });
@@ -668,7 +692,8 @@ export const propagateImmutableActions = (propagationNameSpace, rootModel, propa
             }, {
                 propagationNameSpace,
                 propagateToSource: false,
-                sourceId: propagationSourceId
+                sourceId: propagationSourceId,
+                propagationSource: actionInf.model
             }, actionConf);
         }
     }
