@@ -1688,12 +1688,14 @@ var DataModel = function (_Relation) {
             };
 
             addToNameSpace && Object(_helper__WEBPACK_IMPORTED_MODULE_1__["addToPropNamespace"])(propagationNameSpace, config, this);
-            Object(_helper__WEBPACK_IMPORTED_MODULE_1__["propagateToAllDataModels"])(identifiers, rootModels, { propagationNameSpace: propagationNameSpace, sourceId: propagationSourceId }, Object.assign({
+            Object(_helper__WEBPACK_IMPORTED_MODULE_1__["propagateToAllDataModels"])(identifiers, rootModels, { propagationNameSpace: propagationNameSpace,
+                sourceId: propagationSourceId,
+                propagationSource: this }, Object.assign({
                 payload: payload
             }, config));
 
             if (isMutableAction) {
-                Object(_helper__WEBPACK_IMPORTED_MODULE_1__["propagateImmutableActions"])(propagationNameSpace, rootModels, {
+                Object(_helper__WEBPACK_IMPORTED_MODULE_1__["propagateImmutableActions"])(propagationNameSpace, rootModel, {
                     config: config,
                     propConfig: propConfig
                 }, this);
@@ -2666,11 +2668,10 @@ var Categorical = function (_Dimension) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../operator/row-diffset-iterator */ "./src/operator/row-diffset-iterator.js");
-/* harmony import */ var _enums__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../enums */ "./src/enums/index.js");
-/* harmony import */ var _measure__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../measure */ "./src/fields/measure/index.js");
-/* harmony import */ var _invalid_aware_types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../invalid-aware-types */ "./src/invalid-aware-types.js");
-/* harmony import */ var _parsers_continuous_parser__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../parsers/continuous-parser */ "./src/fields/parsers/continuous-parser/index.js");
+/* harmony import */ var _enums__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../enums */ "./src/enums/index.js");
+/* harmony import */ var _measure__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../measure */ "./src/fields/measure/index.js");
+/* harmony import */ var _parsers_continuous_parser__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../parsers/continuous-parser */ "./src/fields/parsers/continuous-parser/index.js");
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper */ "./src/fields/helper.js");
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2678,7 +2679,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 
 
 
@@ -2713,7 +2713,7 @@ var Continuous = function (_Measure) {
          * @return {string} Returns the subtype of the field.
          */
         value: function subtype() {
-            return _enums__WEBPACK_IMPORTED_MODULE_1__["MeasureSubtype"].CONTINUOUS;
+            return _enums__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS;
         }
 
         /**
@@ -2727,37 +2727,17 @@ var Continuous = function (_Measure) {
     }, {
         key: 'calculateDataDomain',
         value: function calculateDataDomain() {
-            var _this2 = this;
-
-            var min = Number.POSITIVE_INFINITY;
-            var max = Number.NEGATIVE_INFINITY;
-
-            // here don't use this.data() as the iteration will be occurred two times on same data.
-            Object(_operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__["rowDiffsetIterator"])(this.rowDiffset, function (i) {
-                var datum = _this2.partialField.data[i];
-                if (datum instanceof _invalid_aware_types__WEBPACK_IMPORTED_MODULE_3__["default"]) {
-                    return;
-                }
-
-                if (datum < min) {
-                    min = datum;
-                }
-                if (datum > max) {
-                    max = datum;
-                }
-            });
-
-            return [min, max];
+            return Object(_helper__WEBPACK_IMPORTED_MODULE_3__["calculateContinuousDomain"])(this.partialField.data, this.rowDiffset);
         }
     }], [{
         key: 'parser',
         value: function parser() {
-            return new _parsers_continuous_parser__WEBPACK_IMPORTED_MODULE_4__["default"]();
+            return new _parsers_continuous_parser__WEBPACK_IMPORTED_MODULE_2__["default"]();
         }
     }]);
 
     return Continuous;
-}(_measure__WEBPACK_IMPORTED_MODULE_2__["default"]);
+}(_measure__WEBPACK_IMPORTED_MODULE_1__["default"]);
 
 /* harmony default export */ __webpack_exports__["default"] = (Continuous);
 
@@ -3149,6 +3129,45 @@ var Field = function () {
 }();
 
 /* harmony default export */ __webpack_exports__["default"] = (Field);
+
+/***/ }),
+
+/***/ "./src/fields/helper.js":
+/*!******************************!*\
+  !*** ./src/fields/helper.js ***!
+  \******************************/
+/*! exports provided: calculateContinuousDomain */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "calculateContinuousDomain", function() { return calculateContinuousDomain; });
+/* harmony import */ var _operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../operator/row-diffset-iterator */ "./src/operator/row-diffset-iterator.js");
+/* harmony import */ var _invalid_aware_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../invalid-aware-types */ "./src/invalid-aware-types.js");
+
+
+
+var calculateContinuousDomain = function calculateContinuousDomain(data, rowDiffset) {
+    var min = Number.POSITIVE_INFINITY;
+    var max = Number.NEGATIVE_INFINITY;
+
+    // here don't use this.data() as the iteration will be occurred two times on same data.
+    Object(_operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__["rowDiffsetIterator"])(rowDiffset, function (i) {
+        var datum = data[i];
+        if (datum instanceof _invalid_aware_types__WEBPACK_IMPORTED_MODULE_1__["default"]) {
+            return;
+        }
+
+        if (datum < min) {
+            min = datum;
+        }
+        if (datum > max) {
+            max = datum;
+        }
+    });
+
+    return [min, max];
+};
 
 /***/ }),
 
@@ -3729,6 +3748,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils */ "./src/utils/index.js");
 /* harmony import */ var _invalid_aware_types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../invalid-aware-types */ "./src/invalid-aware-types.js");
 /* harmony import */ var _parsers_temporal_parser__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../parsers/temporal-parser */ "./src/fields/parsers/temporal-parser/index.js");
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../helper */ "./src/fields/helper.js");
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -3736,6 +3756,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 
 
 
@@ -3782,22 +3803,7 @@ var Temporal = function (_Dimension) {
     _createClass(Temporal, [{
         key: 'calculateDataDomain',
         value: function calculateDataDomain() {
-            var _this2 = this;
-
-            var hash = new Set();
-            var domain = [];
-
-            // here don't use this.data() as the iteration will be
-            // occurred two times on same data.
-            Object(_operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__["rowDiffsetIterator"])(this.rowDiffset, function (i) {
-                var datum = _this2.partialField.data[i];
-                if (!hash.has(datum)) {
-                    hash.add(datum);
-                    domain.push(datum);
-                }
-            });
-
-            return domain;
+            return Object(_helper__WEBPACK_IMPORTED_MODULE_5__["calculateContinuousDomain"])(this.partialField.data, this.rowDiffset);
         }
 
         /**
@@ -3869,13 +3875,13 @@ var Temporal = function (_Dimension) {
     }, {
         key: 'formattedData',
         value: function formattedData() {
-            var _this3 = this;
+            var _this2 = this;
 
             var data = [];
             var dataFormat = this.format();
 
             Object(_operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__["rowDiffsetIterator"])(this.rowDiffset, function (i) {
-                var datum = _this3.partialField.data[i];
+                var datum = _this2.partialField.data[i];
                 // If value is of invalid type or format is missing
                 if (_invalid_aware_types__WEBPACK_IMPORTED_MODULE_3__["default"].isInvalid(datum) || !dataFormat && Number.isFinite(datum)) {
                     // Use the invalid map value or the raw value
@@ -3951,6 +3957,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _fields__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./fields */ "./src/fields/index.js");
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./utils */ "./src/utils/index.js");
 var _selectModeMap,
+    _boundsChecker,
     _this = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
@@ -4171,26 +4178,29 @@ var cloneWithAllFields = function cloneWithAllFields(model) {
     return clonedDm;
 };
 
-var getKey = function getKey(arr, data, fn) {
-    var key = fn(arr, data, 0);
+var getKey = function getKey(arr, data, fn, rowId) {
+    var key = fn(arr, data, 0, rowId);
 
     for (var i = 1, len = arr.length; i < len; i++) {
-        key = key + ',' + fn(arr, data, i);
+        key = key + ',' + fn(arr, data, i, rowId);
     }
     return key;
 };
 
 var keyFn = function keyFn(arr, fields, idx, rowId) {
-    var val = fields[arr[idx]].internalValue;
-    return arr[idx] === _constants__WEBPACK_IMPORTED_MODULE_4__["ROW_ID"] ? rowId : val;
+    var field = arr[idx];
+    var val = field === _constants__WEBPACK_IMPORTED_MODULE_4__["ROW_ID"] ? rowId : fields[field].internalValue;
+    return val;
 };
 
-var boundsChecker = _defineProperty({}, _enums__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS, function (val, domain) {
+var domainChecker = function domainChecker(val, domain) {
     var domainArr = domain[0] instanceof Array ? domain : [domain];
     return domainArr.some(function (dom) {
         return val >= dom[0] && val <= dom[1];
     });
-});
+};
+
+var boundsChecker = (_boundsChecker = {}, _defineProperty(_boundsChecker, _enums__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS, domainChecker), _defineProperty(_boundsChecker, _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL, domainChecker), _boundsChecker);
 
 var isWithinDomain = function isWithinDomain(value, domain, fieldType) {
     return boundsChecker[fieldType](value, domain);
@@ -4201,8 +4211,14 @@ var filterPropagationModel = function filterPropagationModel(model, propModels) 
 
     var fns = [];
     var operation = config.operation || _constants__WEBPACK_IMPORTED_MODULE_4__["LOGICAL_OPERATORS"].AND;
-    var filterByMeasure = config.filterByMeasure || false;
-    var clonedModel = cloneWithAllFields(model);
+    var _config$filterByDim = config.filterByDim,
+        filterByDim = _config$filterByDim === undefined ? true : _config$filterByDim,
+        _config$filterByMeasu = config.filterByMeasure,
+        filterByMeasure = _config$filterByMeasu === undefined ? false : _config$filterByMeasu,
+        _config$clone = config.clone,
+        clone = _config$clone === undefined ? true : _config$clone;
+
+    var clonedModel = clone ? cloneWithAllFields(model) : model;
     var modelFieldsConfig = clonedModel.getFieldsConfig();
 
     if (!propModels.length) {
@@ -4211,8 +4227,9 @@ var filterPropagationModel = function filterPropagationModel(model, propModels) 
         }];
     } else {
         fns = propModels.map(function (propModel) {
-            return function () {
-                var criteria = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+            return function (_ref5) {
+                var _ref5$criteria = _ref5.criteria,
+                    criteria = _ref5$criteria === undefined ? {} : _ref5$criteria;
                 var _criteria$identifiers = criteria.identifiers,
                     identifiers = _criteria$identifiers === undefined ? [[], []] : _criteria$identifiers,
                     range = criteria.range;
@@ -4223,27 +4240,57 @@ var filterPropagationModel = function filterPropagationModel(model, propModels) 
                     _identifiers$2 = _identifiers[1],
                     values = _identifiers$2 === undefined ? [] : _identifiers$2;
 
+                var indices = fieldNames.reduce(function (map, name, i) {
+                    map[name] = i;
+                    return map;
+                }, {});
+                fieldNames = fieldNames.filter(function (field) {
+                    return field in modelFieldsConfig && modelFieldsConfig[field].def.type === _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION || field === _constants__WEBPACK_IMPORTED_MODULE_4__["ROW_ID"];
+                });
                 var dLen = fieldNames.length;
                 var valuesMap = {};
 
                 if (dLen) {
-                    for (var i = 1, len = identifiers.length; i < len; i++) {
+                    var _loop = function _loop(i, len) {
                         var row = identifiers[i];
-                        var key = row.join();
+                        var key = '' + fieldNames.map(function (field) {
+                            var idx = indices[field];
+                            return row[idx];
+                        });
                         valuesMap[key] = 1;
+                    };
+
+                    for (var i = 1, len = identifiers.length; i < len; i++) {
+                        _loop(i, len);
                     }
                 }
-                var rangeKeys = Object.keys(range || {});
-                return values.length || rangeKeys.length ? function (fields, i) {
-                    var present = dLen ? valuesMap[getKey(fieldNames, fields, keyFn, i)] : true;
+                var rangeKeys = Object.keys(range || {}).filter(function (field) {
+                    return field in modelFieldsConfig;
+                });
+                var hasData = values.length || rangeKeys.length;
 
-                    if (filterByMeasure) {
-                        return rangeKeys.every(function (field) {
-                            var val = fields[field].internalValue;
-                            return isWithinDomain(val, range[field], modelFieldsConfig[field].def.subtype);
-                        }) && present;
+                if (!filterByMeasure) {
+                    rangeKeys = rangeKeys.filter(function (field) {
+                        return modelFieldsConfig[field].def.type !== _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
+                    });
+                }
+
+                if (!filterByDim) {
+                    rangeKeys = rangeKeys.filter(function (field) {
+                        return modelFieldsConfig[field].def.type !== _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
+                    });
+                }
+
+                return hasData ? function (fields, i) {
+                    var present = true;
+                    if (filterByDim) {
+                        present = dLen ? valuesMap[getKey(fieldNames, fields, keyFn, i)] : true;
                     }
-                    return present;
+
+                    return rangeKeys.every(function (field) {
+                        var val = fields[field].internalValue;
+                        return isWithinDomain(val, range[field], modelFieldsConfig[field].def.subtype);
+                    }) && present;
                 } : function () {
                     return false;
                 };
@@ -4253,17 +4300,17 @@ var filterPropagationModel = function filterPropagationModel(model, propModels) 
 
     var filteredModel = void 0;
     if (operation === _constants__WEBPACK_IMPORTED_MODULE_4__["LOGICAL_OPERATORS"].AND) {
-        filteredModel = clonedModel.select(function (fields) {
+        filteredModel = clonedModel.select(function (fields, i) {
             return fns.every(function (fn) {
-                return fn(fields);
+                return fn(fields, i);
             });
         }, {
             saveChild: false
         });
     } else {
-        filteredModel = clonedModel.select(function (fields) {
+        filteredModel = clonedModel.select(function (fields, i) {
             return fns.some(function (fn) {
-                return fn(fields);
+                return fn(fields, i);
             });
         }, {
             saveChild: false
@@ -4552,12 +4599,8 @@ var propagateIdentifiers = function propagateIdentifiers(dataModel, propModel) {
     var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     var propModelInf = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 
-    var nonTraversingModel = propModelInf.nonTraversingModel;
     var excludeModels = propModelInf.excludeModels || [];
-
-    if (dataModel === nonTraversingModel) {
-        return;
-    }
+    var criterias = propModelInf.criteria;
 
     var propagate = excludeModels.length ? excludeModels.indexOf(dataModel) === -1 : true;
 
@@ -4565,7 +4608,18 @@ var propagateIdentifiers = function propagateIdentifiers(dataModel, propModel) {
 
     var children = dataModel._children;
     children.forEach(function (child) {
+        var matchingCriteria = criterias.filter(function (val) {
+            return val.groupedModel === child;
+        });
         var selectionModel = applyExistingOperationOnModel(propModel, child);
+
+        if (matchingCriteria.length) {
+            selectionModel = filterPropagationModel(selectionModel, matchingCriteria, {
+                filterByDim: false,
+                filterByMeasure: true,
+                clone: false
+            });
+        }
         propagateIdentifiers(child, selectionModel, config, propModelInf);
     });
 };
@@ -4598,12 +4652,10 @@ var getPathToRootModel = function getPathToRootModel(model) {
 
 var propagateToAllDataModels = function propagateToAllDataModels(identifiers, rootModels, propagationInf, config) {
     var criteria = void 0;
-    var propModel = void 0;
     var propagationNameSpace = propagationInf.propagationNameSpace,
         propagateToSource = propagationInf.propagateToSource;
 
     var propagationSourceId = propagationInf.sourceId;
-    var propagateInterpolatedValues = config.propagateInterpolatedValues;
     var filterFn = function filterFn(entry) {
         var filter = config.filterFn || function () {
             return true;
@@ -4611,15 +4663,32 @@ var propagateToAllDataModels = function propagateToAllDataModels(identifiers, ro
         return filter(entry, config);
     };
 
+    var addGroupedModel = function addGroupedModel(_ref6) {
+        var conf = _ref6.config,
+            model = _ref6.model;
+        var crit = conf.criteria;
+
+        var groupedModel = void 0;
+
+        if (crit !== null && crit.fields.some(function (d) {
+            return d.type === _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
+        })) {
+            groupedModel = getRootGroupByModel(model);
+        }
+        return Object.assign({}, conf, {
+            groupedModel: groupedModel
+        });
+    };
+
     var criterias = [];
 
-    if (identifiers === null && config.persistent !== true) {
+    if (identifiers === null) {
         criterias = [{
             criteria: []
         }];
         criteria = [];
     } else {
-        var _ref5;
+        var _ref7;
 
         var actionCriterias = Object.values(propagationNameSpace.mutableActions);
         if (propagateToSource !== false) {
@@ -4628,9 +4697,7 @@ var propagateToAllDataModels = function propagateToAllDataModels(identifiers, ro
             });
         }
 
-        var filteredCriteria = actionCriterias.filter(filterFn).map(function (action) {
-            return action.config.criteria;
-        });
+        var filteredCriteria = actionCriterias.filter(filterFn);
 
         var excludeModels = [];
 
@@ -4643,9 +4710,7 @@ var propagateToAllDataModels = function propagateToAllDataModels(identifiers, ro
                     excludeModels.push(actionInf.model);
                     criteria = sourceActionCriterias.filter(function (d) {
                         return d !== actionInf;
-                    }).map(function (d) {
-                        return d.config.criteria;
-                    });
+                    }).map(addGroupedModel);
                     criteria.length && criterias.push({
                         criteria: criteria,
                         models: actionInf.model,
@@ -4655,7 +4720,12 @@ var propagateToAllDataModels = function propagateToAllDataModels(identifiers, ro
             });
         }
 
-        criteria = (_ref5 = []).concat.apply(_ref5, [].concat(_toConsumableArray(filteredCriteria), [identifiers])).filter(function (d) {
+        criteria = (_ref7 = []).concat.apply(_ref7, [].concat(_toConsumableArray(filteredCriteria.map(addGroupedModel)), [{
+            criteria: identifiers,
+            groupedModel: identifiers !== null && identifiers.fields.some(function (d) {
+                return d.type === _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
+            }) ? getRootGroupByModel(propagationInf.propagationSource) : null
+        }])).filter(function (d) {
             return d !== null;
         });
         criterias.push({
@@ -4671,16 +4741,14 @@ var propagateToAllDataModels = function propagateToAllDataModels(identifiers, ro
         propagationSourceId: propagationSourceId
     }, config);
 
-    var rootGroupByModel = rootModels.groupByModel;
-    if (propagateInterpolatedValues && rootGroupByModel) {
-        propModel = filterPropagationModel(rootGroupByModel, criteria, {
-            filterByMeasure: propagateInterpolatedValues
-        });
-        propagateIdentifiers(rootGroupByModel, propModel, propConfig);
-    }
-
     criterias.forEach(function (inf) {
-        var propagationModel = filterPropagationModel(rootModel, inf.criteria);
+        var crit = inf.criteria;
+
+        var propagationModel = filterPropagationModel(rootModel, crit, {
+            filterByMeasure: !!crit.find(function (d) {
+                return d.groupedModel === rootModel;
+            })
+        });
         var path = inf.path;
 
         if (path) {
@@ -4689,13 +4757,13 @@ var propagateToAllDataModels = function propagateToAllDataModels(identifiers, ro
         } else {
             propagateIdentifiers(rootModel, propagationModel, propConfig, {
                 excludeModels: inf.excludeModels,
-                nonTraversingModel: propagateInterpolatedValues && rootGroupByModel
+                criteria: crit
             });
         }
     });
 };
 
-var propagateImmutableActions = function propagateImmutableActions(propagationNameSpace, rootModels, propagationInf) {
+var propagateImmutableActions = function propagateImmutableActions(propagationNameSpace, rootModel, propagationInf) {
     var immutableActions = propagationNameSpace.immutableActions;
 
     for (var action in immutableActions) {
@@ -4705,10 +4773,14 @@ var propagateImmutableActions = function propagateImmutableActions(propagationNa
         var filterImmutableAction = propagationInf.propConfig.filterImmutableAction ? propagationInf.propConfig.filterImmutableAction(actionConf, propagationInf.config) : true;
         if (actionConf.sourceId !== propagationSourceId && filterImmutableAction) {
             var criteriaModel = actionConf.criteria;
-            propagateToAllDataModels(criteriaModel, rootModels, {
+            propagateToAllDataModels(criteriaModel, {
+                model: rootModel,
+                groupByModel: getRootGroupByModel(actionInf.model)
+            }, {
                 propagationNameSpace: propagationNameSpace,
                 propagateToSource: false,
-                sourceId: propagationSourceId
+                sourceId: propagationSourceId,
+                propagationSource: actionInf.model
             }, actionConf);
         }
     }
@@ -5485,7 +5557,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dataBuilder", function() { return dataBuilder; });
 /* harmony import */ var _row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./row-diffset-iterator */ "./src/operator/row-diffset-iterator.js");
 /* harmony import */ var _sort__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./sort */ "./src/operator/sort.js");
+/* harmony import */ var _enums__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../enums */ "./src/enums/index.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../constants */ "./src/constants/index.js");
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+
 
 
 
@@ -5537,8 +5613,8 @@ function dataBuilder(fieldStore, rowDiffset, colIdentifier, sortingDetails, opti
 
     if (addUid) {
         retObj.schema.push({
-            name: 'uid',
-            type: 'identifier'
+            name: _constants__WEBPACK_IMPORTED_MODULE_3__["ROW_ID"],
+            type: _enums__WEBPACK_IMPORTED_MODULE_2__["FieldType"].DIMENSION
         });
     }
 

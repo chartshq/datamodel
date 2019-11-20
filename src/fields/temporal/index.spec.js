@@ -34,7 +34,6 @@ describe('Temporal', () => {
         it('should return the field domain', () => {
             const expected = [
                 new Date(2017, 3 - 1, 1).getTime(),
-                new Date(2017, 3 - 1, 2).getTime(),
                 new Date(2017, 3 - 1, 3).getTime()
             ];
             expect(tempField.calculateDataDomain()).to.eql(expected);
@@ -49,9 +48,7 @@ describe('Temporal', () => {
 
             const expected = [
                 new Date(2017, 3 - 1, 2).getTime(),
-                new Date(2017, 3 - 1, 3).getTime(),
-                new Date(2019, 11 - 1, 7).getTime(),
-                DataModel.InvalidAwareTypes.NULL
+                new Date(2019, 11 - 1, 7).getTime()
             ];
             expect(tempField.calculateDataDomain()).to.eql(expected);
         });

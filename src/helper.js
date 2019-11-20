@@ -534,13 +534,8 @@ const getFilteredModel = (propModel, path) => {
 };
 
 const propagateIdentifiers = (dataModel, propModel, config = {}, propModelInf = {}) => {
-    const nonTraversingModel = propModelInf.nonTraversingModel;
     const excludeModels = propModelInf.excludeModels || [];
     const criterias = propModelInf.criteria;
-
-    if (dataModel === nonTraversingModel) {
-        return;
-    }
 
     const propagate = excludeModels.length ? excludeModels.indexOf(dataModel) === -1 : true;
 
@@ -592,6 +587,7 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
         const filter = config.filterFn || (() => true);
         return filter(entry, config);
     };
+
     const addGroupedModel = ({ config: conf, model }) => {
         const { criteria: crit } = conf;
         let groupedModel;
@@ -660,7 +656,9 @@ export const propagateToAllDataModels = (identifiers, rootModels, propagationInf
 
     criterias.forEach((inf) => {
         const { criteria: crit } = inf;
-        const propagationModel = filterPropagationModel(rootModel, crit);
+        const propagationModel = filterPropagationModel(rootModel, crit, {
+            filterByMeasure: !!crit.find(d => d.groupedModel === rootModel)
+        });
         const path = inf.path;
 
         if (path) {
