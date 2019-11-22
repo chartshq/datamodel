@@ -1,8 +1,7 @@
-import { rowDiffsetIterator } from '../../operator/row-diffset-iterator';
 import { MeasureSubtype } from '../../enums';
 import Measure from '../measure';
-import InvalidAwareTypes from '../../invalid-aware-types';
 import ContinuousParser from '../parsers/continuous-parser';
+import { calculateContinuousDomain } from '../helper';
 
 /**
  * Represents continuous field subtype.
@@ -31,25 +30,7 @@ export default class Continuous extends Measure {
      * @return {Array} Returns the min and max values.
      */
     calculateDataDomain () {
-        let min = Number.POSITIVE_INFINITY;
-        let max = Number.NEGATIVE_INFINITY;
-
-        // here don't use this.data() as the iteration will be occurred two times on same data.
-        rowDiffsetIterator(this.rowDiffset, (i) => {
-            const datum = this.partialField.data[i];
-            if (datum instanceof InvalidAwareTypes) {
-                return;
-            }
-
-            if (datum < min) {
-                min = datum;
-            }
-            if (datum > max) {
-                max = datum;
-            }
-        });
-
-        return [min, max];
+        return calculateContinuousDomain(this.partialField.data, this.rowDiffset);
     }
 
     static parser() {
