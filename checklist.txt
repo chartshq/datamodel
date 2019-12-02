@@ -11,7 +11,7 @@ Checklist to release a new build to NPM:
   * Now, create a release-ready build, Run: npm run build
   * Test the dist/* files if needed
   * Now commit all the changes with this message: "Make a build and bump version"
-  * Then finish the release, Run: git flow finish release [-s] <new_version_with_v_character> and enter release notes
+  * Then finish the release, Run: git flow release finish [-s] <new_version_with_v_character> and enter release notes
   * Push all changes and tags to remote, Run: git push origin master && git push origin develop && git push origin --tags
   * Edit the title of the released tag in Github
   * When everything is fine, it's ready to release
