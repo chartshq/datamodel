@@ -25,6 +25,8 @@ import reducerStore from './utils/reducer-store';
 import { createFields } from './field-creator';
 import InvalidAwareTypes from './invalid-aware-types';
 import Value from './value';
+import { converterStore } from './converter';
+import { fieldRegistry } from './fields';
 
 /**
  * DataModel is an in-browser representation of tabular data. It supports
@@ -92,6 +94,20 @@ class DataModel extends Relation {
      */
     static get Reducers () {
         return reducerStore;
+    }
+
+    /**
+     * Converters are functions that transforms data in various format tpo datamodel consumabe format.
+     */
+    static get Converters() {
+        return converterStore;
+    }
+
+    /**
+     * Register new type of fields
+     */
+    static get FieldTypes() {
+        return fieldRegistry;
     }
 
     /**
@@ -558,13 +574,15 @@ class DataModel extends Relation {
         };
 
         addToNameSpace && addToPropNamespace(propagationNameSpace, config, this);
-        propagateToAllDataModels(identifiers, rootModels, { propagationNameSpace, sourceId: propagationSourceId },
+        propagateToAllDataModels(identifiers, rootModels, { propagationNameSpace,
+            sourceId: propagationSourceId,
+            propagationSource: this },
             Object.assign({
                 payload
             }, config));
 
         if (isMutableAction) {
-            propagateImmutableActions(propagationNameSpace, rootModels, {
+            propagateImmutableActions(propagationNameSpace, rootModel, {
                 config,
                 propConfig
             }, this);

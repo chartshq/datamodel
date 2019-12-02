@@ -2,6 +2,8 @@ import { rowDiffsetIterator } from '../../operator/row-diffset-iterator';
 import Dimension from '../dimension';
 import { DateTimeFormatter } from '../../utils';
 import InvalidAwareTypes from '../../invalid-aware-types';
+import TemporalParser from '../parsers/temporal-parser';
+import { calculateContinuousDomain } from '../helper';
 
 /**
  * Represents temporal field subtype.
@@ -32,20 +34,7 @@ export default class Temporal extends Dimension {
      * @return {Array} Returns the unique values.
      */
     calculateDataDomain () {
-        const hash = new Set();
-        const domain = [];
-
-        // here don't use this.data() as the iteration will be
-        // occurred two times on same data.
-        rowDiffsetIterator(this.rowDiffset, (i) => {
-            const datum = this.partialField.data[i];
-            if (!hash.has(datum)) {
-                hash.add(datum);
-                domain.push(datum);
-            }
-        });
-
-        return domain;
+        return calculateContinuousDomain(this.partialField.data, this.rowDiffset);
     }
 
 
@@ -120,6 +109,10 @@ export default class Temporal extends Dimension {
             }
         });
         return data;
+    }
+
+    static parser() {
+        return new TemporalParser();
     }
 }
 

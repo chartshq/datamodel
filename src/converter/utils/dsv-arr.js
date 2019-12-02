@@ -1,4 +1,4 @@
-import { columnMajor } from '../utils';
+import { columnMajor } from '../../utils';
 
 /**
  * Parses and converts data formatted in DSV array to a manageable internal format.

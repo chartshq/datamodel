@@ -7,7 +7,6 @@
 const DimensionSubtype = {
     CATEGORICAL: 'categorical',
     TEMPORAL: 'temporal',
-    GEO: 'geo',
     BINNED: 'binned'
 };
 

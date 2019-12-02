@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 import { FilteringMode, DataFormat } from './enums';
-import { DM_DERIVATIVES } from './constants';
+import { DM_DERIVATIVES, ROW_ID } from './constants';
 import DataModel from './index';
 import pkg from '../package.json';
 import InvalidAwareTypes from './invalid-aware-types';
@@ -407,7 +407,7 @@ describe('DataModel', () => {
                 schema: [
                     { name: 'name', type: 'dimension', subtype: 'categorical' },
                     { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' },
-                    { name: 'uid', type: 'identifier' }
+                    { name: ROW_ID, type: 'dimension' }
                 ],
                 uids: [0, 1, 2]
             };
@@ -1903,30 +1903,30 @@ describe('DataModel', () => {
             { name: 'first', type: 'dimension' },
             { name: 'second', type: 'dimension' },
         ];
-        const propModel = new DataModel([{
-            first: 'Hey',
-            second: 'Jude'
-        }], [{
-            name: 'first',
-            type: 'dimension'
-        }, {
-            name: 'second',
-            type: 'dimension'
-        }]);
-        const propModel1 = new DataModel([{
-            first: 'Hey',
-            second: 'Jude',
-            count: 100
-        }], [{
-            name: 'first',
-            type: 'dimension'
-        }, {
-            name: 'second',
-            type: 'dimension'
-        }, {
-            name: 'count',
-            type: 'measure'
-        }]);
+
+        const propModel = {
+            fields: [{
+                name: 'first',
+                type: 'dimension'
+            }, {
+                name: 'second',
+                type: 'dimension'
+            }],
+            data: [
+                ['first', 'second'],
+                ['Hey', 'Jude']
+            ]
+        };
+
+        const propModel1 = {
+            fields: [{
+                name: 'sales',
+                type: 'measure'
+            }],
+            range: {
+                sales: [20, 25]
+            }
+        };
 
         let dataModel;
         let projectionFlag = false;
@@ -1935,12 +1935,14 @@ describe('DataModel', () => {
         let projected;
         let selected;
         let grouped;
+        let groupedChild;
 
         beforeEach(() => {
             dataModel = new DataModel(data1, schema1);
             projected = dataModel.project(['profit']);
             selected = dataModel.select(fields => fields.profit.valueOf() > 10);
             grouped = dataModel.groupBy(['first']);
+            groupedChild = grouped.select(() => true);
             // setup listeners
             projected.on('propagation', () => {
                 projectionFlag = true;
@@ -2041,6 +2043,27 @@ describe('DataModel', () => {
             expect(
                 projectionFlag && selectionFlag && groupByFlag
             ).to.be.true;
+        });
+
+        it('Should propagate when measures are present in criteria', () => {
+            groupedChild.propagate(propModel1, {
+                action: 'highlight',
+                isMutableAction: true,
+                sourceId: 'canvas-1',
+                applyOnSource: false,
+                propagateToSource: true,
+                criteria: propModel1
+            }, true);
+
+            groupedChild.propagate(propModel1, {
+                action: 'highlight',
+                isMutableAction: true,
+                sourceId: 'canvas-2',
+                applyOnSource: false,
+                propagateToSource: true,
+                criteria: propModel1
+            }, true);
+            expect(projectionFlag && selectionFlag && groupByFlag).to.be.true;
         });
     });
 
