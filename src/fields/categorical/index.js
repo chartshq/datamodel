@@ -1,6 +1,7 @@
 import { rowDiffsetIterator } from '../../operator/row-diffset-iterator';
 import { DimensionSubtype } from '../../enums';
 import Dimension from '../dimension';
+import CategoricalParser from '../parsers/categorical-parser';
 /**
  * Represents categorical field subtype.
  *
@@ -40,5 +41,9 @@ export default class Categorical extends Dimension {
             }
         });
         return domain;
+    }
+
+    static parser() {
+        return new CategoricalParser();
     }
 }

@@ -2,16 +2,19 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { Categorical, Temporal, Binned, Continuous } from './fields';
+import Categorical from './fields/categorical';
+import Temporal from './fields/temporal';
+import Binned from './fields/binned';
+import Continuous from './fields/continuous';
 import { createFields, createUnitFieldFromPartial } from './field-creator';
 import { MeasureSubtype, DimensionSubtype } from './enums';
+import PartialField from './fields/partial-field';
 
 describe('Creating Field', () => {
     describe('#createUnitFieldFromPartial', () => {
         it('should return an array of correct field instances', () => {
-            let mockedPartialField = {
-                schema: { name: 'Country' }
-            };
+            let mockedPartialField = new PartialField('Country', [], { name: 'Country' }, null);
+            // mockedPartialField.schema = { name: 'Country' }
             let mockedRowDiffset = '1-2';
             expect(createUnitFieldFromPartial(mockedPartialField, mockedRowDiffset) instanceof Categorical).to.be.true;
 

@@ -1,4 +1,59 @@
-const DataModel = window.DataModel.default;
+// const DataModel = window.DataModel.default;
+const columnMajor = (store) => {
+    let i = 0;
+    return (...fields) => {
+        fields.forEach((val, fieldIndex) => {
+            if (!(store[fieldIndex] instanceof Array)) {
+                store[fieldIndex] = Array.from({ length: i });
+            }
+            store[fieldIndex].push(val);
+        });
+        i++;
+    };
+};
+
+
+function FlatJSON222 (arr, schema) {
+    if (!Array.isArray(schema)) {
+        throw new Error('Schema missing or is in an unsupported format');
+    }
+
+    const header = {};
+    let i = 0;
+    let insertionIndex;
+    const columns = [];
+    const push = columnMajor(columns);
+    const schemaFieldsName = schema.map(unitSchema => unitSchema.name);
+
+    arr.forEach((item) => {
+        const fields = [];
+        schemaFieldsName.forEach((unitSchema) => {
+            if (unitSchema in header) {
+                insertionIndex = header[unitSchema];
+            } else {
+                header[unitSchema] = i++;
+                insertionIndex = i - 1;
+            }
+            fields[insertionIndex] = item[unitSchema];
+        });
+        push(...fields);
+    });
+
+    return [Object.keys(header), columns];
+}
+
+class JSONConverter2 extends DataModel.DataConverter{
+    constructor(){
+        super("json2")
+    }
+
+    convert(data , schema , options){
+        console.log("this is json2")
+        return FlatJSON222(data,schema,options);
+    }
+} 
+
+DataModel.Converters.register(new JSONConverter2());
 
 const schema = [
     {
@@ -50,13 +105,6 @@ const data = [
     }
 ];
 
-const dm = new DataModel(data, schema);
-const dataGenerated = dm.getData({
-    order: 'column',
-    formatter: {
-        birthday: val => new Date(val),
-        name: val => `Name: ${val}`
-    }
-});
+const dm = new DataModel(data, schema,{ dataFormat:"json2" });
 
-console.log(dataGenerated);
+console.log(dm.getData());

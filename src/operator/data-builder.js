@@ -1,5 +1,7 @@
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import { sortData } from './sort';
+import { FieldType } from '../enums';
+import { ROW_ID } from '../constants';
 
 /**
  * Builds the actual data array.
@@ -48,8 +50,8 @@ export function dataBuilder (fieldStore, rowDiffset, colIdentifier, sortingDetai
 
     if (addUid) {
         retObj.schema.push({
-            name: 'uid',
-            type: 'identifier'
+            name: ROW_ID,
+            type: FieldType.DIMENSION
         });
     }
 

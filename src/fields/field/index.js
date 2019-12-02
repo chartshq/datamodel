@@ -1,4 +1,5 @@
 import { rowDiffsetIterator } from '../../operator/row-diffset-iterator';
+import PartialField from '../partial-field';
 
 /**
  * In {@link DataModel}, every tabular data consists of column, a column is stored as field.
@@ -30,6 +31,10 @@ export default class Field {
     constructor (partialField, rowDiffset) {
         this.partialField = partialField;
         this.rowDiffset = rowDiffset;
+    }
+
+    static parser() {
+        throw new Error('Not yet implemented');
     }
 
     /**
@@ -124,5 +129,48 @@ export default class Field {
      */
     formattedData () {
         throw new Error('Not yet implemented');
+    }
+
+    static get BUILDER() {
+        const builder = {
+            _params: {},
+            _context: this,
+            fieldName(name) {
+                this._params.name = name;
+                return this;
+            },
+            schema(schema) {
+                this._params.schema = schema;
+                return this;
+            },
+            data(data) {
+                this._params.data = data;
+                return this;
+            },
+            partialField(partialField) {
+                this._params.partialField = partialField;
+                return this;
+            },
+            rowDiffset(rowDiffset) {
+                this._params.rowDiffset = rowDiffset;
+                return this;
+            },
+            build() {
+                let partialField = null;
+                if (this._params.partialField instanceof PartialField) {
+                    partialField = this._params.partialField;
+                } else if (this._params.schema && this._params.data) {
+                    partialField = new PartialField(this._params.name,
+                                        this._params.data,
+                                        this._params.schema,
+                                        this._context.parser());
+                }
+                else {
+                    throw new Error('Invalid Field parameters');
+                }
+                return new this._context(partialField, this._params.rowDiffset);
+            }
+        };
+        return builder;
     }
 }
