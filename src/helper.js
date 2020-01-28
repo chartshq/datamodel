@@ -204,6 +204,7 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
     const { filterByDim = true, filterByMeasure = false, clone = true } = config;
     const clonedModel = clone ? cloneWithAllFields(model) : model;
     const modelFieldsConfig = clonedModel.getFieldsConfig();
+    const uids = model.getPartialFieldspace().idField.data();
 
     if (!propModels.length) {
         fns = [() => false];
@@ -223,11 +224,25 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
             if (dLen) {
                 for (let i = 1, len = identifiers.length; i < len; i++) {
                     const row = identifiers[i];
-                    const key = `${fieldNames.map((field) => {
-                        const idx = indices[field];
-                        return row[idx];
-                    })}`;
-                    valuesMap[key] = 1;
+                    let key;
+                    if (ROW_ID in indices) {
+                        const ids = row[indices[ROW_ID]];
+                        if (ids) {
+                            ids.values().forEach((id) => {
+                                key = `${fieldNames.map((field) => {
+                                    const idx = indices[field];
+                                    return field === ROW_ID ? id : row[idx];
+                                })}`;
+                                valuesMap[key] = 1;
+                            });
+                        }
+                    } else {
+                        key = `${fieldNames.map((field) => {
+                            const idx = indices[field];
+                            return row[idx];
+                        })}`;
+                        valuesMap[key] = 1;
+                    }
                 }
             }
             let rangeKeys = Object.keys(range || {}).filter(field => field in modelFieldsConfig);
@@ -244,7 +259,7 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
             return hasData ? (fields, i) => {
                 let present = true;
                 if (filterByDim) {
-                    present = dLen ? valuesMap[getKey(fieldNames, fields, keyFn, i)] : true;
+                    present = dLen ? valuesMap[getKey(fieldNames, fields, keyFn, uids[i])] : true;
                 }
 
                 return rangeKeys.every((field) => {
@@ -436,12 +451,33 @@ export const updateData = (relation, data, schema, options) => {
         throw new Error(`No converter function found for ${options.dataFormat} format`);
     }
 
-    const [header, formattedData] = converter.convert(data, schema, options);
+    let [header, formattedData] = converter.convert(data, schema, options);
     resolveFieldName(schema, header);
+
+    const idIndex = schema.findIndex(field => field.subtype === DimensionSubtype.ID);
+    let idData;
+
+    if (idIndex !== -1) {
+        idData = formattedData[idIndex] || [];
+        formattedData = formattedData.filter((d, i) => i !== idIndex);
+        header = header.filter((d, i) => i !== idIndex);
+        schema = schema.filter(field => field.subtype !== DimensionSubtype.ID);
+    } else {
+        const rowLength = (formattedData[0] && formattedData[0].length) || 0;
+        idData = new Array(rowLength).fill().map((d, i) => i);
+    }
+
     const fieldArr = createFields(formattedData, schema, header);
 
+    const idField = createFields([idData], [{
+        name: ROW_ID,
+        type: 'dimension',
+        subtype: DimensionSubtype.ID
+    }], [ROW_ID])[0];
+
+
     // This will create a new fieldStore with the fields
-    const nameSpace = fieldStore.createNamespace(fieldArr, options.name);
+    const nameSpace = fieldStore.createNamespace(fieldArr, options.name, idField);
     relation._partialFieldspace = nameSpace;
 
     // If data is provided create the default colIdentifier and rowDiffset
@@ -452,11 +488,12 @@ export const updateData = (relation, data, schema, options) => {
     const { fields } = nameSpace;
     const rawFieldsData = fields.map(field => field.data());
     const formattedFieldsData = fields.map(field => field.formattedData());
+    const idFieldData = idField.data();
     rowDiffsetIterator(relation._rowDiffset, (i) => {
         valueObjects[i] = prepareSelectionData(fields, formattedFieldsData, rawFieldsData, i);
+        valueObjects[i][ROW_ID] = new Value(idFieldData[i], idFieldData[i], idField);
     });
     nameSpace._cachedValueObjects = valueObjects;
-
     relation._colIdentifier = (schema.map(_ => _.name)).join();
     relation._dataFormat = options.dataFormat === DataFormat.AUTO ? detectDataFormat(data) : options.dataFormat;
     return relation;

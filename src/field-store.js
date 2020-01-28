@@ -4,13 +4,13 @@ import { getUniqueId } from './utils';
 const fieldStore = {
     data: {},
 
-    createNamespace (fieldArr, name) {
+    createNamespace (fieldArr, name, idField) {
         const dataId = name || getUniqueId();
 
         this.data[dataId] = {
             name: dataId,
             fields: fieldArr,
-
+            idField,
             fieldsObj () {
                 let fieldsObj = this._cachedFieldsObj;
 
@@ -50,7 +50,7 @@ const fieldStore = {
             },
         };
         return this.data[dataId];
-    },
+    }
 };
 
 export default fieldStore;

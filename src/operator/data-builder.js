@@ -1,6 +1,6 @@
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import { sortData } from './sort';
-import { FieldType } from '../enums';
+import { FieldType, DimensionSubtype } from '../enums';
 import { ROW_ID } from '../constants';
 
 /**
@@ -14,7 +14,9 @@ import { ROW_ID } from '../constants';
  * @param {Object} options - The options required to create the type of the data.
  * @return {Object} Returns an object containing the multidimensional array and the relative schema.
  */
-export function dataBuilder (fieldStore, rowDiffset, colIdentifier, sortingDetails, options) {
+export function dataBuilder ({ fields: fieldStore, idField }, rowDiffset, colIdentifier, sortingDetails, options) {
+    const idData = idField.data();
+
     const defOptions = {
         addUid: false,
         columnWise: false
@@ -35,7 +37,8 @@ export function dataBuilder (fieldStore, rowDiffset, colIdentifier, sortingDetai
 
     colIArr.forEach((colName) => {
         for (let i = 0; i < fieldStore.length; i += 1) {
-            if (fieldStore[i].name() === colName) {
+            const name = fieldStore[i].name();
+            if (name === colName) {
                 tmpDataArr.push(fieldStore[i]);
                 break;
             }
@@ -51,7 +54,8 @@ export function dataBuilder (fieldStore, rowDiffset, colIdentifier, sortingDetai
     if (addUid) {
         retObj.schema.push({
             name: ROW_ID,
-            type: FieldType.DIMENSION
+            type: FieldType.DIMENSION,
+            subtype: DimensionSubtype.ID
         });
     }
 
@@ -63,14 +67,14 @@ export function dataBuilder (fieldStore, rowDiffset, colIdentifier, sortingDetai
             retObj.data[insertInd][ii + start] = field.partialField.data[i];
         });
         if (addUid) {
-            retObj.data[insertInd][tmpDataArr.length] = i;
+            retObj.data[insertInd][tmpDataArr.length] = idData[i];
         }
         // Creates an array of unique identifiers for each row
-        retObj.uids.push(i);
+        retObj.uids.push(idData[i]);
 
         // If sorting needed then there is the need to expose the index
         // mapping from the old index to its new index
-        if (reqSorting) { retObj.data[insertInd].push(i); }
+        if (reqSorting) { retObj.data[insertInd].push(idData[i]); }
     });
 
     // Handles the sort functionality

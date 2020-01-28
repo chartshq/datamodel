@@ -7,7 +7,8 @@
 const DimensionSubtype = {
     CATEGORICAL: 'categorical',
     TEMPORAL: 'temporal',
-    BINNED: 'binned'
+    BINNED: 'binned',
+    ID: '__id'
 };
 
 export default DimensionSubtype;
