@@ -1,9 +1,14 @@
 import { FieldParser } from '..';
-
+/**
+ * Wrapper around row identifier value. Row id value contains the unique id of each row which
+ * remains same across all datamodels of same source.
+ */
 export class IdValue {
-    constructor (val, hash) {
-        this._val = new Set(val instanceof Array ? val.map(Number) : [Number(val)]);
-        this._hash = hash || this._val.values().next().value;
+    constructor (val) {
+        const valArr = val instanceof Array ? val.map(Number) : [Number(val)];
+        this._val = new Set(valArr);
+        this._hash = valArr[0];
+        this._valArr = valArr;
         return this;
     }
 
@@ -12,7 +17,7 @@ export class IdValue {
     }
 
     values () {
-        return [...this._val];
+        return this._valArr;
     }
 }
 
@@ -29,7 +34,7 @@ export default class IdParser extends FieldParser {
    *
    * @public
    * @param {string|number} val - The value of the field.
-   * @return {string} Returns the stringified value.
+   * @return {string} Returns the instance of id value.
    */
     parse (val) {
         const result = val instanceof IdValue ? new IdValue(val.values()) : new IdValue(val);
