@@ -4,6 +4,7 @@
 import { expect } from 'chai';
 import { union } from './union';
 import DataModel from '../index';
+import { IdValue } from '../fields/parsers/id-parser';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a', state: 'aa' },
@@ -43,7 +44,7 @@ describe('Testing union', () => {
                 ['a', 'ab'],
                 ['b', 'ba'],
                 ],
-                uids: [0, 1, 2, 3]
+                uids: [0, 1, 2, 3].map(id => new IdValue(id))
             });
         });
         it('should not perform union if fields are not same', () => {

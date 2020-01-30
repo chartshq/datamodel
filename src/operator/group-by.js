@@ -3,7 +3,8 @@ import { rowDiffsetIterator } from './row-diffset-iterator';
 import DataModel from '../export';
 import reducerStore from '../utils/reducer-store';
 import { defaultReducerName } from './group-by-function';
-import { FieldType } from '../enums';
+import { FieldType, DimensionSubtype } from '../enums';
+import { ROW_ID } from '../constants';
 
 /**
  * This function sanitize the user given field and return a common Array structure field
@@ -67,10 +68,11 @@ function getReducerObj (dataModel, reducers = {}) {
  * @param {DataModel} existingDataModel Existing datamodel instance
  * @return {DataModel} new dataModel with the group by
  */
-function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
+function groupBy (dataModel, fieldArr, reducers) {
     const sFieldArr = getFieldArr(dataModel, fieldArr);
     const reducerObj = getReducerObj(dataModel, reducers);
     const fieldStore = dataModel.getFieldspace();
+    const idData = dataModel.getPartialFieldspace().idField.data();
     const fieldStoreObj = fieldStore.fieldsObj();
     const dbName = fieldStore.name;
     const dimensionArr = [];
@@ -97,6 +99,7 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     });
     // Prepare the data
     let rowCount = 0;
+    const idMap = [];
     rowDiffsetIterator(dataModel._rowDiffset, (i) => {
         let hash = '';
         dimensionArr.forEach((_) => {
@@ -105,36 +108,41 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
         if (hashMap[hash] === undefined) {
             hashMap[hash] = rowCount;
             data.push({});
+            idMap.push([]);
             dimensionArr.forEach((_) => {
                 data[rowCount][_] = fieldStoreObj[_].partialField.data[i];
             });
             measureArr.forEach((_) => {
                 data[rowCount][_] = [fieldStoreObj[_].partialField.data[i]];
             });
+            idMap[rowCount] = [`${idData[i]}`];
             rowCount += 1;
         } else {
             measureArr.forEach((_) => {
                 data[hashMap[hash]][_].push(fieldStoreObj[_].partialField.data[i]);
             });
+            idMap[hashMap[hash]].push(`${idData[i]}`);
         }
     });
 
     // reduction
     let cachedStore = {};
     let cloneProvider = () => dataModel.detachedRoot();
-    data.forEach((row) => {
+    data.forEach((row, i) => {
         const tuple = row;
         measureArr.forEach((_) => {
             tuple[_] = reducerObj[_](row[_], cloneProvider, cachedStore);
         });
+        tuple[ROW_ID] = idMap[i];
     });
-    if (existingDataModel) {
-        existingDataModel.__calculateFieldspace();
-        newDataModel = existingDataModel;
-    }
-    else {
-        newDataModel = new DataModel(data, schema, { name: dbName });
-    }
+
+    schema.push({
+        name: ROW_ID,
+        type: FieldType.DIMENSION,
+        subtype: DimensionSubtype.ID
+    });
+
+    newDataModel = new DataModel(data, schema, { name: dbName });
     return newDataModel;
 }
 

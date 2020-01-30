@@ -5,6 +5,7 @@ import { expect } from 'chai';
 import DataModel from '../index'
 ;
 import { naturalJoin } from './natural-join';
+import { IdValue } from '../fields/parsers/id-parser';
 
 describe('Test Natural Join', () => {
     const data1 = [
@@ -147,7 +148,7 @@ describe('Test Natural Join', () => {
                 uids: [
                     0,
                     1
-                ]
+                ].map(id => new IdValue(id))
             };
             expect(naturalJoin(data23, data24, obj => obj.ModelA.id === obj.ModelB.id).getData())
                             .to.deep.equal(expectedResult);
