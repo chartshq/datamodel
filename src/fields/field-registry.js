@@ -3,6 +3,7 @@ import Temporal from './temporal';
 import Binned from './binned';
 import Continuous from './continuous';
 import { DimensionSubtype, MeasureSubtype } from '../enums';
+import ID from './id';
 
 
 class FieldTypeRegistry {
@@ -27,6 +28,7 @@ class FieldTypeRegistry {
 const registerDefaultFields = (store) => {
     store
                     .registerFieldType(DimensionSubtype.CATEGORICAL, Categorical)
+                    .registerFieldType(DimensionSubtype.ID, ID)
                     .registerFieldType(DimensionSubtype.TEMPORAL, Temporal)
                     .registerFieldType(DimensionSubtype.BINNED, Binned)
                     .registerFieldType(MeasureSubtype.CONTINUOUS, Continuous);

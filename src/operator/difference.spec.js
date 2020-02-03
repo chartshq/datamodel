@@ -4,6 +4,7 @@
 import { expect } from 'chai';
 import { difference } from './difference';
 import DataModel from '../index';
+import { IdValue } from '../fields/parsers/id-parser';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a', state: 'aa' },
@@ -45,7 +46,7 @@ describe('Checking difference', () => {
                 ['a', 'aa'],
                 ['b', 'bb'],
                 ],
-                uids: [0, 1]
+                uids: [0, 1].map(id => new IdValue(id))
             });
         });
 

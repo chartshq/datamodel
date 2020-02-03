@@ -166,11 +166,11 @@ class DataModel extends Relation {
             sort: []
         };
         options = Object.assign({}, defOptions, options);
-        const fields = this.getPartialFieldspace().fields;
+        const { idField, fields } = this.getPartialFieldspace();
 
         const dataGenerated = dataBuilder.call(
             this,
-            this.getPartialFieldspace().fields,
+            { fields, idField },
             this._rowDiffset,
             options.getAllFields ? fields.map(d => d.name()).join() : this._colIdentifier,
             options.sort,
@@ -237,17 +237,11 @@ class DataModel extends Relation {
     getUids () {
         const rowDiffset = this._rowDiffset;
         const ids = [];
+        const idData = this.getPartialFieldspace().idField.data();
 
-        if (rowDiffset.length) {
-            const diffSets = rowDiffset.split(',');
-
-            diffSets.forEach((set) => {
-                let [start, end] = set.split('-').map(Number);
-
-                end = end !== undefined ? end : start;
-                ids.push(...Array(end - start + 1).fill().map((_, idx) => start + idx));
-            });
-        }
+        rowDiffsetIterator(rowDiffset, (i) => {
+            ids.push(idData[i]);
+        });
 
         return ids;
     }
@@ -287,7 +281,6 @@ class DataModel extends Relation {
             { fieldsArr, groupByString, defaultReducer: reducerStore.defaultReducer() },
             reducers
         );
-
         if (config.saveChild) {
             newDataModel.setParent(this);
         } else {
@@ -351,11 +344,12 @@ class DataModel extends Relation {
     sort (sortingDetails, config = { saveChild: false }) {
         const rawData = this.getData({
             order: 'row',
-            sort: sortingDetails
+            sort: sortingDetails,
+            withUid: true
         });
+
         const header = rawData.schema.map(field => field.name);
         const dataInCSVArr = [header].concat(rawData.data);
-
         const sortedDm = new this.constructor(dataInCSVArr, rawData.schema, { dataFormat: 'DSVArr' });
 
         persistDerivations(

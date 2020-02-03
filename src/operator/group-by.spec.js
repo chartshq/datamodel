@@ -5,6 +5,7 @@ import { expect } from 'chai';
 import { getFieldArr, getReducerObj, groupBy } from './group-by';
 import DataModel from '../index';
 import { defReducer, fnList } from './group-by-function';
+import { IdValue } from '../fields/parsers/id-parser';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a', state: 'aa' },
@@ -88,7 +89,7 @@ describe('Test groupBy', () => {
                 ['a', 20, 40],
                 ['b', 30, 50],
                 ],
-                uids: [0, 1]
+                uids: [[0, 2], [1, 3]].map(id => new IdValue(id))
             };
             const compData = groupBy(dataModel1, ['city']).getData();
             expect(compData).to.deep.equal(reqData);
@@ -107,7 +108,7 @@ describe('Test groupBy', () => {
                 ['a', 40],
                 ['b', 50],
                 ],
-                uids: [0, 1]
+                uids: [[0, 2], [1, 3]].map(id => new IdValue(id))
             };
             const compData = groupBy(dataModel1, ['city']).getData();
             expect(compData).to.deep.equal(reqData);

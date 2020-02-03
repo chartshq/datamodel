@@ -144,7 +144,7 @@ console.log(projectDm.getData().schema);
 
 ## Documentation
 
-Find detailed documentation and API reference from [here](https://muzejs.org/docs/introduction-to-datamodel).
+Find detailed documentation and API reference from [here](https://muzejs.org/docs/concepts/datamodel/introducing-datamodel).
 
 ## Contributing
 
