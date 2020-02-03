@@ -2,9 +2,10 @@
 /* eslint-disable no-unused-expressions, no-new */
 
 import { expect } from 'chai';
-import { FilteringMode, DataFormat } from './enums';
+import { FilteringMode, DataFormat, DimensionSubtype } from './enums';
 import { DM_DERIVATIVES, ROW_ID } from './constants';
 import DataModel from './index';
+import { IdValue } from './fields/parsers/id-parser';
 import pkg from '../package.json';
 import InvalidAwareTypes from './invalid-aware-types';
 import { getDerivationArguments } from './helper';
@@ -264,7 +265,7 @@ describe('DataModel', () => {
                     { name: 'name', type: 'dimension', subtype: 'categorical' },
                     { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
                 ],
-                uids: [0, 1, 2]
+                uids: [0, 1, 2].map(id => new IdValue(id))
             };
             expect(generatedData).to.deep.equal(expected);
 
@@ -288,7 +289,7 @@ describe('DataModel', () => {
                     { name: 'name', type: 'dimension', subtype: 'categorical' },
                     { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' }
                 ],
-                uids: [0, 1, 2]
+                uids: [0, 1, 2].map(id => new IdValue(id))
             };
             expect(generatedData).to.deep.equal(expected);
 
@@ -312,7 +313,7 @@ describe('DataModel', () => {
                     ['SUMANT', '1996-8-0'],
                     ['AKASH', '1994-1-1']
                 ],
-                uids: [0, 1, 2]
+                uids: [0, 1, 2].map(id => new IdValue(id))
             };
             expect(generatedData).to.deep.equal(expected);
 
@@ -335,7 +336,7 @@ describe('DataModel', () => {
                     ['ROUSAN', 'SUMANT', 'AKASH'],
                     ['1995-7-3', '1996-8-0', '1994-1-1']
                 ],
-                uids: [0, 1, 2]
+                uids: [0, 1, 2].map(id => new IdValue(id))
             };
             expect(generatedData).to.deep.equal(expected);
         });
@@ -354,6 +355,7 @@ describe('DataModel', () => {
             ];
 
             const dm = new DataModel(data, schema);
+            // G16;
             const expected = {
                 schema: [
                     {
@@ -378,7 +380,7 @@ describe('DataModel', () => {
                     ['low', 100, 2],
                     ['high', 400, 1]
                 ],
-                uids: [2, 3, 0, 1]
+                uids: [2, 3, 0, 1].map(id => new IdValue(id))
             };
 
             expect(dm.getData({
@@ -400,16 +402,16 @@ describe('DataModel', () => {
             const dataModel = new DataModel(data, schema);
             const expected = {
                 data: [
-                    ['Rousan', new Date(1995, 7 - 1, 5).getTime(), 0],
-                    ['Sumant', new Date(1996, 8 - 1, 4).getTime(), 1],
-                    ['Akash', new Date(1994, 1 - 1, 3).getTime(), 2]
+                    ['Rousan', new Date(1995, 7 - 1, 5).getTime(), new IdValue(0)],
+                    ['Sumant', new Date(1996, 8 - 1, 4).getTime(), new IdValue(1)],
+                    ['Akash', new Date(1994, 1 - 1, 3).getTime(), new IdValue(2)]
                 ],
                 schema: [
                     { name: 'name', type: 'dimension', subtype: 'categorical' },
                     { name: 'birthday', type: 'dimension', subtype: 'temporal', format: '%Y-%m-%d' },
-                    { name: ROW_ID, type: 'dimension' }
+                    { name: ROW_ID, type: 'dimension', subtype: DimensionSubtype.ID }
                 ],
-                uids: [0, 1, 2]
+                uids: [0, 1, 2].map(id => new IdValue(id))
             };
 
             expect(dataModel.getData({ withUid: true })).to.deep.equal(expected);
@@ -463,11 +465,7 @@ describe('DataModel', () => {
                         'single'
                     ]
                 ],
-                uids: [
-                    0,
-                    1,
-                    2
-                ]
+                uids: [0, 1, 2].map(id => new IdValue(id))
             };
             expect(dm.getData({ getAllFields: true })).to.deep.equal(expected);
         });
@@ -499,7 +497,7 @@ describe('DataModel', () => {
                     { name: 'age', type: 'measure', subtype: 'continuous' },
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                 ],
-                uids: [0, 1, 2]
+                uids: [0, 1, 2].map(id => new IdValue(id))
             };
             expect(dataModel === projectedDataModel).to.be.false;
             expect(projectedDataModel.getData()).to.deep.equal(expected);
@@ -520,7 +518,7 @@ describe('DataModel', () => {
                     { name: 'education', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 1, 2]
+                uids: [0, 1, 2].map(id => new IdValue(id))
             };
             expect(expected).to.deep.equal(invProjectedDataModel.getData());
         });
@@ -541,7 +539,7 @@ describe('DataModel', () => {
                     { name: 'age', type: 'measure', subtype: 'continuous' },
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                 ],
-                uids: [0, 1, 2]
+                uids: [0, 1, 2].map(id => new IdValue(id))
             };
             const rejectionModel = {
                 data: [
@@ -553,7 +551,7 @@ describe('DataModel', () => {
                     { name: 'education', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 1, 2]
+                uids: [0, 1, 2].map(id => new IdValue(id))
             };
 
             expect(projectedModel).to.deep.equal(dataModels[0].getData());
@@ -591,7 +589,7 @@ describe('DataModel', () => {
                     ['secondary', 'blue-collar', 59],
                     ['tertiary', 'management', 35]
                 ],
-                uids: [0, 1, 2]
+                uids: [0, 1, 2].map(id => new IdValue(id))
             };
 
             expect(dataModel === projectedDataModel).to.be.false;
@@ -658,7 +656,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 4]
+                uids: [0, 4].map(id => new IdValue(id))
             };
 
             const expData2 = {
@@ -672,7 +670,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [1, 3, 4]
+                uids: [1, 3, 4].map(id => new IdValue(id))
             };
 
             const dataModel = new DataModel(dataaa, schemaa);
@@ -697,7 +695,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 2, 4]
+                uids: [0, 2, 4].map(id => new IdValue(id))
             };
 
             // check project is not applied on the same DataModel
@@ -729,7 +727,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 1, 3, 4]
+                uids: [0, 1, 3, 4].map(id => new IdValue(id))
             });
             expect(rejected).to.deep.equal({
                 data: [
@@ -740,7 +738,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [2]
+                uids: [2].map(id => new IdValue(id))
             });
             expect(selectionAll[0].getData()).to.deep.equal(selected);
             expect(selectionAll[1].getData()).to.deep.equal(rejected);
@@ -762,7 +760,7 @@ describe('DataModel', () => {
                     { name: 'age', type: 'measure', subtype: 'continuous' },
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                 ],
-                uids: [0, 2]
+                uids: [0, 2].map(id => new IdValue(id))
             };
             // check project is not applied on the same DataModel
             expect(dataModel === selectedDm).to.be.false;
@@ -778,7 +776,7 @@ describe('DataModel', () => {
                     { name: 'age', type: 'measure', subtype: 'continuous' },
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                 ],
-                uids: [2]
+                uids: [2].map(id => new IdValue(id))
             };
             expect(selectedDm2._rowDiffset).to.equal('2');
             // Check The return data
@@ -799,7 +797,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 2, 4]
+                uids: [0, 2, 4].map(id => new IdValue(id))
             };
 
             // check project is not applied on the same DataModel
@@ -833,7 +831,7 @@ describe('DataModel', () => {
                     [59, 'blue-collar', 'married'],
                     [57, 'self-employed', 'married']
                 ],
-                uids: [1, 3]
+                uids: [1, 3].map(id => new IdValue(id))
             };
 
             expect(selectedDm.getData()).to.eql(expData);
@@ -849,7 +847,7 @@ describe('DataModel', () => {
                     [30, 'management', 'married'],
                     [59, 'blue-collar', 'married']
                 ],
-                uids: [0, 1]
+                uids: [0, 1].map(id => new IdValue(id))
             };
 
             expect(selectedDm.getData()).to.eql(expData);
@@ -872,7 +870,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 2, 4]
+                uids: [0, 2, 4].map(id => new IdValue(id))
             };
 
             // check project is not applied on the same DataModel
@@ -934,7 +932,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 1, 2, 3]
+                uids: [1, 3, 2, 0].map(id => new IdValue(id))
             };
 
             expect(sortedDm).not.to.equal(dataModel);
@@ -975,7 +973,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 1, 2, 3, 4, 5]
+                uids: [1, 3, 2, 5, 0, 4].map(id => new IdValue(id))
             };
             expect(sortedDm.getData()).to.deep.equal(expData);
         });
@@ -1013,7 +1011,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 1, 2, 3, 4, 5]
+                uids: [0, 1, 2, 3, 4, 5].map(id => new IdValue(id))
             };
             expect(sortedDm.getData()).to.deep.equal(expData);
         });
@@ -1052,7 +1050,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 1, 2, 3, 4, 5]
+                uids: [2, 1, 0, 3, 5, 4].map(id => new IdValue(id))
             };
             expect(sortedDm.getData()).to.deep.equal(expData);
         });
@@ -1092,7 +1090,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 1, 2, 3, 4, 5]
+                uids: [4, 1, 5, 0, 2, 3].map(id => new IdValue(id))
             };
             expect(sortedDm.getData()).to.deep.equal(expData);
         });
@@ -1132,7 +1130,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 1, 2, 3, 4, 5]
+                uids: [0, 1, 2, 3, 4, 5].map(id => new IdValue(id))
             };
             expect(sortedDm.getData()).to.deep.equal(expData);
         });
@@ -1174,7 +1172,7 @@ describe('DataModel', () => {
                     ['Teen', 14, 'Female', 'Kolkata'],
                     ['Usha', 49, 'Female', 'Kolkata'],
                 ],
-                uids: [0, 1, 2, 3, 4, 5, 6]
+                uids: [0, 2, 4, 5, 6, 1, 3].map(id => new IdValue(id))
             };
             expect(sortedDm.getData()).to.deep.equal(expData);
         });
@@ -1213,7 +1211,7 @@ describe('DataModel', () => {
                     { name: 'job', type: 'dimension', subtype: 'categorical' },
                     { name: 'marital', type: 'dimension', subtype: 'categorical' }
                 ],
-                uids: [0, 1, 2, 3, 4, 5]
+                uids: [1, 3, 2, 5, 0, 4].map(id => new IdValue(id))
             };
             expect(sortedDm.getData()).to.deep.equal(expData);
         });
@@ -1253,7 +1251,7 @@ describe('DataModel', () => {
                     ['medium', 660, 5],
                     ['high', 400, 1]
                 ],
-                uids: [0, 1, 2, 3, 4, 5]
+                uids: [5, 3, 0, 2, 4, 1].map(id => new IdValue(id))
             };
             expect(sortedDm.getData()).to.deep.equal(expected);
 
@@ -1277,7 +1275,7 @@ describe('DataModel', () => {
                     ['medium', 660, 5],
                     ['medium', 20, 1.5]
                 ],
-                uids: [0, 1, 2, 3, 4, 5]
+                uids: [5, 0, 3, 1, 4, 2].map(id => new IdValue(id))
             };
             expect(sortedDm.getData()).to.deep.equal(expected);
         });
@@ -1367,7 +1365,7 @@ describe('DataModel', () => {
                     [15, 25, 'b', 200, 'a'],
                     [15, 25, 'b', 250, 'b'],
                 ],
-                uids: [0, 1, 2, 3]
+                uids: [0, 1, 2, 3].map(id => new IdValue(id))
             });
             expect((dataModel1.join(dataModel2,
                 (dmFields1, dmFields2) => dmFields1.city.value === dmFields2.city.value)).getData()).to.deep.equal({
@@ -1382,7 +1380,7 @@ describe('DataModel', () => {
                         [10, 20, 'a', 200, 'a'],
                         [15, 25, 'b', 250, 'b'],
                     ],
-                    uids: [0, 1]
+                    uids: [0, 1].map(id => new IdValue(id))
                 });
             expect((dataModel1.naturalJoin(dataModel2)).getData()).to.deep.equal({
                 schema: [
@@ -1395,7 +1393,7 @@ describe('DataModel', () => {
                     [10, 20, 'a', 200],
                     [15, 25, 'b', 250],
                 ],
-                uids: [0, 1]
+                uids: [0, 1].map(id => new IdValue(id))
             });
         });
 
@@ -1436,7 +1434,7 @@ describe('DataModel', () => {
                     [10, 20, 'a', 'aa', 200],
                     [15, 25, 'b', 'aa', 250]
                 ],
-                uids: [0, 1]
+                uids: [0, 1].map(id => new IdValue(id))
             });
         });
 
@@ -1476,7 +1474,7 @@ describe('DataModel', () => {
                 data: [
                     [10, 20, 'a', 'aa', 200]
                 ],
-                uids: [0]
+                uids: [0].map(id => new IdValue(id))
             });
         });
 
@@ -1527,7 +1525,7 @@ describe('DataModel', () => {
                     [15, 25, 'b', 200, 'a'],
                     [15, 25, 'b', 250, 'b']
                 ],
-                uids: [0, 1]
+                uids: [0, 1].map(id => new IdValue(id))
             };
             expect(joinedDm.getData()).to.eql(expected);
         });
@@ -1571,7 +1569,7 @@ describe('DataModel', () => {
                     ['a', 'aa'],
                     ['b', 'bb'],
                 ],
-                uids: [0, 1]
+                uids: [0, 1].map(id => new IdValue(id))
             });
             expect(dataModel1.union(dataModel2).getData()).to.deep.equal({
                 schema: [
@@ -1586,7 +1584,7 @@ describe('DataModel', () => {
                     ['a', 'aba'],
                     ['b', 'baa'],
                 ],
-                uids: [0, 1, 2, 3, 4, 5]
+                uids: [0, 1, 2, 3, 4, 5].map(id => new IdValue(id))
             });
         });
     });
@@ -1610,7 +1608,6 @@ describe('DataModel', () => {
                 name: 'Song',
                 type: 'dimension'
             }, [i => i]);
-
             const songData = newDm.groupBy(['Song']);
             const expected = {
                 schema: [
@@ -1624,7 +1621,7 @@ describe('DataModel', () => {
                     [10, 20, '2'],
                     [15, 25, '3']
                 ],
-                uids: [0, 1, 2, 3]
+                uids: [0, 1, 2, 3].map(id => new IdValue(id))
             };
 
             expect(
@@ -1788,7 +1785,7 @@ describe('DataModel', () => {
                     [10, 20, 'a', 'ab', 2.5],
                     [15, 25, 'b', 'ba', -2.5]
                 ],
-                uids: [0, 1, 2, 3]
+                uids: [0, 1, 2, 3].map(id => new IdValue(id))
             };
 
             expect(calculatedDm.getData()).to.eql(expected);
@@ -1812,7 +1809,7 @@ describe('DataModel', () => {
                     [10, 20, 'a', 'ab', 20],
                     [15, 25, 'b', 'ba', 45]
                 ],
-                uids: [0, 1, 2, 3]
+                uids: [0, 1, 2, 3].map(id => new IdValue(id))
             };
 
             expect(calculatedDm.getData()).to.eql(expected);
@@ -2083,7 +2080,10 @@ describe('DataModel', () => {
         const propModel = new DataModel(data1, schema1);
 
         it('should give proper uids for default datamodel', () => {
-            expect(propModel.getUids()).to.deep.equal([0, 1, 2, 3]);
+            expect(propModel.getUids()).to.deep.equal([0, 1, 2, 3].map(d => new IdValue(d)));
+        });
+        it('should create an id field', () => {
+            expect(propModel.getPartialFieldspace().idField.subtype() === DimensionSubtype.ID).to.equals(true);
         });
     });
 
@@ -2149,7 +2149,7 @@ describe('DataModel', () => {
                         { name: 'age', type: 'measure', subtype: 'continuous' },
                         { name: 'marital', type: 'dimension', subtype: 'categorical' }
                     ],
-                    uids: [0, 1, 2, 3]
+                    uids: [[0], [1, 5, 6], [2, 3], [4]].map(id => new IdValue(id))
                 };
 
                 const dataModel2 = new DataModel(dataaa, schemaa);
@@ -2235,7 +2235,7 @@ describe('DataModel', () => {
                         [1.25, 45, 'Hey'],
                         [-1.25, 45, 'White']
                     ],
-                    uids: [0, 1]
+                    uids: [[0, 1], [2, 3]].map(id => new IdValue(id))
                 };
 
                 expect(groupedDm.getData()).to.eql(expected);

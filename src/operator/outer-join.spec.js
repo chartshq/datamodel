@@ -6,6 +6,7 @@ import { fullOuterJoin, leftOuterJoin, rightOuterJoin } from './outer-join';
 import DataModel from '../index'
 ;
 import InvalidAwareTypes from '../invalid-aware-types';
+import { IdValue } from '../fields/parsers/id-parser';
 
 describe('Testing Outer Join', () => {
     const data1 = [
@@ -179,7 +180,7 @@ describe('Testing Outer Join', () => {
                     1,
                     2,
                     3
-                ]
+                ].map(id => new IdValue(id))
             };
             expect(leftOuterJoin(data23, data24,
                 (dmFields1, dmFields2) => dmFields1.id.value === dmFields2.id.value).getData())
@@ -272,7 +273,7 @@ describe('Testing Outer Join', () => {
                 uids: [
                     0,
                     1
-                ]
+                ].map(id => new IdValue(id))
             };
             expect(rightOuterJoin(data23, data24,
                 (dmFields1, dmFields2) => dmFields1.id.value === dmFields2.id.value).getData())
@@ -392,7 +393,7 @@ describe('Testing Outer Join', () => {
                     1,
                     2,
                     3
-                ]
+                ].map(id => new IdValue(id))
             };
 
             expect(fullOuterJoin(data23, data24,

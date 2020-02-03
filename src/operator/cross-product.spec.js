@@ -4,6 +4,7 @@
 import { expect } from 'chai';
 import { crossProduct } from './cross-product';
 import DataModel from '../index';
+import { IdValue } from '../fields/parsers/id-parser';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a' },
@@ -43,7 +44,7 @@ describe('CrossProduct Functionality', () => {
                 [15, 25, 'b', 200, 'a'],
                 [15, 25, 'b', 250, 'b'],
                 ],
-                uids: [0, 1, 2, 3]
+                uids: [0, 1, 2, 3].map(id => new IdValue(id))
             });
         });
         it('should perform crossProduct on two datamodels with given filterFn', () => {
@@ -63,7 +64,7 @@ describe('CrossProduct Functionality', () => {
                 [10, 20, 'a', 200],
                 [15, 25, 'b', 250],
                 ],
-                uids: [0, 1]
+                uids: [0, 1].map(id => new IdValue(id))
             });
         });
 

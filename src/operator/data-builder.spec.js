@@ -4,6 +4,9 @@
 import { expect } from 'chai';
 import { dataBuilder } from './data-builder';
 import { createFields } from '../field-creator';
+import { IdValue } from '../fields/parsers/id-parser';
+import { DimensionSubtype } from '../enums';
+import { ROW_ID } from '../constants';
 
 function avg(...nums) {
     return nums.reduce((acc, next) => acc + next, 0) / nums.length;
@@ -23,7 +26,13 @@ describe('Checking dataBuilder', () => {
                 { name: 'city', type: 'dimension' },
             ];
             const fieldsArr = createFields(data, schema);
-            const expObj = dataBuilder(fieldsArr, '0-2,4', 'profit,sales,city');
+            const idData = [0, 1, 2, 3, 4, 5];
+            const idField = createFields([idData], [{
+                name: ROW_ID,
+                type: 'dimension',
+                subtype: DimensionSubtype.ID
+            }], [ROW_ID])[0];
+            const expObj = dataBuilder({ fields: fieldsArr, idField }, '0-2,4', 'profit,sales,city');
             const oriObj = {
                 schema: [
                     { name: 'profit', type: 'measure' },
@@ -36,7 +45,7 @@ describe('Checking dataBuilder', () => {
                     [7, 8, 'c'],
                     [20, 77, 'e'],
                 ],
-                uids: [0, 1, 2, 4]
+                uids: [0, 1, 2, 4].map(id => new IdValue(id))
             };
             expect(expObj).to.deep.equal(oriObj);
         });
@@ -53,7 +62,14 @@ describe('Checking dataBuilder', () => {
                 { name: 'city', type: 'dimension' },
             ];
             const fieldsArr = createFields(data, schema);
-            const expObj = dataBuilder(fieldsArr, '0-2,4', 'profit,sales,city', undefined, { columnWise: true });
+            const idData = [0, 1, 2, 3, 4, 5];
+            const idField = createFields([idData], [{
+                name: ROW_ID,
+                type: 'dimension',
+                subtype: DimensionSubtype.ID
+            }], [ROW_ID])[0];
+            const expObj = dataBuilder({ fields: fieldsArr, idField },
+                '0-2,4', 'profit,sales,city', undefined, { columnWise: true });
             const oriObj = {
                 schema: [
                     { name: 'profit', type: 'measure' },
@@ -65,7 +81,7 @@ describe('Checking dataBuilder', () => {
                     [20, 25, 8, 77],
                     ['a', 'b', 'c', 'e'],
                 ],
-                uids: [0, 1, 2, 4]
+                uids: [0, 1, 2, 4].map(id => new IdValue(id))
             };
             expect(expObj).to.deep.equal(oriObj);
         });
@@ -78,7 +94,13 @@ describe('Checking dataBuilder', () => {
                 { name: 'city', type: 'dimension' },
             ];
             const fieldsArr = createFields(data, schema);
-            const expObj = dataBuilder(fieldsArr, '', 'profit,sales,city');
+            const idData = [];
+            const idField = createFields([idData], [{
+                name: ROW_ID,
+                type: 'dimension',
+                subtype: DimensionSubtype.ID
+            }], [ROW_ID])[0];
+            const expObj = dataBuilder({ fields: fieldsArr, idField }, '', 'profit,sales,city');
             const oriObj = {
                 schema: [
                     { name: 'profit', type: 'measure' },
@@ -98,7 +120,13 @@ describe('Checking dataBuilder', () => {
             ];
             const schema = [];
             const fieldsArr = createFields(data, schema);
-            const expObj = dataBuilder(fieldsArr, '', '');
+            const idData = [0, 1, 2, 3, 4, 5];
+            const idField = createFields([idData], [{
+                name: ROW_ID,
+                type: 'dimension',
+                subtype: DimensionSubtype.ID
+            }], [ROW_ID])[0];
+            const expObj = dataBuilder({ fields: fieldsArr, idField }, '', '');
             const oriObj = {
                 schema: [],
                 data: [],
@@ -118,8 +146,14 @@ describe('Checking dataBuilder', () => {
                 { name: 'sales', type: 'measure' },
                 { name: 'city', type: 'dimension' },
             ];
+            const idData = [0, 1, 2, 3, 4, 5];
+            const idField = createFields([idData], [{
+                name: ROW_ID,
+                type: 'dimension',
+                subtype: DimensionSubtype.ID
+            }], [ROW_ID])[0];
             const fieldsArr = createFields(data, schema);
-            const expObj = dataBuilder(fieldsArr, '0-2,4', 'sales,city');
+            const expObj = dataBuilder({ fields: fieldsArr, idField }, '0-2,4', 'sales,city');
             const oriObj = {
                 schema: [
                     { name: 'sales', type: 'measure' },
@@ -131,7 +165,7 @@ describe('Checking dataBuilder', () => {
                     [8, 'c'],
                     [77, 'e'],
                 ],
-                uids: [0, 1, 2, 4]
+                uids: [0, 1, 2, 4].map(id => new IdValue(id))
             };
             expect(expObj).to.deep.equal(oriObj);
         });
@@ -148,7 +182,13 @@ describe('Checking dataBuilder', () => {
                 { name: 'city', type: 'dimension' },
             ];
             const fieldsArr = createFields(data, schema);
-            const expObj = dataBuilder(fieldsArr, '0-5', 'profit,sales,city');
+            const idData = [0, 1, 2, 3, 4, 5];
+            const idField = createFields([idData], [{
+                name: ROW_ID,
+                type: 'dimension',
+                subtype: DimensionSubtype.ID
+            }], [ROW_ID])[0];
+            const expObj = dataBuilder({ fields: fieldsArr, idField }, '0-5', 'profit,sales,city');
             const oriObj = {
                 schema: [
                     { name: 'profit', type: 'measure' },
@@ -163,7 +203,7 @@ describe('Checking dataBuilder', () => {
                     [20, 77, 'e'],
                     [35, 9, 'f'],
                 ],
-                uids: [0, 1, 2, 3, 4, 5]
+                uids: [0, 1, 2, 3, 4, 5].map(id => new IdValue(id))
             };
             expect(expObj).to.deep.equal(oriObj);
         });
@@ -180,7 +220,13 @@ describe('Checking dataBuilder', () => {
                 { name: 'city', type: 'dimension' },
             ];
             const fieldsArr = createFields(data, schema);
-            const expObj = dataBuilder(fieldsArr, '', 'profit,sales,city');
+            const idData = [0, 1, 2, 3, 4, 5];
+            const idField = createFields([idData], [{
+                name: ROW_ID,
+                type: 'dimension',
+                subtype: DimensionSubtype.ID
+            }], [ROW_ID])[0];
+            const expObj = dataBuilder({ fields: fieldsArr, idField }, '', 'profit,sales,city');
             const oriObj = {
                 schema: [
                     { name: 'profit', type: 'measure' },
@@ -205,7 +251,13 @@ describe('Checking dataBuilder', () => {
                 { name: 'city', type: 'dimension' },
             ];
             const fieldsArr = createFields(data, schema);
-            const expObj = dataBuilder(fieldsArr, '0-5', 'city,profit,sales');
+            const idData = [0, 1, 2, 3, 4, 5];
+            const idField = createFields([idData], [{
+                name: ROW_ID,
+                type: 'dimension',
+                subtype: DimensionSubtype.ID
+            }], [ROW_ID])[0];
+            const expObj = dataBuilder({ fields: fieldsArr, idField }, '0-5', 'city,profit,sales');
             const oriObj = {
                 schema: [
                     { name: 'city', type: 'dimension' },
@@ -220,7 +272,7 @@ describe('Checking dataBuilder', () => {
                     ['e', 20, 77],
                     ['f', 35, 9],
                 ],
-                uids: [0, 1, 2, 3, 4, 5]
+                uids: [0, 1, 2, 3, 4, 5].map(id => new IdValue(id))
             };
             expect(expObj).to.deep.equal(oriObj);
         });
@@ -237,7 +289,13 @@ describe('Checking dataBuilder', () => {
                 { name: 'city', type: 'dimension' },
             ];
             const fieldsArr = createFields(data, schema);
-            const expObj = dataBuilder(fieldsArr, '5-0', 'profit,sales,city');
+            const idData = [0, 1, 2, 3, 4, 5];
+            const idField = createFields([idData], [{
+                name: ROW_ID,
+                type: 'dimension',
+                subtype: DimensionSubtype.ID
+            }], [ROW_ID])[0];
+            const expObj = dataBuilder({ fields: fieldsArr, idField }, '5-0', 'profit,sales,city');
             const oriObj = {
                 schema: [
                     { name: 'profit', type: 'measure' },
@@ -262,8 +320,14 @@ describe('Checking dataBuilder', () => {
                 { name: 'city', type: 'dimension' },
             ];
             const fieldsArr = createFields(data, schema);
+            const idData = [0, 1, 2, 3, 4, 5];
+            const idField = createFields([idData], [{
+                name: ROW_ID,
+                type: 'dimension',
+                subtype: DimensionSubtype.ID
+            }], [ROW_ID])[0];
             const retData = dataBuilder(
-                fieldsArr,
+                { fields: fieldsArr, idField },
                 '0-2,4',
                 'profit,sales,city',
                 [
@@ -282,7 +346,7 @@ describe('Checking dataBuilder', () => {
                     [15, 25, 'b'],
                     [20, 77, 'e'],
                 ],
-                uids: [2, 0, 1, 4]
+                uids: [2, 0, 1, 4].map(id => new IdValue(id))
             };
             expect(retData).to.deep.equal(expected);
         });
@@ -299,9 +363,14 @@ describe('Checking dataBuilder', () => {
                 { name: 'weight', type: 'measure', subtype: 'continuous' }
             ];
             const fieldsArr = createFields(data, schema);
-
+            const idData = [0, 1, 2, 3, 4, 5];
+            const idField = createFields([idData], [{
+                name: ROW_ID,
+                type: 'dimension',
+                subtype: DimensionSubtype.ID
+            }], [ROW_ID])[0];
             let retData = dataBuilder(
-                fieldsArr,
+                { fields: fieldsArr, idField },
                 '0-5',
                 'performance,horsepower,weight',
                 [
@@ -323,12 +392,12 @@ describe('Checking dataBuilder', () => {
                     ['medium', 660, 5],
                     ['high', 400, 1]
                 ],
-                uids: [5, 3, 0, 2, 4, 1]
+                uids: [5, 3, 0, 2, 4, 1].map(id => new IdValue(id))
             };
             expect(retData).to.deep.equal(expected);
 
             retData = dataBuilder(
-                fieldsArr,
+                { fields: fieldsArr, idField },
                 '0-5',
                 'performance,horsepower,weight',
                 [
@@ -352,7 +421,7 @@ describe('Checking dataBuilder', () => {
                     ['medium', 660, 5],
                     ['medium', 20, 1.5]
                 ],
-                uids: [5, 0, 3, 1, 4, 2]
+                uids: [5, 0, 3, 1, 4, 2].map(id => new IdValue(id))
             };
             expect(retData).to.deep.equal(expected);
         });
