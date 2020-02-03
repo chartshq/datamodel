@@ -2,7 +2,7 @@
   "name": "datamodel",
   "description": "Relational algebra compliant in-memory tabular data store",
   "homepage": "https://github.com/chartshq/datamodel",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "license": "MIT",
   "main": "dist/datamodel.js",
   "keywords": [
