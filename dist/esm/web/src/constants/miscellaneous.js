@@ -1,0 +1,1 @@
+export var Operations;!function(t){t.SELECT="select",t.GROUPBY="groupBy",t.PROJECT="project",t.SPLIT="split",t.SORT="sort",t.CALCULATE="calculate_variable"}(Operations||(Operations={}));export var DEFAULT="default";

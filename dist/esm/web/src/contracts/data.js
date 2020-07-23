@@ -1,0 +1,1 @@
+export var DataFormat;!function(a){a.FLAT_JSON="FlatJSON",a.DSV_STR="DSVStr",a.DSV_ARR="DSVArr",a.AUTO="Auto"}(DataFormat||(DataFormat={}));

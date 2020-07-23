@@ -1,0 +1,1 @@
+import{DataFormat}from"../../contracts/data";import DSVArr from"../dataParsers/dsv-arr";var DSVArrayConverter=function(){function r(){this._type=DataFormat.DSV_ARR}return Object.defineProperty(r.prototype,"type",{get:function(){return this._type},enumerable:!1,configurable:!0}),r.prototype.convert=function(r,t,e){return DSVArr(r,t,e)},r}();export default DSVArrayConverter;

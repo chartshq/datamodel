@@ -1,0 +1,1 @@
+var DEFAULT_HW_CONCURRENCY=1;function createTaskerPool(r){var e,n;if("undefined"!=typeof window){var o=Math.min(null!==(n=null===(e=window.navigator)||void 0===e?void 0:e.hardwareConcurrency)&&void 0!==n?n:DEFAULT_HW_CONCURRENCY,4);if(null!=window.Worker)return Array.from({length:o}).map(function(){return{isFree:!0,worker:new r}})}}export{createTaskerPool};

@@ -1,0 +1,1 @@
+import FlatJSON from"./flat-json";import DSVArr from"./dsv-arr";import DSVStr from"./dsv-str";import{detectDataFormat}from"../utils/index";function Auto(t,r,o){var a={FlatJSON:FlatJSON,DSVStr:DSVStr,DSVArr:DSVArr},e=detectDataFormat(t);if(!e)throw new Error("Could not detect the data format");return a[e](t,r,o)}export default Auto;

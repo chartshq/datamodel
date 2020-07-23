@@ -1,0 +1,1 @@
+import{DataFormat}from"../../contracts/data";import AUTO from"../dataParsers/auto-resolver";var AutoDataConverter=function(){function t(){this._type=DataFormat.AUTO}return Object.defineProperty(t.prototype,"type",{get:function(){return this._type},enumerable:!1,configurable:!0}),t.prototype.convert=function(t,r,e){return AUTO(t,r,e)},t}();export default AutoDataConverter;
