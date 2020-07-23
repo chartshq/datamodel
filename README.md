@@ -20,3 +20,5 @@
 
 
 # MIGRATION IN PROGRESS
+
+Visit old version https://github.com/chartshq/muze-deprecated
