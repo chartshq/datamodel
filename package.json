@@ -8,7 +8,8 @@
     "dist",
     "README.md",
     "package.json",
-    "dist/esm/web/src/index.d.ts"
+    "dist/esm/web/src/index.d.ts",
+    "LICENSE"
   ],
   "author": "Charts.com <eng@chars.com> (https://charts.com/)",
   "dependencies": {
