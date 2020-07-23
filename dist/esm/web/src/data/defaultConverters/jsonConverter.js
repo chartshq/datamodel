@@ -1,0 +1,1 @@
+import{DataFormat}from"../../contracts/data";import FlatJSON from"../dataParsers/flat-json";var JSONConverter=function(){function t(){this._type=DataFormat.FLAT_JSON}return Object.defineProperty(t.prototype,"type",{get:function(){return this._type},enumerable:!1,configurable:!0}),t.prototype.convert=function(t,r){return FlatJSON(t,r)},t}();export default JSONConverter;

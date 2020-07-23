@@ -1,104 +1,62 @@
 {
-  "name": "datamodel",
-  "description": "Relational algebra compliant in-memory tabular data store",
-  "homepage": "https://github.com/chartshq/datamodel",
-  "version": "2.3.1",
-  "license": "MIT",
-  "main": "dist/datamodel.js",
-  "keywords": [
-    "datamodel",
-    "data",
-    "relational",
-    "algebra",
-    "model",
-    "muze",
-    "fusioncharts",
-    "table",
-    "tabular",
-    "operation"
+  "name": "@chartshq/datamodel",
+  "version": "3.0.0",
+  "main": "./dist/node/datamodel.js",
+  "module": "./dist/esm/web/src/index.js",
+  "types": "./dist/esm/web/src/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "package.json",
+    "dist/esm/web/src/index.d.ts"
   ],
-  "author": "Muzejs.org (https://muzejs.org/)",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/chartshq/datamodel.git"
+  "author": "Charts.com <eng@chars.com> (https://charts.com/)",
+  "dependencies": {
+    "d3-dsv": "^1.2.0",
+    "global-promise": "^1.0.4",
+    "uuid": "^8.0.0"
   },
   "contributors": [
     {
-      "name": "Akash Goswami",
-      "email": "akashgoswami90s@gmail.com"
-    },
-    {
-      "name": "Subhash Haldar"
-    },
-    {
-      "name": "Rousan Ali",
-      "email": "rousanali786@gmail.com",
-      "url": "https://rousan.io"
-    },
-    {
       "name": "Ujjal Kumar Dutta",
-      "email": "duttaujjalkumar@live.com"
+      "email": "duttaujjal143@gmail.com",
+      "url": "https://github.com/UD-UD"
     },
     {
       "name": "Ranajit Banerjee",
-      "email": "ranajit.113124@gmail.com"
+      "email": "ranajit.113124@gmail.com",
+      "url": "https://github.com/ranajitbanerjee"
+    },
+    {
+      "name": "Rousan Ali",
+      "email": "hello@rousan.io",
+      "url": "https://rousan.io"
+    },
+    {
+      "name": "Nakshatra Mukhopadhyay",
+      "email": "nakshatra.mukhopadhyay1994@gmail.com"
     },
     {
       "name": "Adarsh Lilha",
-      "email": "adarshlilha@gmail.com"
+      "email": "adarsh@charts.com"
     },
     {
       "name": "Swati Mukherjee",
-      "email": "swati020494@gmail.com"
+      "email": "swati@charts.com"
     }
   ],
-  "dependencies": {
-    "d3-dsv": "^1.0.8"
-  },
-  "devDependencies": {
-    "babel-cli": "6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-eslint": "6.1.2",
-    "babel-loader": "^7.1.4",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-flow": "^6.23.0",
-    "chai": "3.5.0",
-    "cross-env": "^5.0.5",
-    "eslint": "3.19.0",
-    "eslint-config-airbnb": "15.1.0",
-    "eslint-plugin-import": "2.7.0",
-    "eslint-plugin-jsx-a11y": "5.1.1",
-    "eslint-plugin-react": "7.3.0",
-    "istanbul-instrumenter-loader": "^3.0.0",
-    "jsdoc": "3.5.5",
-    "json2yaml": "^1.1.0",
-    "karma": "1.7.1",
-    "karma-chai": "0.1.0",
-    "karma-chrome-launcher": "2.1.1",
-    "karma-coverage-istanbul-reporter": "^1.3.0",
-    "karma-mocha": "1.3.0",
-    "karma-spec-reporter": "0.0.31",
-    "karma-webpack": "2.0.3",
-    "marked": "^0.5.0",
-    "mocha": "3.4.2",
-    "mocha-webpack": "0.7.0",
-    "transform-runtime": "0.0.0",
-    "webpack": "^4.12.0",
-    "webpack-cli": "^3.0.7",
-    "webpack-dev-server": "^3.1.4"
-  },
-  "scripts": {
-    "test": "npm run lint && npm run ut",
-    "ut": "karma start karma.conf.js",
-    "utd": "karma start --single-run false --browsers Chrome karma.conf.js ",
-    "build": "npm run build:prod",
-    "build:dev": "webpack --mode development",
-    "build:prod": "webpack --mode production",
-    "start": "webpack-dev-server --config webpack.config.dev.js --mode development --open",
-    "lint": "eslint ./src",
-    "lint-errors": "eslint --quiet ./src",
-    "docs": "rm -rf yaml && mkdir yaml && jsdoc -c jsdoc.conf.json"
+  "keywords": [
+    "muze",
+    "data-visualization",
+    "visualization",
+    "relational",
+    "algebra",
+    "relation",
+    "webassembly"
+  ],
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix"
+    ]
   }
 }

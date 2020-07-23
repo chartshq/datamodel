@@ -1,0 +1,1 @@
+import{FieldSubtype}from"../../constants/fields";var ContinuousParser=function(){function e(){this._type=FieldSubtype.CONTINUOUS}return Object.defineProperty(e.prototype,"type",{get:function(){return this._type},enumerable:!1,configurable:!0}),e.prototype.parse=function(e){return e||0===e?Number(e):NaN},e}();export{ContinuousParser};

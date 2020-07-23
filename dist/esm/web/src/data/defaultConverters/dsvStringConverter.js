@@ -1,0 +1,1 @@
+import{DataFormat}from"../../contracts/data";import DSVStr from"../dataParsers/dsv-str";var DSVStringConverter=function(){function t(){this._type=DataFormat.DSV_STR}return Object.defineProperty(t.prototype,"type",{get:function(){return this._type},enumerable:!1,configurable:!0}),t.prototype.convert=function(t,r,e){return DSVStr(t,r,e)},t}();export default DSVStringConverter;

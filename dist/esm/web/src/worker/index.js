@@ -1,0 +1,1 @@
+import{initializePoolExecutor}from"./pool-executor";export var transformDataOnWorker=function(o,r){return initializePoolExecutor(r)(o)};

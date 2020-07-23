@@ -1,0 +1,1 @@
+var Invalid=function(){function t(t){this._value=t}return t.prototype.value=function(){return this._value},t.prototype.toString=function(){return String(this._value)},t}();export default Invalid;

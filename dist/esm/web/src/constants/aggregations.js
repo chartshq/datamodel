@@ -1,0 +1,1 @@
+export var AggregationType;!function(t){t.SUM="sum",t.AVG="avg",t.MIN="min",t.MAX="max",t.FIRST="first",t.LAST="last",t.COUNT="count",t.STD="std"}(AggregationType||(AggregationType={}));export var _aggregationResolver=function(t){return{sum:0,avg:1,count:3,min:4,max:5,std:6}[t]};

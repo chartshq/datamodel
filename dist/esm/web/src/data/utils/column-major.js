@@ -1,0 +1,1 @@
+export default function(r){var n=0;return function(){for(var t=[],f=0;f<arguments.length;f++)t[f]=arguments[f];t.forEach(function(t,f){r[f]instanceof Array||(r[f]=Array.from({length:n})),r[f].push(t)}),n++}}

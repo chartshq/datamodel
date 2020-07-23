@@ -1,0 +1,1 @@
+export var FilteringModesType;!function(e){e.NORMAL="normal",e.INVERSE="inverse",e.ALL="all"}(FilteringModesType||(FilteringModesType={}));export var _modeResolver=function(e){return{normal:1,inverse:2,all:3}[e]};

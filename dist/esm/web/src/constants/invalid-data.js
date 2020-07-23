@@ -1,0 +1,1 @@
+export var InvalidData;!function(a){a.UNDEFINED=""}(InvalidData||(InvalidData={}));export var InvalidType;!function(a){a.NULL="null",a.UNDEFINED="undefined",a.NAN="NaN",a.NIL="nil",a.NA="na",a.EMPTY_STRING=""}(InvalidType||(InvalidType={}));export var DEFAULT_INVALID_VALUE="_invalid";export var RESERVED_INVALID_VALUE="_#-";

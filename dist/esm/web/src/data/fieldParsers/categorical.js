@@ -1,0 +1,1 @@
+import{FieldSubtype}from"../../constants/fields";var CategoricalParser=function(){function e(){this._type=FieldSubtype.CATEGORICAL}return Object.defineProperty(e.prototype,"type",{get:function(){return this._type},enumerable:!1,configurable:!0}),e.prototype.parse=function(e){return"number"==typeof e?String(e):e},e}();export{CategoricalParser};
