@@ -217,7 +217,7 @@ import Engine from '@chartshq/datamodel';
 
     ```js
     dm.select((fields) => { 
-    		return fields.Origin.value === 'USA';
+      return fields.Origin.value === 'USA';
     });
     ```
 
@@ -225,9 +225,9 @@ import Engine from '@chartshq/datamodel';
 
     ```js
     dm.select({
-    		field: 'Origin',
-    		operator: DataModel.ComparisonOperators.EQUAL,
-    		value: 'USA'
+      field: 'Origin',
+      operator: DataModel.ComparisonOperators.EQUAL,
+      value: 'USA'
     });
     ```
 
@@ -237,7 +237,7 @@ import Engine from '@chartshq/datamodel';
 
     ```js
     dm.groupBy(['Origin'], {
-    		Acceleration: 'avg'
+      Acceleration: 'avg'
     });
     ```
 
@@ -245,8 +245,8 @@ import Engine from '@chartshq/datamodel';
 
     ```js
     dm.groupBy(['Origin'], [{
-    		aggn: Datamodel.AggregationFunctions.AVG,
-    		field: 'Acceleration'
+      aggn: Datamodel.AggregationFunctions.AVG,
+      field: 'Acceleration'
     }]);
     ```
 
