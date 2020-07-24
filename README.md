@@ -151,7 +151,7 @@ import Engine from '@chartshq/datamodel';
   //  ]
 
   // Perform the selection operation
-  const selectDm = dm.select({ field: ‘Origin’, value: ‘USA’, operator: ‘eq’ });
+  const selectDm = dm.select({ field: ‘Origin’, value: ‘USA’, operator: DataModel.ComparisonOperators.EQUAL });
   console.log(selectDm.getData().data);
   // Output:
   //  [
