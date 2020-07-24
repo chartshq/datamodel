@@ -117,17 +117,15 @@ const data = [
 ```js
 // If you are using the npm package,
 // import the package as below:
-import DataModel from '@chartshq/datamodel';
+import Engine from '@chartshq/datamodel';
 
 // If you are using CDN, then use it as follows:
-const DataModel = window.DataModel;
+const Engine = window.DataModel;
 ```
 
 2. Load the DataModel engine and pass the data and schema to `DataModel` constructor and create a new `DataModel` instance:
 
 ```js
-import Engine from '@chartshq/datamodel';
-
 // As the DataModel are asynchronous, so we need to
 // use async-await syntax.
 (async () => {
