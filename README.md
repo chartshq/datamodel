@@ -21,4 +21,4 @@
 
 # MIGRATION IN PROGRESS
 
-Visit old version https://github.com/chartshq/muze-deprecated
+Visit old version https://github.com/chartshq/datamodel-deprecated
