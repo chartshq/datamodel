@@ -7,9 +7,9 @@
 
 DataModel is an in-browser representation of tabular data. It uses WebAssembly for high performance and works seamlessly with any JavaScript library. It supports [Relational Algebra](https://en.wikipedia.org/wiki/Relational_algebra) operators which enable you to run `select`, `group`, `sort` (and many more) operations on the data.
 
-The current version peforms all the data operations like `filtering`, `aggregation`, etc. on **[WebAssembly](https://webassembly.org/)** which gives a **10x performance** boost compared to the [old JavaScript version](https://github.com/chartshq/datamodel-deprecated).
+The current version performs all the data operations like `filtering`, `aggregation`, etc. on **[WebAssembly](https://webassembly.org/)** which gives a **10x performance** boost compared to the [old JavaScript version](https://github.com/chartshq/datamodel-deprecated).
 
-It is written in [Rust langauge](https://www.rust-lang.org/) to handle computation intensive data operations, which is then compiled to **[WebAssembly](https://webassembly.org/)**, thereby providing a native-like performance for data operations.
+It is written in [Rust Language](https://www.rust-lang.org/) to handle computation intensive data operations, which is then compiled to **[WebAssembly](https://webassembly.org/)**, thereby providing a native-like performance for data operations.
 
 DataModel can be used if you need an in-browser tabular data store for data analysis, visualization or just general use of data.
 
@@ -200,7 +200,7 @@ import Engine from '@chartshq/datamodel';
   const DataModel = await Engine.onReady();
 
   // Converts the raw data into a format
-	// which DataModel can consume.
+  // which DataModel can consume.
   const formattedData = await DataModel.loadData(data, schema);
 
   // Create a new DataModel instance with
