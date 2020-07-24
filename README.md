@@ -135,7 +135,7 @@ import Engine from '@chartshq/datamodel';
   const DataModel = await Engine.onReady();
 
   // Converts the raw data into a format
-	// which DataModel can consume.
+  // which DataModel can consume.
   const formattedData = await DataModel.loadData(data, schema);
 
   // Create a new DataModel instance with
