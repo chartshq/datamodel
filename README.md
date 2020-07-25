@@ -47,7 +47,7 @@ As we're using [Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker)
 $ npm install worker-loader --save-dev
 ```
 
-And, within your webpack configuration object, you'll need to add the `worker-loader` to the list of modules, like so:
+And then within your webpack configuration object, you'll need to add the `worker-loader` to the list of modules, like so:
 
 ```js
 module.exports = {
