@@ -41,7 +41,13 @@ Install DataModel from NPM:
 $ npm install --save @chartshq/datamodel
 ```
 
-As we're using [Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker) internally, so the [worker-loader](https://www.npmjs.com/package/worker-loader) needs to be added in your `webpack.config.js` file as follows:
+As we're using [Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker) internally, so the [worker-loader](https://www.npmjs.com/package/worker-loader) needs to be installed as follows:
+
+```bash
+$ npm install worker-loader --save-dev
+```
+
+And then add this in your `webpack.config.js` file as follows:
 
 ```js
 module: {
