@@ -137,7 +137,7 @@ const Engine = window.DataModel;
 ```js
 // As the DataModel are asynchronous, so we need to
 // use async-await syntax.
-(async () => {
+async function myAsyncFn() {
   // Load the DataModel module.
   const DataModel = await Engine.onReady();
 
@@ -158,7 +158,7 @@ const Engine = window.DataModel;
   //  ]
 
   // Perform the selection operation
-  const selectDm = dm.select({ field: ‘Origin’, value: ‘USA’, operator: DataModel.ComparisonOperators.EQUAL });
+  const selectDm = dm.select({ field: 'Origin', value: 'USA', operator: DataModel.ComparisonOperators.EQUAL });
   console.log(selectDm.getData().data);
   // Output:
   //  [
@@ -181,8 +181,11 @@ const Engine = window.DataModel;
   //     {"name": "Origin","type": "dimension"},
   //     {"name": "Maker","type": "dimension"}
   //  ]
-})()
-.catch(console.error.bind(console));
+}
+
+myAsyncFn()
+  .catch(console.error.bind(console));
+  
 ```
 
 ## Documentation
