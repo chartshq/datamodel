@@ -50,7 +50,8 @@ $ npm install worker-loader --save-dev
 And then add this in your `webpack.config.js` file as follows:
 
 ```js
-module: {
+module.exports = {
+  module: {
     rules: [
       {
         test: /\.worker/,
@@ -62,7 +63,8 @@ module: {
         },
       },
     ],
-  },
+  }
+};
 ```
 
 Please visit the [worker-loader](https://www.npmjs.com/package/worker-loader) for more info about the loader.
