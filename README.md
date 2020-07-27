@@ -277,7 +277,7 @@ Upcoming data operations:
 - difference
 - ... many more ...
 
-For more details on API's visit our [docs](http://www.muzejs.org/docs)
+For more details on APIs visit our [docs](http://www.muzejs.org/docs).
 
 ## License
 
