@@ -157,7 +157,7 @@ async function myAsyncFn() {
   //     ["datsun pl510", "datsun", 88, "Japan"]
   //  ]
 
-  // Perform the selection operation
+  // Perform the selection operation.
   const selectDm = dm.select({ field: 'Origin', value: 'USA', operator: DataModel.ComparisonOperators.EQUAL });
   console.log(selectDm.getData().data);
   // Output:
@@ -166,7 +166,7 @@ async function myAsyncFn() {
   //     ["buick skylark 320", "buick", 165, "USA]
   //  ]
 
-  // Perform the projection operation
+  // Perform the projection operation.
   const projectDm = dm.project(["Origin", "Maker"]);
   console.log(projectDm.getData().data);
   // Output:
