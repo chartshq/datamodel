@@ -21,7 +21,7 @@ DataModel can be used if you need an in-browser tabular data store for data anal
 
 * 🚀  Uses **[WebAssembly](https://webassembly.org/)** for handling huge datasets and for **better performance**.
 
-* ⛺  Also supports **Nodejs**.
+* ⛺  Also works in **Nodejs** environment out-of-the-box.
 
 ## Installation
 
