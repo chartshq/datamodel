@@ -68,7 +68,7 @@ module.exports = {
 };
 ```
 
-Please visit the [worker-loader](https://www.npmjs.com/package/worker-loader) for more info about the loader.
+You also can checkout our [datamodel-app-template](https://github.com/chartshq/datamodel-app-template) to try out the `DataModel` quickly through a boilerplate app.
 
 ## Getting Started
 
