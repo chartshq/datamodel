@@ -255,7 +255,7 @@ import Engine from '@chartshq/datamodel';
 
     ```js
     dm.groupBy(['Origin'], [{
-      aggn: Datamodel.AggregationFunctions.AVG,
+      aggn: DataModel.AggregationFunctions.AVG,
       field: 'Acceleration'
     }]);
     ```
