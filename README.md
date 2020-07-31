@@ -190,7 +190,7 @@ myAsyncFn()
 
 ## Documentation
 
-Find detailed documentation and API reference from [here](http://muzejs.org/docs/wasm/concepts/datamodel/introducing-datamodel).
+Find detailed documentation and API reference from [here](https://muzejs.org/docs/wa/latest/concepts/datamodel/introducing-datamodel).
 
 ## What has changed?
 
@@ -277,8 +277,8 @@ Upcoming data operations:
 - difference
 - ... many more ...
 
-For more details on APIs visit our [docs](http://muzejs.org/docs/wasm/concepts/datamodel/introducing-datamodel).
+For more details on APIs visit our [docs](https://muzejs.org/docs/wa/latest/concepts/datamodel/introducing-datamodel).
 
 ## License
 
-[Custom License](http://muzejs.org/muze-wa/eula) (Free to use)
+[Custom License](https://muzejs.org/muze-wa/eula) (Free to use)
