@@ -1,24 +1,298 @@
-<!-- <h3 align="center">
-  <br />
-  <br />
-  <a href="https://github.com/chartshq/datamodel">
-    <img src="https://github.com/chartshq/datamodel/raw/master/logo.svg" alt="datamodel" title="datamodel" />
-  </a>
-</h3>
-<br />
-<br />
-<br /> -->
-
-[![Build Status](https://api.travis-ci.org/chartshq/datamodel.svg?branch=develop)](https://travis-ci.org/chartshq/datamodel)
-[![codecov](https://codecov.io/gh/chartshq/datamodel/branch/develop/graph/badge.svg)](https://codecov.io/gh/chartshq/datamodel)
-[![Maintainability](https://api.codeclimate.com/v1/badges/80e8cf66984f3bd82da2/maintainability)](https://codeclimate.com/github/chartshq/datamodel/maintainability)
-[![NPM version](https://img.shields.io/npm/v/datamodel.svg)](https://www.npmjs.com/package/datamodel)
-[![NPM total downloads](https://img.shields.io/npm/dt/datamodel.svg)](https://www.npmjs.com/package/datamodel)
+[![Free](https://img.shields.io/badge/cost-Free-brightgreen)](http://muzejs.org/muze-wa/eula)
+[![License](https://img.shields.io/badge/license-Custom-brightgreen)](http://muzejs.org/muze-wa/eula)
+[![NPM version](https://img.shields.io/npm/v/@chartshq/datamodel.svg)](https://www.npmjs.com/package/@chartshq/datamodel)
 [![Contributors](https://img.shields.io/github/contributors/chartshq/datamodel.svg)](https://github.com/chartshq/datamodel/graphs/contributors)
-[![License](https://img.shields.io/github/license/chartshq/datamodel.svg)](https://github.com/chartshq/datamodel/blob/master/LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/chartshq/datamodel/blob/master/CONTRIBUTING.md)
 
+## What is DataModel?
 
-# MIGRATION IN PROGRESS
+DataModel is an in-browser representation of tabular data. It uses WebAssembly for high performance and works seamlessly with any JavaScript library. It supports [Relational Algebra](https://en.wikipedia.org/wiki/Relational_algebra) operators which enable you to run `select`, `group`, `sort` (and many more) operations on the data.
 
-Visit old version https://github.com/chartshq/datamodel-deprecated
+The current version performs all the data operations like `filtering`, `aggregation`, etc. on **[WebAssembly](https://webassembly.org/)** which gives a **10x performance** boost compared to the [old JavaScript version](https://github.com/chartshq/datamodel-deprecated).
+
+It is written in [Rust Language](https://www.rust-lang.org/) to handle computation intensive data operations, which is then compiled to **[WebAssembly](https://webassembly.org/)**, thereby providing a native-like performance for data operations.
+
+DataModel can be used if you need an in-browser tabular data store for data analysis, visualization or just general use of data.
+
+## Features
+
+ * 🎉  Supports [**Relational Algebra**](https://en.wikipedia.org/wiki/Relational_algebra) operators e.g. `selection`, `projection`, `group`, `calculateVariable`, `sort` etc out-of-the-box.
+
+* 💎  Every operation creates **Immutable** DataModel instance and builds a Directed Acyclic Graph (DAG) which establishes auto interactivity.
+
+* 🚀  Uses **[WebAssembly](https://webassembly.org/)** for handling huge datasets and for **better performance**.
+
+* ⛺  Also works in **Nodejs** environment out-of-the-box.
+
+## Installation
+
+### CDN
+
+Insert the DataModel build into the `<head>`:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@chartshq/datamodel@3.0.0/dist/browser/datamodel.js" type="text/javascript"></script>
+```
+
+### NPM
+
+Install DataModel from NPM:
+
+```bash
+$ npm install --save @chartshq/datamodel
+```
+
+As we're using [Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker) internally, so the [worker-loader](https://www.npmjs.com/package/worker-loader) needs to be installed as follows:
+
+```bash
+$ npm install worker-loader --save-dev
+```
+
+And then within your webpack configuration object, you'll need to add the `worker-loader` to the list of module rules, like so:
+
+```js
+module.exports = {
+  module: {
+    rules: [
+      // Add the following object to your module `rules` list.
+      {
+        test: /\.worker/,
+        include: /datamodel/,
+        loader: 'worker-loader',
+        options: {
+          inline: false, // If you want to make it inline, set to true.
+          fallback: true
+        },
+      },
+    ],
+  }
+};
+```
+
+You also can checkout our [datamodel-app-template](https://github.com/chartshq/datamodel-app-template) to try out the `DataModel` quickly through a boilerplate app.
+
+## Getting Started
+
+Once the installation is done, please follow the steps below:
+
+1. Prepare the data and the corresponding schema:
+
+```js
+// Prepare the schema for data.
+const schema = [
+  {
+    name: 'Name',
+    type: 'dimension'
+  },
+  {
+    name: 'Maker',
+    type: 'dimension'
+  },
+  {
+    name: 'Horsepower',
+    type: 'measure',
+    defAggFn: 'avg'
+  },
+  {
+    name: 'Origin',
+    type: 'dimension'
+  }
+]
+
+// Prepare the data.
+const data = [
+   {
+    "Name": "chevrolet chevelle malibu",
+    "Maker": "chevrolet",
+    "Horsepower": 130,
+    "Origin": "USA"
+  },
+  {
+    "Name": "buick skylark 320",
+    "Maker": "buick",
+    "Horsepower": 165,
+    "Origin": "USA"
+  },
+  {
+    "Name": "datsun pl510",
+    "Maker": "datsun",
+    "Horsepower": 88,
+    "Origin": "Japan"
+  }
+]
+```
+
+2. Import DataModel as follows:
+
+If you are using the npm package, import the package as below:
+```js
+import Engine from '@chartshq/datamodel';
+```
+
+If you are using it in NodeJS, then require it as below:
+```js
+const Engine = require('@chartshq/datamodel').default;
+```
+
+If you are using CDN, then use it as follows:
+```js
+const Engine = window.DataModel;
+```
+
+3. Load the DataModel engine and pass the data and schema to `DataModel` constructor and create a new `DataModel` instance:
+
+```js
+// As the DataModel are asynchronous, so we need to
+// use async-await syntax.
+async function myAsyncFn() {
+  // Load the DataModel module.
+  const DataModel = await Engine.onReady();
+
+  // Converts the raw data into a format
+  // which DataModel can consume.
+  const formattedData = await DataModel.loadData(data, schema);
+
+  // Create a new DataModel instance with
+  // the formatted data.
+  const dm = new DataModel(formattedData);
+
+  console.log(dm.getData().data);
+  // Output:
+  //  [
+  //     ["chevrolet chevelle malibu", "chevrolet", 130, "USA"],
+  //     ["buick skylark 320", "buick", 165, "USA"],
+  //     ["datsun pl510", "datsun", 88, "Japan"]
+  //  ]
+
+  // Perform the selection operation.
+  const selectDm = dm.select({ field: 'Origin', value: 'USA', operator: DataModel.ComparisonOperators.EQUAL });
+  console.log(selectDm.getData().data);
+  // Output:
+  //  [
+  //     ["chevrolet chevelle malibu", "chevrolet", 130, "USA],
+  //     ["buick skylark 320", "buick", 165, "USA]
+  //  ]
+
+  // Perform the projection operation.
+  const projectDm = dm.project(["Origin", "Maker"]);
+  console.log(projectDm.getData().data);
+  // Output:
+  //  [
+  //     ["USA", "chevrolet"],
+  //     ["USA", "buick"],
+  //     ["Japan", "datsun"]
+  //  ]
+
+  console.log(projectDm.getData().schema);
+  // Output:
+  //  [
+  //     {"name": "Origin","type": "dimension"},
+  //     {"name": "Maker","type": "dimension"}
+  //  ]
+}
+
+myAsyncFn()
+  .catch(console.error.bind(console));
+
+```
+
+4. Now dispose the DataModel instance if it's not needed:
+
+```js
+// This also disposes all the datamodels which are created from it.
+dm.dispose();
+```
+
+## Documentation
+
+Find detailed documentation and API reference from [here](https://muzejs.org/docs/wa/latest/concepts/datamodel/introducing-datamodel).
+
+## What has changed?
+
+DataModel 3.0.0 now has the core written in [Rust language](https://www.rust-lang.org/)  and has been ported to **[WebAssembly](https://webassembly.org/)** bringing in a huge performance difference w.r.t to [previous version](https://github.com/chartshq/datamodel-deprecated), in terms of both data size and computing speed. While the JavaScript version is deprecated and no active development will take place there but critical bugs if raised would be taken and released in GitHub only.
+
+You can visit the JavaScript (deprecated) version here [https://github.com/chartshq/datamodel-deprecated](https://github.com/chartshq/datamodel-deprecated)
+
+## Migrating from previous versions of DataModel
+
+Now the DataModel became asynchronous as opposed to being synchronous in the previous JavaScript version.
+
+```js
+import Engine from '@chartshq/datamodel';
+
+(async () => {
+  // Load the DataModel module.
+  const DataModel = await Engine.onReady();
+
+  // Converts the raw data into a format
+  // which DataModel can consume.
+  const formattedData = await DataModel.loadData(data, schema);
+
+  // Create a new DataModel instance with
+  // the formatted data.
+  const dm = new DataModel(formattedData);
+})();
+```
+
+### **Changed APIs**
+
+- **select**
+
+    DataModel deprecated version:
+
+    ```js
+    dm.select((fields) => {
+      return fields.Origin.value === 'USA';
+    });
+    ```
+
+    Latest version:
+
+    ```js
+    dm.select({
+      field: 'Origin',
+      operator: DataModel.ComparisonOperators.EQUAL,
+      value: 'USA'
+    });
+    ```
+
+- **groupBy**
+
+    DataModel deprecated version:
+
+    ```js
+    dm.groupBy(['Origin'], {
+      Acceleration: 'avg'
+    });
+    ```
+
+    Latest version:
+
+    ```js
+    dm.groupBy(['Origin'], [{
+      aggn: DataModel.AggregationFunctions.AVG,
+      field: 'Acceleration'
+    }]);
+    ```
+
+Supported data operations:
+
+- select
+- project
+- calculateVariable
+- sort
+- groupBy
+
+Upcoming data operations:
+
+- join
+- bin
+- compose
+- union
+- difference
+- ... many more ...
+
+For more details on APIs visit our [docs](https://muzejs.org/docs/wa/latest/concepts/datamodel/introducing-datamodel).
+
+## License
+
+[Custom License](https://muzejs.org/muze-wa/eula) (Free to use)
