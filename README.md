@@ -128,6 +128,11 @@ If you are using the npm package, import the package as below:
 import Engine from '@chartshq/datamodel';
 ```
 
+If you are using it in NodeJS, then require it as below:
+```js
+const Engine = require('@chartshq/datamodel').default;
+```
+
 If you are using CDN, then use it as follows:
 ```js
 const Engine = window.DataModel;
