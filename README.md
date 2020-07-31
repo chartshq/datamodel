@@ -188,13 +188,20 @@ myAsyncFn()
   
 ```
 
+3. Now dispose the DataModel instance if it's not needed:
+
+```js
+// This also disposes all the datamodels which are created from it.
+dm.dispose();
+```
+
 ## Documentation
 
 Find detailed documentation and API reference from [here](https://muzejs.org/docs/wa/latest/concepts/datamodel/introducing-datamodel).
 
 ## What has changed?
 
-DataModel 3.0.0 now has the core written in [Rust langauge](https://www.rust-lang.org/)  and has been ported to **[WebAssembly](https://webassembly.org/)** bringing in a huge performance difference w.r.t to [previous version](https://github.com/chartshq/datamodel-deprecated), in terms of both data size and computing speed. While the JavaScript version is deprecated and no active development will take place there but critical bugs if raised would be taken and released in GitHub only.
+DataModel 3.0.0 now has the core written in [Rust language](https://www.rust-lang.org/)  and has been ported to **[WebAssembly](https://webassembly.org/)** bringing in a huge performance difference w.r.t to [previous version](https://github.com/chartshq/datamodel-deprecated), in terms of both data size and computing speed. While the JavaScript version is deprecated and no active development will take place there but critical bugs if raised would be taken and released in GitHub only.
 
 You can visit the JavaScript (deprecated) version here [https://github.com/chartshq/datamodel-deprecated](https://github.com/chartshq/datamodel-deprecated)
 
